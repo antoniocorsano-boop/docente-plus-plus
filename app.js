@@ -355,6 +355,8 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     async callOpenRouterAPI(prompt, apiKey) {
+        const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
+        
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -362,7 +364,7 @@ ${lessonData.evaluation || 'N/D'}
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'alibaba/tongyi-deepresearch-30b-a3b',
+                model: modelId,
                 messages: [
                     {
                         role: 'system',
@@ -396,11 +398,15 @@ ${lessonData.evaluation || 'N/D'}
     // Settings methods
     saveSettings() {
         const apiKey = document.getElementById('openrouter-api-key').value;
+        const modelId = document.getElementById('openrouter-model-id').value;
         const teacherName = document.getElementById('teacher-name').value;
         const schoolName = document.getElementById('school-name').value;
 
         if (apiKey) {
             localStorage.setItem('openrouter-api-key', apiKey);
+        }
+        if (modelId) {
+            localStorage.setItem('openrouter-model-id', modelId);
         }
         if (teacherName) {
             localStorage.setItem('teacher-name', teacherName);
@@ -415,11 +421,15 @@ ${lessonData.evaluation || 'N/D'}
 
     loadSettings() {
         const apiKey = localStorage.getItem('openrouter-api-key');
+        const modelId = localStorage.getItem('openrouter-model-id');
         const teacherName = localStorage.getItem('teacher-name');
         const schoolName = localStorage.getItem('school-name');
 
         if (apiKey) {
             document.getElementById('openrouter-api-key').value = apiKey;
+        }
+        if (modelId) {
+            document.getElementById('openrouter-model-id').value = modelId;
         }
         if (teacherName) {
             document.getElementById('teacher-name').value = teacherName;
@@ -447,6 +457,8 @@ ${lessonData.evaluation || 'N/D'}
             return;
         }
 
+        const modelId = document.getElementById('openrouter-model-id').value.trim() || 'alibaba/tongyi-deepresearch-30b-a3b';
+
         // Update status to show verification in progress
         statusIcon.textContent = '⏳';
         statusIcon.className = 'api-key-status';
@@ -461,7 +473,7 @@ ${lessonData.evaluation || 'N/D'}
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'alibaba/tongyi-deepresearch-30b-a3b',
+                    model: modelId,
                     messages: [
                         {
                             role: 'user',
@@ -477,7 +489,7 @@ ${lessonData.evaluation || 'N/D'}
                 statusIcon.textContent = '✅';
                 statusIcon.className = 'api-key-status verified';
                 statusIcon.title = 'API Key valida';
-                alert('✅ API Key verificata con successo!\n\nLa chiave API è valida e funzionante.');
+                alert(`✅ API Key verificata con successo!\n\nLa chiave API è valida e funzionante.\nModello verificato: ${modelId}`);
             } else {
                 // API key is invalid
                 const errorData = await response.json().catch(() => ({}));

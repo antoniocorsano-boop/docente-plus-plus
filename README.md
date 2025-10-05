@@ -53,9 +53,11 @@ L'assistente IA OpenRouter può aiutarti con:
      ```
    - Poi naviga su `http://localhost:8000`
 
-3. **Configura l'API Key**:
+3. **Configura l'API Key e il Model ID**:
    - Vai nella sezione "Impostazioni"
    - Inserisci la tua OpenRouter API Key
+   - (Opzionale) Inserisci il Model ID del modello OpenRouter che desideri utilizzare
+   - Clicca "Verifica API Key" per testare la configurazione
    - Salva le impostazioni
 
 4. **Inizia ad usare l'app**:
@@ -88,6 +90,18 @@ Visualizza statistiche rapide su:
 2. Usa i suggerimenti rapidi per iniziare
 3. L'IA risponderà con consigli professionali
 4. Usa Ctrl+Enter per inviare rapidamente
+
+### Configurazione Modello IA
+L'applicazione permette di configurare il modello OpenRouter da utilizzare:
+- **Model ID predefinito**: `alibaba/tongyi-deepresearch-30b-a3b` (gratuito)
+- **Modelli personalizzati**: Puoi specificare qualsiasi modello disponibile su OpenRouter
+- **Esempi di modelli**:
+  - `openai/gpt-3.5-turbo` - Modello OpenAI veloce ed economico
+  - `anthropic/claude-2` - Modello Anthropic Claude
+  - `google/palm-2-chat-bison` - Modello Google PaLM
+  - Per la lista completa, visita [OpenRouter Models](https://openrouter.ai/models)
+
+**Nota**: Alcuni modelli potrebbero richiedere crediti sul tuo account OpenRouter.
 
 ### Import/Export Dati
 - **Export**: Scarica tutti i tuoi dati in formato JSON
