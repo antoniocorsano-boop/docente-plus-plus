@@ -427,6 +427,72 @@ ${lessonData.evaluation || 'N/D'}
         if (schoolName) {
             document.getElementById('school-name').value = schoolName;
         }
+
+        // Initialize API key status icon
+        const statusIcon = document.getElementById('api-key-status');
+        if (statusIcon) {
+            statusIcon.textContent = '⚪';
+            statusIcon.className = 'api-key-status unverified';
+            statusIcon.title = 'Non verificata';
+        }
+    }
+
+    async verifyAPIKey() {
+        const apiKeyInput = document.getElementById('deepseek-api-key');
+        const statusIcon = document.getElementById('api-key-status');
+        const apiKey = apiKeyInput.value.trim();
+
+        if (!apiKey) {
+            alert('Inserisci una API key prima di verificarla');
+            return;
+        }
+
+        // Update status to show verification in progress
+        statusIcon.textContent = '⏳';
+        statusIcon.className = 'api-key-status';
+        statusIcon.title = 'Verifica in corso...';
+
+        try {
+            // Make a minimal test call to DeepSeek API
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: 'test'
+                        }
+                    ],
+                    max_tokens: 5
+                })
+            });
+
+            if (response.ok) {
+                // API key is valid
+                statusIcon.textContent = '✅';
+                statusIcon.className = 'api-key-status verified';
+                statusIcon.title = 'API Key valida';
+                alert('✅ API Key verificata con successo!\n\nLa chiave API è valida e funzionante.');
+            } else {
+                // API key is invalid
+                const errorData = await response.json().catch(() => ({}));
+                statusIcon.textContent = '❌';
+                statusIcon.className = 'api-key-status invalid';
+                statusIcon.title = 'API Key non valida';
+                alert(`❌ Verifica fallita!\n\nLa chiave API non è valida.\nErrore: ${response.status} ${response.statusText}\n\n${errorData.error?.message || 'Verifica che la chiave sia corretta.'}`);
+            }
+        } catch (error) {
+            // Network or other error
+            statusIcon.textContent = '❌';
+            statusIcon.className = 'api-key-status invalid';
+            statusIcon.title = 'Errore di verifica';
+            alert(`❌ Errore durante la verifica!\n\n${error.message}\n\nVerifica la tua connessione internet e riprova.`);
+        }
     }
 
     // Data persistence methods

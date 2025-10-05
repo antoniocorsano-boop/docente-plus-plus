@@ -145,7 +145,11 @@
                 <form id="settings-form" onsubmit="event.preventDefault(); app.saveSettings();">
                     <div class="form-group">
                         <label for="deepseek-api-key">DeepSeek API Key:</label>
-                        <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
+                        <div class="api-key-input-container">
+                            <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
+                            <span id="api-key-status" class="api-key-status" title="Non verificata">⚪</span>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="app.verifyAPIKey()" style="margin-top: 10px;">🔍 Verifica API Key</button>
                         <small>La chiave API viene salvata localmente nel browser</small>
                     </div>
                     <div class="form-group">
