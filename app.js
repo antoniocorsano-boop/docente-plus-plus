@@ -9,6 +9,7 @@ class DocentePlusPlus {
         this.chatMessages = [];
         this.activeClass = '';
         this.selectedFile = null;
+        this.materials = []; // Store uploaded materials/files
         this.init();
     }
 
@@ -23,6 +24,7 @@ class DocentePlusPlus {
         this.renderDashboard();
         this.renderLessons();
         this.renderStudents();
+        this.renderMaterials();
         this.loadSettings();
         this.loadActiveClass();
         
@@ -176,17 +178,37 @@ class DocentePlusPlus {
 
         lessonsList.innerHTML = this.lessons
             .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map(lesson => `
-                <div class="lesson-item">
-                    <h4>${lesson.title}</h4>
-                    <p><strong>Materia:</strong> ${lesson.subject}</p>
-                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')}</p>
-                    <p>${lesson.description || 'Nessuna descrizione'}</p>
-                    <div class="item-actions">
-                        <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
+            .map(lesson => {
+                const linkedMaterials = lesson.materials ? 
+                    this.materials.filter(m => lesson.materials.includes(m.id)) : [];
+                
+                return `
+                    <div class="lesson-item">
+                        <h4>${lesson.title}</h4>
+                        <p><strong>Materia:</strong> ${lesson.subject}</p>
+                        <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')}</p>
+                        <p>${lesson.description || 'Nessuna descrizione'}</p>
+                        ${linkedMaterials.length > 0 ? `
+                            <div class="lesson-materials">
+                                <strong>📎 Materiali allegati:</strong>
+                                <ul class="materials-list-inline">
+                                    ${linkedMaterials.map(m => `
+                                        <li>
+                                            <button class="material-link-btn" onclick="app.downloadMaterial(${m.id})" aria-label="Scarica ${m.name}">
+                                                📄 ${m.name}
+                                            </button>
+                                            <button class="material-unlink-btn" onclick="app.unlinkMaterialFromLesson(${m.id}, ${lesson.id})" aria-label="Rimuovi ${m.name} dalla lezione" title="Rimuovi dalla lezione">✕</button>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        <div class="item-actions">
+                            <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
     }
 
     async generateLessonWithAI() {
@@ -348,12 +370,32 @@ ${lessonData.evaluation || 'N/D'}
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (file) {
+            // Validate file size (max 5MB for localStorage compatibility)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                alert('Il file è troppo grande. La dimensione massima è 5MB.');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'text/plain', 
+                                  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.txt', '.doc', '.docx'];
+            
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes(fileExtension) && !allowedTypes.includes(file.type)) {
+                alert('Tipo di file non supportato. Sono accettati solo: PDF, immagini (JPG, PNG), TXT, DOC, DOCX');
+                event.target.value = '';
+                return;
+            }
+
             this.selectedFile = file;
             const displayElement = document.getElementById('selected-file-display');
             displayElement.innerHTML = `
                 <div class="file-info">
                     <span class="file-name">📄 ${file.name} (${this.formatFileSize(file.size)})</span>
-                    <button class="remove-file-btn" onclick="app.clearSelectedFile()">Rimuovi</button>
+                    <button class="remove-file-btn" onclick="app.clearSelectedFile()" aria-label="Rimuovi file selezionato">Rimuovi</button>
                 </div>
             `;
             displayElement.classList.add('active');
@@ -386,45 +428,207 @@ ${lessonData.evaluation || 'N/D'}
         if (!message && !this.selectedFile) return;
 
         const apiKey = localStorage.getItem('openrouter-api-key');
-        
-        if (!apiKey) {
-            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
-            this.switchTab('settings');
-            return;
-        }
 
-        // Build user message with context
-        let userMessage = message;
-        if (this.activeClass) {
-            userMessage = `[Classe: ${this.activeClass}] ${message}`;
-        }
-
-        this.addChatMessage('user', message);
-        
-        // Handle file upload
+        // Handle file upload first (before API key check)
+        let savedFileId = null;
         if (this.selectedFile) {
-            const fileInfo = `📎 File allegato: ${this.selectedFile.name}`;
-            this.addChatMessage('system', fileInfo);
-            
-            // Check if file is supported (basic check - most models don't support file uploads via this API)
-            this.addChatMessage('system', 'Nota: Il file è stato selezionato, ma la maggior parte dei modelli OpenRouter non supporta l\'upload diretto di file. Il file verrà ignorato in questa richiesta.');
-            
-            // Clear the selected file after attempting to send
-            this.clearSelectedFile();
+            try {
+                // Save file to materials
+                savedFileId = await this.saveFileMaterial(this.selectedFile, message);
+                const fileInfo = `📎 File salvato: ${this.selectedFile.name}`;
+                this.addChatMessage('system', fileInfo);
+                
+                // Add note about AI model compatibility
+                this.addChatMessage('system', 'Nota: Il file è stato salvato nei materiali. La maggior parte dei modelli OpenRouter non supporta l\'elaborazione diretta di file, ma il file è disponibile nella sezione materiali della lezione.');
+                
+                // Clear the selected file after saving
+                this.clearSelectedFile();
+            } catch (error) {
+                console.error('Error saving file:', error);
+                this.addChatMessage('system', `Errore nel salvataggio del file: ${error.message}`);
+                this.clearSelectedFile();
+            }
+        }
+        
+        // If there's a message to send to AI, check for API key
+        if (message) {
+            if (!apiKey) {
+                alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
+                this.switchTab('settings');
+                return;
+            }
+
+            // Build user message with context
+            let userMessage = message;
+            if (this.activeClass) {
+                userMessage = `[Classe: ${this.activeClass}] ${message}`;
+            }
+
+            this.addChatMessage('user', message);
         }
         
         input.value = '';
 
-        try {
-            const response = await this.callOpenRouterAPI(userMessage, apiKey);
-            
-            if (response && response.content) {
-                this.addChatMessage('ai', response.content);
+        // Only call AI if there's a message and API key
+        if (message && apiKey) {
+            try {
+                const userMessage = this.activeClass ? `[Classe: ${this.activeClass}] ${message}` : message;
+                const response = await this.callOpenRouterAPI(userMessage, apiKey);
+                
+                if (response && response.content) {
+                    this.addChatMessage('ai', response.content);
+                }
+            } catch (error) {
+                console.error('Error calling AI:', error);
+                this.addChatMessage('system', `Errore: ${error.message}`);
             }
-        } catch (error) {
-            console.error('Error calling AI:', error);
-            this.addChatMessage('system', `Errore: ${error.message}`);
         }
+    }
+
+    async saveFileMaterial(file, description = '') {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const material = {
+                        id: Date.now(),
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: e.target.result, // Base64 encoded data
+                        description: description,
+                        uploadedAt: new Date().toISOString(),
+                        linkedToClass: this.activeClass || null,
+                        linkedToLessonId: null // Can be linked later
+                    };
+                    
+                    this.materials.push(material);
+                    this.saveData();
+                    resolve(material.id);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = () => {
+                reject(new Error('Errore nella lettura del file'));
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+
+    deleteMaterial(materialId) {
+        if (confirm('Sei sicuro di voler eliminare questo materiale?')) {
+            this.materials = this.materials.filter(m => m.id !== materialId);
+            
+            // Remove references from lessons
+            this.lessons.forEach(lesson => {
+                if (lesson.materials && lesson.materials.includes(materialId)) {
+                    lesson.materials = lesson.materials.filter(id => id !== materialId);
+                }
+            });
+            
+            this.saveData();
+            this.renderMaterials();
+        }
+    }
+
+    linkMaterialToLesson(materialId, lessonId) {
+        const lesson = this.lessons.find(l => l.id === lessonId);
+        if (lesson) {
+            if (!lesson.materials) {
+                lesson.materials = [];
+            }
+            if (!lesson.materials.includes(materialId)) {
+                lesson.materials.push(materialId);
+            }
+            
+            const material = this.materials.find(m => m.id === materialId);
+            if (material) {
+                material.linkedToLessonId = lessonId;
+            }
+            
+            this.saveData();
+            this.renderLessons();
+            this.renderMaterials();
+        }
+    }
+
+    unlinkMaterialFromLesson(materialId, lessonId) {
+        const lesson = this.lessons.find(l => l.id === lessonId);
+        if (lesson && lesson.materials) {
+            lesson.materials = lesson.materials.filter(id => id !== materialId);
+            
+            const material = this.materials.find(m => m.id === materialId);
+            if (material && material.linkedToLessonId === lessonId) {
+                material.linkedToLessonId = null;
+            }
+            
+            this.saveData();
+            this.renderLessons();
+            this.renderMaterials();
+        }
+    }
+
+    downloadMaterial(materialId) {
+        const material = this.materials.find(m => m.id === materialId);
+        if (!material) return;
+
+        const link = document.createElement('a');
+        link.href = material.data;
+        link.download = material.name;
+        link.click();
+    }
+
+    renderMaterials() {
+        const materialsList = document.getElementById('materials-list');
+        if (!materialsList) return;
+
+        if (this.materials.length === 0) {
+            materialsList.innerHTML = `
+                <div class="empty-state">
+                    <h3>Nessun materiale caricato</h3>
+                    <p>I file caricati tramite la chat IA appariranno qui</p>
+                </div>
+            `;
+            return;
+        }
+
+        materialsList.innerHTML = this.materials
+            .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
+            .map(material => {
+                const linkedLesson = material.linkedToLessonId ? 
+                    this.lessons.find(l => l.id === material.linkedToLessonId) : null;
+                
+                return `
+                    <div class="material-item">
+                        <div class="material-header">
+                            <h4>📎 ${material.name}</h4>
+                            <span class="material-size">${this.formatFileSize(material.size)}</span>
+                        </div>
+                        ${material.description ? `<p class="material-description">${material.description}</p>` : ''}
+                        <div class="material-meta">
+                            <span>📅 ${new Date(material.uploadedAt).toLocaleDateString('it-IT')}</span>
+                            ${material.linkedToClass ? `<span>🎯 Classe: ${material.linkedToClass}</span>` : ''}
+                            ${linkedLesson ? `<span>📚 Lezione: ${linkedLesson.title}</span>` : ''}
+                        </div>
+                        <div class="material-actions">
+                            <button class="btn btn-primary" onclick="app.downloadMaterial(${material.id})" aria-label="Scarica ${material.name}">📥 Scarica</button>
+                            ${!material.linkedToLessonId ? `
+                                <select onchange="if(this.value) app.linkMaterialToLesson(${material.id}, parseInt(this.value))" class="lesson-link-select" aria-label="Collega a lezione">
+                                    <option value="">Collega a lezione...</option>
+                                    ${this.lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('')}
+                                </select>
+                            ` : `
+                                <button class="btn btn-secondary" onclick="app.unlinkMaterialFromLesson(${material.id}, ${material.linkedToLessonId})" aria-label="Scollega dalla lezione">🔗 Scollega</button>
+                            `}
+                            <button class="btn btn-danger" onclick="app.deleteMaterial(${material.id})" aria-label="Elimina ${material.name}">🗑️ Elimina</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
     }
 
     quickAIPrompt(prompt) {
@@ -622,11 +826,15 @@ ${lessonData.evaluation || 'N/D'}
     saveData() {
         localStorage.setItem('docente-plus-lessons', JSON.stringify(this.lessons));
         localStorage.setItem('docente-plus-students', JSON.stringify(this.students));
+        localStorage.setItem('docente-plus-materials', JSON.stringify(this.materials));
+        localStorage.setItem('docente-plus-chat-messages', JSON.stringify(this.chatMessages));
     }
 
     loadData() {
         const lessonsData = localStorage.getItem('docente-plus-lessons');
         const studentsData = localStorage.getItem('docente-plus-students');
+        const materialsData = localStorage.getItem('docente-plus-materials');
+        const chatMessagesData = localStorage.getItem('docente-plus-chat-messages');
 
         if (lessonsData) {
             try {
@@ -645,12 +853,42 @@ ${lessonData.evaluation || 'N/D'}
                 this.students = [];
             }
         }
+
+        if (materialsData) {
+            try {
+                this.materials = JSON.parse(materialsData);
+            } catch (e) {
+                console.error('Error loading materials:', e);
+                this.materials = [];
+            }
+        }
+
+        if (chatMessagesData) {
+            try {
+                this.chatMessages = JSON.parse(chatMessagesData);
+                // Restore chat messages to UI
+                this.chatMessages.forEach(msg => {
+                    const messagesContainer = document.getElementById('chat-messages');
+                    if (messagesContainer) {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `message ${msg.type}`;
+                        messageDiv.textContent = msg.content;
+                        messagesContainer.appendChild(messageDiv);
+                    }
+                });
+            } catch (e) {
+                console.error('Error loading chat messages:', e);
+                this.chatMessages = [];
+            }
+        }
     }
 
     exportData() {
         const data = {
             lessons: this.lessons,
             students: this.students,
+            materials: this.materials,
+            chatMessages: this.chatMessages,
             exportDate: new Date().toISOString()
         };
 
@@ -686,10 +924,17 @@ ${lessonData.evaluation || 'N/D'}
                     if (data.students) {
                         this.students = data.students;
                     }
+                    if (data.materials) {
+                        this.materials = data.materials;
+                    }
+                    if (data.chatMessages) {
+                        this.chatMessages = data.chatMessages;
+                    }
                     
                     this.saveData();
                     this.renderLessons();
                     this.renderStudents();
+                    this.renderMaterials();
                     this.renderDashboard();
                     
                     alert('Dati importati con successo!');

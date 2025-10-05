@@ -17,6 +17,7 @@
             <button class="tab-button active" data-tab="dashboard">Dashboard</button>
             <button class="tab-button" data-tab="lessons">Lezioni</button>
             <button class="tab-button" data-tab="students">Studenti</button>
+            <button class="tab-button" data-tab="materials">Materiali</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
         </nav>
@@ -149,6 +150,15 @@
             <div id="students-list" class="students-list"></div>
         </div>
 
+        <!-- Materials Tab -->
+        <div id="materials" class="tab-content">
+            <h2>Gestione Materiali</h2>
+            <div class="materials-info">
+                <p>I materiali caricati tramite l'Assistente IA vengono salvati qui e possono essere collegati alle lezioni.</p>
+            </div>
+            <div id="materials-list" class="materials-list"></div>
+        </div>
+
         <!-- AI Assistant Tab -->
         <div id="ai-assistant" class="tab-content">
             <h2>Assistente IA OpenRouter</h2>
@@ -159,8 +169,8 @@
                         <label for="ai-file-input" class="file-upload-label">
                             📎 Allega file (PDF, immagini, txt, ecc.)
                         </label>
-                        <input type="file" id="ai-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" onchange="app.handleFileSelect(event)">
-                        <div id="selected-file-display" class="selected-file-display"></div>
+                        <input type="file" id="ai-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" onchange="app.handleFileSelect(event)" aria-label="Seleziona file da caricare">
+                        <div id="selected-file-display" class="selected-file-display" role="status" aria-live="polite"></div>
                     </div>
                     <div class="chat-input-container">
                         <textarea id="ai-input" placeholder="Chiedi all'assistente IA di aiutarti con la pianificazione delle lezioni, idee didattiche, valutazioni..." rows="3"></textarea>

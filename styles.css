@@ -623,3 +623,160 @@ header h1 {
 .selected-file-display .remove-file-btn:hover {
     background: #c0392b;
 }
+
+/* Materials Section */
+.materials-info {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.materials-info p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.materials-list {
+    display: grid;
+    gap: 15px;
+}
+
+.material-item {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.material-item:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.material-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.material-header h4 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.material-size {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    background: var(--bg-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.material-description {
+    color: var(--text-secondary);
+    margin: 10px 0;
+    font-size: 0.95em;
+}
+
+.material-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.material-meta span {
+    background: var(--bg-color);
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+.material-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.lesson-link-select {
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9em;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.lesson-link-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Lesson Materials Display */
+.lesson-materials {
+    margin: 15px 0;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 8px;
+}
+
+.lesson-materials strong {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.materials-list-inline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.materials-list-inline li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+}
+
+.material-link-btn {
+    padding: 6px 12px;
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.material-link-btn:hover {
+    background: #3fa864;
+    transform: translateY(-1px);
+}
+
+.material-unlink-btn {
+    padding: 4px 8px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.material-unlink-btn:hover {
+    opacity: 1;
+    background: #c0392b;
+}
