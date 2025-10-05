@@ -7,6 +7,8 @@ class DocentePlusPlus {
         this.students = [];
         this.settings = {};
         this.chatMessages = [];
+        this.activeClass = '';
+        this.selectedFile = null;
         this.init();
     }
 
@@ -22,6 +24,7 @@ class DocentePlusPlus {
         this.renderLessons();
         this.renderStudents();
         this.loadSettings();
+        this.loadActiveClass();
         
         console.log('Docente++ initialized successfully');
     }
@@ -85,6 +88,41 @@ class DocentePlusPlus {
         
         const apiKey = localStorage.getItem('openrouter-api-key');
         document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
+        
+        // Update active class display
+        this.updateClassDisplay();
+    }
+
+    // Class Management methods
+    setActiveClass(className) {
+        this.activeClass = className;
+        localStorage.setItem('active-class', className);
+        this.updateClassDisplay();
+    }
+
+    loadActiveClass() {
+        const savedClass = localStorage.getItem('active-class');
+        if (savedClass) {
+            this.activeClass = savedClass;
+            const selector = document.getElementById('active-class-selector');
+            if (selector) {
+                selector.value = savedClass;
+            }
+            this.updateClassDisplay();
+        }
+    }
+
+    updateClassDisplay() {
+        const displayElement = document.getElementById('current-class-display');
+        if (displayElement) {
+            if (this.activeClass) {
+                displayElement.textContent = `Classe: ${this.activeClass}`;
+                displayElement.style.display = 'inline-block';
+            } else {
+                displayElement.textContent = 'Nessuna classe selezionata';
+                displayElement.style.display = 'inline-block';
+            }
+        }
     }
 
     // Lesson management methods
@@ -307,11 +345,45 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // AI Assistant methods
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.selectedFile = file;
+            const displayElement = document.getElementById('selected-file-display');
+            displayElement.innerHTML = `
+                <div class="file-info">
+                    <span class="file-name">📄 ${file.name} (${this.formatFileSize(file.size)})</span>
+                    <button class="remove-file-btn" onclick="app.clearSelectedFile()">Rimuovi</button>
+                </div>
+            `;
+            displayElement.classList.add('active');
+        }
+    }
+
+    clearSelectedFile() {
+        this.selectedFile = null;
+        const fileInput = document.getElementById('ai-file-input');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        const displayElement = document.getElementById('selected-file-display');
+        if (displayElement) {
+            displayElement.innerHTML = '';
+            displayElement.classList.remove('active');
+        }
+    }
+
+    formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
     async sendAIMessage() {
         const input = document.getElementById('ai-input');
         const message = input.value.trim();
         
-        if (!message) return;
+        if (!message && !this.selectedFile) return;
 
         const apiKey = localStorage.getItem('openrouter-api-key');
         
@@ -321,11 +393,30 @@ ${lessonData.evaluation || 'N/D'}
             return;
         }
 
+        // Build user message with context
+        let userMessage = message;
+        if (this.activeClass) {
+            userMessage = `[Classe: ${this.activeClass}] ${message}`;
+        }
+
         this.addChatMessage('user', message);
+        
+        // Handle file upload
+        if (this.selectedFile) {
+            const fileInfo = `📎 File allegato: ${this.selectedFile.name}`;
+            this.addChatMessage('system', fileInfo);
+            
+            // Check if file is supported (basic check - most models don't support file uploads via this API)
+            this.addChatMessage('system', 'Nota: Il file è stato selezionato, ma la maggior parte dei modelli OpenRouter non supporta l\'upload diretto di file. Il file verrà ignorato in questa richiesta.');
+            
+            // Clear the selected file after attempting to send
+            this.clearSelectedFile();
+        }
+        
         input.value = '';
 
         try {
-            const response = await this.callOpenRouterAPI(message, apiKey);
+            const response = await this.callOpenRouterAPI(userMessage, apiKey);
             
             if (response && response.content) {
                 this.addChatMessage('ai', response.content);
@@ -357,6 +448,18 @@ ${lessonData.evaluation || 'N/D'}
     async callOpenRouterAPI(prompt, apiKey) {
         const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
         
+        // Build system message with context
+        let systemMessage = 'Sei un assistente IA specializzato nell\'aiutare gli insegnanti con la pianificazione didattica, la creazione di materiali educativi e la gestione della classe. Rispondi sempre in italiano in modo chiaro e professionale.';
+        
+        if (this.activeClass) {
+            systemMessage += ` L'insegnante sta lavorando con la classe ${this.activeClass}.`;
+        }
+        
+        const schoolYear = localStorage.getItem('school-year');
+        if (schoolYear) {
+            systemMessage += ` Anno scolastico: ${schoolYear}.`;
+        }
+        
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -368,7 +471,7 @@ ${lessonData.evaluation || 'N/D'}
                 messages: [
                     {
                         role: 'system',
-                        content: 'Sei un assistente IA specializzato nell\'aiutare gli insegnanti con la pianificazione didattica, la creazione di materiali educativi e la gestione della classe. Rispondi sempre in italiano in modo chiaro e professionale.'
+                        content: systemMessage
                     },
                     {
                         role: 'user',
@@ -401,6 +504,7 @@ ${lessonData.evaluation || 'N/D'}
         const modelId = document.getElementById('openrouter-model-id').value;
         const teacherName = document.getElementById('teacher-name').value;
         const schoolName = document.getElementById('school-name').value;
+        const schoolYear = document.getElementById('school-year').value;
 
         if (apiKey) {
             localStorage.setItem('openrouter-api-key', apiKey);
@@ -414,6 +518,9 @@ ${lessonData.evaluation || 'N/D'}
         if (schoolName) {
             localStorage.setItem('school-name', schoolName);
         }
+        if (schoolYear) {
+            localStorage.setItem('school-year', schoolYear);
+        }
 
         this.renderDashboard();
         alert('Impostazioni salvate con successo!');
@@ -424,6 +531,7 @@ ${lessonData.evaluation || 'N/D'}
         const modelId = localStorage.getItem('openrouter-model-id');
         const teacherName = localStorage.getItem('teacher-name');
         const schoolName = localStorage.getItem('school-name');
+        const schoolYear = localStorage.getItem('school-year');
 
         if (apiKey) {
             document.getElementById('openrouter-api-key').value = apiKey;
@@ -436,6 +544,9 @@ ${lessonData.evaluation || 'N/D'}
         }
         if (schoolName) {
             document.getElementById('school-name').value = schoolName;
+        }
+        if (schoolYear) {
+            document.getElementById('school-year').value = schoolYear;
         }
 
         // Initialize API key status icon

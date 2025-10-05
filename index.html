@@ -24,6 +24,38 @@
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
             <h2>Dashboard</h2>
+            <div class="class-selector-container">
+                <label for="active-class-selector">🎯 Classe Attiva:</label>
+                <select id="active-class-selector" onchange="app.setActiveClass(this.value)">
+                    <option value="">Seleziona una classe</option>
+                    <option value="1A">1A</option>
+                    <option value="1B">1B</option>
+                    <option value="1C">1C</option>
+                    <option value="1D">1D</option>
+                    <option value="1E">1E</option>
+                    <option value="2A">2A</option>
+                    <option value="2B">2B</option>
+                    <option value="2C">2C</option>
+                    <option value="2D">2D</option>
+                    <option value="2E">2E</option>
+                    <option value="3A">3A</option>
+                    <option value="3B">3B</option>
+                    <option value="3C">3C</option>
+                    <option value="3D">3D</option>
+                    <option value="3E">3E</option>
+                    <option value="4A">4A</option>
+                    <option value="4B">4B</option>
+                    <option value="4C">4C</option>
+                    <option value="4D">4D</option>
+                    <option value="4E">4E</option>
+                    <option value="5A">5A</option>
+                    <option value="5B">5B</option>
+                    <option value="5C">5C</option>
+                    <option value="5D">5D</option>
+                    <option value="5E">5E</option>
+                </select>
+                <span id="current-class-display" class="current-class-badge">Nessuna classe selezionata</span>
+            </div>
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>📚 Lezioni Programmate</h3>
@@ -123,6 +155,13 @@
             <div class="ai-container">
                 <div class="ai-chat">
                     <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-file-upload">
+                        <label for="ai-file-input" class="file-upload-label">
+                            📎 Allega file (PDF, immagini, txt, ecc.)
+                        </label>
+                        <input type="file" id="ai-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" onchange="app.handleFileSelect(event)">
+                        <div id="selected-file-display" class="selected-file-display"></div>
+                    </div>
                     <div class="chat-input-container">
                         <textarea id="ai-input" placeholder="Chiedi all'assistente IA di aiutarti con la pianificazione delle lezioni, idee didattiche, valutazioni..." rows="3"></textarea>
                         <button class="btn btn-primary" onclick="app.sendAIMessage()">Invia</button>
@@ -164,6 +203,20 @@
                     <div class="form-group">
                         <label for="school-name">Nome Scuola:</label>
                         <input type="text" id="school-name" placeholder="Nome della scuola" autocomplete="organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="school-year">Anno Scolastico:</label>
+                        <select id="school-year">
+                            <option value="">Seleziona anno scolastico</option>
+                            <option value="2023/2024">2023/2024</option>
+                            <option value="2024/2025">2024/2025</option>
+                            <option value="2025/2026">2025/2026</option>
+                            <option value="2026/2027">2026/2027</option>
+                            <option value="2027/2028">2027/2028</option>
+                            <option value="2028/2029">2028/2029</option>
+                            <option value="2029/2030">2029/2030</option>
+                        </select>
+                        <small>Seleziona l'anno scolastico di riferimento</small>
                     </div>
                     <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
                 </form>
