@@ -362,7 +362,7 @@ ${lessonData.evaluation || 'N/D'}
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'openchat/openchat-3.5-1210',
+                model: 'alibaba/tongyi-deepresearch-30b-a3b',
                 messages: [
                     {
                         role: 'system',
@@ -461,7 +461,7 @@ ${lessonData.evaluation || 'N/D'}
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'openchat/openchat-3.5-1210',
+                    model: 'alibaba/tongyi-deepresearch-30b-a3b',
                     messages: [
                         {
                             role: 'user',
