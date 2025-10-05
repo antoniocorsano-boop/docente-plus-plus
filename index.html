@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>🎓 Docente++</h1>
-            <p class="subtitle">Gestione della Didattica Potenziata da IA DeepSeek</p>
+            <p class="subtitle">Gestione della Didattica Potenziata da IA OpenRouter</p>
         </header>
 
         <nav class="tabs">
@@ -43,7 +43,7 @@
                 <div class="card">
                     <h3>🤖 IA Attiva</h3>
                     <p class="stat-number" id="ai-status">✓</p>
-                    <p class="stat-label">DeepSeek Ready</p>
+                    <p class="stat-label">OpenRouter Ready</p>
                 </div>
             </div>
         </div>
@@ -119,7 +119,7 @@
 
         <!-- AI Assistant Tab -->
         <div id="ai-assistant" class="tab-content">
-            <h2>Assistente IA DeepSeek</h2>
+            <h2>Assistente IA OpenRouter</h2>
             <div class="ai-container">
                 <div class="ai-chat">
                     <div id="chat-messages" class="chat-messages"></div>
@@ -144,9 +144,9 @@
             <div class="settings-container">
                 <form id="settings-form" onsubmit="event.preventDefault(); app.saveSettings();">
                     <div class="form-group">
-                        <label for="deepseek-api-key">DeepSeek API Key:</label>
+                        <label for="openrouter-api-key">OpenRouter API Key:</label>
                         <div class="api-key-input-container">
-                            <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
+                            <input type="password" id="openrouter-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
                             <span id="api-key-status" class="api-key-status" title="Non verificata">⚪</span>
                         </div>
                         <button type="button" class="btn btn-secondary" onclick="app.verifyAPIKey()" style="margin-top: 10px;">🔍 Verifica API Key</button>

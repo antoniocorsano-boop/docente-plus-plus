@@ -1,6 +1,6 @@
 # 🎓 Docente++ 
 
-**Web app per la gestione della didattica dell'insegnante potenziata da IA DeepSeek**
+**Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter**
 
 App per un insegnamento basato su IA, evoluzione del progetto docente-plus con interfaccia web completa.
 
@@ -11,14 +11,14 @@ App per un insegnamento basato su IA, evoluzione del progetto docente-plus con i
 - **Dashboard Intuitiva**: Panoramica rapida di lezioni, studenti e attività
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **Gestione Studenti**: Organizza e gestisci i tuoi studenti
-- **Assistente IA DeepSeek**: Ottieni aiuto per pianificazione didattica, creazione materiali e idee innovative
+- **Assistente IA OpenRouter**: Ottieni aiuto per pianificazione didattica, creazione materiali e idee innovative
 - **Generazione Automatica**: Crea piani di lezione completi con l'IA
 - **Persistenza Dati**: Tutti i dati salvati localmente nel browser
 - **Import/Export**: Backup e ripristino dei dati
 
 ### Funzionalità IA
 
-L'assistente IA DeepSeek può aiutarti con:
+L'assistente IA OpenRouter può aiutarti con:
 - 📐 Generazione piani di lezione strutturati
 - ✍️ Creazione di esercizi e attività didattiche
 - 🎯 Suggerimenti per attività interattive
@@ -31,7 +31,7 @@ L'assistente IA DeepSeek può aiutarti con:
 ### Requisiti
 
 - Browser web moderno (Chrome, Firefox, Safari, Edge)
-- Chiave API DeepSeek (ottenibile su [https://www.deepseek.com](https://www.deepseek.com))
+- Chiave API OpenRouter (ottenibile su [https://openrouter.ai](https://openrouter.ai))
 
 ### Avvio Rapido
 
@@ -55,7 +55,7 @@ L'assistente IA DeepSeek può aiutarti con:
 
 3. **Configura l'API Key**:
    - Vai nella sezione "Impostazioni"
-   - Inserisci la tua DeepSeek API Key
+   - Inserisci la tua OpenRouter API Key
    - Salva le impostazioni
 
 4. **Inizia ad usare l'app**:
@@ -109,7 +109,7 @@ docente-plus-plus/
 - **CSS3**: Design responsive con variabili CSS e animazioni
 - **JavaScript (ES6+)**: Logica applicativa orientata agli oggetti
 - **LocalStorage API**: Persistenza dati lato client
-- **DeepSeek API**: Intelligenza artificiale per assistenza didattica
+- **OpenRouter API**: Intelligenza artificiale per assistenza didattica
 - **Fetch API**: Comunicazione con servizi esterni
 
 ## 🎨 Caratteristiche del Design
@@ -124,7 +124,7 @@ docente-plus-plus/
 - **Dati Locali**: Tutti i dati sono salvati solo nel tuo browser
 - **API Key Sicura**: La chiave API è memorizzata localmente e mai condivisa
 - **Nessun Server**: L'app funziona completamente lato client
-- **HTTPS Consigliato**: Per chiamate API sicure a DeepSeek
+- **HTTPS Consigliato**: Per chiamate API sicure a OpenRouter
 
 ## 📝 Licenza
 
@@ -150,7 +150,7 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 
 ## 📚 Risorse Utili
 
-- [Documentazione DeepSeek API](https://www.deepseek.com/docs)
+- [Documentazione OpenRouter API](https://openrouter.ai/docs)
 - [Guida HTML5](https://developer.mozilla.org/it/docs/Web/HTML)
 - [Guida CSS3](https://developer.mozilla.org/it/docs/Web/CSS)
 - [Guida JavaScript](https://developer.mozilla.org/it/docs/Web/JavaScript)
@@ -159,7 +159,7 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 
 ### Versione 1.0.0 (2025)
 - Implementazione iniziale dell'applicazione web
-- Integrazione con DeepSeek AI
+- Integrazione con OpenRouter AI
 - Gestione lezioni e studenti
 - Dashboard interattiva
 - Sistema di import/export dati

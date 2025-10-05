@@ -1,5 +1,5 @@
 // Docente++ - Main Application JavaScript
-// Web app for teacher didactics management powered by DeepSeek AI
+// Web app for teacher didactics management powered by OpenRouter AI
 
 class DocentePlusPlus {
     constructor() {
@@ -83,7 +83,7 @@ class DocentePlusPlus {
         document.getElementById('student-count').textContent = this.students.length;
         document.getElementById('evaluation-count').textContent = '0';
         
-        const apiKey = localStorage.getItem('deepseek-api-key');
+        const apiKey = localStorage.getItem('openrouter-api-key');
         document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
     }
 
@@ -152,10 +152,10 @@ class DocentePlusPlus {
     }
 
     async generateLessonWithAI() {
-        const apiKey = localStorage.getItem('deepseek-api-key');
+        const apiKey = localStorage.getItem('openrouter-api-key');
         
         if (!apiKey) {
-            alert('Configura la tua API key di DeepSeek nelle impostazioni prima di usare l\'IA');
+            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
             this.switchTab('settings');
             return;
         }
@@ -169,7 +169,7 @@ class DocentePlusPlus {
         this.addChatMessage('system', 'Generazione lezione in corso...');
 
         try {
-            const response = await this.callDeepSeekAPI(
+            const response = await this.callOpenRouterAPI(
                 `Genera un piano di lezione dettagliato per ${subject} sull'argomento "${topic}". 
                 Includi: obiettivi di apprendimento, durata stimata, materiali necessari, 
                 attività didattiche e metodi di valutazione. Rispondi in formato JSON con i campi: 
@@ -313,10 +313,10 @@ ${lessonData.evaluation || 'N/D'}
         
         if (!message) return;
 
-        const apiKey = localStorage.getItem('deepseek-api-key');
+        const apiKey = localStorage.getItem('openrouter-api-key');
         
         if (!apiKey) {
-            alert('Configura la tua API key di DeepSeek nelle impostazioni prima di usare l\'IA');
+            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
             this.switchTab('settings');
             return;
         }
@@ -325,7 +325,7 @@ ${lessonData.evaluation || 'N/D'}
         input.value = '';
 
         try {
-            const response = await this.callDeepSeekAPI(message, apiKey);
+            const response = await this.callOpenRouterAPI(message, apiKey);
             
             if (response && response.content) {
                 this.addChatMessage('ai', response.content);
@@ -354,15 +354,15 @@ ${lessonData.evaluation || 'N/D'}
         this.chatMessages.push({ type, content, timestamp: new Date().toISOString() });
     }
 
-    async callDeepSeekAPI(prompt, apiKey) {
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    async callOpenRouterAPI(prompt, apiKey) {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: 'deepseek-chat',
+                model: 'openchat/openchat-3.5-1210',
                 messages: [
                     {
                         role: 'system',
@@ -395,12 +395,12 @@ ${lessonData.evaluation || 'N/D'}
 
     // Settings methods
     saveSettings() {
-        const apiKey = document.getElementById('deepseek-api-key').value;
+        const apiKey = document.getElementById('openrouter-api-key').value;
         const teacherName = document.getElementById('teacher-name').value;
         const schoolName = document.getElementById('school-name').value;
 
         if (apiKey) {
-            localStorage.setItem('deepseek-api-key', apiKey);
+            localStorage.setItem('openrouter-api-key', apiKey);
         }
         if (teacherName) {
             localStorage.setItem('teacher-name', teacherName);
@@ -414,12 +414,12 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     loadSettings() {
-        const apiKey = localStorage.getItem('deepseek-api-key');
+        const apiKey = localStorage.getItem('openrouter-api-key');
         const teacherName = localStorage.getItem('teacher-name');
         const schoolName = localStorage.getItem('school-name');
 
         if (apiKey) {
-            document.getElementById('deepseek-api-key').value = apiKey;
+            document.getElementById('openrouter-api-key').value = apiKey;
         }
         if (teacherName) {
             document.getElementById('teacher-name').value = teacherName;
@@ -438,7 +438,7 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     async verifyAPIKey() {
-        const apiKeyInput = document.getElementById('deepseek-api-key');
+        const apiKeyInput = document.getElementById('openrouter-api-key');
         const statusIcon = document.getElementById('api-key-status');
         const apiKey = apiKeyInput.value.trim();
 
@@ -453,15 +453,15 @@ ${lessonData.evaluation || 'N/D'}
         statusIcon.title = 'Verifica in corso...';
 
         try {
-            // Make a minimal test call to DeepSeek API
-            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            // Make a minimal test call to OpenRouter API
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat',
+                    model: 'openchat/openchat-3.5-1210',
                     messages: [
                         {
                             role: 'user',
