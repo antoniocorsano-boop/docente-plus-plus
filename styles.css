@@ -431,6 +431,34 @@ header h1 {
     max-width: 600px;
 }
 
+.api-key-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.api-key-input-container input {
+    flex: 1;
+}
+
+.api-key-status {
+    font-size: 1.5em;
+    cursor: help;
+    transition: all 0.3s ease;
+}
+
+.api-key-status.verified {
+    color: #28a745;
+}
+
+.api-key-status.invalid {
+    color: #dc3545;
+}
+
+.api-key-status.unverified {
+    color: #6c757d;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .ai-container {
