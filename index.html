@@ -142,22 +142,26 @@
         <div id="settings" class="tab-content">
             <h2>Impostazioni</h2>
             <div class="settings-container">
-                <div class="form-group">
-                    <label for="deepseek-api-key">DeepSeek API Key:</label>
-                    <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key">
-                    <small>La chiave API viene salvata localmente nel browser</small>
+                <form id="settings-form" onsubmit="event.preventDefault(); app.saveSettings();">
+                    <div class="form-group">
+                        <label for="deepseek-api-key">DeepSeek API Key:</label>
+                        <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
+                        <small>La chiave API viene salvata localmente nel browser</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-name">Nome Insegnante:</label>
+                        <input type="text" id="teacher-name" placeholder="Il tuo nome" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="school-name">Nome Scuola:</label>
+                        <input type="text" id="school-name" placeholder="Nome della scuola" autocomplete="organization">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
+                </form>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="app.exportData()">📥 Esporta Dati</button>
+                    <button class="btn btn-secondary" onclick="app.importData()">📤 Importa Dati</button>
                 </div>
-                <div class="form-group">
-                    <label for="teacher-name">Nome Insegnante:</label>
-                    <input type="text" id="teacher-name" placeholder="Il tuo nome">
-                </div>
-                <div class="form-group">
-                    <label for="school-name">Nome Scuola:</label>
-                    <input type="text" id="school-name" placeholder="Nome della scuola">
-                </div>
-                <button class="btn btn-primary" onclick="app.saveSettings()">Salva Impostazioni</button>
-                <button class="btn btn-secondary" onclick="app.exportData()">📥 Esporta Dati</button>
-                <button class="btn btn-secondary" onclick="app.importData()">📤 Importa Dati</button>
             </div>
         </div>
     </div>
