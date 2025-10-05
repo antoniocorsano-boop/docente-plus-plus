@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docente++ - Gestione Didattica con IA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Docente++</h1>
+            <p class="subtitle">Gestione della Didattica Potenziata da IA DeepSeek</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-button" data-tab="lessons">Lezioni</button>
+            <button class="tab-button" data-tab="students">Studenti</button>
+            <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
+            <button class="tab-button" data-tab="settings">Impostazioni</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>📚 Lezioni Programmate</h3>
+                    <p class="stat-number" id="lesson-count">0</p>
+                    <p class="stat-label">Lezioni questa settimana</p>
+                </div>
+                <div class="card">
+                    <h3>👥 Studenti</h3>
+                    <p class="stat-number" id="student-count">0</p>
+                    <p class="stat-label">Studenti totali</p>
+                </div>
+                <div class="card">
+                    <h3>✅ Valutazioni</h3>
+                    <p class="stat-number" id="evaluation-count">0</p>
+                    <p class="stat-label">Da completare</p>
+                </div>
+                <div class="card">
+                    <h3>🤖 IA Attiva</h3>
+                    <p class="stat-number" id="ai-status">✓</p>
+                    <p class="stat-label">DeepSeek Ready</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Tab -->
+        <div id="lessons" class="tab-content">
+            <h2>Gestione Lezioni</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="app.showAddLessonForm()">➕ Nuova Lezione</button>
+                <button class="btn btn-secondary" onclick="app.generateLessonWithAI()">🤖 Genera con IA</button>
+            </div>
+            
+            <div id="add-lesson-form" class="form-container" style="display: none;">
+                <h3>Nuova Lezione</h3>
+                <form id="lesson-form">
+                    <div class="form-group">
+                        <label for="lesson-title">Titolo:</label>
+                        <input type="text" id="lesson-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lesson-subject">Materia:</label>
+                        <input type="text" id="lesson-subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lesson-date">Data:</label>
+                        <input type="date" id="lesson-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lesson-description">Descrizione:</label>
+                        <textarea id="lesson-description" rows="4"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva</button>
+                        <button type="button" class="btn btn-secondary" onclick="app.hideAddLessonForm()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="lessons-list" class="lessons-list"></div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <h2>Gestione Studenti</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="app.showAddStudentForm()">➕ Nuovo Studente</button>
+            </div>
+            
+            <div id="add-student-form" class="form-container" style="display: none;">
+                <h3>Nuovo Studente</h3>
+                <form id="student-form">
+                    <div class="form-group">
+                        <label for="student-name">Nome e Cognome:</label>
+                        <input type="text" id="student-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="student-email">Email:</label>
+                        <input type="email" id="student-email">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-class">Classe:</label>
+                        <input type="text" id="student-class">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva</button>
+                        <button type="button" class="btn btn-secondary" onclick="app.hideAddStudentForm()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="students-list" class="students-list"></div>
+        </div>
+
+        <!-- AI Assistant Tab -->
+        <div id="ai-assistant" class="tab-content">
+            <h2>Assistente IA DeepSeek</h2>
+            <div class="ai-container">
+                <div class="ai-chat">
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <textarea id="ai-input" placeholder="Chiedi all'assistente IA di aiutarti con la pianificazione delle lezioni, idee didattiche, valutazioni..." rows="3"></textarea>
+                        <button class="btn btn-primary" onclick="app.sendAIMessage()">Invia</button>
+                    </div>
+                </div>
+                <div class="ai-suggestions">
+                    <h3>Suggerimenti Rapidi</h3>
+                    <button class="suggestion-btn" onclick="app.quickAIPrompt('Genera un piano di lezione per matematica')">📐 Piano lezione matematica</button>
+                    <button class="suggestion-btn" onclick="app.quickAIPrompt('Crea esercizi per italiano')">✍️ Esercizi italiano</button>
+                    <button class="suggestion-btn" onclick="app.quickAIPrompt('Suggerisci attività didattiche interattive')">🎯 Attività interattive</button>
+                    <button class="suggestion-btn" onclick="app.quickAIPrompt('Genera criteri di valutazione')">📊 Criteri valutazione</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <h2>Impostazioni</h2>
+            <div class="settings-container">
+                <form id="settings-form" onsubmit="event.preventDefault(); app.saveSettings();">
+                    <div class="form-group">
+                        <label for="deepseek-api-key">DeepSeek API Key:</label>
+                        <input type="password" id="deepseek-api-key" placeholder="Inserisci la tua API key" autocomplete="off">
+                        <small>La chiave API viene salvata localmente nel browser</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="teacher-name">Nome Insegnante:</label>
+                        <input type="text" id="teacher-name" placeholder="Il tuo nome" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="school-name">Nome Scuola:</label>
+                        <input type="text" id="school-name" placeholder="Nome della scuola" autocomplete="organization">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
+                </form>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="app.exportData()">📥 Esporta Dati</button>
+                    <button class="btn btn-secondary" onclick="app.importData()">📤 Importa Dati</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
