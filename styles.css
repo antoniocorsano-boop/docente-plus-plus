@@ -513,3 +513,113 @@ header h1 {
 .empty-state h3 {
     margin-bottom: 10px;
 }
+
+/* Class Selector */
+.class-selector-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.class-selector-container label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.class-selector-container select {
+    padding: 8px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.class-selector-container select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.current-class-badge {
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+/* File Upload in Chat */
+.chat-file-upload {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    border: 2px dashed var(--border-color);
+}
+
+.file-upload-label {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95em;
+}
+
+.file-upload-label:hover {
+    background: #3fa864;
+    transform: translateY(-1px);
+}
+
+#ai-file-input {
+    display: none;
+}
+
+.selected-file-display {
+    margin-top: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: var(--text-primary);
+    display: none;
+}
+
+.selected-file-display.active {
+    display: block;
+}
+
+.selected-file-display .file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.selected-file-display .file-name {
+    font-weight: 500;
+}
+
+.selected-file-display .remove-file-btn {
+    padding: 4px 10px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.selected-file-display .remove-file-btn:hover {
+    background: #c0392b;
+}
