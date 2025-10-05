@@ -974,7 +974,7 @@ ${lessonData.evaluation || 'N/D'}
         const statusIcon = document.getElementById('api-key-status');
         if (statusIcon) {
             statusIcon.textContent = '⚪';
-            statusIcon.className = 'api-key-status unverified';
+            statusIcon.className = 'api-key-status';
             statusIcon.title = 'Non verificata';
         }
     }

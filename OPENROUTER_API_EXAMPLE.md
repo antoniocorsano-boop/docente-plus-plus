@@ -135,6 +135,5 @@ The response follows the OpenAI-compatible format:
 - The `alibaba/tongyi-deepresearch-30b-a3b` model is the default free model available on OpenRouter
 - **NEW**: The application now supports configurable models - users can specify any OpenRouter model in the settings
 - The API is compatible with OpenAI's chat completions format
-- All messages and parameters are preserved from the original DeepSeek integration
-- The application uses the same message structure and parameters (temperature, max_tokens)
+- The application uses a standard message structure and parameters (temperature, max_tokens)
 - When verifying the API key, the application tests with the configured model to ensure it's accessible
