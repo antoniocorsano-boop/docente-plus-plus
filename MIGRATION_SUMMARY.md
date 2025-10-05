@@ -11,7 +11,7 @@ Successfully migrated the Docente++ application from DeepSeek API to OpenRouter 
 
 ### 2. AI Model
 - **Old**: `deepseek-chat`
-- **New**: `openchat/openchat-3.5-1210` (free model on OpenRouter)
+- **New**: `alibaba/tongyi-deepresearch-30b-a3b` (free model on OpenRouter)
 
 ### 3. Code Changes
 

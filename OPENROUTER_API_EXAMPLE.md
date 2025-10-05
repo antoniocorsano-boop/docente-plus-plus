@@ -13,7 +13,7 @@ Authorization: Bearer YOUR_OPENROUTER_API_KEY
 
 ## Free Model Used
 ```
-openchat/openchat-3.5-1210
+alibaba/tongyi-deepresearch-30b-a3b
 ```
 
 ## Example Request
@@ -27,7 +27,7 @@ const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         'Authorization': `Bearer YOUR_OPENROUTER_API_KEY`
     },
     body: JSON.stringify({
-        model: 'openchat/openchat-3.5-1210',
+        model: 'alibaba/tongyi-deepresearch-30b-a3b',
         messages: [
             {
                 role: 'system',
@@ -53,7 +53,7 @@ curl https://openrouter.ai/api/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_OPENROUTER_API_KEY" \
   -d '{
-    "model": "openchat/openchat-3.5-1210",
+    "model": "alibaba/tongyi-deepresearch-30b-a3b",
     "messages": [
       {
         "role": "system",
@@ -85,7 +85,7 @@ The response follows the OpenAI-compatible format:
     }
   ],
   "created": 1234567890,
-  "model": "openchat/openchat-3.5-1210",
+  "model": "alibaba/tongyi-deepresearch-30b-a3b",
   "object": "chat.completion"
 }
 ```
@@ -100,7 +100,7 @@ The response follows the OpenAI-compatible format:
 
 ## Notes
 
-- The `openchat/openchat-3.5-1210` model is a free model available on OpenRouter
+- The `alibaba/tongyi-deepresearch-30b-a3b` model is a free model available on OpenRouter
 - The API is compatible with OpenAI's chat completions format
 - All messages and parameters are preserved from the original DeepSeek integration
 - The application uses the same message structure and parameters (temperature, max_tokens)
