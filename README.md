@@ -84,6 +84,39 @@ L'assistente IA OpenRouter può aiutarti con:
    - Usa l'assistente IA per generare contenuti
    - Esporta i tuoi dati per backup
 
+## 📊 Riepilogo Funzionalità
+
+### ✅ Funzionalità Implementate
+
+- **Assistente IA OpenRouter**: Supporto per la pianificazione didattica, la creazione di materiali e idee innovative
+- **Generazione Automatica**: Piani di lezione creati con l'IA
+- **Persistenza Dati**: Salvataggio locale dei dati nel browser
+- **Import/Export**: Backup e ripristino di profilo, classi e dati
+- **Onboarding Guidato**: Configurazione iniziale del profilo docente al primo accesso
+- **Gestione Classi**: Creazione, modifica, eliminazione classi
+- **Gestione Studenti**: Organizzazione degli studenti
+- **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
+- **Gestione Materie**: Gestione discipline con autocomplete intelligente
+- **Configurazione Anno Scolastico**: Date inizio/fine personalizzabili
+- **Dashboard Intuitiva**: Panoramica di lezioni, studenti e attività
+- **Configurazione Model ID OpenRouter**: Impostazione del modello IA utilizzato direttamente dalle impostazioni
+- **Privacy e Sicurezza**: Dati e chiavi API solo locali, nessun server
+- **Responsive & Accessibile**: Interfaccia moderna, fluida, personalizzabile, compatibile desktop/tablet/mobile
+- **Documentazione API**: Esempi e guida API OpenRouter disponibili
+
+### 🚀 Funzionalità da Implementare
+
+Le seguenti funzionalità sono pianificate per le prossime versioni:
+
+- **Gestione avanzata delle valutazioni**: Possibilità di creare, assegnare e visualizzare criteri e griglie di valutazione personalizzate per studenti/classi
+- **Notifiche e promemoria**: Sistema di notifiche per scadenze, attività e aggiornamenti
+- **Esportazione dati in formati aggiuntivi**: Supporto a PDF/Excel per report e stampe
+- **Gestione attività didattiche**: Modulo dedicato per esercizi, attività interattive, compiti e materiali associati alle lezioni
+- **Backup cloud opzionale**: Sincronizzazione e ripristino dati tramite provider esterni (es. Google Drive, Dropbox)
+- **Accessibilità estesa**: Miglioramento funzioni per utenti con disabilità (es. navigazione da tastiera, testo alternativo, modalità contrasto elevato)
+
+> **Nota**: Per richiedere una nuova funzionalità o discutere le priorità, apri una [nuova issue](https://github.com/antbrogame-a11y/docente-plus-plus/issues) su GitHub.
+
 ## 📖 Guida all'Uso
 
 ### 🎓 Onboarding Iniziale
