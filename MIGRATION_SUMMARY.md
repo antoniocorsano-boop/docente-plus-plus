@@ -97,3 +97,45 @@ All changes have been tested and verified:
 - Documentation is consistent
 - No DeepSeek references remain
 - OpenRouter integration is complete and ready to use
+
+## Recent Enhancements
+
+### Model ID Configuration (Latest Update)
+
+The application has been enhanced to support configurable OpenRouter models:
+
+#### Changes Made:
+1. **UI Enhancement** (`index.html`):
+   - Added "Model ID" input field in the settings page
+   - Field includes placeholder text and helpful description
+   - Positioned between API Key and teacher name fields
+
+2. **Settings Management** (`app.js`):
+   - `saveSettings()`: Now saves model ID to `localStorage['openrouter-model-id']`
+   - `loadSettings()`: Loads and restores model ID from localStorage
+   - Default value: `alibaba/tongyi-deepresearch-30b-a3b`
+
+3. **API Integration** (`app.js`):
+   - `callOpenRouterAPI()`: Uses configured model ID with fallback to default
+   - `verifyAPIKey()`: Tests API with configured model
+   - Verification message now displays which model was verified
+
+4. **Documentation Updates**:
+   - `README.md`: Added Model ID configuration instructions
+   - `README.md`: Added new section on model configuration with examples
+   - `OPENROUTER_API_EXAMPLE.md`: Added table of popular models and configuration guide
+
+#### Benefits:
+- ✅ Users can choose from any OpenRouter model
+- ✅ Easy switching between free and paid models
+- ✅ Model preference persists across sessions
+- ✅ Verification confirms model accessibility
+- ✅ Backward compatible (defaults to free model if not configured)
+
+#### Testing:
+- ✅ Model ID field displays correctly in settings
+- ✅ Model ID is saved to and loaded from localStorage
+- ✅ API calls use the configured model
+- ✅ Verification works with custom models
+- ✅ Default model is used when field is empty
+- ✅ Settings persist across page reloads
