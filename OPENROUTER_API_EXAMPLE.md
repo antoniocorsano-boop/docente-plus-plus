@@ -11,10 +11,42 @@ The API key is sent in the `Authorization` header as a Bearer token:
 Authorization: Bearer YOUR_OPENROUTER_API_KEY
 ```
 
-## Free Model Used
+## Default Model
 ```
 alibaba/tongyi-deepresearch-30b-a3b
 ```
+This is a free model used by default. The application now allows users to configure any OpenRouter model through the settings interface.
+
+## Configurable Models
+
+Starting from the latest version, Docente++ allows users to configure which OpenRouter model to use through the settings interface. This provides flexibility to:
+
+- Use different models based on specific needs
+- Switch between free and paid models
+- Test different models for optimal results
+
+### Popular OpenRouter Models
+
+| Model | Provider | Type | Cost |
+|-------|----------|------|------|
+| `alibaba/tongyi-deepresearch-30b-a3b` | Alibaba | Free | Free |
+| `openai/gpt-3.5-turbo` | OpenAI | Fast & Economical | Paid |
+| `openai/gpt-4` | OpenAI | Advanced | Paid |
+| `anthropic/claude-2` | Anthropic | Conversational | Paid |
+| `google/palm-2-chat-bison` | Google | Chat | Paid |
+
+For a complete list of available models, visit [OpenRouter Models](https://openrouter.ai/models).
+
+### How to Configure a Custom Model
+
+1. Open Docente++ in your browser
+2. Navigate to the "Impostazioni" (Settings) tab
+3. Enter your OpenRouter API Key
+4. Enter the Model ID in the "Model ID" field (e.g., `openai/gpt-3.5-turbo`)
+5. Click "Verifica API Key" to verify the model is accessible
+6. Click "Salva Impostazioni" to save
+
+The application will use your configured model for all AI operations.
 
 ## Example Request
 
@@ -100,7 +132,9 @@ The response follows the OpenAI-compatible format:
 
 ## Notes
 
-- The `alibaba/tongyi-deepresearch-30b-a3b` model is a free model available on OpenRouter
+- The `alibaba/tongyi-deepresearch-30b-a3b` model is the default free model available on OpenRouter
+- **NEW**: The application now supports configurable models - users can specify any OpenRouter model in the settings
 - The API is compatible with OpenAI's chat completions format
 - All messages and parameters are preserved from the original DeepSeek integration
 - The application uses the same message structure and parameters (temperature, max_tokens)
+- When verifying the API key, the application tests with the configured model to ensure it's accessible
