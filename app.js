@@ -80,6 +80,11 @@ class DocentePlusPlus {
             content.classList.remove('active');
         });
         document.getElementById(tabName).classList.add('active');
+
+        // Refresh materials when switching to materials tab
+        if (tabName === 'materials') {
+            this.renderMaterials();
+        }
     }
 
     // Dashboard methods
