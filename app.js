@@ -1166,9 +1166,23 @@ ${lessonData.evaluation || 'N/D'}
 
         // Filter evaluations
         let filteredEvaluations = this.evaluations.filter(evaluation => {
-            if (filterClassId && evaluation.classId != filterClassId && evaluation.studentId) {
-                const student = this.students.find(s => s.id == evaluation.studentId);
-                if (!student || student.classId != filterClassId) return false;
+            if (filterClassId) {
+                let matchesClass = false;
+                
+                // Check if evaluation is for the class directly
+                if (evaluation.classId == filterClassId) {
+                    matchesClass = true;
+                }
+                // Or if evaluation is for a student in the class
+                else if (evaluation.studentId) {
+                    const student = this.students.find(s => s.id == evaluation.studentId);
+                    const cls = this.classes.find(c => c.id == filterClassId);
+                    if (student && cls && student.class === cls.name) {
+                        matchesClass = true;
+                    }
+                }
+                
+                if (!matchesClass) return false;
             }
             if (filterSubject && evaluation.subjectId != filterSubject) return false;
             if (filterStudentId && evaluation.studentId != filterStudentId) return false;
@@ -1239,32 +1253,36 @@ ${lessonData.evaluation || 'N/D'}
         const classGroups = {};
         
         evaluations.forEach(evaluation => {
-            let classId = evaluation.classId;
-            if (!classId && evaluation.studentId) {
+            let className = null;
+            
+            // Get class from evaluation or from student
+            if (evaluation.classId) {
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                className = cls ? cls.name : null;
+            } else if (evaluation.studentId) {
                 const student = this.students.find(s => s.id == evaluation.studentId);
-                if (student) classId = student.classId;
+                className = student ? student.class : null;
             }
             
-            if (classId) {
-                if (!classGroups[classId]) {
-                    classGroups[classId] = [];
+            if (className) {
+                if (!classGroups[className]) {
+                    classGroups[className] = [];
                 }
-                classGroups[classId].push(evaluation);
+                classGroups[className].push(evaluation);
             }
         });
 
         let html = '<h4>📊 Risultati Aggregati per Classe</h4>';
         
-        Object.keys(classGroups).forEach(classId => {
-            const cls = this.classes.find(c => c.id == classId);
-            const classEvaluations = classGroups[classId];
+        Object.keys(classGroups).forEach(className => {
+            const classEvaluations = classGroups[className];
             const avgScore = this.calculateAverageScore(classEvaluations);
             const subjectStats = this.calculateSubjectStats(classEvaluations);
             
             html += `
                 <div class="card class-results">
                     <div class="class-results-header">
-                        <h5>${cls ? cls.name : 'Classe sconosciuta'}</h5>
+                        <h5>${className}</h5>
                         ${avgScore !== null ? `<span class="avg-score">Media Generale: ${avgScore.toFixed(2)}/10</span>` : ''}
                     </div>
                     <div class="class-stats">
