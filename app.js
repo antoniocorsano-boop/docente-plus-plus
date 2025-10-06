@@ -381,6 +381,7 @@ class DocentePlusPlus {
             title: document.getElementById('lesson-title').value,
             subject: document.getElementById('lesson-subject').value,
             date: document.getElementById('lesson-date').value,
+            time: document.getElementById('lesson-time').value || '09:00',
             description: document.getElementById('lesson-description').value,
             createdAt: new Date().toISOString()
         };
@@ -420,7 +421,7 @@ class DocentePlusPlus {
                 <div class="lesson-item">
                     <h4>${lesson.title}</h4>
                     <p><strong>Materia:</strong> ${lesson.subject}</p>
-                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')}</p>
+                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')} ${lesson.time ? 'alle ' + lesson.time : ''}</p>
                     <p>${lesson.description || 'Nessuna descrizione'}</p>
                     <div class="item-actions">
                         <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
