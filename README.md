@@ -101,7 +101,15 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Gestione Studenti**: Organizzazione degli studenti
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **📅 Gestione Orario Didattico**: Orario settimanale interattivo con vista giornaliera/settimanale, assegnazione classi e tipi di attività (teoria, disegno, laboratorio), esclusione automatica weekend, integrazione con attività
-- **📋 Gestione Attività Didattiche**: Sistema completo per pianificare, monitorare e gestire attività (lezioni, esercitazioni, laboratori, progetti, compiti, verifiche)
+- **📋 Gestione Attività Didattiche**: Sistema completo per pianificare, monitorare e gestire attività (lezioni, esercitazioni, laboratori, progetti, compiti, verifiche) con:
+  - Creazione e modifica attività con priorità (bassa, media, alta)
+  - Monitoraggio avanzamento con percentuale di completamento
+  - Gestione scadenze con notifiche automatiche (3 giorni, 24 ore, scadute)
+  - Note e feedback per ogni attività
+  - Dashboard riepilogativo con statistiche in tempo reale
+  - Assegnazione a classi e studenti
+  - Tracciamento stato (pianificata, in corso, completata)
+  - Export in PDF, Excel e JSON
 - **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
 - **🔔 Notifiche e Promemoria**: Sistema completo di notifiche automatiche e promemoria personalizzabili
 - **Gestione Materie**: Gestione discipline con autocomplete intelligente
