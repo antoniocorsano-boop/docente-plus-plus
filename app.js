@@ -309,6 +309,11 @@ class DocentePlusPlus {
             content.classList.remove('active');
         });
         document.getElementById(tabName).classList.add('active');
+
+        // Refresh notifications when switching to notifications tab
+        if (tabName === 'notifications') {
+            this.renderNotifications();
+        }
     }
 
     // Dashboard methods
