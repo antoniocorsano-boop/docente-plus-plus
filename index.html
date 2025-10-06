@@ -479,6 +479,8 @@
                     <button class="btn btn-secondary" onclick="app.markAllNotificationsRead()">✓ Segna tutte come lette</button>
                     <button class="btn btn-secondary" onclick="app.clearAllNotifications()">🗑️ Elimina tutte</button>
                 </div>
+                <!-- Filter section -->
+                <div id="notifications-filter" class="notifications-filter"></div>
                 <div id="notifications-list" class="notifications-list"></div>
             </div>
 
@@ -559,6 +561,17 @@
                                 <input type="checkbox" id="notification-1h">
                                 ⏰ Avviso 1 ora prima della lezione
                             </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-backup-reminders">
+                                💾 Promemoria backup periodici
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-left: 25px;">
+                            <label for="notification-backup-interval">Intervallo backup (giorni):</label>
+                            <input type="number" id="notification-backup-interval" min="1" max="365" value="7" style="width: 100px;">
+                            <small>Ricevi un promemoria ogni X giorni per eseguire un backup</small>
                         </div>
                     </div>
 
