@@ -11,6 +11,9 @@ class DocentePlusPlus {
         this.chatMessages = [];
         this.activeClass = '';
         this.selectedFile = null;
+        this.evaluationCriteria = [];
+        this.evaluationGrids = [];
+        this.evaluations = [];
         this.init();
     }
 
@@ -31,6 +34,7 @@ class DocentePlusPlus {
         this.renderLessons();
         this.renderStudents();
         this.renderClasses();
+        this.renderEvaluations();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
@@ -294,7 +298,16 @@ class DocentePlusPlus {
     renderDashboard() {
         document.getElementById('lesson-count').textContent = this.lessons.length;
         document.getElementById('student-count').textContent = this.students.length;
-        document.getElementById('evaluation-count').textContent = '0';
+        
+        // Count pending evaluations (those without a score or from the last 7 days)
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const pendingEvaluations = this.evaluations.filter(e => {
+            if (!e.score) return true;
+            const evalDate = new Date(e.date);
+            return evalDate >= sevenDaysAgo;
+        });
+        document.getElementById('evaluation-count').textContent = pendingEvaluations.length;
         
         const apiKey = localStorage.getItem('openrouter-api-key');
         document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
@@ -704,6 +717,390 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    // Evaluation Management methods
+    showAddCriterionForm() {
+        document.getElementById('add-criterion-form').style.display = 'block';
+    }
+
+    hideAddCriterionForm() {
+        document.getElementById('add-criterion-form').style.display = 'none';
+        document.getElementById('criterion-form').reset();
+    }
+
+    addCriterion() {
+        const name = document.getElementById('criterion-name').value;
+        const description = document.getElementById('criterion-description').value;
+        const subject = document.getElementById('criterion-subject').value;
+        const type = document.getElementById('criterion-type').value;
+
+        if (!name) {
+            alert('Inserisci un nome per il criterio');
+            return;
+        }
+
+        const criterion = {
+            id: Date.now(),
+            name,
+            description,
+            subject,
+            type,
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluationCriteria.push(criterion);
+        this.saveData();
+        this.renderEvaluations();
+        this.hideAddCriterionForm();
+    }
+
+    deleteCriterion(id) {
+        if (confirm('Sei sicuro di voler eliminare questo criterio?')) {
+            this.evaluationCriteria = this.evaluationCriteria.filter(c => c.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+        }
+    }
+
+    showAddGridForm() {
+        document.getElementById('add-grid-form').style.display = 'block';
+    }
+
+    hideAddGridForm() {
+        document.getElementById('add-grid-form').style.display = 'none';
+        document.getElementById('grid-form').reset();
+    }
+
+    addGrid() {
+        const name = document.getElementById('grid-name').value;
+        const description = document.getElementById('grid-description').value;
+        const subject = document.getElementById('grid-subject').value;
+
+        if (!name) {
+            alert('Inserisci un nome per la griglia');
+            return;
+        }
+
+        const grid = {
+            id: Date.now(),
+            name,
+            description,
+            subject,
+            levels: [
+                { name: 'Eccellente', score: 10, description: 'Prestazione eccellente' },
+                { name: 'Buono', score: 8, description: 'Prestazione buona' },
+                { name: 'Sufficiente', score: 6, description: 'Prestazione sufficiente' },
+                { name: 'Insufficiente', score: 4, description: 'Prestazione insufficiente' }
+            ],
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluationGrids.push(grid);
+        this.saveData();
+        this.renderEvaluations();
+        this.hideAddGridForm();
+    }
+
+    deleteGrid(id) {
+        if (confirm('Sei sicuro di voler eliminare questa griglia?')) {
+            this.evaluationGrids = this.evaluationGrids.filter(g => g.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+        }
+    }
+
+    showAddEvaluationForm() {
+        document.getElementById('add-evaluation-form').style.display = 'block';
+        this.updateEvaluationFormSelectors();
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('evaluation-date').value = today;
+    }
+
+    hideAddEvaluationForm() {
+        document.getElementById('add-evaluation-form').style.display = 'none';
+        document.getElementById('evaluation-form').reset();
+    }
+
+    updateEvaluationFormSelectors() {
+        // Update student selector
+        const studentSelect = document.getElementById('evaluation-student');
+        if (studentSelect) {
+            studentSelect.innerHTML = '<option value="">Seleziona studente</option>';
+            this.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                studentSelect.appendChild(option);
+            });
+        }
+
+        // Update class selector
+        const classSelect = document.getElementById('evaluation-class');
+        if (classSelect) {
+            classSelect.innerHTML = '<option value="">Seleziona classe</option>';
+            this.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                classSelect.appendChild(option);
+            });
+        }
+
+        // Update criterion selector
+        const criterionSelect = document.getElementById('evaluation-criterion');
+        if (criterionSelect) {
+            criterionSelect.innerHTML = '<option value="">Seleziona criterio</option>';
+            this.evaluationCriteria.forEach(criterion => {
+                const option = document.createElement('option');
+                option.value = criterion.id;
+                option.textContent = criterion.name;
+                criterionSelect.appendChild(option);
+            });
+        }
+
+        // Update grid selector
+        const gridSelect = document.getElementById('evaluation-grid');
+        if (gridSelect) {
+            gridSelect.innerHTML = '<option value="">Seleziona griglia</option>';
+            this.evaluationGrids.forEach(grid => {
+                const option = document.createElement('option');
+                option.value = grid.id;
+                option.textContent = grid.name;
+                gridSelect.appendChild(option);
+            });
+        }
+    }
+
+    addEvaluation() {
+        const studentId = document.getElementById('evaluation-student').value;
+        const classId = document.getElementById('evaluation-class').value;
+        const criterionId = document.getElementById('evaluation-criterion').value;
+        const gridId = document.getElementById('evaluation-grid').value;
+        const score = document.getElementById('evaluation-score').value;
+        const notes = document.getElementById('evaluation-notes').value;
+        const date = document.getElementById('evaluation-date').value;
+
+        if (!studentId && !classId) {
+            alert('Seleziona uno studente o una classe');
+            return;
+        }
+
+        if (!criterionId && !gridId) {
+            alert('Seleziona un criterio o una griglia di valutazione');
+            return;
+        }
+
+        const evaluation = {
+            id: Date.now(),
+            studentId: studentId || null,
+            classId: classId || null,
+            criterionId: criterionId || null,
+            gridId: gridId || null,
+            score: score || null,
+            notes,
+            date: date || new Date().toISOString().split('T')[0],
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluations.push(evaluation);
+        this.saveData();
+        this.renderEvaluations();
+        this.renderDashboard();
+        this.hideAddEvaluationForm();
+    }
+
+    deleteEvaluation(id) {
+        if (confirm('Sei sicuro di voler eliminare questa valutazione?')) {
+            this.evaluations = this.evaluations.filter(e => e.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+            this.renderDashboard();
+        }
+    }
+
+    renderEvaluations() {
+        // Render criteria list
+        const criteriaList = document.getElementById('criteria-list');
+        if (criteriaList) {
+            if (this.evaluationCriteria.length === 0) {
+                criteriaList.innerHTML = '<p class="empty-state">Nessun criterio di valutazione. Creane uno!</p>';
+            } else {
+                criteriaList.innerHTML = this.evaluationCriteria.map(criterion => `
+                    <div class="card evaluation-item">
+                        <h4>${criterion.name}</h4>
+                        <p><strong>Tipo:</strong> ${criterion.type || 'Non specificato'}</p>
+                        <p><strong>Disciplina:</strong> ${criterion.subject || 'Non specificata'}</p>
+                        <p>${criterion.description || ''}</p>
+                        <div class="evaluation-actions">
+                            <button class="btn btn-danger" onclick="app.deleteCriterion(${criterion.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render grids list
+        const gridsList = document.getElementById('grids-list');
+        if (gridsList) {
+            if (this.evaluationGrids.length === 0) {
+                gridsList.innerHTML = '<p class="empty-state">Nessuna griglia di valutazione. Creane una!</p>';
+            } else {
+                gridsList.innerHTML = this.evaluationGrids.map(grid => `
+                    <div class="card evaluation-item">
+                        <h4>${grid.name}</h4>
+                        <p><strong>Disciplina:</strong> ${grid.subject || 'Non specificata'}</p>
+                        <p>${grid.description || ''}</p>
+                        <div class="grid-levels">
+                            <strong>Livelli:</strong>
+                            ${grid.levels.map(level => `
+                                <div class="level-item">
+                                    <span class="level-name">${level.name}</span>
+                                    <span class="level-score">${level.score}/10</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="evaluation-actions">
+                            <button class="btn btn-danger" onclick="app.deleteGrid(${grid.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render evaluations list
+        const evaluationsList = document.getElementById('evaluations-list');
+        if (evaluationsList) {
+            if (this.evaluations.length === 0) {
+                evaluationsList.innerHTML = '<p class="empty-state">Nessuna valutazione registrata.</p>';
+            } else {
+                evaluationsList.innerHTML = this.evaluations.map(evaluation => {
+                    const student = this.students.find(s => s.id == evaluation.studentId);
+                    const cls = this.classes.find(c => c.id == evaluation.classId);
+                    const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                    const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+
+                    return `
+                        <div class="card evaluation-item">
+                            <div class="evaluation-header">
+                                <h4>${student ? student.name : (cls ? 'Classe: ' + cls.name : 'N/D')}</h4>
+                                <span class="evaluation-date">${evaluation.date}</span>
+                            </div>
+                            <p><strong>Criterio/Griglia:</strong> ${criterion ? criterion.name : (grid ? grid.name : 'N/D')}</p>
+                            ${evaluation.score ? `<p><strong>Voto:</strong> ${evaluation.score}/10</p>` : ''}
+                            ${evaluation.notes ? `<p><strong>Note:</strong> ${evaluation.notes}</p>` : ''}
+                            <div class="evaluation-actions">
+                                <button class="btn btn-danger" onclick="app.deleteEvaluation(${evaluation.id})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+
+    exportEvaluations() {
+        const data = {
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations.map(evaluation => {
+                const student = this.students.find(s => s.id == evaluation.studentId);
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+
+                return {
+                    ...evaluation,
+                    studentName: student ? student.name : null,
+                    className: cls ? cls.name : null,
+                    criterionName: criterion ? criterion.name : null,
+                    gridName: grid ? grid.name : null
+                };
+            }),
+            exportDate: new Date().toISOString()
+        };
+
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `valutazioni-export-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        alert('Valutazioni esportate con successo!');
+    }
+
+    async generateCriteriaWithAI() {
+        const subject = prompt('Per quale disciplina vuoi generare i criteri di valutazione?');
+        if (!subject) return;
+
+        const topic = prompt('Quale argomento o competenza vuoi valutare?');
+        if (!topic) return;
+
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            alert('Configura la tua API Key di OpenRouter nelle impostazioni prima di usare questa funzione');
+            return;
+        }
+
+        const loadingMsg = document.getElementById('chat-messages');
+        if (loadingMsg) {
+            const tempDiv = document.createElement('div');
+            tempDiv.className = 'message assistant-message';
+            tempDiv.textContent = '🤖 Generazione criteri di valutazione in corso...';
+            loadingMsg.appendChild(tempDiv);
+            loadingMsg.scrollTop = loadingMsg.scrollHeight;
+        }
+
+        try {
+            const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
+            const response = await this.callOpenRouterAPI(
+                `Genera 4-6 criteri di valutazione dettagliati per la disciplina "${subject}" sull'argomento "${topic}". 
+                Per ogni criterio fornisci:
+                - Nome del criterio
+                - Descrizione dettagliata
+                - Tipo (es. conoscenza, competenza, abilità)
+                
+                Rispondi in formato JSON array con questa struttura:
+                [{"name": "...", "description": "...", "type": "..."}]`,
+                apiKey,
+                modelId
+            );
+
+            if (response && response.content) {
+                try {
+                    const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        const criteria = JSON.parse(jsonMatch[0]);
+                        
+                        criteria.forEach(c => {
+                            this.evaluationCriteria.push({
+                                id: Date.now() + Math.random(),
+                                name: c.name,
+                                description: c.description,
+                                subject: subject,
+                                type: c.type,
+                                createdAt: new Date().toISOString()
+                            });
+                        });
+
+                        this.saveData();
+                        this.renderEvaluations();
+                        alert(`${criteria.length} criteri di valutazione generati con successo!`);
+                    }
+                } catch (e) {
+                    console.error('Error parsing AI response:', e);
+                    alert('Errore nella generazione dei criteri. Riprova.');
+                }
+            }
+        } catch (error) {
+            console.error('Error generating criteria:', error);
+            alert('Errore nella generazione dei criteri');
+        }
+    }
+
     // AI Assistant methods
     handleFileSelect(event) {
         const file = event.target.files[0];
@@ -1044,12 +1441,18 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-lessons', JSON.stringify(this.lessons));
         localStorage.setItem('docente-plus-students', JSON.stringify(this.students));
         localStorage.setItem('docente-plus-classes', JSON.stringify(this.classes));
+        localStorage.setItem('docente-plus-evaluation-criteria', JSON.stringify(this.evaluationCriteria));
+        localStorage.setItem('docente-plus-evaluation-grids', JSON.stringify(this.evaluationGrids));
+        localStorage.setItem('docente-plus-evaluations', JSON.stringify(this.evaluations));
     }
 
     loadData() {
         const lessonsData = localStorage.getItem('docente-plus-lessons');
         const studentsData = localStorage.getItem('docente-plus-students');
         const classesData = localStorage.getItem('docente-plus-classes');
+        const evaluationCriteriaData = localStorage.getItem('docente-plus-evaluation-criteria');
+        const evaluationGridsData = localStorage.getItem('docente-plus-evaluation-grids');
+        const evaluationsData = localStorage.getItem('docente-plus-evaluations');
 
         if (lessonsData) {
             try {
@@ -1077,6 +1480,33 @@ ${lessonData.evaluation || 'N/D'}
                 this.classes = [];
             }
         }
+
+        if (evaluationCriteriaData) {
+            try {
+                this.evaluationCriteria = JSON.parse(evaluationCriteriaData);
+            } catch (e) {
+                console.error('Error loading evaluation criteria:', e);
+                this.evaluationCriteria = [];
+            }
+        }
+
+        if (evaluationGridsData) {
+            try {
+                this.evaluationGrids = JSON.parse(evaluationGridsData);
+            } catch (e) {
+                console.error('Error loading evaluation grids:', e);
+                this.evaluationGrids = [];
+            }
+        }
+
+        if (evaluationsData) {
+            try {
+                this.evaluations = JSON.parse(evaluationsData);
+            } catch (e) {
+                console.error('Error loading evaluations:', e);
+                this.evaluations = [];
+            }
+        }
     }
 
     exportData() {
@@ -1085,6 +1515,9 @@ ${lessonData.evaluation || 'N/D'}
             students: this.students,
             classes: this.classes,
             subjects: this.subjects,
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations,
             teacherProfile: {
                 firstName: localStorage.getItem('teacher-first-name'),
                 lastName: localStorage.getItem('teacher-last-name'),
@@ -1137,6 +1570,15 @@ ${lessonData.evaluation || 'N/D'}
                         this.subjects = data.subjects;
                         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
                     }
+                    if (data.evaluationCriteria) {
+                        this.evaluationCriteria = data.evaluationCriteria;
+                    }
+                    if (data.evaluationGrids) {
+                        this.evaluationGrids = data.evaluationGrids;
+                    }
+                    if (data.evaluations) {
+                        this.evaluations = data.evaluations;
+                    }
                     if (data.teacherProfile) {
                         const profile = data.teacherProfile;
                         if (profile.firstName) localStorage.setItem('teacher-first-name', profile.firstName);
@@ -1153,6 +1595,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.renderLessons();
                     this.renderStudents();
                     this.renderClasses();
+                    this.renderEvaluations();
                     this.updateClassSelectors();
                     this.loadSettings();
                     this.renderDashboard();
