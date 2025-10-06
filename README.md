@@ -92,7 +92,8 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Assistente IA OpenRouter**: Supporto per la pianificazione didattica, la creazione di materiali e idee innovative
 - **Generazione Automatica**: Piani di lezione creati con l'IA
 - **Persistenza Dati**: Salvataggio locale dei dati nel browser
-- **Import/Export**: Backup e ripristino di profilo, classi e dati
+- **Import/Export Avanzato**: Backup e ripristino in **formati multipli (JSON, PDF, Excel)**
+- **Esportazione PDF e Excel**: Report professionali stampabili e fogli di calcolo per analisi avanzate
 - **Onboarding Guidato**: Configurazione iniziale del profilo docente al primo accesso
 - **Gestione Classi**: Creazione, modifica, eliminazione classi
 - **Gestione Studenti**: Organizzazione degli studenti
@@ -103,7 +104,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Configurazione Anno Scolastico**: Date inizio/fine personalizzabili
 - **Dashboard Intuitiva**: Panoramica di lezioni, studenti e attività
 - **Configurazione Model ID OpenRouter**: Impostazione del modello IA utilizzato direttamente dalle impostazioni
-- **Privacy e Sicurezza**: Dati e chiavi API solo locali, nessun server
+- **Privacy e Sicurezza**: Dati e chiavi API solo locali, nessun server, note di riservatezza nei documenti esportati
 - **Responsive & Accessibile**: Interfaccia moderna, fluida, personalizzabile, compatibile desktop/tablet/mobile
 - **Documentazione API**: Esempi e guida API OpenRouter disponibili
 
@@ -111,7 +112,6 @@ L'assistente IA OpenRouter può aiutarti con:
 
 Le seguenti funzionalità sono pianificate per le prossime versioni:
 
-- **Esportazione dati in formati aggiuntivi**: Supporto a PDF/Excel per report e stampe
 - **Gestione attività didattiche**: Modulo dedicato per esercizi, attività interattive, compiti e materiali associati alle lezioni
 - **Backup cloud opzionale**: Sincronizzazione e ripristino dati tramite provider esterni (es. Google Drive, Dropbox)
 - **Accessibilità estesa**: Miglioramento funzioni per utenti con disabilità (es. navigazione da tastiera, testo alternativo, modalità contrasto elevato)
@@ -192,14 +192,18 @@ La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazi
 4. **Cambio Visualizzazione**: Passa facilmente tra vista studente e vista classe
 
 #### 📥 Esportazione Valutazioni
-- Esporta tutte le valutazioni in formato JSON
+- **Formati multipli disponibili**: JSON, PDF e Excel (XLSX)
+- **JSON**: Formato dati strutturato, ideale per backup e importazione
+- **PDF**: Documento formattato pronto per la stampa e condivisione professionale
+- **Excel**: Foglio di calcolo per analisi avanzate e manipolazione dati
 - Include criteri, griglie e valutazioni con dati completi
 - **Statistiche avanzate**: L'export include automaticamente:
   - Numero totale di valutazioni, studenti e classi
   - Media generale di tutte le valutazioni
   - Statistiche per disciplina (conteggio e media)
   - Statistiche per classe (conteggio e media)
-- Ideale per reportistica e analisi dettagliate
+- **Privacy e Sicurezza**: Footer con nota di riservatezza nei documenti PDF
+- Ideale per reportistica, condivisione con colleghi e analisi dettagliate
 
 ### 🔔 Notifiche e Promemoria
 
@@ -274,8 +278,37 @@ L'applicazione permette di configurare il modello OpenRouter da utilizzare:
 **Nota**: Alcuni modelli potrebbero richiedere crediti sul tuo account OpenRouter.
 
 ### Import/Export Dati
-- **Export**: Scarica tutti i tuoi dati in formato JSON
-- **Import**: Ripristina dati da un file precedentemente esportato
+
+#### 📥 Esportazione Dati
+L'applicazione supporta l'esportazione completa dei dati in **tre formati**:
+
+1. **JSON** - Formato dati strutturato
+   - Ideale per backup completi e importazione
+   - Include tutti i dati: lezioni, studenti, classi, valutazioni, notifiche, ecc.
+   - Perfetto per portabilità e ripristino completo
+
+2. **PDF** - Documento formattato
+   - Report professionale pronto per la stampa
+   - Include riepilogo con statistiche principali
+   - Tabelle formattate con classi, studenti e valutazioni
+   - Footer con nota di riservatezza e numerazione pagine
+   - Ideale per condivisione formale e archivio cartaceo
+
+3. **Excel (XLSX)** - Foglio di calcolo
+   - Fogli separati per ogni tipo di dati (Profilo, Classi, Studenti, Lezioni, Valutazioni, Discipline)
+   - Perfetto per analisi avanzate con Excel, Google Sheets, LibreOffice
+   - Facile manipolazione e filtri personalizzati
+   - Compatibile con tutti i software di foglio di calcolo
+
+**Come esportare**:
+- Vai nella sezione "Impostazioni"
+- Clicca su "📥 Esporta Dati"
+- Scegli il formato desiderato (JSON, PDF o Excel)
+- Il file verrà scaricato automaticamente
+
+#### 📤 Importazione Dati
+- **Import**: Ripristina dati da un file JSON precedentemente esportato
+- Tutti i dati vengono ripristinati: lezioni, studenti, classi, valutazioni, notifiche, ecc.
 
 ## 🏗️ Struttura del Progetto
 
