@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -141,6 +143,7 @@
             <button class="tab-button" data-tab="evaluations">Valutazioni</button>
             <button class="tab-button" data-tab="notifications">Notifiche</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
+            <button class="tab-button" data-tab="document-import">📂 Documenti</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
         </nav>
 
@@ -369,6 +372,7 @@
             <h2>Gestione Studenti</h2>
             <div class="section-actions">
                 <button class="btn btn-primary" onclick="app.showAddStudentForm()">➕ Nuovo Studente</button>
+                <button class="btn btn-secondary" onclick="app.showImportStudentsDialog()">📥 Importa da File</button>
             </div>
             
             <div id="add-student-form" class="form-container" style="display: none;">
@@ -385,6 +389,18 @@
                     <div class="form-group">
                         <label for="student-class">Classe:</label>
                         <input type="text" id="student-class">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-birthdate">Data di Nascita:</label>
+                        <input type="date" id="student-birthdate">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-nameday">Onomastico/Santo:</label>
+                        <input type="text" id="student-nameday" placeholder="es. San Giovanni - 24 Giugno">
+                    </div>
+                    <div class="form-group">
+                        <label for="student-notes">Note:</label>
+                        <textarea id="student-notes" rows="2" placeholder="Note aggiuntive sullo studente"></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salva</button>
@@ -778,6 +794,70 @@
                         <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Document Import Tab -->
+        <div id="document-import" class="tab-content">
+            <h2>📂 Importazione e Gestione Documenti con IA</h2>
+            <p class="section-description">
+                Carica documenti didattici e anagrafici. L'assistente IA ti aiuterà a riconoscere e importare automaticamente i dati.
+            </p>
+
+            <!-- Quick Upload Section -->
+            <div class="document-upload-section">
+                <h3>📤 Carica Documento</h3>
+                <div class="upload-area" id="document-upload-area" onclick="document.getElementById('document-file-input').click()">
+                    <div class="upload-icon">📎</div>
+                    <p><strong>Clicca per selezionare</strong> o trascina un file qui</p>
+                    <p class="upload-formats">Formati supportati: CSV, XLSX, PDF, TXT, JSON</p>
+                </div>
+                <input type="file" id="document-file-input" accept=".csv,.xlsx,.xls,.pdf,.txt,.json" style="display: none;" onchange="app.handleDocumentUpload(event)">
+                
+                <div id="document-upload-status" class="upload-status" style="display: none;"></div>
+            </div>
+
+            <!-- AI Classification Section -->
+            <div class="document-classification-section" id="document-classification" style="display: none;">
+                <h3>🤖 Riconoscimento Automatico</h3>
+                <div id="classification-result" class="classification-result"></div>
+                <div id="classification-actions" class="classification-actions"></div>
+            </div>
+
+            <!-- Import Preview Section -->
+            <div class="document-preview-section" id="document-preview" style="display: none;">
+                <h3>👁️ Anteprima Dati da Importare</h3>
+                <div id="preview-content" class="preview-content"></div>
+                <div class="preview-actions">
+                    <button class="btn btn-primary" onclick="app.confirmImport()">✅ Conferma Importazione</button>
+                    <button class="btn btn-secondary" onclick="app.cancelImport()">❌ Annulla</button>
+                    <button class="btn btn-secondary" onclick="app.refineWithAI()">🤖 Affina con IA</button>
+                </div>
+            </div>
+
+            <!-- Imported Documents History -->
+            <div class="document-history-section">
+                <h3>📚 Documenti Importati</h3>
+                <div id="imported-documents-list" class="imported-documents-list"></div>
+            </div>
+
+            <!-- Audio Recording Section -->
+            <div class="audio-recording-section">
+                <h3>🎙️ Registrazione Audio Lezione</h3>
+                <p class="section-description">Registra le tue lezioni per successive analisi e trascrizioni con l'IA</p>
+                <div class="recording-controls">
+                    <button class="btn btn-primary" id="start-recording-btn" onclick="app.startAudioRecording()">
+                        🎙️ Avvia Registrazione
+                    </button>
+                    <button class="btn btn-danger" id="stop-recording-btn" onclick="app.stopAudioRecording()" style="display: none;">
+                        ⏹️ Ferma Registrazione
+                    </button>
+                    <div id="recording-timer" class="recording-timer" style="display: none;">
+                        ⏱️ <span id="timer-display">00:00</span>
+                    </div>
+                </div>
+                <div id="recording-status" class="recording-status"></div>
+                <div id="recordings-list" class="recordings-list"></div>
             </div>
         </div>
 

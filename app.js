@@ -35,6 +35,19 @@ class DocentePlusPlus {
         this.notificationCheckInterval = null;
         this.scheduleView = 'weekly'; // weekly or daily
         this.currentScheduleDate = null; // Will be set to current/next weekday
+        
+        // Document Import Module
+        this.importedDocuments = [];
+        this.currentImportData = null;
+        this.documentClassification = null;
+        
+        // Audio Recording Module
+        this.audioRecordings = [];
+        this.mediaRecorder = null;
+        this.recordingChunks = [];
+        this.recordingStartTime = null;
+        this.recordingTimer = null;
+        
         this.init();
     }
 
@@ -58,6 +71,8 @@ class DocentePlusPlus {
         this.renderEvaluations();
         this.renderActivities();
         this.renderSchedule();
+        this.renderImportedDocuments();
+        this.renderRecordings();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
@@ -135,6 +150,35 @@ class DocentePlusPlus {
         // Subject inputs
         this.setupSubjectInput('onboarding-subjects', 'subjects-suggestions', 'selected-subjects-display');
         this.setupSubjectInput('teacher-subjects-settings', 'subjects-suggestions-settings', 'selected-subjects-display-settings');
+        
+        // Drag and drop for document upload
+        const uploadArea = document.getElementById('document-upload-area');
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.background = '#f0f7ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '';
+                uploadArea.style.background = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '';
+                uploadArea.style.background = '';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const fileInput = document.getElementById('document-file-input');
+                    fileInput.files = files;
+                    this.handleDocumentUpload({ target: { files: files } });
+                }
+            });
+        }
     }
 
     // Onboarding methods
@@ -569,6 +613,9 @@ ${lessonData.evaluation || 'N/D'}
             name: document.getElementById('student-name').value,
             email: document.getElementById('student-email').value,
             class: document.getElementById('student-class').value,
+            birthdate: document.getElementById('student-birthdate').value || null,
+            nameday: document.getElementById('student-nameday').value || null,
+            notes: document.getElementById('student-notes').value || null,
             createdAt: new Date().toISOString()
         };
 
@@ -595,22 +642,37 @@ ${lessonData.evaluation || 'N/D'}
             studentsList.innerHTML = `
                 <div class="empty-state">
                     <h3>Nessuno studente registrato</h3>
-                    <p>Inizia aggiungendo un nuovo studente</p>
+                    <p>Inizia aggiungendo un nuovo studente o importando da file</p>
                 </div>
             `;
             return;
         }
 
-        studentsList.innerHTML = this.students.map(student => `
-            <div class="student-item">
-                <h4>${student.name}</h4>
-                <p><strong>Email:</strong> ${student.email || 'N/D'}</p>
-                <p><strong>Classe:</strong> ${student.class || 'N/D'}</p>
-                <div class="item-actions">
-                    <button class="btn btn-danger" onclick="app.deleteStudent(${student.id})">Elimina</button>
+        studentsList.innerHTML = this.students.map(student => {
+            let additionalInfo = '';
+            if (student.birthdate) {
+                const birthDate = new Date(student.birthdate);
+                additionalInfo += `<p><strong>📅 Data di Nascita:</strong> ${birthDate.toLocaleDateString('it-IT')}</p>`;
+            }
+            if (student.nameday) {
+                additionalInfo += `<p><strong>🎂 Onomastico:</strong> ${student.nameday}</p>`;
+            }
+            if (student.notes) {
+                additionalInfo += `<p><strong>📝 Note:</strong> ${student.notes}</p>`;
+            }
+            
+            return `
+                <div class="student-item">
+                    <h4>${student.name}</h4>
+                    <p><strong>Email:</strong> ${student.email || 'N/D'}</p>
+                    <p><strong>Classe:</strong> ${student.class || 'N/D'}</p>
+                    ${additionalInfo}
+                    <div class="item-actions">
+                        <button class="btn btn-danger" onclick="app.deleteStudent(${student.id})">Elimina</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Activity management methods
@@ -2454,6 +2516,17 @@ ${lessonData.evaluation || 'N/D'}
                 this.schedule = {};
             }
         }
+
+        // Load imported documents
+        const importedDocsData = localStorage.getItem('imported-documents');
+        if (importedDocsData) {
+            try {
+                this.importedDocuments = JSON.parse(importedDocsData);
+            } catch (e) {
+                console.error('Error loading imported documents:', e);
+                this.importedDocuments = [];
+            }
+        }
     }
 
     exportData() {
@@ -3760,6 +3833,774 @@ ${lessonData.evaluation || 'N/D'}
             document.getElementById('notification-quiet-hours').checked = this.notificationSettings.quietHoursEnabled;
             document.getElementById('notification-quiet-start').value = this.notificationSettings.quietHoursStart;
             document.getElementById('notification-quiet-end').value = this.notificationSettings.quietHoursEnd;
+        }
+    }
+
+    // ========================================
+    // DOCUMENT IMPORT MODULE METHODS
+    // ========================================
+
+    showImportStudentsDialog() {
+        this.switchTab('document-import');
+        // Optionally show a hint or focus on upload area
+        const uploadArea = document.getElementById('document-upload-area');
+        if (uploadArea) {
+            uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            uploadArea.style.border = '2px solid #3498db';
+            setTimeout(() => {
+                uploadArea.style.border = '';
+            }, 2000);
+        }
+    }
+
+    async handleDocumentUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const statusDiv = document.getElementById('document-upload-status');
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="upload-progress">
+                <p>📤 Caricamento file: <strong>${file.name}</strong></p>
+                <p>Dimensione: ${this.formatFileSize(file.size)}</p>
+                <div class="loading-spinner">⏳ Analisi in corso...</div>
+            </div>
+        `;
+
+        try {
+            // Read file based on type
+            const fileData = await this.readFileContent(file);
+            
+            // Classify document with AI
+            await this.classifyDocument(file, fileData);
+            
+        } catch (error) {
+            console.error('Error uploading document:', error);
+            statusDiv.innerHTML = `
+                <div class="error-message">
+                    ❌ Errore durante il caricamento: ${error.message}
+                </div>
+            `;
+        }
+    }
+
+    async readFileContent(file) {
+        const extension = file.name.split('.').pop().toLowerCase();
+        
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                try {
+                    let parsedData = null;
+                    
+                    if (extension === 'csv') {
+                        // Parse CSV using PapaParse
+                        parsedData = Papa.parse(e.target.result, {
+                            header: true,
+                            skipEmptyLines: true,
+                            dynamicTyping: true
+                        });
+                        resolve({ type: 'csv', data: parsedData.data, raw: e.target.result });
+                        
+                    } else if (extension === 'xlsx' || extension === 'xls') {
+                        // Parse Excel using XLSX
+                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        resolve({ type: 'excel', data: jsonData, raw: e.target.result, workbook });
+                        
+                    } else if (extension === 'json') {
+                        // Parse JSON
+                        parsedData = JSON.parse(e.target.result);
+                        resolve({ type: 'json', data: parsedData, raw: e.target.result });
+                        
+                    } else if (extension === 'txt') {
+                        // Plain text
+                        resolve({ type: 'text', data: e.target.result, raw: e.target.result });
+                        
+                    } else if (extension === 'pdf') {
+                        // For PDF, we'll just store the raw data and let AI handle it
+                        resolve({ type: 'pdf', data: null, raw: e.target.result });
+                    } else {
+                        reject(new Error('Formato file non supportato'));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            reader.onerror = () => reject(new Error('Errore nella lettura del file'));
+            
+            if (extension === 'xlsx' || extension === 'xls') {
+                reader.readAsBinaryString(file);
+            } else {
+                reader.readAsText(file);
+            }
+        });
+    }
+
+    async classifyDocument(file, fileData) {
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        if (!apiKey) {
+            // Show classification without AI
+            this.showManualClassification(file, fileData);
+            return;
+        }
+
+        const statusDiv = document.getElementById('document-upload-status');
+        statusDiv.innerHTML = `
+            <div class="upload-progress">
+                <p>🤖 Analisi documento con IA...</p>
+                <div class="loading-spinner">⏳ Classificazione in corso...</div>
+            </div>
+        `;
+
+        try {
+            // Prepare data preview for AI
+            let dataPreview = '';
+            if (fileData.type === 'csv' || fileData.type === 'excel') {
+                const preview = fileData.data.slice(0, 5);
+                dataPreview = JSON.stringify(preview, null, 2);
+            } else if (fileData.type === 'text' || fileData.type === 'json') {
+                dataPreview = fileData.raw.substring(0, 1000);
+            } else if (fileData.type === 'pdf') {
+                dataPreview = 'Documento PDF (contenuto non analizzabile in questa versione)';
+            }
+
+            const prompt = `Analizza questo documento e classifica il tipo di contenuto.
+
+Nome file: ${file.name}
+Tipo: ${fileData.type}
+
+Anteprima dati:
+${dataPreview}
+
+Identifica se il documento contiene:
+1. ANAGRAFICA_STUDENTI - Lista di studenti con dati anagrafici (nome, cognome, data nascita, classe, email, ecc.)
+2. MATERIALI_DIDATTICI - Materiali didattici, programmi, contenuti delle lezioni
+3. ATTIVITA - Attività didattiche, compiti, progetti, esercitazioni
+4. VALUTAZIONI - Griglie di valutazione, criteri, voti
+5. ALTRO - Altro tipo di documento
+
+Rispondi SOLO in formato JSON con questa struttura:
+{
+  "tipo": "ANAGRAFICA_STUDENTI|MATERIALI_DIDATTICI|ATTIVITA|VALUTAZIONI|ALTRO",
+  "confidenza": 0.0-1.0,
+  "descrizione": "breve descrizione del contenuto",
+  "suggerimenti": "suggerimenti per l'importazione"
+}`;
+
+            const response = await this.callOpenRouterAPI(prompt, apiKey);
+            
+            // Parse AI response
+            let classification;
+            try {
+                // Try to extract JSON from response
+                const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    classification = JSON.parse(jsonMatch[0]);
+                } else {
+                    throw new Error('Risposta non in formato JSON');
+                }
+            } catch (e) {
+                console.error('Error parsing AI classification:', e);
+                classification = {
+                    tipo: 'ALTRO',
+                    confidenza: 0.5,
+                    descrizione: response.content,
+                    suggerimenti: 'Classificazione manuale consigliata'
+                };
+            }
+
+            this.documentClassification = classification;
+            this.currentImportData = { file, fileData };
+            
+            this.showClassificationResult(file, classification, fileData);
+            
+        } catch (error) {
+            console.error('Error classifying document:', error);
+            statusDiv.innerHTML = `
+                <div class="warning-message">
+                    ⚠️ Impossibile classificare automaticamente il documento.
+                    <button class="btn btn-secondary" onclick="app.showManualClassification()">Classifica Manualmente</button>
+                </div>
+            `;
+        }
+    }
+
+    showClassificationResult(file, classification, fileData) {
+        const statusDiv = document.getElementById('document-upload-status');
+        const classificationDiv = document.getElementById('document-classification');
+        const resultDiv = document.getElementById('classification-result');
+        const actionsDiv = document.getElementById('classification-actions');
+        
+        statusDiv.style.display = 'none';
+        classificationDiv.style.display = 'block';
+
+        const typeIcons = {
+            'ANAGRAFICA_STUDENTI': '👥',
+            'MATERIALI_DIDATTICI': '📚',
+            'ATTIVITA': '📋',
+            'VALUTAZIONI': '✅',
+            'ALTRO': '📄'
+        };
+
+        const typeLabels = {
+            'ANAGRAFICA_STUDENTI': 'Anagrafica Studenti',
+            'MATERIALI_DIDATTICI': 'Materiali Didattici',
+            'ATTIVITA': 'Attività Didattiche',
+            'VALUTAZIONI': 'Valutazioni',
+            'ALTRO': 'Altro'
+        };
+
+        const confidencePercent = Math.round(classification.confidenza * 100);
+        
+        resultDiv.innerHTML = `
+            <div class="classification-card">
+                <div class="classification-header">
+                    <span class="classification-icon">${typeIcons[classification.tipo] || '📄'}</span>
+                    <h4>${typeLabels[classification.tipo] || classification.tipo}</h4>
+                </div>
+                <div class="classification-details">
+                    <p><strong>Confidenza:</strong> ${confidencePercent}%</p>
+                    <p><strong>Descrizione:</strong> ${classification.descrizione}</p>
+                    ${classification.suggerimenti ? `<p><strong>Suggerimenti:</strong> ${classification.suggerimenti}</p>` : ''}
+                </div>
+            </div>
+        `;
+
+        // Show appropriate actions based on classification
+        if (classification.tipo === 'ANAGRAFICA_STUDENTI') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-primary" onclick="app.processStudentsImport()">
+                    ✅ Importa Studenti
+                </button>
+                <button class="btn btn-secondary" onclick="app.showManualClassification()">
+                    🔄 Riclassifica
+                </button>
+            `;
+        } else if (classification.tipo === 'MATERIALI_DIDATTICI') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-primary" onclick="app.processMaterialsImport()">
+                    ✅ Importa Materiali
+                </button>
+                <button class="btn btn-secondary" onclick="app.showManualClassification()">
+                    🔄 Riclassifica
+                </button>
+            `;
+        } else if (classification.tipo === 'ATTIVITA') {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-primary" onclick="app.processActivitiesImport()">
+                    ✅ Importa Attività
+                </button>
+                <button class="btn btn-secondary" onclick="app.showManualClassification()">
+                    🔄 Riclassifica
+                </button>
+            `;
+        } else {
+            actionsDiv.innerHTML = `
+                <button class="btn btn-secondary" onclick="app.showManualClassification()">
+                    📋 Classifica Manualmente
+                </button>
+            `;
+        }
+    }
+
+    showManualClassification(file, fileData) {
+        const classificationDiv = document.getElementById('document-classification');
+        const resultDiv = document.getElementById('classification-result');
+        const actionsDiv = document.getElementById('classification-actions');
+        
+        classificationDiv.style.display = 'block';
+        
+        resultDiv.innerHTML = `
+            <div class="manual-classification">
+                <h4>Seleziona il tipo di documento:</h4>
+                <select id="manual-classification-type" class="form-control">
+                    <option value="">-- Seleziona tipo --</option>
+                    <option value="ANAGRAFICA_STUDENTI">👥 Anagrafica Studenti</option>
+                    <option value="MATERIALI_DIDATTICI">📚 Materiali Didattici</option>
+                    <option value="ATTIVITA">📋 Attività Didattiche</option>
+                    <option value="VALUTAZIONI">✅ Valutazioni</option>
+                    <option value="ALTRO">📄 Altro</option>
+                </select>
+            </div>
+        `;
+        
+        actionsDiv.innerHTML = `
+            <button class="btn btn-primary" onclick="app.processManualClassification()">
+                ✅ Procedi con Importazione
+            </button>
+            <button class="btn btn-secondary" onclick="app.cancelImport()">
+                ❌ Annulla
+            </button>
+        `;
+    }
+
+    processManualClassification() {
+        const typeSelect = document.getElementById('manual-classification-type');
+        const selectedType = typeSelect.value;
+        
+        if (!selectedType) {
+            alert('Seleziona un tipo di documento');
+            return;
+        }
+
+        this.documentClassification = {
+            tipo: selectedType,
+            confidenza: 1.0,
+            descrizione: 'Classificazione manuale',
+            suggerimenti: ''
+        };
+
+        // Process based on type
+        if (selectedType === 'ANAGRAFICA_STUDENTI') {
+            this.processStudentsImport();
+        } else if (selectedType === 'MATERIALI_DIDATTICI') {
+            this.processMaterialsImport();
+        } else if (selectedType === 'ATTIVITA') {
+            this.processActivitiesImport();
+        } else {
+            alert('Tipo di documento non ancora supportato per l\'importazione automatica');
+        }
+    }
+
+    async processStudentsImport() {
+        if (!this.currentImportData) {
+            alert('Nessun dato da importare');
+            return;
+        }
+
+        const { fileData } = this.currentImportData;
+        const previewDiv = document.getElementById('document-preview');
+        const previewContent = document.getElementById('preview-content');
+        
+        // Hide classification, show preview
+        document.getElementById('document-classification').style.display = 'none';
+        previewDiv.style.display = 'block';
+
+        // Extract student data
+        let studentsData = [];
+        
+        if (fileData.type === 'csv' || fileData.type === 'excel') {
+            studentsData = this.extractStudentsFromTabularData(fileData.data);
+        } else if (fileData.type === 'json') {
+            studentsData = this.extractStudentsFromJSON(fileData.data);
+        }
+
+        // Store for confirmation
+        this.currentImportData.studentsData = studentsData;
+
+        // Show preview
+        if (studentsData.length === 0) {
+            previewContent.innerHTML = `
+                <div class="warning-message">
+                    ⚠️ Nessun dato studente trovato nel file.
+                    Verifica che il file contenga colonne come: nome, cognome, email, classe, data_nascita, ecc.
+                </div>
+            `;
+        } else {
+            previewContent.innerHTML = `
+                <p><strong>Trovati ${studentsData.length} studenti da importare</strong></p>
+                <div class="preview-table-container">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Classe</th>
+                                <th>Data Nascita</th>
+                                <th>Onomastico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentsData.map(s => `
+                                <tr>
+                                    <td>${s.name || 'N/D'}</td>
+                                    <td>${s.email || 'N/D'}</td>
+                                    <td>${s.class || 'N/D'}</td>
+                                    <td>${s.birthdate || 'N/D'}</td>
+                                    <td>${s.nameday || 'N/D'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+    }
+
+    extractStudentsFromTabularData(data) {
+        // Map common column names to our fields
+        const fieldMappings = {
+            nome: 'name',
+            name: 'name',
+            cognome: 'lastName',
+            lastname: 'lastName',
+            email: 'email',
+            'e-mail': 'email',
+            classe: 'class',
+            class: 'class',
+            data_nascita: 'birthdate',
+            data_di_nascita: 'birthdate',
+            birthdate: 'birthdate',
+            nascita: 'birthdate',
+            onomastico: 'nameday',
+            santo: 'nameday',
+            nameday: 'nameday',
+            note: 'notes',
+            notes: 'notes'
+        };
+
+        return data.map(row => {
+            const student = {
+                name: '',
+                email: '',
+                class: '',
+                birthdate: null,
+                nameday: null,
+                notes: null
+            };
+
+            // Map row fields to student object
+            Object.keys(row).forEach(key => {
+                const normalizedKey = key.toLowerCase().trim();
+                const mappedField = fieldMappings[normalizedKey];
+                
+                if (mappedField) {
+                    student[mappedField] = row[key];
+                }
+            });
+
+            // Combine name and lastName if separate
+            if (student.lastName) {
+                student.name = `${student.name || ''} ${student.lastName}`.trim();
+                delete student.lastName;
+            }
+
+            // Only include if we have at least a name
+            return student.name ? student : null;
+        }).filter(s => s !== null);
+    }
+
+    extractStudentsFromJSON(data) {
+        // If data is an array, process it
+        if (Array.isArray(data)) {
+            return this.extractStudentsFromTabularData(data);
+        }
+        
+        // If data has a students property, use it
+        if (data.students && Array.isArray(data.students)) {
+            return this.extractStudentsFromTabularData(data.students);
+        }
+
+        return [];
+    }
+
+    confirmImport() {
+        if (!this.currentImportData || !this.currentImportData.studentsData) {
+            alert('Nessun dato da importare');
+            return;
+        }
+
+        const studentsData = this.currentImportData.studentsData;
+        let importedCount = 0;
+        let duplicatesCount = 0;
+
+        studentsData.forEach(studentData => {
+            // Check for duplicates
+            const existing = this.students.find(s => 
+                s.name.toLowerCase() === studentData.name.toLowerCase() &&
+                s.email === studentData.email
+            );
+
+            if (existing) {
+                // Update existing student with new data (merge)
+                if (studentData.birthdate && !existing.birthdate) existing.birthdate = studentData.birthdate;
+                if (studentData.nameday && !existing.nameday) existing.nameday = studentData.nameday;
+                if (studentData.class && !existing.class) existing.class = studentData.class;
+                if (studentData.notes) {
+                    existing.notes = existing.notes ? 
+                        `${existing.notes}\n${studentData.notes}` : 
+                        studentData.notes;
+                }
+                duplicatesCount++;
+            } else {
+                // Add new student
+                const student = {
+                    id: Date.now() + importedCount,
+                    name: studentData.name,
+                    email: studentData.email || '',
+                    class: studentData.class || '',
+                    birthdate: studentData.birthdate || null,
+                    nameday: studentData.nameday || null,
+                    notes: studentData.notes || null,
+                    createdAt: new Date().toISOString()
+                };
+                this.students.push(student);
+                importedCount++;
+            }
+        });
+
+        // Save and refresh
+        this.saveData();
+        this.renderStudents();
+        this.updateClassSelectors();
+
+        // Record imported document
+        this.recordImportedDocument({
+            fileName: this.currentImportData.file.name,
+            fileType: this.currentImportData.fileData.type,
+            classificationType: this.documentClassification.tipo,
+            importedCount,
+            duplicatesCount,
+            timestamp: new Date().toISOString()
+        });
+
+        // Create notification
+        this.createNotification({
+            title: '✅ Importazione Completata',
+            message: `Importati ${importedCount} nuovi studenti. ${duplicatesCount} duplicati aggiornati.`,
+            type: 'system',
+            notificationId: `import-${Date.now()}`
+        });
+
+        // Show success and reset
+        alert(`✅ Importazione completata!\n\nNuovi studenti: ${importedCount}\nDuplicati aggiornati: ${duplicatesCount}`);
+        
+        this.cancelImport();
+        this.switchTab('students');
+    }
+
+    processMaterialsImport() {
+        alert('Importazione materiali didattici sarà disponibile in una prossima versione');
+        // TODO: Implement materials import
+    }
+
+    processActivitiesImport() {
+        alert('Importazione attività sarà disponibile in una prossima versione');
+        // TODO: Implement activities import
+    }
+
+    cancelImport() {
+        // Reset state
+        this.currentImportData = null;
+        this.documentClassification = null;
+        
+        // Hide all sections
+        document.getElementById('document-upload-status').style.display = 'none';
+        document.getElementById('document-classification').style.display = 'none';
+        document.getElementById('document-preview').style.display = 'none';
+        
+        // Reset file input
+        const fileInput = document.getElementById('document-file-input');
+        if (fileInput) fileInput.value = '';
+    }
+
+    refineWithAI() {
+        alert('Funzionalità di affinamento con IA in fase di sviluppo');
+        // TODO: Implement AI refinement for import data
+    }
+
+    recordImportedDocument(documentInfo) {
+        this.importedDocuments.push(documentInfo);
+        localStorage.setItem('imported-documents', JSON.stringify(this.importedDocuments));
+        this.renderImportedDocuments();
+    }
+
+    renderImportedDocuments() {
+        const listDiv = document.getElementById('imported-documents-list');
+        
+        if (this.importedDocuments.length === 0) {
+            listDiv.innerHTML = '<p class="empty-state">Nessun documento importato</p>';
+            return;
+        }
+
+        listDiv.innerHTML = this.importedDocuments.map((doc, index) => `
+            <div class="imported-doc-item">
+                <div class="doc-info">
+                    <h4>📄 ${doc.fileName}</h4>
+                    <p><strong>Tipo:</strong> ${doc.classificationType}</p>
+                    <p><strong>Importati:</strong> ${doc.importedCount} elementi</p>
+                    <p><strong>Data:</strong> ${new Date(doc.timestamp).toLocaleString('it-IT')}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ========================================
+    // AUDIO RECORDING MODULE METHODS
+    // ========================================
+
+    async startAudioRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.recordingChunks = [];
+            
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.recordingChunks.push(event.data);
+                }
+            };
+            
+            this.mediaRecorder.onstop = () => {
+                this.saveRecording();
+            };
+            
+            this.mediaRecorder.start();
+            this.recordingStartTime = Date.now();
+            
+            // Update UI
+            document.getElementById('start-recording-btn').style.display = 'none';
+            document.getElementById('stop-recording-btn').style.display = 'inline-block';
+            document.getElementById('recording-timer').style.display = 'inline-block';
+            
+            // Start timer
+            this.recordingTimer = setInterval(() => {
+                const elapsed = Date.now() - this.recordingStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('timer-display').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+            
+            document.getElementById('recording-status').innerHTML = 
+                '<p class="success-message">🎙️ Registrazione in corso...</p>';
+            
+        } catch (error) {
+            console.error('Error starting recording:', error);
+            alert('Impossibile avviare la registrazione. Verifica i permessi del microfono.');
+        }
+    }
+
+    stopAudioRecording() {
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+            
+            // Stop all tracks
+            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            // Clear timer
+            if (this.recordingTimer) {
+                clearInterval(this.recordingTimer);
+                this.recordingTimer = null;
+            }
+            
+            // Update UI
+            document.getElementById('start-recording-btn').style.display = 'inline-block';
+            document.getElementById('stop-recording-btn').style.display = 'none';
+            document.getElementById('recording-timer').style.display = 'none';
+            
+            document.getElementById('recording-status').innerHTML = 
+                '<p class="success-message">✅ Registrazione salvata</p>';
+        }
+    }
+
+    saveRecording() {
+        const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+        const duration = Date.now() - this.recordingStartTime;
+        
+        // Create recording object
+        const recording = {
+            id: Date.now(),
+            blob: blob,
+            duration: duration,
+            timestamp: new Date().toISOString(),
+            activeClass: this.activeClass || 'N/D',
+            context: this.generateRecordingContext()
+        };
+        
+        // Store in memory (not in localStorage due to size limits)
+        this.audioRecordings.push(recording);
+        
+        // Render recordings list
+        this.renderRecordings();
+        
+        // Create notification
+        this.createNotification({
+            title: '🎙️ Registrazione Salvata',
+            message: `Registrazione di ${Math.floor(duration / 1000)} secondi salvata con successo`,
+            type: 'system',
+            notificationId: `recording-${recording.id}`
+        });
+    }
+
+    generateRecordingContext() {
+        // Generate context information for the recording
+        const context = {
+            class: this.activeClass || null,
+            date: new Date().toLocaleDateString('it-IT'),
+            time: new Date().toLocaleTimeString('it-IT')
+        };
+        
+        // Add current lesson if available
+        const today = new Date().toISOString().split('T')[0];
+        const todayLessons = this.lessons.filter(l => l.date === today);
+        if (todayLessons.length > 0) {
+            context.lesson = todayLessons[0].topic || todayLessons[0].subject;
+        }
+        
+        return context;
+    }
+
+    renderRecordings() {
+        const listDiv = document.getElementById('recordings-list');
+        
+        if (this.audioRecordings.length === 0) {
+            listDiv.innerHTML = '<p class="empty-state">Nessuna registrazione disponibile</p>';
+            return;
+        }
+
+        listDiv.innerHTML = `
+            <h4>Registrazioni (${this.audioRecordings.length})</h4>
+            ${this.audioRecordings.map(rec => {
+                const durationMin = Math.floor(rec.duration / 60000);
+                const durationSec = Math.floor((rec.duration % 60000) / 1000);
+                const url = URL.createObjectURL(rec.blob);
+                
+                return `
+                    <div class="recording-item">
+                        <div class="recording-info">
+                            <p><strong>📅 ${new Date(rec.timestamp).toLocaleString('it-IT')}</strong></p>
+                            <p>Classe: ${rec.context.class || 'N/D'}</p>
+                            ${rec.context.lesson ? `<p>Lezione: ${rec.context.lesson}</p>` : ''}
+                            <p>Durata: ${durationMin}:${String(durationSec).padStart(2, '0')}</p>
+                        </div>
+                        <audio controls src="${url}"></audio>
+                        <div class="recording-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="app.downloadRecording(${rec.id})">
+                                💾 Download
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="app.deleteRecording(${rec.id})">
+                                🗑️ Elimina
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        `;
+    }
+
+    downloadRecording(id) {
+        const recording = this.audioRecordings.find(r => r.id === id);
+        if (!recording) return;
+        
+        const url = URL.createObjectURL(recording.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `registrazione-${new Date(recording.timestamp).toISOString()}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    deleteRecording(id) {
+        if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
+            this.audioRecordings = this.audioRecordings.filter(r => r.id !== id);
+            this.renderRecordings();
         }
     }
 }
