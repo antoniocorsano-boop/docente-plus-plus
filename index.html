@@ -379,6 +379,12 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label for="evaluation-subject">Disciplina:</label>
+                            <select id="evaluation-subject">
+                                <option value="">Seleziona disciplina</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="evaluation-score">Voto (opzionale):</label>
                             <input type="number" id="evaluation-score" min="0" max="10" step="0.5" placeholder="es. 8">
                         </div>
@@ -398,6 +404,37 @@
                 </div>
 
                 <div id="evaluations-list" class="evaluations-list"></div>
+            </div>
+
+            <!-- Assessment Results and Analytics Section -->
+            <div class="evaluation-section">
+                <h3>📈 Risultati e Statistiche</h3>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="app.toggleResultsView()">🔄 Cambia Visualizzazione</button>
+                </div>
+
+                <div id="results-filters" class="filters-container">
+                    <div class="filter-group">
+                        <label for="filter-class">Filtra per Classe:</label>
+                        <select id="filter-class" onchange="app.filterResults()">
+                            <option value="">Tutte le classi</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-subject">Filtra per Disciplina:</label>
+                        <select id="filter-subject" onchange="app.filterResults()">
+                            <option value="">Tutte le discipline</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-student">Filtra per Studente:</label>
+                        <select id="filter-student" onchange="app.filterResults()">
+                            <option value="">Tutti gli studenti</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="results-display" class="results-display"></div>
             </div>
         </div>
 

@@ -892,6 +892,18 @@ ${lessonData.evaluation || 'N/D'}
                 gridSelect.appendChild(option);
             });
         }
+
+        // Update subject selector
+        const subjectSelect = document.getElementById('evaluation-subject');
+        if (subjectSelect) {
+            subjectSelect.innerHTML = '<option value="">Seleziona disciplina</option>';
+            this.subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+        }
     }
 
     addEvaluation() {
@@ -899,6 +911,7 @@ ${lessonData.evaluation || 'N/D'}
         const classId = document.getElementById('evaluation-class').value;
         const criterionId = document.getElementById('evaluation-criterion').value;
         const gridId = document.getElementById('evaluation-grid').value;
+        const subjectId = document.getElementById('evaluation-subject').value;
         const score = document.getElementById('evaluation-score').value;
         const notes = document.getElementById('evaluation-notes').value;
         const date = document.getElementById('evaluation-date').value;
@@ -919,6 +932,7 @@ ${lessonData.evaluation || 'N/D'}
             classId: classId || null,
             criterionId: criterionId || null,
             gridId: gridId || null,
+            subjectId: subjectId || null,
             score: score || null,
             notes,
             date: date || new Date().toISOString().split('T')[0],
@@ -1009,6 +1023,7 @@ ${lessonData.evaluation || 'N/D'}
                                 <span class="evaluation-date">${evaluation.date}</span>
                             </div>
                             <p><strong>Criterio/Griglia:</strong> ${criterion ? criterion.name : (grid ? grid.name : 'N/D')}</p>
+                            ${evaluation.subjectId ? `<p><strong>Disciplina:</strong> ${evaluation.subjectId}</p>` : ''}
                             ${evaluation.score ? `<p><strong>Voto:</strong> ${evaluation.score}/10</p>` : ''}
                             ${evaluation.notes ? `<p><strong>Note:</strong> ${evaluation.notes}</p>` : ''}
                             <div class="evaluation-actions">
@@ -1019,9 +1034,46 @@ ${lessonData.evaluation || 'N/D'}
                 }).join('');
             }
         }
+
+        // Initialize results filters
+        this.initializeResultsFilters();
+        // Render results view
+        this.renderResults();
     }
 
     exportEvaluations() {
+        // Calculate statistics for export
+        const stats = {
+            totalEvaluations: this.evaluations.length,
+            totalStudents: new Set(this.evaluations.map(e => e.studentId).filter(id => id)).size,
+            totalClasses: new Set(this.evaluations.map(e => e.classId).filter(id => id)).size,
+            averageScore: this.calculateAverageScore(this.evaluations),
+            evaluationsBySubject: {},
+            evaluationsByClass: {}
+        };
+
+        // Calculate by subject
+        this.subjects.forEach(subject => {
+            const subjectEvals = this.evaluations.filter(e => e.subjectId === subject);
+            if (subjectEvals.length > 0) {
+                stats.evaluationsBySubject[subject] = {
+                    count: subjectEvals.length,
+                    averageScore: this.calculateAverageScore(subjectEvals)
+                };
+            }
+        });
+
+        // Calculate by class
+        this.classes.forEach(cls => {
+            const classEvals = this.evaluations.filter(e => e.classId == cls.id);
+            if (classEvals.length > 0) {
+                stats.evaluationsByClass[cls.name] = {
+                    count: classEvals.length,
+                    averageScore: this.calculateAverageScore(classEvals)
+                };
+            }
+        });
+
         const data = {
             evaluationCriteria: this.evaluationCriteria,
             evaluationGrids: this.evaluationGrids,
@@ -1036,9 +1088,11 @@ ${lessonData.evaluation || 'N/D'}
                     studentName: student ? student.name : null,
                     className: cls ? cls.name : null,
                     criterionName: criterion ? criterion.name : null,
-                    gridName: grid ? grid.name : null
+                    gridName: grid ? grid.name : null,
+                    subjectName: evaluation.subjectId || null
                 };
             }),
+            statistics: stats,
             exportDate: new Date().toISOString()
         };
 
@@ -1052,7 +1106,239 @@ ${lessonData.evaluation || 'N/D'}
         link.click();
         
         URL.revokeObjectURL(url);
-        alert('Valutazioni esportate con successo!');
+        alert('Valutazioni esportate con successo con statistiche!');
+    }
+
+    initializeResultsFilters() {
+        // Populate filter selectors
+        const filterClass = document.getElementById('filter-class');
+        if (filterClass) {
+            filterClass.innerHTML = '<option value="">Tutte le classi</option>';
+            this.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                filterClass.appendChild(option);
+            });
+        }
+
+        const filterSubject = document.getElementById('filter-subject');
+        if (filterSubject) {
+            filterSubject.innerHTML = '<option value="">Tutte le discipline</option>';
+            
+            // Get unique subjects from evaluations and this.subjects
+            const allSubjects = new Set();
+            this.subjects.forEach(s => allSubjects.add(s));
+            this.evaluations.forEach(e => {
+                if (e.subjectId) allSubjects.add(e.subjectId);
+            });
+            
+            Array.from(allSubjects).sort().forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                filterSubject.appendChild(option);
+            });
+        }
+
+        const filterStudent = document.getElementById('filter-student');
+        if (filterStudent) {
+            filterStudent.innerHTML = '<option value="">Tutti gli studenti</option>';
+            this.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                filterStudent.appendChild(option);
+            });
+        }
+    }
+
+    filterResults() {
+        this.renderResults();
+    }
+
+    toggleResultsView() {
+        const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
+        const newMode = viewMode === 'by-student' ? 'by-class' : 'by-student';
+        localStorage.setItem('results-view-mode', newMode);
+        this.renderResults();
+    }
+
+    renderResults() {
+        const resultsDisplay = document.getElementById('results-display');
+        if (!resultsDisplay) return;
+
+        const filterClassId = document.getElementById('filter-class')?.value || '';
+        const filterSubject = document.getElementById('filter-subject')?.value || '';
+        const filterStudentId = document.getElementById('filter-student')?.value || '';
+
+        // Filter evaluations
+        let filteredEvaluations = this.evaluations.filter(evaluation => {
+            if (filterClassId) {
+                let matchesClass = false;
+                
+                // Check if evaluation is for the class directly
+                if (evaluation.classId == filterClassId) {
+                    matchesClass = true;
+                }
+                // Or if evaluation is for a student in the class
+                else if (evaluation.studentId) {
+                    const student = this.students.find(s => s.id == evaluation.studentId);
+                    const cls = this.classes.find(c => c.id == filterClassId);
+                    if (student && cls && student.class === cls.name) {
+                        matchesClass = true;
+                    }
+                }
+                
+                if (!matchesClass) return false;
+            }
+            if (filterSubject && evaluation.subjectId != filterSubject) return false;
+            if (filterStudentId && evaluation.studentId != filterStudentId) return false;
+            return true;
+        });
+
+        const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
+
+        if (filteredEvaluations.length === 0) {
+            resultsDisplay.innerHTML = '<p class="empty-state">Nessuna valutazione corrisponde ai filtri selezionati.</p>';
+            return;
+        }
+
+        if (viewMode === 'by-student') {
+            this.renderResultsByStudent(resultsDisplay, filteredEvaluations);
+        } else {
+            this.renderResultsByClass(resultsDisplay, filteredEvaluations);
+        }
+    }
+
+    renderResultsByStudent(container, evaluations) {
+        const studentGroups = {};
+        
+        evaluations.forEach(evaluation => {
+            if (evaluation.studentId) {
+                if (!studentGroups[evaluation.studentId]) {
+                    studentGroups[evaluation.studentId] = [];
+                }
+                studentGroups[evaluation.studentId].push(evaluation);
+            }
+        });
+
+        let html = '<h4>📊 Risultati per Studente</h4>';
+        
+        Object.keys(studentGroups).forEach(studentId => {
+            const student = this.students.find(s => s.id == studentId);
+            const studentEvaluations = studentGroups[studentId];
+            const avgScore = this.calculateAverageScore(studentEvaluations);
+            
+            html += `
+                <div class="card student-results">
+                    <div class="student-results-header">
+                        <h5>${student ? student.name : 'Studente sconosciuto'}</h5>
+                        ${avgScore !== null ? `<span class="avg-score">Media: ${avgScore.toFixed(2)}/10</span>` : ''}
+                    </div>
+                    <div class="student-evaluations">
+                        ${studentEvaluations.map(evaluation => {
+                            const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                            const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+                            return `
+                                <div class="evaluation-row">
+                                    <span class="eval-date">${evaluation.date}</span>
+                                    <span class="eval-criterion">${criterion ? criterion.name : (grid ? grid.name : 'N/D')}</span>
+                                    ${evaluation.subjectId ? `<span class="eval-subject">${evaluation.subjectId}</span>` : ''}
+                                    ${evaluation.score ? `<span class="eval-score">${evaluation.score}/10</span>` : '<span class="eval-score">-</span>'}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    renderResultsByClass(container, evaluations) {
+        const classGroups = {};
+        
+        evaluations.forEach(evaluation => {
+            let className = null;
+            
+            // Get class from evaluation or from student
+            if (evaluation.classId) {
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                className = cls ? cls.name : null;
+            } else if (evaluation.studentId) {
+                const student = this.students.find(s => s.id == evaluation.studentId);
+                className = student ? student.class : null;
+            }
+            
+            if (className) {
+                if (!classGroups[className]) {
+                    classGroups[className] = [];
+                }
+                classGroups[className].push(evaluation);
+            }
+        });
+
+        let html = '<h4>📊 Risultati Aggregati per Classe</h4>';
+        
+        Object.keys(classGroups).forEach(className => {
+            const classEvaluations = classGroups[className];
+            const avgScore = this.calculateAverageScore(classEvaluations);
+            const subjectStats = this.calculateSubjectStats(classEvaluations);
+            
+            html += `
+                <div class="card class-results">
+                    <div class="class-results-header">
+                        <h5>${className}</h5>
+                        ${avgScore !== null ? `<span class="avg-score">Media Generale: ${avgScore.toFixed(2)}/10</span>` : ''}
+                    </div>
+                    <div class="class-stats">
+                        <p><strong>Totale Valutazioni:</strong> ${classEvaluations.length}</p>
+                        ${subjectStats ? `
+                            <div class="subject-stats">
+                                <strong>Medie per Disciplina:</strong>
+                                ${Object.keys(subjectStats).map(subject => `
+                                    <div class="subject-stat-row">
+                                        <span>${subject}</span>
+                                        <span>${subjectStats[subject].avg.toFixed(2)}/10 (${subjectStats[subject].count} valutazioni)</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    calculateAverageScore(evaluations) {
+        const scored = evaluations.filter(e => e.score !== null && e.score !== '');
+        if (scored.length === 0) return null;
+        const sum = scored.reduce((acc, e) => acc + parseFloat(e.score), 0);
+        return sum / scored.length;
+    }
+
+    calculateSubjectStats(evaluations) {
+        const stats = {};
+        
+        evaluations.forEach(evaluation => {
+            if (evaluation.subjectId && evaluation.score) {
+                if (!stats[evaluation.subjectId]) {
+                    stats[evaluation.subjectId] = { sum: 0, count: 0 };
+                }
+                stats[evaluation.subjectId].sum += parseFloat(evaluation.score);
+                stats[evaluation.subjectId].count++;
+            }
+        });
+
+        Object.keys(stats).forEach(subject => {
+            stats[subject].avg = stats[subject].sum / stats[subject].count;
+        });
+
+        return Object.keys(stats).length > 0 ? stats : null;
     }
 
     async generateCriteriaWithAI() {
