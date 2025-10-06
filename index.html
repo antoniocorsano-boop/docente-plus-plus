@@ -134,6 +134,7 @@
         <nav class="tabs">
             <button class="tab-button active" data-tab="dashboard">Dashboard</button>
             <button class="tab-button" data-tab="lessons">Lezioni</button>
+            <button class="tab-button" data-tab="activities">Attività</button>
             <button class="tab-button" data-tab="students">Studenti</button>
             <button class="tab-button" data-tab="classes">Classi</button>
             <button class="tab-button" data-tab="evaluations">Valutazioni</button>
@@ -162,6 +163,11 @@
                     <h3>👥 Studenti</h3>
                     <p class="stat-number" id="student-count">0</p>
                     <p class="stat-label">Studenti totali</p>
+                </div>
+                <div class="card">
+                    <h3>📋 Attività</h3>
+                    <p class="stat-number" id="activity-count">0</p>
+                    <p class="stat-label">Attività in corso</p>
                 </div>
                 <div class="card">
                     <h3>✅ Valutazioni</h3>
@@ -217,6 +223,73 @@
             </div>
 
             <div id="lessons-list" class="lessons-list"></div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <h2>Gestione Attività Didattiche</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="app.showAddActivityForm()">➕ Nuova Attività</button>
+                <select id="activity-filter" class="filter-select" onchange="app.renderActivities()">
+                    <option value="all">Tutte le attività</option>
+                    <option value="planned">Pianificate</option>
+                    <option value="in-progress">In corso</option>
+                    <option value="completed">Completate</option>
+                    <option value="lesson">Lezioni</option>
+                    <option value="exercise">Esercitazioni</option>
+                    <option value="lab">Laboratori</option>
+                    <option value="project">Progetti</option>
+                    <option value="homework">Compiti</option>
+                    <option value="exam">Verifiche</option>
+                </select>
+            </div>
+            
+            <div id="add-activity-form" class="form-container" style="display: none;">
+                <h3>Nuova Attività</h3>
+                <form id="activity-form">
+                    <div class="form-group">
+                        <label for="activity-title">Titolo: *</label>
+                        <input type="text" id="activity-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-type">Tipo di Attività: *</label>
+                        <select id="activity-type" required>
+                            <option value="lesson">Lezione</option>
+                            <option value="exercise">Esercitazione</option>
+                            <option value="lab">Laboratorio</option>
+                            <option value="project">Progetto</option>
+                            <option value="homework">Compiti</option>
+                            <option value="exam">Verifica</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-description">Descrizione:</label>
+                        <textarea id="activity-description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-deadline">Scadenza:</label>
+                        <input type="date" id="activity-deadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-class">Assegna a Classe:</label>
+                        <select id="activity-class">
+                            <option value="">Nessuna (generale)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-student">Assegna a Studente:</label>
+                        <select id="activity-student">
+                            <option value="">Nessuno (tutta la classe)</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva</button>
+                        <button type="button" class="btn btn-secondary" onclick="app.hideAddActivityForm()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="activities-list" class="activities-list"></div>
         </div>
 
         <!-- Students Tab -->

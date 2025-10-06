@@ -268,7 +268,8 @@ header h1 {
 }
 
 .lesson-item,
-.student-item {
+.student-item,
+.activity-item {
     background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
@@ -277,32 +278,67 @@ header h1 {
 }
 
 .lesson-item:hover,
-.student-item:hover {
+.student-item:hover,
+.activity-item:hover {
     box-shadow: var(--shadow-hover);
     transform: translateX(5px);
 }
 
 .lesson-item h4,
-.student-item h4 {
+.student-item h4,
+.activity-item h4 {
     color: var(--primary-color);
     margin-bottom: 10px;
 }
 
 .lesson-item p,
-.student-item p {
+.student-item p,
+.activity-item p {
     color: var(--text-secondary);
     margin: 5px 0;
 }
 
-.item-actions {
+.item-actions,
+.activity-actions {
     margin-top: 15px;
     display: flex;
     gap: 10px;
 }
 
-.item-actions button {
+.item-actions button,
+.activity-actions button {
     padding: 6px 12px;
     font-size: 0.9em;
+}
+
+/* Activity-specific styles */
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.activity-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.activities-list {
+    display: grid;
+    gap: 20px;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95em;
+    background: white;
+    cursor: pointer;
 }
 
 /* AI Assistant */

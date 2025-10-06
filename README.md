@@ -15,6 +15,7 @@ App per un insegnamento basato su IA, evoluzione del progetto docente-plus con i
 - **📅 Anno Scolastico**: Configurazione anno scolastico con date inizio/fine personalizzabili
 - **Dashboard Intuitiva**: Panoramica rapida di lezioni, studenti e attività con selezione classe attiva
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
+- **📋 Gestione Attività**: Sistema completo per pianificare e monitorare attività didattiche (esercitazioni, laboratori, progetti, compiti)
 - **Gestione Studenti**: Organizza e gestisci i tuoi studenti
 - **✅ Gestione Valutazioni**: Sistema completo per criteri, griglie e valutazioni personalizzate
 - **Assistente IA OpenRouter**: Ottieni aiuto per pianificazione didattica, creazione materiali e idee innovative
@@ -98,6 +99,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Gestione Classi**: Creazione, modifica, eliminazione classi
 - **Gestione Studenti**: Organizzazione degli studenti
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
+- **📋 Gestione Attività Didattiche**: Sistema completo per pianificare, monitorare e gestire attività (lezioni, esercitazioni, laboratori, progetti, compiti, verifiche)
 - **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
 - **🔔 Notifiche e Promemoria**: Sistema completo di notifiche automatiche e promemoria personalizzabili
 - **Gestione Materie**: Gestione discipline con autocomplete intelligente
@@ -112,7 +114,6 @@ L'assistente IA OpenRouter può aiutarti con:
 
 Le seguenti funzionalità sono pianificate per le prossime versioni:
 
-- **Gestione attività didattiche**: Modulo dedicato per esercizi, attività interattive, compiti e materiali associati alle lezioni
 - **Backup cloud opzionale**: Sincronizzazione e ripristino dati tramite provider esterni (es. Google Drive, Dropbox)
 - **Accessibilità estesa**: Miglioramento funzioni per utenti con disabilità (es. navigazione da tastiera, testo alternativo, modalità contrasto elevato)
 
