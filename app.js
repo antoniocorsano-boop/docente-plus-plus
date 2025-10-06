@@ -14,6 +14,19 @@ class DocentePlusPlus {
         this.evaluationCriteria = [];
         this.evaluationGrids = [];
         this.evaluations = [];
+        this.notifications = [];
+        this.reminders = [];
+        this.notificationSettings = {
+            browserNotifications: true,
+            emailNotifications: false,
+            lessonReminders: true,
+            remindersBefore24h: true,
+            remindersBefore1h: true,
+            quietHoursEnabled: false,
+            quietHoursStart: '22:00',
+            quietHoursEnd: '07:00'
+        };
+        this.notificationCheckInterval = null;
         this.init();
     }
 
@@ -38,6 +51,10 @@ class DocentePlusPlus {
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
+        
+        // Initialize notification system
+        this.requestNotificationPermission();
+        this.startNotificationChecks();
         
         console.log('Docente++ initialized successfully');
     }
@@ -292,6 +309,11 @@ class DocentePlusPlus {
             content.classList.remove('active');
         });
         document.getElementById(tabName).classList.add('active');
+
+        // Refresh notifications when switching to notifications tab
+        if (tabName === 'notifications') {
+            this.renderNotifications();
+        }
     }
 
     // Dashboard methods
@@ -364,6 +386,7 @@ class DocentePlusPlus {
             title: document.getElementById('lesson-title').value,
             subject: document.getElementById('lesson-subject').value,
             date: document.getElementById('lesson-date').value,
+            time: document.getElementById('lesson-time').value || '09:00',
             description: document.getElementById('lesson-description').value,
             createdAt: new Date().toISOString()
         };
@@ -403,7 +426,7 @@ class DocentePlusPlus {
                 <div class="lesson-item">
                     <h4>${lesson.title}</h4>
                     <p><strong>Materia:</strong> ${lesson.subject}</p>
-                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')}</p>
+                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')} ${lesson.time ? 'alle ' + lesson.time : ''}</p>
                     <p>${lesson.description || 'Nessuna descrizione'}</p>
                     <div class="item-actions">
                         <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
@@ -1444,6 +1467,9 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-evaluation-criteria', JSON.stringify(this.evaluationCriteria));
         localStorage.setItem('docente-plus-evaluation-grids', JSON.stringify(this.evaluationGrids));
         localStorage.setItem('docente-plus-evaluations', JSON.stringify(this.evaluations));
+        localStorage.setItem('docente-plus-notifications', JSON.stringify(this.notifications));
+        localStorage.setItem('docente-plus-reminders', JSON.stringify(this.reminders));
+        localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
     }
 
     loadData() {
@@ -1507,6 +1533,38 @@ ${lessonData.evaluation || 'N/D'}
                 this.evaluations = [];
             }
         }
+
+        // Load notifications
+        const notificationsData = localStorage.getItem('docente-plus-notifications');
+        if (notificationsData) {
+            try {
+                this.notifications = JSON.parse(notificationsData);
+            } catch (e) {
+                console.error('Error loading notifications:', e);
+                this.notifications = [];
+            }
+        }
+
+        // Load reminders
+        const remindersData = localStorage.getItem('docente-plus-reminders');
+        if (remindersData) {
+            try {
+                this.reminders = JSON.parse(remindersData);
+            } catch (e) {
+                console.error('Error loading reminders:', e);
+                this.reminders = [];
+            }
+        }
+
+        // Load notification settings
+        const notificationSettingsData = localStorage.getItem('docente-plus-notification-settings');
+        if (notificationSettingsData) {
+            try {
+                this.notificationSettings = JSON.parse(notificationSettingsData);
+            } catch (e) {
+                console.error('Error loading notification settings:', e);
+            }
+        }
     }
 
     exportData() {
@@ -1518,6 +1576,9 @@ ${lessonData.evaluation || 'N/D'}
             evaluationCriteria: this.evaluationCriteria,
             evaluationGrids: this.evaluationGrids,
             evaluations: this.evaluations,
+            notifications: this.notifications,
+            reminders: this.reminders,
+            notificationSettings: this.notificationSettings,
             teacherProfile: {
                 firstName: localStorage.getItem('teacher-first-name'),
                 lastName: localStorage.getItem('teacher-last-name'),
@@ -1579,6 +1640,15 @@ ${lessonData.evaluation || 'N/D'}
                     if (data.evaluations) {
                         this.evaluations = data.evaluations;
                     }
+                    if (data.notifications) {
+                        this.notifications = data.notifications;
+                    }
+                    if (data.reminders) {
+                        this.reminders = data.reminders;
+                    }
+                    if (data.notificationSettings) {
+                        this.notificationSettings = data.notificationSettings;
+                    }
                     if (data.teacherProfile) {
                         const profile = data.teacherProfile;
                         if (profile.firstName) localStorage.setItem('teacher-first-name', profile.firstName);
@@ -1596,6 +1666,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.renderStudents();
                     this.renderClasses();
                     this.renderEvaluations();
+                    this.renderNotifications();
                     this.updateClassSelectors();
                     this.loadSettings();
                     this.renderDashboard();
@@ -1611,6 +1682,330 @@ ${lessonData.evaluation || 'N/D'}
         };
         
         input.click();
+    }
+
+    // Notification Management Methods
+    requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted');
+                } else {
+                    console.log('Notification permission denied');
+                }
+            });
+        }
+    }
+
+    startNotificationChecks() {
+        // Check for notifications every 5 minutes
+        this.notificationCheckInterval = setInterval(() => {
+            this.checkAndSendNotifications();
+        }, 5 * 60 * 1000); // 5 minutes
+
+        // Also check immediately
+        this.checkAndSendNotifications();
+    }
+
+    checkAndSendNotifications() {
+        const now = new Date();
+
+        // Check if we're in quiet hours
+        if (this.isQuietHours(now)) {
+            return;
+        }
+
+        // Check lesson reminders
+        if (this.notificationSettings.lessonReminders) {
+            this.checkLessonReminders(now);
+        }
+
+        // Check custom reminders
+        this.checkCustomReminders(now);
+    }
+
+    isQuietHours(date) {
+        if (!this.notificationSettings.quietHoursEnabled) {
+            return false;
+        }
+
+        const currentTime = date.getHours() * 60 + date.getMinutes();
+        const [startHour, startMin] = this.notificationSettings.quietHoursStart.split(':').map(Number);
+        const [endHour, endMin] = this.notificationSettings.quietHoursEnd.split(':').map(Number);
+        const startTime = startHour * 60 + startMin;
+        const endTime = endHour * 60 + endMin;
+
+        if (startTime < endTime) {
+            return currentTime >= startTime && currentTime <= endTime;
+        } else {
+            // Quiet hours span midnight
+            return currentTime >= startTime || currentTime <= endTime;
+        }
+    }
+
+    checkLessonReminders(now) {
+        this.lessons.forEach(lesson => {
+            const lessonDate = new Date(lesson.date + 'T' + lesson.time);
+            const timeDiff = lessonDate - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+            // Check for 24-hour reminder
+            if (this.notificationSettings.remindersBefore24h && 
+                hoursDiff > 23.5 && hoursDiff <= 24.5) {
+                const notificationId = `lesson-24h-${lesson.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '📚 Promemoria Lezione (24 ore)',
+                        message: `Domani alle ${lesson.time}: ${lesson.title}`,
+                        type: 'lesson-reminder',
+                        relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for 1-hour reminder
+            if (this.notificationSettings.remindersBefore1h && 
+                hoursDiff > 0.5 && hoursDiff <= 1.5) {
+                const notificationId = `lesson-1h-${lesson.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '📚 Promemoria Lezione (1 ora)',
+                        message: `Tra un\'ora: ${lesson.title}`,
+                        type: 'lesson-reminder',
+                        relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+        });
+    }
+
+    checkCustomReminders(now) {
+        this.reminders.forEach(reminder => {
+            if (reminder.dismissed || reminder.notified) {
+                return;
+            }
+
+            const reminderDate = new Date(reminder.dateTime);
+            const timeDiff = reminderDate - now;
+
+            if (timeDiff <= 0 && timeDiff > -5 * 60 * 1000) { // Within 5 minutes of reminder time
+                this.createNotification({
+                    title: `🔔 ${reminder.title}`,
+                    message: reminder.message,
+                    type: 'custom-reminder',
+                    relatedId: reminder.id,
+                    notificationId: `reminder-${reminder.id}`
+                });
+                reminder.notified = true;
+                this.saveData();
+            }
+        });
+    }
+
+    hasNotificationBeenSent(notificationId) {
+        return this.notifications.some(n => n.notificationId === notificationId);
+    }
+
+    createNotification(data) {
+        const notification = {
+            id: Date.now(),
+            ...data,
+            createdAt: new Date().toISOString(),
+            read: false
+        };
+
+        this.notifications.unshift(notification);
+        this.saveData();
+
+        // Send browser notification
+        if (this.notificationSettings.browserNotifications && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification(notification.title, {
+                body: notification.message,
+                icon: '🎓',
+                tag: notification.notificationId
+            });
+        }
+
+        // Update UI if on notifications tab
+        this.renderNotifications();
+    }
+
+    addReminder() {
+        const title = document.getElementById('reminder-title').value;
+        const message = document.getElementById('reminder-message').value;
+        const date = document.getElementById('reminder-date').value;
+        const time = document.getElementById('reminder-time').value;
+
+        if (!title || !date || !time) {
+            alert('Inserisci titolo, data e ora per il promemoria');
+            return;
+        }
+
+        const reminder = {
+            id: Date.now(),
+            title,
+            message,
+            dateTime: `${date}T${time}`,
+            createdAt: new Date().toISOString(),
+            notified: false,
+            dismissed: false
+        };
+
+        this.reminders.push(reminder);
+        this.saveData();
+        this.renderNotifications();
+        this.hideAddReminderForm();
+
+        // Clear form
+        document.getElementById('reminder-title').value = '';
+        document.getElementById('reminder-message').value = '';
+        document.getElementById('reminder-date').value = '';
+        document.getElementById('reminder-time').value = '';
+    }
+
+    deleteReminder(id) {
+        if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
+            this.reminders = this.reminders.filter(r => r.id !== id);
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    dismissReminder(id) {
+        const reminder = this.reminders.find(r => r.id === id);
+        if (reminder) {
+            reminder.dismissed = true;
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    markNotificationRead(id) {
+        const notification = this.notifications.find(n => n.id === id);
+        if (notification) {
+            notification.read = true;
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    markAllNotificationsRead() {
+        this.notifications.forEach(n => n.read = true);
+        this.saveData();
+        this.renderNotifications();
+    }
+
+    deleteNotification(id) {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+        this.saveData();
+        this.renderNotifications();
+    }
+
+    clearAllNotifications() {
+        if (confirm('Sei sicuro di voler eliminare tutte le notifiche?')) {
+            this.notifications = [];
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    saveNotificationSettings() {
+        this.notificationSettings.browserNotifications = document.getElementById('notification-browser').checked;
+        this.notificationSettings.emailNotifications = document.getElementById('notification-email').checked;
+        this.notificationSettings.lessonReminders = document.getElementById('notification-lesson-reminders').checked;
+        this.notificationSettings.remindersBefore24h = document.getElementById('notification-24h').checked;
+        this.notificationSettings.remindersBefore1h = document.getElementById('notification-1h').checked;
+        this.notificationSettings.quietHoursEnabled = document.getElementById('notification-quiet-hours').checked;
+        this.notificationSettings.quietHoursStart = document.getElementById('notification-quiet-start').value;
+        this.notificationSettings.quietHoursEnd = document.getElementById('notification-quiet-end').value;
+
+        this.saveData();
+        alert('Impostazioni notifiche salvate!');
+    }
+
+    showAddReminderForm() {
+        document.getElementById('add-reminder-form').style.display = 'block';
+    }
+
+    hideAddReminderForm() {
+        document.getElementById('add-reminder-form').style.display = 'none';
+    }
+
+    renderNotifications() {
+        // Render notifications list
+        const notificationsList = document.getElementById('notifications-list');
+        if (notificationsList) {
+            const unreadCount = this.notifications.filter(n => !n.read).length;
+            const notificationsHeader = document.getElementById('notifications-header');
+            if (notificationsHeader) {
+                notificationsHeader.innerHTML = `
+                    <h3>🔔 Notifiche Recenti</h3>
+                    ${unreadCount > 0 ? `<span class="badge">${unreadCount} non lette</span>` : ''}
+                `;
+            }
+
+            if (this.notifications.length === 0) {
+                notificationsList.innerHTML = '<p class="empty-state">Nessuna notifica</p>';
+            } else {
+                notificationsList.innerHTML = this.notifications.slice(0, 50).map(notification => `
+                    <div class="notification-item ${notification.read ? 'read' : 'unread'}">
+                        <div class="notification-header">
+                            <h4>${notification.title}</h4>
+                            <span class="notification-time">${new Date(notification.createdAt).toLocaleString('it-IT')}</span>
+                        </div>
+                        <p>${notification.message}</p>
+                        <div class="notification-actions">
+                            ${!notification.read ? `<button class="btn btn-sm" onclick="app.markNotificationRead(${notification.id})">Segna come letta</button>` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="app.deleteNotification(${notification.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render reminders list
+        const remindersList = document.getElementById('reminders-list');
+        if (remindersList) {
+            const activeReminders = this.reminders.filter(r => !r.dismissed);
+            
+            if (activeReminders.length === 0) {
+                remindersList.innerHTML = '<p class="empty-state">Nessun promemoria attivo</p>';
+            } else {
+                remindersList.innerHTML = activeReminders.map(reminder => {
+                    const reminderDate = new Date(reminder.dateTime);
+                    const isPast = reminderDate < new Date();
+                    
+                    return `
+                        <div class="reminder-item ${isPast ? 'past' : 'upcoming'}">
+                            <div class="reminder-header">
+                                <h4>${reminder.title}</h4>
+                                <span class="reminder-time">${reminderDate.toLocaleString('it-IT')}</span>
+                            </div>
+                            ${reminder.message ? `<p>${reminder.message}</p>` : ''}
+                            <div class="reminder-actions">
+                                <button class="btn btn-sm" onclick="app.dismissReminder(${reminder.id})">Archivia</button>
+                                <button class="btn btn-sm btn-danger" onclick="app.deleteReminder(${reminder.id})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Load notification settings into form
+        const browserCheckbox = document.getElementById('notification-browser');
+        if (browserCheckbox) {
+            browserCheckbox.checked = this.notificationSettings.browserNotifications;
+            document.getElementById('notification-email').checked = this.notificationSettings.emailNotifications;
+            document.getElementById('notification-lesson-reminders').checked = this.notificationSettings.lessonReminders;
+            document.getElementById('notification-24h').checked = this.notificationSettings.remindersBefore24h;
+            document.getElementById('notification-1h').checked = this.notificationSettings.remindersBefore1h;
+            document.getElementById('notification-quiet-hours').checked = this.notificationSettings.quietHoursEnabled;
+            document.getElementById('notification-quiet-start').value = this.notificationSettings.quietHoursStart;
+            document.getElementById('notification-quiet-end').value = this.notificationSettings.quietHoursEnd;
+        }
     }
 }
 

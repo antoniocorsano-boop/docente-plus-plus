@@ -98,6 +98,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Gestione Studenti**: Organizzazione degli studenti
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
+- **🔔 Notifiche e Promemoria**: Sistema completo di notifiche automatiche e promemoria personalizzabili
 - **Gestione Materie**: Gestione discipline con autocomplete intelligente
 - **Configurazione Anno Scolastico**: Date inizio/fine personalizzabili
 - **Dashboard Intuitiva**: Panoramica di lezioni, studenti e attività
@@ -110,7 +111,6 @@ L'assistente IA OpenRouter può aiutarti con:
 
 Le seguenti funzionalità sono pianificate per le prossime versioni:
 
-- **Notifiche e promemoria**: Sistema di notifiche per scadenze, attività e aggiornamenti
 - **Esportazione dati in formati aggiuntivi**: Supporto a PDF/Excel per report e stampe
 - **Gestione attività didattiche**: Modulo dedicato per esercizi, attività interattive, compiti e materiali associati alle lezioni
 - **Backup cloud opzionale**: Sincronizzazione e ripristino dati tramite provider esterni (es. Google Drive, Dropbox)
@@ -185,6 +185,37 @@ La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazi
 - Esporta tutte le valutazioni in formato JSON
 - Include criteri, griglie e valutazioni con dati completi
 - Ideale per reportistica e analisi
+
+### 🔔 Notifiche e Promemoria
+
+Il sistema di notifiche ti aiuta a rimanere organizzato e non perdere scadenze importanti.
+
+#### Notifiche Automatiche per Lezioni
+1. **Promemoria 24 ore prima**: Ricevi un avviso il giorno prima della lezione
+2. **Promemoria 1 ora prima**: Avviso finale un'ora prima dell'inizio
+3. Le notifiche vengono inviate automaticamente per tutte le lezioni programmate
+4. Puoi configurare quali promemoria ricevere nelle impostazioni
+
+#### Promemoria Personalizzati
+1. Vai alla sezione "Notifiche"
+2. Clicca "Nuovo Promemoria"
+3. Inserisci titolo, messaggio, data e ora
+4. Il promemoria apparirà nella lista e ti notificherà al momento opportuno
+5. Puoi archiviare o eliminare promemoria completati
+
+#### Storico Notifiche
+- Visualizza tutte le notifiche ricevute
+- Distingui tra notifiche lette e non lette
+- Segna notifiche come lette o eliminale
+- Pulisci tutte le notifiche in un colpo solo
+
+#### Impostazioni Notifiche
+- **Notifiche Browser**: Abilita/disabilita notifiche popup del browser
+- **Promemoria Lezioni**: Attiva/disattiva i promemoria automatici per le lezioni
+- **Orari di Silenzio**: Configura orari in cui non ricevere notifiche (es. 22:00-07:00)
+- Personalizza quando ricevere i promemoria (24h, 1h prima)
+
+**Nota**: Per ricevere notifiche browser, devi autorizzare il sito quando richiesto dal browser.
 
 ### Assistente IA
 1. Scrivi la tua richiesta nella chat

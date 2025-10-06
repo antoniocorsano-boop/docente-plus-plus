@@ -103,6 +103,7 @@
             <button class="tab-button" data-tab="students">Studenti</button>
             <button class="tab-button" data-tab="classes">Classi</button>
             <button class="tab-button" data-tab="evaluations">Valutazioni</button>
+            <button class="tab-button" data-tab="notifications">Notifiche</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
         </nav>
@@ -160,9 +161,15 @@
                         <label for="lesson-subject">Materia:</label>
                         <input type="text" id="lesson-subject" required>
                     </div>
-                    <div class="form-group">
-                        <label for="lesson-date">Data:</label>
-                        <input type="date" id="lesson-date" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lesson-date">Data:</label>
+                            <input type="date" id="lesson-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lesson-time">Ora:</label>
+                            <input type="time" id="lesson-time" value="09:00" required>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="lesson-description">Descrizione:</label>
@@ -419,6 +426,129 @@
                     <button class="suggestion-btn" onclick="app.quickAIPrompt('Suggerisci attività didattiche interattive')">🎯 Attività interattive</button>
                     <button class="suggestion-btn" onclick="app.quickAIPrompt('Genera criteri di valutazione')">📊 Criteri valutazione</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications" class="tab-content">
+            <h2>🔔 Notifiche e Promemoria</h2>
+            
+            <!-- Notifications Section -->
+            <div class="notification-section">
+                <div class="section-header" id="notifications-header">
+                    <h3>🔔 Notifiche Recenti</h3>
+                </div>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="app.markAllNotificationsRead()">✓ Segna tutte come lette</button>
+                    <button class="btn btn-secondary" onclick="app.clearAllNotifications()">🗑️ Elimina tutte</button>
+                </div>
+                <div id="notifications-list" class="notifications-list"></div>
+            </div>
+
+            <!-- Reminders Section -->
+            <div class="reminder-section">
+                <h3>⏰ Promemoria Personali</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddReminderForm()">➕ Nuovo Promemoria</button>
+                </div>
+
+                <div id="add-reminder-form" class="form-container" style="display: none;">
+                    <h4>Crea Promemoria</h4>
+                    <form onsubmit="event.preventDefault(); app.addReminder();">
+                        <div class="form-group">
+                            <label for="reminder-title">Titolo: *</label>
+                            <input type="text" id="reminder-title" placeholder="Titolo del promemoria" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminder-message">Messaggio:</label>
+                            <textarea id="reminder-message" placeholder="Descrizione del promemoria" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reminder-date">Data: *</label>
+                                <input type="date" id="reminder-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reminder-time">Ora: *</label>
+                                <input type="time" id="reminder-time" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva Promemoria</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddReminderForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="reminders-list" class="reminders-list"></div>
+            </div>
+
+            <!-- Notification Settings Section -->
+            <div class="notification-settings-section">
+                <h3>⚙️ Impostazioni Notifiche</h3>
+                <form id="notification-settings-form" onsubmit="event.preventDefault(); app.saveNotificationSettings();">
+                    <div class="settings-group">
+                        <h4>Canali di Notifica</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-browser">
+                                🌐 Notifiche Browser
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-email" disabled>
+                                📧 Notifiche Email (prossimamente)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Promemoria Automatici</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-lesson-reminders">
+                                📚 Promemoria per lezioni programmate
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-24h">
+                                ⏰ Avviso 24 ore prima della lezione
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-1h">
+                                ⏰ Avviso 1 ora prima della lezione
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Orari Silenzio</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-quiet-hours">
+                                🌙 Abilita orari di silenzio
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="notification-quiet-start">Inizio:</label>
+                                <input type="time" id="notification-quiet-start">
+                            </div>
+                            <div class="form-group">
+                                <label for="notification-quiet-end">Fine:</label>
+                                <input type="time" id="notification-quiet-end">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
+                    </div>
+                </form>
             </div>
         </div>
 
