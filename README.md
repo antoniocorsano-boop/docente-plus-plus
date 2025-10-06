@@ -203,13 +203,27 @@ La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazi
 
 ### 🔔 Notifiche e Promemoria
 
-Il sistema di notifiche ti aiuta a rimanere organizzato e non perdere scadenze importanti.
+Il sistema di notifiche ti aiuta a rimanere organizzato e non perdere scadenze importanti con notifiche automatiche, promemoria personalizzati e un sistema di gestione completo.
+
+#### Tipi di Notifiche
+
+Il sistema supporta diverse categorie di notifiche:
+- **📚 Lezioni**: Promemoria automatici per lezioni programmate
+- **⏰ Promemoria**: Promemoria personalizzati creati manualmente
+- **💾 Backup**: Avvisi per ricordarti di eseguire backup periodici dei dati
+- **⚙️ Sistema**: Notifiche di sistema (import/export completati, aggiornamenti, ecc.)
 
 #### Notifiche Automatiche per Lezioni
 1. **Promemoria 24 ore prima**: Ricevi un avviso il giorno prima della lezione
 2. **Promemoria 1 ora prima**: Avviso finale un'ora prima dell'inizio
 3. Le notifiche vengono inviate automaticamente per tutte le lezioni programmate
 4. Puoi configurare quali promemoria ricevere nelle impostazioni
+
+#### Promemoria Backup Automatici
+1. **Backup Periodici**: Il sistema ti ricorda di eseguire backup regolari dei tuoi dati
+2. **Intervallo Configurabile**: Imposta ogni quanti giorni ricevere il promemoria (default: 7 giorni)
+3. **Tracciamento Automatico**: L'ultimo backup viene tracciato automaticamente
+4. **Notifiche Completamento**: Ricevi conferma quando esporti o importi i dati
 
 #### Promemoria Personalizzati
 1. Vai alla sezione "Notifiche"
@@ -218,15 +232,24 @@ Il sistema di notifiche ti aiuta a rimanere organizzato e non perdere scadenze i
 4. Il promemoria apparirà nella lista e ti notificherà al momento opportuno
 5. Puoi archiviare o eliminare promemoria completati
 
+#### Gestione e Filtri Notifiche
+- **Filtri per Categoria**: Visualizza solo le notifiche di una specifica categoria (Tutte, Lezioni, Promemoria, Backup, Sistema)
+- **Contatori in Tempo Reale**: Ogni filtro mostra il numero di notifiche per categoria
+- **Indicatori Visivi**: Ogni tipo di notifica ha un colore distintivo per facile identificazione
+- **Badge Non Lette**: Visualizza il numero di notifiche non ancora lette
+
 #### Storico Notifiche
-- Visualizza tutte le notifiche ricevute
-- Distingui tra notifiche lette e non lette
-- Segna notifiche come lette o eliminale
-- Pulisci tutte le notifiche in un colpo solo
+- Visualizza tutte le notifiche ricevute (limite 50 più recenti)
+- Distingui tra notifiche lette e non lette con indicatori visivi
+- Segna notifiche come lette individualmente o tutte insieme
+- Elimina singole notifiche o pulisci tutto lo storico
+- Filtra per tipo per trovare rapidamente ciò che cerchi
 
 #### Impostazioni Notifiche
 - **Notifiche Browser**: Abilita/disabilita notifiche popup del browser
 - **Promemoria Lezioni**: Attiva/disattiva i promemoria automatici per le lezioni
+- **Promemoria Backup**: Attiva/disattiva i promemoria periodici per i backup
+- **Intervallo Backup**: Configura ogni quanti giorni ricevere il promemoria (1-365 giorni)
 - **Orari di Silenzio**: Configura orari in cui non ricevere notifiche (es. 22:00-07:00)
 - Personalizza quando ricevere i promemoria (24h, 1h prima)
 
