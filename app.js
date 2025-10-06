@@ -2545,6 +2545,8 @@ ${lessonData.evaluation || 'N/D'}
         yPos += 7;
         doc.text(`Attività: ${data.activities.length}`, 14, yPos);
         yPos += 7;
+        doc.text(`Slot Orario Configurati: ${Object.keys(data.schedule || {}).length}`, 14, yPos);
+        yPos += 7;
         doc.text(`Valutazioni: ${data.evaluations.length}`, 14, yPos);
         yPos += 7;
         doc.text(`Criteri di Valutazione: ${data.evaluationCriteria.length}`, 14, yPos);
@@ -2597,6 +2599,43 @@ ${lessonData.evaluation || 'N/D'}
                 body: studentsData,
                 theme: 'grid',
                 styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Schedule summary
+        const scheduleEntries = Object.keys(data.schedule || {}).length;
+        if (scheduleEntries > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Orario Didattico', 14, yPos);
+            yPos += 7;
+            
+            const scheduleData = Object.entries(data.schedule).map(([key, slot]) => {
+                const [dateStr, hour] = key.split('-').slice(0, 2);
+                const hourStr = key.split('-')[2];
+                const date = new Date(dateStr);
+                const dayName = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'][date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                return [
+                    `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
+                    `${hourStr}:00`,
+                    cls ? cls.name : 'N/D',
+                    activityTypes[slot.activityType] || 'N/D'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Giorno', 'Ora', 'Classe', 'Tipo Attività']],
+                body: scheduleData,
+                theme: 'grid',
+                styles: { fontSize: 8 }
             });
         }
 
@@ -2840,6 +2879,31 @@ ${lessonData.evaluation || 'N/D'}
             });
             const wsSubjects = XLSX.utils.aoa_to_sheet(subjectsData);
             XLSX.utils.book_append_sheet(wb, wsSubjects, 'Discipline');
+        }
+
+        // Schedule sheet
+        if (data.schedule && Object.keys(data.schedule).length > 0) {
+            const scheduleData = [
+                ['Giorno', 'Data', 'Ora', 'Classe', 'Tipo Attività']
+            ];
+            Object.entries(data.schedule).forEach(([key, slot]) => {
+                const [dateStr, hourStr] = key.split('-');
+                const date = new Date(dateStr);
+                const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                const dayName = dayNames[date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                
+                scheduleData.push([
+                    dayName,
+                    date.toLocaleDateString('it-IT'),
+                    `${hourStr}:00`,
+                    cls ? cls.name : '',
+                    activityTypes[slot.activityType] || ''
+                ]);
+            });
+            const wsSchedule = XLSX.utils.aoa_to_sheet(scheduleData);
+            XLSX.utils.book_append_sheet(wb, wsSchedule, 'Orario');
         }
 
         // Write file
