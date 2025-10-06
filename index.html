@@ -239,6 +239,49 @@
         <!-- Activities Tab -->
         <div id="activities" class="tab-content">
             <h2>Gestione Attività Didattiche</h2>
+            
+            <!-- Activities Summary Section -->
+            <div id="activities-summary" class="summary-section">
+                <h3>Riepilogo Attività</h3>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-icon">📋</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="total-activities">0</p>
+                            <p class="summary-label">Totali</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">📅</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="planned-activities">0</p>
+                            <p class="summary-label">Pianificate</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">▶️</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="inprogress-activities">0</p>
+                            <p class="summary-label">In Corso</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">✅</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="completed-activities">0</p>
+                            <p class="summary-label">Completate</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">⚠️</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="overdue-activities">0</p>
+                            <p class="summary-label">Scadute</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="section-actions">
                 <button class="btn btn-primary" onclick="app.showAddActivityForm()">➕ Nuova Attività</button>
                 <select id="activity-filter" class="filter-select" onchange="app.renderActivities()">
@@ -256,8 +299,9 @@
             </div>
             
             <div id="add-activity-form" class="form-container" style="display: none;">
-                <h3>Nuova Attività</h3>
+                <h3 id="activity-form-title">Nuova Attività</h3>
                 <form id="activity-form">
+                    <input type="hidden" id="activity-edit-id">
                     <div class="form-group">
                         <label for="activity-title">Titolo: *</label>
                         <input type="text" id="activity-title" required>
@@ -274,12 +318,25 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="activity-priority">Priorità:</label>
+                        <select id="activity-priority">
+                            <option value="low">Bassa</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="activity-description">Descrizione:</label>
                         <textarea id="activity-description" rows="4"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="activity-deadline">Scadenza:</label>
                         <input type="date" id="activity-deadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-progress">Avanzamento (%):</label>
+                        <input type="number" id="activity-progress" min="0" max="100" value="0">
+                        <small>Percentuale di completamento dell'attività (0-100)</small>
                     </div>
                     <div class="form-group">
                         <label for="activity-class">Assegna a Classe:</label>
@@ -292,6 +349,10 @@
                         <select id="activity-student">
                             <option value="">Nessuno (tutta la classe)</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-notes">Note/Feedback:</label>
+                        <textarea id="activity-notes" rows="3" placeholder="Aggiungi note o feedback sull'attività"></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salva</button>

@@ -31,7 +31,7 @@ class DocentePlusPlus {
             quietHoursStart: '22:00',
             quietHoursEnd: '07:00'
         };
-        this.notificationFilter = 'all'; // all, lesson-reminder, custom-reminder, backup, system
+        this.notificationFilter = 'all'; // all, lesson-reminder, activity-reminder, custom-reminder, backup, system
         this.notificationCheckInterval = null;
         this.scheduleView = 'weekly'; // weekly or daily
         this.currentScheduleDate = null; // Will be set to current/next weekday
@@ -615,6 +615,8 @@ ${lessonData.evaluation || 'N/D'}
 
     // Activity management methods
     showAddActivityForm() {
+        document.getElementById('activity-form-title').textContent = 'Nuova Attività';
+        document.getElementById('activity-edit-id').value = '';
         document.getElementById('add-activity-form').style.display = 'block';
         this.updateActivityFormSelectors();
     }
@@ -622,6 +624,33 @@ ${lessonData.evaluation || 'N/D'}
     hideAddActivityForm() {
         document.getElementById('add-activity-form').style.display = 'none';
         document.getElementById('activity-form').reset();
+        document.getElementById('activity-edit-id').value = '';
+    }
+
+    showEditActivityForm(id) {
+        const activity = this.activities.find(a => a.id === id);
+        if (!activity) return;
+
+        document.getElementById('activity-form-title').textContent = 'Modifica Attività';
+        document.getElementById('activity-edit-id').value = id;
+        document.getElementById('activity-title').value = activity.title;
+        document.getElementById('activity-type').value = activity.type;
+        document.getElementById('activity-description').value = activity.description || '';
+        document.getElementById('activity-deadline').value = activity.deadline || '';
+        document.getElementById('activity-priority').value = activity.priority || 'medium';
+        document.getElementById('activity-progress').value = activity.progress || 0;
+        document.getElementById('activity-notes').value = activity.notes || '';
+        
+        this.updateActivityFormSelectors();
+        
+        if (activity.classId) {
+            document.getElementById('activity-class').value = activity.classId;
+        }
+        if (activity.studentId) {
+            document.getElementById('activity-student').value = activity.studentId;
+        }
+        
+        document.getElementById('add-activity-form').style.display = 'block';
     }
 
     updateActivityFormSelectors() {
@@ -640,19 +669,43 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     addActivity() {
-        const activity = {
-            id: Date.now(),
-            title: document.getElementById('activity-title').value,
-            type: document.getElementById('activity-type').value,
-            description: document.getElementById('activity-description').value,
-            deadline: document.getElementById('activity-deadline').value,
-            classId: document.getElementById('activity-class').value || null,
-            studentId: document.getElementById('activity-student').value || null,
-            status: 'planned',
-            createdAt: new Date().toISOString()
-        };
+        const editId = document.getElementById('activity-edit-id').value;
+        
+        if (editId) {
+            // Edit existing activity
+            const activity = this.activities.find(a => a.id == editId);
+            if (activity) {
+                activity.title = document.getElementById('activity-title').value;
+                activity.type = document.getElementById('activity-type').value;
+                activity.description = document.getElementById('activity-description').value;
+                activity.deadline = document.getElementById('activity-deadline').value;
+                activity.classId = document.getElementById('activity-class').value || null;
+                activity.studentId = document.getElementById('activity-student').value || null;
+                activity.priority = document.getElementById('activity-priority').value || 'medium';
+                activity.progress = parseInt(document.getElementById('activity-progress').value) || 0;
+                activity.notes = document.getElementById('activity-notes').value || '';
+                activity.updatedAt = new Date().toISOString();
+            }
+        } else {
+            // Create new activity
+            const activity = {
+                id: Date.now(),
+                title: document.getElementById('activity-title').value,
+                type: document.getElementById('activity-type').value,
+                description: document.getElementById('activity-description').value,
+                deadline: document.getElementById('activity-deadline').value,
+                classId: document.getElementById('activity-class').value || null,
+                studentId: document.getElementById('activity-student').value || null,
+                priority: document.getElementById('activity-priority').value || 'medium',
+                progress: parseInt(document.getElementById('activity-progress').value) || 0,
+                notes: document.getElementById('activity-notes').value || '',
+                status: 'planned',
+                createdAt: new Date().toISOString()
+            };
 
-        this.activities.push(activity);
+            this.activities.push(activity);
+        }
+
         this.saveData();
         this.renderActivities();
         this.renderDashboard();
@@ -684,7 +737,36 @@ ${lessonData.evaluation || 'N/D'}
         this.renderActivities();
     }
 
+    renderActivitiesSummary() {
+        const totalActivities = this.activities.length;
+        const plannedActivities = this.activities.filter(a => a.status === 'planned').length;
+        const inProgressActivities = this.activities.filter(a => a.status === 'in-progress').length;
+        const completedActivities = this.activities.filter(a => a.status === 'completed').length;
+        
+        // Calculate overdue activities
+        const now = new Date();
+        const overdueActivities = this.activities.filter(a => {
+            if (!a.deadline || a.status === 'completed') return false;
+            return new Date(a.deadline) < now;
+        }).length;
+        
+        // Update summary cards
+        const totalEl = document.getElementById('total-activities');
+        const plannedEl = document.getElementById('planned-activities');
+        const inProgressEl = document.getElementById('inprogress-activities');
+        const completedEl = document.getElementById('completed-activities');
+        const overdueEl = document.getElementById('overdue-activities');
+        
+        if (totalEl) totalEl.textContent = totalActivities;
+        if (plannedEl) plannedEl.textContent = plannedActivities;
+        if (inProgressEl) inProgressEl.textContent = inProgressActivities;
+        if (completedEl) completedEl.textContent = completedActivities;
+        if (overdueEl) overdueEl.textContent = overdueActivities;
+    }
+
     renderActivities() {
+        this.renderActivitiesSummary();
+        
         const activitiesList = document.getElementById('activities-list');
         
         if (!activitiesList) return;
@@ -741,29 +823,62 @@ ${lessonData.evaluation || 'N/D'}
             'completed': '#27ae60'
         };
 
+        const priorityLabels = {
+            'low': 'Bassa',
+            'medium': 'Media',
+            'high': 'Alta'
+        };
+
+        const priorityColors = {
+            'low': '#95a5a6',
+            'medium': '#f39c12',
+            'high': '#e74c3c'
+        };
+
         activitiesList.innerHTML = filteredActivities.map(activity => {
             const cls = this.classes.find(c => c.id == activity.classId);
             const student = this.students.find(s => s.id == activity.studentId);
             const icon = activityTypeIcons[activity.type] || '📋';
             const statusLabel = statusLabels[activity.status] || activity.status;
             const statusColor = statusColors[activity.status] || '#95a5a6';
+            const priority = activity.priority || 'medium';
+            const priorityLabel = priorityLabels[priority];
+            const priorityColor = priorityColors[priority];
+            const progress = activity.progress || 0;
+
+            // Calculate if deadline is near (within 3 days)
+            const isDeadlineNear = activity.deadline ? 
+                (new Date(activity.deadline) - new Date()) < (3 * 24 * 60 * 60 * 1000) : false;
 
             return `
                 <div class="activity-item">
                     <div class="activity-header">
                         <h4>${icon} ${activity.title}</h4>
-                        <span class="activity-status" style="background-color: ${statusColor}">${statusLabel}</span>
+                        <div class="activity-badges">
+                            <span class="activity-status" style="background-color: ${statusColor}">${statusLabel}</span>
+                            <span class="activity-priority" style="background-color: ${priorityColor}">Priorità: ${priorityLabel}</span>
+                        </div>
                     </div>
                     <p><strong>Tipo:</strong> ${activity.type}</p>
                     ${activity.description ? `<p><strong>Descrizione:</strong> ${activity.description}</p>` : ''}
-                    ${activity.deadline ? `<p><strong>Scadenza:</strong> ${new Date(activity.deadline).toLocaleDateString('it-IT')}</p>` : ''}
+                    ${activity.deadline ? `<p><strong>Scadenza:</strong> ${new Date(activity.deadline).toLocaleDateString('it-IT')}${isDeadlineNear ? ' <span style="color: #e74c3c;">⚠️ Imminente</span>' : ''}</p>` : ''}
                     ${cls ? `<p><strong>Classe:</strong> ${cls.name}</p>` : ''}
                     ${student ? `<p><strong>Studente:</strong> ${student.name}</p>` : ''}
+                    ${progress > 0 ? `
+                        <div class="activity-progress">
+                            <label><strong>Avanzamento:</strong> ${progress}%</label>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%; background-color: ${statusColor}"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${activity.notes ? `<p><strong>Note:</strong> ${activity.notes}</p>` : ''}
                     <div class="activity-actions">
-                        ${activity.status !== 'in-progress' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'in-progress')">In corso</button>` : ''}
-                        ${activity.status !== 'completed' ? `<button class="btn btn-success" onclick="app.updateActivityStatus(${activity.id}, 'completed')">Completa</button>` : ''}
-                        ${activity.status === 'completed' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'planned')">Riapri</button>` : ''}
-                        <button class="btn btn-danger" onclick="app.deleteActivity(${activity.id})">Elimina</button>
+                        <button class="btn btn-secondary" onclick="app.showEditActivityForm(${activity.id})">✏️ Modifica</button>
+                        ${activity.status !== 'in-progress' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'in-progress')">▶️ In corso</button>` : ''}
+                        ${activity.status !== 'completed' ? `<button class="btn btn-success" onclick="app.updateActivityStatus(${activity.id}, 'completed')">✅ Completa</button>` : ''}
+                        ${activity.status === 'completed' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'planned')">↩️ Riapri</button>` : ''}
+                        <button class="btn btn-danger" onclick="app.deleteActivity(${activity.id})">🗑️ Elimina</button>
                     </div>
                 </div>
             `;
@@ -2637,6 +2752,51 @@ ${lessonData.evaluation || 'N/D'}
                 theme: 'grid',
                 styles: { fontSize: 8 }
             });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Activities table
+        if (data.activities && data.activities.length > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Attività Didattiche', 14, yPos);
+            yPos += 7;
+            
+            const activitiesData = data.activities.slice(0, 30).map(a => {
+                const cls = data.classes.find(c => c.id == a.classId);
+                const statusLabels = {
+                    'planned': 'Pianificata',
+                    'in-progress': 'In corso',
+                    'completed': 'Completata'
+                };
+                const typeLabels = {
+                    'lesson': 'Lezione',
+                    'exercise': 'Esercitazione',
+                    'lab': 'Laboratorio',
+                    'project': 'Progetto',
+                    'homework': 'Compiti',
+                    'exam': 'Verifica'
+                };
+                return [
+                    a.title || 'N/D',
+                    typeLabels[a.type] || a.type || 'N/D',
+                    cls ? cls.name : 'Generale',
+                    statusLabels[a.status] || a.status || 'N/D',
+                    a.deadline ? new Date(a.deadline).toLocaleDateString('it-IT') : '-'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Titolo', 'Tipo', 'Classe', 'Stato', 'Scadenza']],
+                body: activitiesData,
+                theme: 'striped',
+                styles: { fontSize: 8 }
+            });
         }
 
         // Footer with privacy note
@@ -3130,6 +3290,9 @@ ${lessonData.evaluation || 'N/D'}
             this.checkLessonReminders(now);
         }
 
+        // Check activity deadline reminders
+        this.checkActivityDeadlineReminders(now);
+
         // Check custom reminders
         this.checkCustomReminders(now);
 
@@ -3189,6 +3352,68 @@ ${lessonData.evaluation || 'N/D'}
                         message: `Tra un\'ora: ${lesson.title}`,
                         type: 'lesson-reminder',
                         relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+        });
+    }
+
+    checkActivityDeadlineReminders(now) {
+        this.activities.forEach(activity => {
+            // Skip completed activities or those without deadlines
+            if (activity.status === 'completed' || !activity.deadline) {
+                return;
+            }
+
+            const deadlineDate = new Date(activity.deadline);
+            const timeDiff = deadlineDate - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+            // Check for 3-day reminder
+            if (daysDiff > 2.9 && daysDiff <= 3.1) {
+                const notificationId = `activity-3d-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '📋 Promemoria Attività (3 giorni)',
+                        message: `Scadenza tra 3 giorni${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for 24-hour reminder
+            if (hoursDiff > 23.5 && hoursDiff <= 24.5) {
+                const notificationId = `activity-24h-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '📋 Promemoria Attività (24 ore)',
+                        message: `Scadenza domani${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for overdue
+            if (timeDiff < 0 && timeDiff > -24 * 60 * 60 * 1000) {
+                const notificationId = `activity-overdue-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '⚠️ Attività Scaduta',
+                        message: `Scadenza superata${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
                         notificationId: notificationId
                     });
                 }
@@ -3443,6 +3668,9 @@ ${lessonData.evaluation || 'N/D'}
                         </button>
                         <button class="filter-btn ${this.notificationFilter === 'lesson-reminder' ? 'active' : ''}" onclick="app.filterNotifications('lesson-reminder')">
                             📚 Lezioni (${stats.byType['lesson-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'activity-reminder' ? 'active' : ''}" onclick="app.filterNotifications('activity-reminder')">
+                            📋 Attività (${stats.byType['activity-reminder'] || 0})
                         </button>
                         <button class="filter-btn ${this.notificationFilter === 'custom-reminder' ? 'active' : ''}" onclick="app.filterNotifications('custom-reminder')">
                             ⏰ Promemoria (${stats.byType['custom-reminder'] || 0})

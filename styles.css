@@ -319,12 +319,123 @@ header h1 {
     margin-bottom: 15px;
 }
 
-.activity-status {
+.activity-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.activity-status,
+.activity-priority {
     padding: 4px 12px;
     border-radius: 20px;
     color: white;
     font-size: 0.85em;
     font-weight: 500;
+}
+
+.activity-progress {
+    margin: 15px 0;
+}
+
+.activity-progress label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+/* Activity Summary Section */
+.summary-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.summary-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+}
+
+.summary-icon {
+    font-size: 2em;
+}
+
+.summary-content {
+    flex: 1;
+}
+
+.summary-number {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 0.85em;
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+}
+
+/* Different colors for summary cards */
+.summary-cards .summary-card:nth-child(1) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.summary-cards .summary-card:nth-child(2) {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.summary-cards .summary-card:nth-child(3) {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.summary-cards .summary-card:nth-child(4) {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+.summary-cards .summary-card:nth-child(5) {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
 .activities-list {
