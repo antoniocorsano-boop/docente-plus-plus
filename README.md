@@ -98,6 +98,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Esportazione PDF e Excel**: Report professionali stampabili e fogli di calcolo per analisi avanzate
 - **📂 Modulo Importazione Documenti con IA**: Sistema avanzato per importare e gestire documenti didattici e anagrafici
   - Caricamento file multipli formati (CSV, XLSX, PDF, TXT, JSON)
+  - **📋 Importazione Attività da PDF**: Estrazione automatica attività didattiche da PDF con suddivisione per livelli classe (Prima, Seconda, Terza Media)
   - Riconoscimento automatico tipo documento tramite IA
   - Importazione intelligente anagrafica studenti con campi estesi (data nascita, onomastico, note)
   - Gestione duplicati con merge automatico
@@ -532,6 +533,7 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 ## 📚 Risorse Utili
 
 - [Documentazione OpenRouter API](https://openrouter.ai/docs)
+- [📋 Guida Importazione Attività da PDF](PDF_ACTIVITIES_IMPORT.md) - Documentazione completa della funzionalità
 - [Guida HTML5](https://developer.mozilla.org/it/docs/Web/HTML)
 - [Guida CSS3](https://developer.mozilla.org/it/docs/Web/CSS)
 - [Guida JavaScript](https://developer.mozilla.org/it/docs/Web/JavaScript)

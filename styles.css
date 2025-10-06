@@ -1802,6 +1802,20 @@ header h1 {
     background-color: #f8f9fa;
 }
 
+.class-activities-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.class-activities-group h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
 .preview-actions {
     margin-top: 20px;
     display: flex;
