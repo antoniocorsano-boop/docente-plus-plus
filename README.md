@@ -177,14 +177,29 @@ La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazi
 #### ✅ Assegnazione Valutazioni
 1. Assegna valutazioni a singoli studenti o classi intere
 2. Scegli un criterio o una griglia di riferimento
-3. Inserisci voto (opzionale) e note dettagliate
-4. Traccia la data della valutazione
-5. Visualizza tutte le valutazioni assegnate
+3. Seleziona la disciplina di riferimento
+4. Inserisci voto (opzionale) e note dettagliate
+5. Traccia la data della valutazione
+6. Visualizza tutte le valutazioni assegnate
+
+#### 📈 Risultati e Statistiche
+1. **Visualizzazione per Studente**: Vedi tutte le valutazioni di ogni studente con media calcolata automaticamente
+2. **Visualizzazione Aggregata per Classe**: Analizza i risultati a livello di classe con:
+   - Media generale della classe
+   - Numero totale di valutazioni
+   - Medie per disciplina con dettaglio del numero di valutazioni
+3. **Filtri Avanzati**: Filtra i risultati per classe, disciplina o studente specifico
+4. **Cambio Visualizzazione**: Passa facilmente tra vista studente e vista classe
 
 #### 📥 Esportazione Valutazioni
 - Esporta tutte le valutazioni in formato JSON
 - Include criteri, griglie e valutazioni con dati completi
-- Ideale per reportistica e analisi
+- **Statistiche avanzate**: L'export include automaticamente:
+  - Numero totale di valutazioni, studenti e classi
+  - Media generale di tutte le valutazioni
+  - Statistiche per disciplina (conteggio e media)
+  - Statistiche per classe (conteggio e media)
+- Ideale per reportistica e analisi dettagliate
 
 ### 🔔 Notifiche e Promemoria
 

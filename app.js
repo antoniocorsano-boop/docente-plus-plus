@@ -1125,7 +1125,15 @@ ${lessonData.evaluation || 'N/D'}
         const filterSubject = document.getElementById('filter-subject');
         if (filterSubject) {
             filterSubject.innerHTML = '<option value="">Tutte le discipline</option>';
-            this.subjects.forEach(subject => {
+            
+            // Get unique subjects from evaluations and this.subjects
+            const allSubjects = new Set();
+            this.subjects.forEach(s => allSubjects.add(s));
+            this.evaluations.forEach(e => {
+                if (e.subjectId) allSubjects.add(e.subjectId);
+            });
+            
+            Array.from(allSubjects).sort().forEach(subject => {
                 const option = document.createElement('option');
                 option.value = subject;
                 option.textContent = subject;
