@@ -1091,3 +1091,154 @@ header h1 {
     opacity: 0.5;
 }
 
+/* Results and Analytics Styles */
+.filters-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.filter-group select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+}
+
+.results-display {
+    margin-top: 20px;
+}
+
+.student-results,
+.class-results {
+    margin-bottom: 20px;
+}
+
+.student-results-header,
+.class-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.student-results-header h5,
+.class-results-header h5 {
+    font-size: 1.2em;
+    color: var(--text-primary);
+}
+
+.avg-score {
+    background: var(--primary-color);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.student-evaluations {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.evaluation-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 150px 80px;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    align-items: center;
+}
+
+.eval-date {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.eval-criterion {
+    font-weight: 500;
+}
+
+.eval-subject {
+    color: var(--primary-color);
+    font-size: 0.9em;
+}
+
+.eval-score {
+    text-align: right;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.class-stats {
+    margin-top: 15px;
+}
+
+.class-stats p {
+    margin-bottom: 10px;
+}
+
+.subject-stats {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.subject-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    margin: 5px 0;
+    background: var(--bg-color);
+    border-radius: 6px;
+}
+
+.subject-stat-row span:first-child {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.subject-stat-row span:last-child {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Responsive Design for Results */
+@media (max-width: 768px) {
+    .filters-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .evaluation-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .eval-score {
+        text-align: left;
+    }
+}
+
+
