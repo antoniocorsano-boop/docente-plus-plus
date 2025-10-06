@@ -10,7 +10,7 @@
    Mario,Rossi,mario@example.com,3A,2005-03-15,San Mario - 19 Gennaio
    ```
 
-2. **Open Docente++** and go to the "📂 Documenti" tab
+2. **Open Docente++** and go to the "🤖 Importa/gestisci con IA" tab
 
 3. **Upload the file**:
    - Click the upload area, or
@@ -33,7 +33,7 @@
 
 ### Step 2: Record a Lesson
 
-1. **Go to "📂 Documenti" tab**
+1. **Go to "🤖 Importa/gestisci con IA" tab**
 
 2. **Scroll to "🎙️ Registrazione Audio Lezione"**
 

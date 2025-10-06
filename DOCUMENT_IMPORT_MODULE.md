@@ -43,7 +43,7 @@ Il modulo di importazione documenti è un sistema avanzato integrato in Docente+
 ### Accesso al Modulo
 
 Il modulo è accessibile tramite:
-- Tab "📂 Documenti" nella navigazione principale
+- Tab "🤖 Importa/gestisci con IA" nella navigazione principale
 - Pulsante "📥 Importa da File" nella sezione Studenti
 
 ### Importazione Studenti da CSV/Excel
@@ -80,7 +80,7 @@ Anna,Neri,anna.neri@example.com,3B,2005-04-12,Sant'Anna - 26 Luglio,Ottima in it
 
 #### Passo 2: Caricare il File
 
-1. Naviga alla sezione "📂 Documenti"
+1. Naviga alla sezione "🤖 Importa/gestisci con IA"
 2. Clicca sull'area di upload "📎 Clicca per selezionare o trascina un file qui"
 3. Seleziona il file CSV o Excel dal tuo computer
    - Oppure trascinalo direttamente nell'area di upload
@@ -146,7 +146,7 @@ Duplicati aggiornati: 2
 
 #### Avviare una Registrazione
 
-1. Vai nella sezione "📂 Documenti"
+1. Vai nella sezione "🤖 Importa/gestisci con IA"
 2. Scorri fino a "🎙️ Registrazione Audio Lezione"
 3. Clicca "🎙️ Avvia Registrazione"
 4. Autorizza l'accesso al microfono quando richiesto dal browser
