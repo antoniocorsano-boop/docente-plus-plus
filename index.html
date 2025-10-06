@@ -102,6 +102,7 @@
             <button class="tab-button" data-tab="lessons">Lezioni</button>
             <button class="tab-button" data-tab="students">Studenti</button>
             <button class="tab-button" data-tab="classes">Classi</button>
+            <button class="tab-button" data-tab="evaluations">Valutazioni</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
         </nav>
@@ -252,6 +253,145 @@
             </div>
 
             <div id="classes-list" class="classes-list"></div>
+        </div>
+
+        <!-- Evaluations Tab -->
+        <div id="evaluations" class="tab-content">
+            <h2>Gestione Valutazioni</h2>
+            
+            <!-- Evaluation Criteria Section -->
+            <div class="evaluation-section">
+                <h3>📋 Criteri di Valutazione</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddCriterionForm()">➕ Nuovo Criterio</button>
+                    <button class="btn btn-secondary" onclick="app.generateCriteriaWithAI()">🤖 Genera con IA</button>
+                </div>
+
+                <div id="add-criterion-form" class="form-container" style="display: none;">
+                    <h4>Nuovo Criterio di Valutazione</h4>
+                    <form id="criterion-form" onsubmit="event.preventDefault(); app.addCriterion();">
+                        <div class="form-group">
+                            <label for="criterion-name">Nome Criterio: *</label>
+                            <input type="text" id="criterion-name" placeholder="es. Comprensione del testo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-description">Descrizione:</label>
+                            <textarea id="criterion-description" rows="3" placeholder="Descrivi il criterio di valutazione"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-subject">Disciplina:</label>
+                            <input type="text" id="criterion-subject" placeholder="es. Italiano">
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-type">Tipo:</label>
+                            <select id="criterion-type">
+                                <option value="">Seleziona tipo</option>
+                                <option value="conoscenza">Conoscenza</option>
+                                <option value="competenza">Competenza</option>
+                                <option value="abilità">Abilità</option>
+                                <option value="atteggiamento">Atteggiamento</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddCriterionForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="criteria-list" class="criteria-list"></div>
+            </div>
+
+            <!-- Evaluation Grids Section -->
+            <div class="evaluation-section">
+                <h3>📊 Griglie di Valutazione (Rubriche)</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddGridForm()">➕ Nuova Griglia</button>
+                </div>
+
+                <div id="add-grid-form" class="form-container" style="display: none;">
+                    <h4>Nuova Griglia di Valutazione</h4>
+                    <form id="grid-form" onsubmit="event.preventDefault(); app.addGrid();">
+                        <div class="form-group">
+                            <label for="grid-name">Nome Griglia: *</label>
+                            <input type="text" id="grid-name" placeholder="es. Rubrica di Italiano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grid-description">Descrizione:</label>
+                            <textarea id="grid-description" rows="3" placeholder="Descrivi la griglia di valutazione"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="grid-subject">Disciplina:</label>
+                            <input type="text" id="grid-subject" placeholder="es. Italiano">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddGridForm()">Annulla</button>
+                        </div>
+                        <small>Nota: La griglia sarà creata con 4 livelli di default (Eccellente, Buono, Sufficiente, Insufficiente)</small>
+                    </form>
+                </div>
+
+                <div id="grids-list" class="grids-list"></div>
+            </div>
+
+            <!-- Evaluations Section -->
+            <div class="evaluation-section">
+                <h3>✅ Valutazioni Assegnate</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddEvaluationForm()">➕ Nuova Valutazione</button>
+                    <button class="btn btn-secondary" onclick="app.exportEvaluations()">📥 Esporta Valutazioni</button>
+                </div>
+
+                <div id="add-evaluation-form" class="form-container" style="display: none;">
+                    <h4>Nuova Valutazione</h4>
+                    <form id="evaluation-form" onsubmit="event.preventDefault(); app.addEvaluation();">
+                        <div class="form-group">
+                            <label for="evaluation-student">Studente:</label>
+                            <select id="evaluation-student">
+                                <option value="">Seleziona studente</option>
+                            </select>
+                            <small>Oppure seleziona una classe qui sotto</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-class">Classe:</label>
+                            <select id="evaluation-class">
+                                <option value="">Seleziona classe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-criterion">Criterio:</label>
+                            <select id="evaluation-criterion">
+                                <option value="">Seleziona criterio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-grid">Griglia:</label>
+                            <select id="evaluation-grid">
+                                <option value="">Seleziona griglia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-score">Voto (opzionale):</label>
+                            <input type="number" id="evaluation-score" min="0" max="10" step="0.5" placeholder="es. 8">
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-date">Data:</label>
+                            <input type="date" id="evaluation-date" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-notes">Note:</label>
+                            <textarea id="evaluation-notes" rows="3" placeholder="Aggiungi note sulla valutazione"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddEvaluationForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="evaluations-list" class="evaluations-list"></div>
+            </div>
         </div>
 
         <!-- AI Assistant Tab -->

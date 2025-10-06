@@ -16,6 +16,7 @@ App per un insegnamento basato su IA, evoluzione del progetto docente-plus con i
 - **Dashboard Intuitiva**: Panoramica rapida di lezioni, studenti e attività con selezione classe attiva
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **Gestione Studenti**: Organizza e gestisci i tuoi studenti
+- **✅ Gestione Valutazioni**: Sistema completo per criteri, griglie e valutazioni personalizzate
 - **Assistente IA OpenRouter**: Ottieni aiuto per pianificazione didattica, creazione materiali e idee innovative
 - **Generazione Automatica**: Crea piani di lezione completi con l'IA
 - **Persistenza Dati**: Tutti i dati salvati localmente nel browser
@@ -96,6 +97,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Gestione Classi**: Creazione, modifica, eliminazione classi
 - **Gestione Studenti**: Organizzazione degli studenti
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
+- **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
 - **Gestione Materie**: Gestione discipline con autocomplete intelligente
 - **Configurazione Anno Scolastico**: Date inizio/fine personalizzabili
 - **Dashboard Intuitiva**: Panoramica di lezioni, studenti e attività
@@ -108,7 +110,6 @@ L'assistente IA OpenRouter può aiutarti con:
 
 Le seguenti funzionalità sono pianificate per le prossime versioni:
 
-- **Gestione avanzata delle valutazioni**: Possibilità di creare, assegnare e visualizzare criteri e griglie di valutazione personalizzate per studenti/classi
 - **Notifiche e promemoria**: Sistema di notifiche per scadenze, attività e aggiornamenti
 - **Esportazione dati in formati aggiuntivi**: Supporto a PDF/Excel per report e stampe
 - **Gestione attività didattiche**: Modulo dedicato per esercizi, attività interattive, compiti e materiali associati alle lezioni
@@ -153,6 +154,37 @@ Visualizza statistiche rapide su:
 1. Aggiungi studenti con nome, email e classe
 2. Visualizza e gestisci l'elenco completo
 3. Elimina studenti quando necessario
+
+### ✅ Gestione Valutazioni
+
+La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazione degli studenti:
+
+#### 📋 Criteri di Valutazione
+1. Crea criteri personalizzati (es. "Comprensione del testo narrativo")
+2. Specifica tipo: Conoscenza, Competenza, Abilità o Atteggiamento
+3. Associa una disciplina al criterio
+4. Usa l'IA per generare criteri automaticamente
+
+#### 📊 Griglie di Valutazione (Rubriche)
+1. Crea griglie con livelli di performance predefiniti:
+   - **Eccellente**: 10/10
+   - **Buono**: 8/10
+   - **Sufficiente**: 6/10
+   - **Insufficiente**: 4/10
+2. Personalizza per disciplina e argomento
+3. Usa le griglie per valutazioni standardizzate
+
+#### ✅ Assegnazione Valutazioni
+1. Assegna valutazioni a singoli studenti o classi intere
+2. Scegli un criterio o una griglia di riferimento
+3. Inserisci voto (opzionale) e note dettagliate
+4. Traccia la data della valutazione
+5. Visualizza tutte le valutazioni assegnate
+
+#### 📥 Esportazione Valutazioni
+- Esporta tutte le valutazioni in formato JSON
+- Include criteri, griglie e valutazioni con dati completi
+- Ideale per reportistica e analisi
 
 ### Assistente IA
 1. Scrivi la tua richiesta nella chat
