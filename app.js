@@ -851,9 +851,9 @@ ${lessonData.evaluation || 'N/D'}
                 (new Date(activity.deadline) - new Date()) < (3 * 24 * 60 * 60 * 1000) : false;
 
             return `
-                <div class="activity-item">
+                <div class="activity-item" role="article" aria-labelledby="activity-title-${activity.id}">
                     <div class="activity-header">
-                        <h4>${icon} ${activity.title}</h4>
+                        <h4 id="activity-title-${activity.id}">${icon} ${activity.title}</h4>
                         <div class="activity-badges">
                             <span class="activity-status" style="background-color: ${statusColor}">${statusLabel}</span>
                             <span class="activity-priority" style="background-color: ${priorityColor}">Priorità: ${priorityLabel}</span>
@@ -865,9 +865,9 @@ ${lessonData.evaluation || 'N/D'}
                     ${cls ? `<p><strong>Classe:</strong> ${cls.name}</p>` : ''}
                     ${student ? `<p><strong>Studente:</strong> ${student.name}</p>` : ''}
                     ${progress > 0 ? `
-                        <div class="activity-progress">
+                        <div class="activity-progress" role="group" aria-label="Avanzamento attività">
                             <label><strong>Avanzamento:</strong> ${progress}%</label>
-                            <div class="progress-bar">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Percentuale di completamento ${progress}%">
                                 <div class="progress-fill" style="width: ${progress}%; background-color: ${statusColor}"></div>
                             </div>
                         </div>
