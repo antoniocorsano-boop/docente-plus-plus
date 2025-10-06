@@ -236,7 +236,7 @@ Il modulo di importazione con IA ti permette di caricare elenchi studenti da fil
 
 1. **Dalla sezione Studenti**:
    - Clicca "📥 Importa da File"
-   - Verrai portato automaticamente alla sezione Documenti
+   - Verrai portato automaticamente alla sezione "🤖 Importa/gestisci con IA"
 
 2. **Caricamento File**:
    - Clicca sull'area di upload o trascina il file
@@ -287,7 +287,7 @@ Laura,Bianchi,laura.bianchi@example.com,3A,2005-07-22,Santa Laura - 19 Ottobre,P
 Il modulo di registrazione audio ti permette di registrare le lezioni per successive analisi:
 
 1. **Avvia Registrazione**:
-   - Vai nella sezione "📂 Documenti"
+   - Vai nella sezione "🤖 Importa/gestisci con IA"
    - Scorri fino a "🎙️ Registrazione Audio Lezione"
    - Clicca "🎙️ Avvia Registrazione"
    - Autorizza l'accesso al microfono se richiesto
@@ -314,7 +314,7 @@ Il modulo di registrazione audio ti permette di registrare le lezioni per succes
 
 ### 📂 Gestione Documenti Importati
 
-Nella sezione "📂 Documenti" puoi:
+Nella sezione "🤖 Importa/gestisci con IA" puoi:
 - Visualizzare lo storico dei documenti importati
 - Vedere statistiche di importazione (elementi importati, duplicati)
 - Tenere traccia di data e tipo di ogni importazione

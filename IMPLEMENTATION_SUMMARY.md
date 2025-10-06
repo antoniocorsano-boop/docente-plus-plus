@@ -53,7 +53,7 @@ January 2025
 - [x] Recording metadata display
 
 #### 5. User Interface
-- [x] New "📂 Documenti" tab in navigation
+- [x] New "🤖 Importa/gestisci con IA" tab in navigation
 - [x] Import button in Students section
 - [x] Enhanced student form
 - [x] Upload area with visual feedback
@@ -85,7 +85,7 @@ January 2025
 1. **index.html** (93 lines added)
    - Added PapaParse CDN
    - Enhanced student form (3 new fields)
-   - New "Documenti" tab in navigation
+   - New "🤖 Importa/gestisci con IA" tab in navigation
    - Document import interface
    - Audio recording interface
 
