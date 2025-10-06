@@ -16,6 +16,7 @@ class DocentePlusPlus {
         this.evaluations = [];
         this.notifications = [];
         this.reminders = [];
+        this.activities = [];
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -52,6 +53,7 @@ class DocentePlusPlus {
         this.renderStudents();
         this.renderClasses();
         this.renderEvaluations();
+        this.renderActivities();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
@@ -95,6 +97,15 @@ class DocentePlusPlus {
             classForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.saveClass();
+            });
+        }
+
+        // Activity form
+        const activityForm = document.getElementById('activity-form');
+        if (activityForm) {
+            activityForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addActivity();
             });
         }
 
@@ -324,6 +335,10 @@ class DocentePlusPlus {
     renderDashboard() {
         document.getElementById('lesson-count').textContent = this.lessons.length;
         document.getElementById('student-count').textContent = this.students.length;
+        
+        // Count in-progress activities
+        const inProgressActivities = this.activities.filter(a => a.status === 'in-progress' || a.status === 'planned');
+        document.getElementById('activity-count').textContent = inProgressActivities.length;
         
         // Count pending evaluations (those without a score or from the last 7 days)
         const now = new Date();
@@ -592,6 +607,163 @@ ${lessonData.evaluation || 'N/D'}
                 </div>
             </div>
         `).join('');
+    }
+
+    // Activity management methods
+    showAddActivityForm() {
+        document.getElementById('add-activity-form').style.display = 'block';
+        this.updateActivityFormSelectors();
+    }
+
+    hideAddActivityForm() {
+        document.getElementById('add-activity-form').style.display = 'none';
+        document.getElementById('activity-form').reset();
+    }
+
+    updateActivityFormSelectors() {
+        const classSelector = document.getElementById('activity-class');
+        const studentSelector = document.getElementById('activity-student');
+        
+        if (classSelector) {
+            classSelector.innerHTML = '<option value="">Nessuna (generale)</option>' +
+                this.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+        
+        if (studentSelector) {
+            studentSelector.innerHTML = '<option value="">Nessuno (tutta la classe)</option>' +
+                this.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+    }
+
+    addActivity() {
+        const activity = {
+            id: Date.now(),
+            title: document.getElementById('activity-title').value,
+            type: document.getElementById('activity-type').value,
+            description: document.getElementById('activity-description').value,
+            deadline: document.getElementById('activity-deadline').value,
+            classId: document.getElementById('activity-class').value || null,
+            studentId: document.getElementById('activity-student').value || null,
+            status: 'planned',
+            createdAt: new Date().toISOString()
+        };
+
+        this.activities.push(activity);
+        this.saveData();
+        this.renderActivities();
+        this.renderDashboard();
+        this.hideAddActivityForm();
+    }
+
+    deleteActivity(id) {
+        if (confirm('Sei sicuro di voler eliminare questa attività?')) {
+            this.activities = this.activities.filter(activity => activity.id !== id);
+            this.saveData();
+            this.renderActivities();
+            this.renderDashboard();
+        }
+    }
+
+    updateActivityStatus(id, newStatus) {
+        const activity = this.activities.find(a => a.id === id);
+        if (activity) {
+            activity.status = newStatus;
+            activity.updatedAt = new Date().toISOString();
+            this.saveData();
+            this.renderActivities();
+            this.renderDashboard();
+        }
+    }
+
+    filterActivities(filterType) {
+        this.activityFilter = filterType;
+        this.renderActivities();
+    }
+
+    renderActivities() {
+        const activitiesList = document.getElementById('activities-list');
+        
+        if (!activitiesList) return;
+
+        if (this.activities.length === 0) {
+            activitiesList.innerHTML = `
+                <div class="empty-state">
+                    <h3>Nessuna attività programmata</h3>
+                    <p>Inizia aggiungendo una nuova attività didattica</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Apply filter
+        let filteredActivities = this.activities;
+        const filterSelect = document.getElementById('activity-filter');
+        if (filterSelect) {
+            const filterValue = filterSelect.value;
+            if (filterValue && filterValue !== 'all') {
+                if (filterValue === 'planned' || filterValue === 'in-progress' || filterValue === 'completed') {
+                    filteredActivities = this.activities.filter(a => a.status === filterValue);
+                } else {
+                    filteredActivities = this.activities.filter(a => a.type === filterValue);
+                }
+            }
+        }
+
+        // Sort by deadline (newest first)
+        filteredActivities.sort((a, b) => {
+            if (!a.deadline) return 1;
+            if (!b.deadline) return -1;
+            return new Date(a.deadline) - new Date(b.deadline);
+        });
+
+        const activityTypeIcons = {
+            'lesson': '📚',
+            'exercise': '✏️',
+            'lab': '🔬',
+            'project': '📊',
+            'homework': '📝',
+            'exam': '📄'
+        };
+
+        const statusLabels = {
+            'planned': 'Pianificata',
+            'in-progress': 'In corso',
+            'completed': 'Completata'
+        };
+
+        const statusColors = {
+            'planned': '#3498db',
+            'in-progress': '#f39c12',
+            'completed': '#27ae60'
+        };
+
+        activitiesList.innerHTML = filteredActivities.map(activity => {
+            const cls = this.classes.find(c => c.id == activity.classId);
+            const student = this.students.find(s => s.id == activity.studentId);
+            const icon = activityTypeIcons[activity.type] || '📋';
+            const statusLabel = statusLabels[activity.status] || activity.status;
+            const statusColor = statusColors[activity.status] || '#95a5a6';
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-header">
+                        <h4>${icon} ${activity.title}</h4>
+                        <span class="activity-status" style="background-color: ${statusColor}">${statusLabel}</span>
+                    </div>
+                    <p><strong>Tipo:</strong> ${activity.type}</p>
+                    ${activity.description ? `<p><strong>Descrizione:</strong> ${activity.description}</p>` : ''}
+                    ${activity.deadline ? `<p><strong>Scadenza:</strong> ${new Date(activity.deadline).toLocaleDateString('it-IT')}</p>` : ''}
+                    ${cls ? `<p><strong>Classe:</strong> ${cls.name}</p>` : ''}
+                    ${student ? `<p><strong>Studente:</strong> ${student.name}</p>` : ''}
+                    <div class="activity-actions">
+                        ${activity.status !== 'in-progress' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'in-progress')">In corso</button>` : ''}
+                        ${activity.status !== 'completed' ? `<button class="btn btn-success" onclick="app.updateActivityStatus(${activity.id}, 'completed')">Completa</button>` : ''}
+                        ${activity.status === 'completed' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'planned')">Riapri</button>` : ''}
+                        <button class="btn btn-danger" onclick="app.deleteActivity(${activity.id})">Elimina</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     // Class Management methods
@@ -1693,6 +1865,7 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-notifications', JSON.stringify(this.notifications));
         localStorage.setItem('docente-plus-reminders', JSON.stringify(this.reminders));
         localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
+        localStorage.setItem('docente-plus-activities', JSON.stringify(this.activities));
     }
 
     loadData() {
@@ -1788,6 +1961,17 @@ ${lessonData.evaluation || 'N/D'}
                 console.error('Error loading notification settings:', e);
             }
         }
+
+        // Load activities
+        const activitiesData = localStorage.getItem('docente-plus-activities');
+        if (activitiesData) {
+            try {
+                this.activities = JSON.parse(activitiesData);
+            } catch (e) {
+                console.error('Error loading activities:', e);
+                this.activities = [];
+            }
+        }
     }
 
     exportData() {
@@ -1833,6 +2017,7 @@ ${lessonData.evaluation || 'N/D'}
             students: this.students,
             classes: this.classes,
             subjects: this.subjects,
+            activities: this.activities,
             evaluationCriteria: this.evaluationCriteria,
             evaluationGrids: this.evaluationGrids,
             evaluations: this.evaluations,
@@ -1989,6 +2174,8 @@ ${lessonData.evaluation || 'N/D'}
         doc.text(`Classi: ${data.classes.length}`, 14, yPos);
         yPos += 7;
         doc.text(`Discipline: ${data.subjects.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Attività: ${data.activities.length}`, 14, yPos);
         yPos += 7;
         doc.text(`Valutazioni: ${data.evaluations.length}`, 14, yPos);
         yPos += 7;
@@ -2228,6 +2415,29 @@ ${lessonData.evaluation || 'N/D'}
             XLSX.utils.book_append_sheet(wb, wsLessons, 'Lezioni');
         }
 
+        // Activities sheet
+        if (data.activities && data.activities.length > 0) {
+            const activitiesData = [
+                ['Titolo', 'Tipo', 'Descrizione', 'Scadenza', 'Classe', 'Studente', 'Stato', 'Data Creazione']
+            ];
+            data.activities.forEach(a => {
+                const cls = data.classes.find(c => c.id == a.classId);
+                const student = data.students.find(s => s.id == a.studentId);
+                activitiesData.push([
+                    a.title || '',
+                    a.type || '',
+                    a.description || '',
+                    a.deadline ? new Date(a.deadline).toLocaleDateString('it-IT') : '',
+                    cls ? cls.name : '',
+                    student ? student.name : '',
+                    a.status || '',
+                    a.createdAt ? new Date(a.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsActivities = XLSX.utils.aoa_to_sheet(activitiesData);
+            XLSX.utils.book_append_sheet(wb, wsActivities, 'Attività');
+        }
+
         // Evaluations sheet
         if (data.evaluations.length > 0) {
             const evaluationsData = [
@@ -2383,6 +2593,9 @@ ${lessonData.evaluation || 'N/D'}
                         this.subjects = data.subjects;
                         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
                     }
+                    if (data.activities) {
+                        this.activities = data.activities;
+                    }
                     if (data.evaluationCriteria) {
                         this.evaluationCriteria = data.evaluationCriteria;
                     }
@@ -2417,6 +2630,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.renderLessons();
                     this.renderStudents();
                     this.renderClasses();
+                    this.renderActivities();
                     this.renderEvaluations();
                     this.renderNotifications();
                     this.updateClassSelectors();
