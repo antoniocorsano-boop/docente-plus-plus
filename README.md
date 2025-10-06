@@ -96,9 +96,26 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Persistenza Dati**: Salvataggio locale dei dati nel browser
 - **Import/Export Avanzato**: Backup e ripristino in **formati multipli (JSON, PDF, Excel)**
 - **Esportazione PDF e Excel**: Report professionali stampabili e fogli di calcolo per analisi avanzate
+- **📂 Modulo Importazione Documenti con IA**: Sistema avanzato per importare e gestire documenti didattici e anagrafici
+  - Caricamento file multipli formati (CSV, XLSX, PDF, TXT, JSON)
+  - Riconoscimento automatico tipo documento tramite IA
+  - Importazione intelligente anagrafica studenti con campi estesi (data nascita, onomastico, note)
+  - Gestione duplicati con merge automatico
+  - Anteprima dati prima dell'importazione
+  - Storico documenti importati
+- **🎙️ Registrazione Audio Lezioni**: Registra e gestisci audio delle lezioni
+  - Registrazione con timer in tempo reale
+  - Associazione automatica contesto (classe, lezione, data)
+  - Riproduzione e download registrazioni
+  - Gestione archivio registrazioni
 - **Onboarding Guidato**: Configurazione iniziale del profilo docente al primo accesso
 - **Gestione Classi**: Creazione, modifica, eliminazione classi
-- **Gestione Studenti**: Organizzazione degli studenti
+- **Gestione Studenti Avanzata**: Organizzazione studenti con campi estesi
+  - Dati anagrafici completi (nome, email, classe)
+  - Data di nascita per calcolo età e compleanni
+  - Onomastico/Santo per notifiche personalizzate
+  - Note aggiuntive personalizzabili
+  - Importazione massiva da file CSV/Excel
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **📅 Gestione Orario Didattico**: Orario settimanale interattivo con vista giornaliera/settimanale, assegnazione classi e tipi di attività (teoria, disegno, laboratorio), esclusione automatica weekend, integrazione con attività
 - **📋 Gestione Attività Didattiche**: Sistema completo per pianificare, monitorare e gestire attività (lezioni, esercitazioni, laboratori, progetti, compiti, verifiche) con:
@@ -124,6 +141,10 @@ L'assistente IA OpenRouter può aiutarti con:
 
 Le seguenti funzionalità sono pianificate per le prossime versioni:
 
+- **Importazione Materiali Didattici**: Caricamento e classificazione automatica materiali didattici
+- **Importazione Attività**: Import massivo di attività e programmi didattici
+- **Trascrizione Audio con IA**: Trascrizione automatica registrazioni audio lezioni
+- **Analisi Predittiva**: Analisi progressi studenti e suggerimenti IA
 - **Backup cloud opzionale**: Sincronizzazione e ripristino dati tramite provider esterni (es. Google Drive, Dropbox)
 - **Accessibilità estesa**: Miglioramento funzioni per utenti con disabilità (es. navigazione da tastiera, testo alternativo, modalità contrasto elevato)
 
@@ -196,9 +217,107 @@ La sezione "Orario" ti permette di gestire il tuo orario settimanale in modo int
 > **Nota**: L'orario viene salvato automaticamente e incluso nei backup JSON, PDF ed Excel.
 
 ### Gestione Studenti
-1. Aggiungi studenti con nome, email e classe
-2. Visualizza e gestisci l'elenco completo
-3. Elimina studenti quando necessario
+
+#### Aggiunta Manuale Studenti
+1. Vai nella sezione "Studenti"
+2. Clicca su "➕ Nuovo Studente"
+3. Compila il form con i dati dello studente:
+   - Nome e Cognome (obbligatorio)
+   - Email
+   - Classe
+   - Data di Nascita (per gestione compleanni e calcolo età)
+   - Onomastico/Santo (es. "San Giovanni - 24 Giugno")
+   - Note aggiuntive
+4. Clicca "Salva"
+
+#### 📥 Importazione Studenti da File
+
+Il modulo di importazione con IA ti permette di caricare elenchi studenti da file CSV o Excel:
+
+1. **Dalla sezione Studenti**:
+   - Clicca "📥 Importa da File"
+   - Verrai portato automaticamente alla sezione Documenti
+
+2. **Caricamento File**:
+   - Clicca sull'area di upload o trascina il file
+   - Formati supportati: CSV, XLSX, PDF, TXT, JSON
+   - Il file verrà analizzato automaticamente
+
+3. **Classificazione IA** (se hai configurato OpenRouter API Key):
+   - L'IA riconosce automaticamente il tipo di documento
+   - Mostra il livello di confidenza della classificazione
+   - Fornisce suggerimenti per l'importazione
+
+4. **Anteprima e Conferma**:
+   - Visualizza i dati estratti in tabella
+   - Verifica che i campi siano mappati correttamente
+   - Clicca "✅ Conferma Importazione"
+
+5. **Gestione Duplicati**:
+   - Gli studenti esistenti vengono identificati per nome ed email
+   - I dati mancanti vengono integrati automaticamente
+   - Ricevi un riepilogo: nuovi studenti + duplicati aggiornati
+
+#### Formato File CSV/Excel
+
+Il sistema riconosce automaticamente colonne comuni:
+- `nome`, `name` → Nome studente
+- `cognome`, `lastname` → Cognome
+- `email`, `e-mail` → Email
+- `classe`, `class` → Classe
+- `data_nascita`, `birthdate`, `nascita` → Data di nascita
+- `onomastico`, `santo`, `nameday` → Onomastico
+- `note`, `notes` → Note aggiuntive
+
+**Esempio CSV:**
+```csv
+nome,cognome,email,classe,data_nascita,onomastico,note
+Mario,Rossi,mario.rossi@example.com,3A,2005-03-15,San Mario - 19 Gennaio,Studente eccellente
+Laura,Bianchi,laura.bianchi@example.com,3A,2005-07-22,Santa Laura - 19 Ottobre,Partecipazione attiva
+```
+
+#### Visualizzazione Studenti
+- L'elenco mostra tutti i dati dello studente
+- Data di nascita formattata in italiano
+- Onomastico per ricordare le celebrazioni
+- Note sempre visibili per riferimento rapido
+
+### 🎙️ Registrazione Audio Lezioni
+
+Il modulo di registrazione audio ti permette di registrare le lezioni per successive analisi:
+
+1. **Avvia Registrazione**:
+   - Vai nella sezione "📂 Documenti"
+   - Scorri fino a "🎙️ Registrazione Audio Lezione"
+   - Clicca "🎙️ Avvia Registrazione"
+   - Autorizza l'accesso al microfono se richiesto
+
+2. **Durante la Registrazione**:
+   - Timer in tempo reale mostra la durata
+   - La registrazione associa automaticamente:
+     - Classe attiva
+     - Data e ora
+     - Lezione corrente (se disponibile)
+
+3. **Ferma e Salva**:
+   - Clicca "⏹️ Ferma Registrazione"
+   - L'audio viene salvato automaticamente
+   - Ricevi una notifica di conferma
+
+4. **Gestione Registrazioni**:
+   - Riproduci le registrazioni direttamente nell'app
+   - Scarica i file audio (formato WebM)
+   - Visualizza contesto (classe, lezione, data)
+   - Elimina le registrazioni non più necessarie
+
+> **Nota**: Le registrazioni audio sono mantenute in memoria durante la sessione. Per conservarle a lungo termine, scaricale sul tuo dispositivo.
+
+### 📂 Gestione Documenti Importati
+
+Nella sezione "📂 Documenti" puoi:
+- Visualizzare lo storico dei documenti importati
+- Vedere statistiche di importazione (elementi importati, duplicati)
+- Tenere traccia di data e tipo di ogni importazione
 
 ### ✅ Gestione Valutazioni
 
