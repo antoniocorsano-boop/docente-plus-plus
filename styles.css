@@ -1397,5 +1397,165 @@ header h1 {
     color: #666;
 }
 
+/* Schedule Styles */
+.schedule-info {
+    background-color: #e8f4f8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.schedule-info p {
+    margin: 5px 0;
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.schedule-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.schedule-view-toggle {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.schedule-table thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.schedule-table th,
+.schedule-table td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.schedule-table th {
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.schedule-hour {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.schedule-slot {
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-height: 60px;
+    vertical-align: middle;
+    position: relative;
+}
+
+.schedule-slot:hover {
+    background-color: #f0f7ff;
+}
+
+.slot-class {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.slot-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.slot-activity {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 0.85em;
+}
+
+/* Modal adjustments for schedule */
+.modal-content .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.modal-content .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.activity-section {
+    margin-bottom: 20px;
+}
+
+.activity-section h4 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.activity-option {
+    cursor: pointer;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.activity-option:hover {
+    background-color: #f0f7ff;
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.activity-option strong {
+    display: block;
+    color: var(--text-primary);
+}
+
+.activity-option p {
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
 
 

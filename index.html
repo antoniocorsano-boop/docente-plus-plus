@@ -134,6 +134,7 @@
         <nav class="tabs">
             <button class="tab-button active" data-tab="dashboard">Dashboard</button>
             <button class="tab-button" data-tab="lessons">Lezioni</button>
+            <button class="tab-button" data-tab="schedule">Orario</button>
             <button class="tab-button" data-tab="activities">Attività</button>
             <button class="tab-button" data-tab="students">Studenti</button>
             <button class="tab-button" data-tab="classes">Classi</button>
@@ -223,6 +224,16 @@
             </div>
 
             <div id="lessons-list" class="lessons-list"></div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <h2>📅 Orario Didattico</h2>
+            <div class="schedule-info">
+                <p>Gestisci il tuo orario settimanale. Clicca su una cella per assegnare una classe e un tipo di attività (Teoria, Disegno, Laboratorio).</p>
+                <p><small>Gli slot orari vanno dalle 8:00 alle 14:00, dal lunedì al venerdì. Sabato e domenica sono automaticamente esclusi.</small></p>
+            </div>
+            <div id="schedule-container"></div>
         </div>
 
         <!-- Activities Tab -->
