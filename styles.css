@@ -1225,6 +1225,60 @@ header h1 {
     font-weight: 600;
 }
 
+/* Notification Filters */
+.notifications-filter {
+    margin: 15px 0;
+}
+
+.notification-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-primary);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.filter-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Notification Type Indicators */
+.notification-type-lesson-reminder {
+    border-left-color: #2196F3;
+}
+
+.notification-type-custom-reminder {
+    border-left-color: #FF9800;
+}
+
+.notification-type-backup {
+    border-left-color: #9C27B0;
+}
+
+.notification-type-system {
+    border-left-color: #4CAF50;
+}
+
 /* Responsive Design for Results */
 @media (max-width: 768px) {
     .filters-container {
@@ -1238,6 +1292,14 @@ header h1 {
     
     .eval-score {
         text-align: left;
+    }
+
+    .notification-filters {
+        flex-direction: column;
+    }
+
+    .filter-btn {
+        width: 100%;
     }
 }
 

@@ -22,10 +22,14 @@ class DocentePlusPlus {
             lessonReminders: true,
             remindersBefore24h: true,
             remindersBefore1h: true,
+            backupReminders: true,
+            backupReminderInterval: 7, // days
+            lastBackupDate: null,
             quietHoursEnabled: false,
             quietHoursStart: '22:00',
             quietHoursEnd: '07:00'
         };
+        this.notificationFilter = 'all'; // all, lesson-reminder, custom-reminder, backup, system
         this.notificationCheckInterval = null;
         this.init();
     }
@@ -1888,6 +1892,18 @@ ${lessonData.evaluation || 'N/D'}
         link.click();
         
         URL.revokeObjectURL(url);
+
+        // Track backup date
+        this.notificationSettings.lastBackupDate = new Date().toISOString();
+        this.saveData();
+
+        // Create backup notification
+        this.createNotification({
+            title: '✅ Backup Completato',
+            message: 'I tuoi dati sono stati esportati con successo',
+            type: 'system',
+            notificationId: `backup-success-${Date.now()}`
+        });
     }
 
     importData() {
@@ -1957,6 +1973,14 @@ ${lessonData.evaluation || 'N/D'}
                     this.loadSettings();
                     this.renderDashboard();
                     
+                    // Create import success notification
+                    this.createNotification({
+                        title: '✅ Importazione Completata',
+                        message: 'I dati sono stati importati e ripristinati con successo',
+                        type: 'system',
+                        notificationId: `import-success-${Date.now()}`
+                    });
+                    
                     alert('Dati importati con successo!');
                 } catch (error) {
                     console.error('Error importing data:', error);
@@ -2008,6 +2032,11 @@ ${lessonData.evaluation || 'N/D'}
 
         // Check custom reminders
         this.checkCustomReminders(now);
+
+        // Check backup reminders
+        if (this.notificationSettings.backupReminders) {
+            this.checkBackupReminders(now);
+        }
     }
 
     isQuietHours(date) {
@@ -2092,6 +2121,49 @@ ${lessonData.evaluation || 'N/D'}
 
     hasNotificationBeenSent(notificationId) {
         return this.notifications.some(n => n.notificationId === notificationId);
+    }
+
+    checkBackupReminders(now) {
+        const lastBackup = this.notificationSettings.lastBackupDate;
+        const interval = this.notificationSettings.backupReminderInterval;
+        
+        if (!lastBackup) {
+            // First time - suggest backup after 7 days of use
+            const firstUseDate = localStorage.getItem('docente-plus-first-use');
+            if (!firstUseDate) {
+                localStorage.setItem('docente-plus-first-use', now.toISOString());
+                return;
+            }
+            
+            const daysSinceFirstUse = (now - new Date(firstUseDate)) / (1000 * 60 * 60 * 24);
+            if (daysSinceFirstUse >= 7) {
+                const notificationId = 'backup-initial';
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '💾 Promemoria Backup',
+                        message: 'È consigliato eseguire un backup dei tuoi dati. Vai in Impostazioni > Esporta Dati',
+                        type: 'backup',
+                        notificationId: notificationId
+                    });
+                }
+            }
+        } else {
+            // Check if it's time for regular backup reminder
+            const lastBackupDate = new Date(lastBackup);
+            const daysSinceBackup = (now - lastBackupDate) / (1000 * 60 * 60 * 24);
+            
+            if (daysSinceBackup >= interval) {
+                const notificationId = `backup-${lastBackupDate.toISOString()}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '💾 Promemoria Backup Periodico',
+                        message: `Sono passati ${Math.floor(daysSinceBackup)} giorni dall'ultimo backup. Esporta i tuoi dati per sicurezza.`,
+                        type: 'backup',
+                        notificationId: notificationId
+                    });
+                }
+            }
+        }
     }
 
     createNotification(data) {
@@ -2203,6 +2275,13 @@ ${lessonData.evaluation || 'N/D'}
         this.notificationSettings.lessonReminders = document.getElementById('notification-lesson-reminders').checked;
         this.notificationSettings.remindersBefore24h = document.getElementById('notification-24h').checked;
         this.notificationSettings.remindersBefore1h = document.getElementById('notification-1h').checked;
+        this.notificationSettings.backupReminders = document.getElementById('notification-backup-reminders').checked;
+        
+        const backupInterval = document.getElementById('notification-backup-interval').value;
+        if (backupInterval) {
+            this.notificationSettings.backupReminderInterval = parseInt(backupInterval);
+        }
+        
         this.notificationSettings.quietHoursEnabled = document.getElementById('notification-quiet-hours').checked;
         this.notificationSettings.quietHoursStart = document.getElementById('notification-quiet-start').value;
         this.notificationSettings.quietHoursEnd = document.getElementById('notification-quiet-end').value;
@@ -2219,11 +2298,33 @@ ${lessonData.evaluation || 'N/D'}
         document.getElementById('add-reminder-form').style.display = 'none';
     }
 
+    filterNotifications(filter) {
+        this.notificationFilter = filter;
+        this.renderNotifications();
+    }
+
+    getNotificationStats() {
+        const stats = {
+            total: this.notifications.length,
+            unread: this.notifications.filter(n => !n.read).length,
+            byType: {}
+        };
+
+        // Count by type
+        this.notifications.forEach(n => {
+            const type = n.type || 'other';
+            stats.byType[type] = (stats.byType[type] || 0) + 1;
+        });
+
+        return stats;
+    }
+
     renderNotifications() {
         // Render notifications list
         const notificationsList = document.getElementById('notifications-list');
         if (notificationsList) {
-            const unreadCount = this.notifications.filter(n => !n.read).length;
+            const stats = this.getNotificationStats();
+            const unreadCount = stats.unread;
             const notificationsHeader = document.getElementById('notifications-header');
             if (notificationsHeader) {
                 notificationsHeader.innerHTML = `
@@ -2232,11 +2333,41 @@ ${lessonData.evaluation || 'N/D'}
                 `;
             }
 
-            if (this.notifications.length === 0) {
+            // Add filter buttons
+            const filterSection = document.getElementById('notifications-filter');
+            if (filterSection) {
+                filterSection.innerHTML = `
+                    <div class="notification-filters">
+                        <button class="filter-btn ${this.notificationFilter === 'all' ? 'active' : ''}" onclick="app.filterNotifications('all')">
+                            Tutte (${stats.total})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'lesson-reminder' ? 'active' : ''}" onclick="app.filterNotifications('lesson-reminder')">
+                            📚 Lezioni (${stats.byType['lesson-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'custom-reminder' ? 'active' : ''}" onclick="app.filterNotifications('custom-reminder')">
+                            ⏰ Promemoria (${stats.byType['custom-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'backup' ? 'active' : ''}" onclick="app.filterNotifications('backup')">
+                            💾 Backup (${stats.byType['backup'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'system' ? 'active' : ''}" onclick="app.filterNotifications('system')">
+                            ⚙️ Sistema (${stats.byType['system'] || 0})
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Filter notifications based on current filter
+            let filteredNotifications = this.notifications;
+            if (this.notificationFilter !== 'all') {
+                filteredNotifications = this.notifications.filter(n => n.type === this.notificationFilter);
+            }
+
+            if (filteredNotifications.length === 0) {
                 notificationsList.innerHTML = '<p class="empty-state">Nessuna notifica</p>';
             } else {
-                notificationsList.innerHTML = this.notifications.slice(0, 50).map(notification => `
-                    <div class="notification-item ${notification.read ? 'read' : 'unread'}">
+                notificationsList.innerHTML = filteredNotifications.slice(0, 50).map(notification => `
+                    <div class="notification-item ${notification.read ? 'read' : 'unread'} notification-type-${notification.type || 'other'}">
                         <div class="notification-header">
                             <h4>${notification.title}</h4>
                             <span class="notification-time">${new Date(notification.createdAt).toLocaleString('it-IT')}</span>
@@ -2288,6 +2419,16 @@ ${lessonData.evaluation || 'N/D'}
             document.getElementById('notification-lesson-reminders').checked = this.notificationSettings.lessonReminders;
             document.getElementById('notification-24h').checked = this.notificationSettings.remindersBefore24h;
             document.getElementById('notification-1h').checked = this.notificationSettings.remindersBefore1h;
+            
+            const backupCheckbox = document.getElementById('notification-backup-reminders');
+            if (backupCheckbox) {
+                backupCheckbox.checked = this.notificationSettings.backupReminders;
+            }
+            const backupIntervalInput = document.getElementById('notification-backup-interval');
+            if (backupIntervalInput) {
+                backupIntervalInput.value = this.notificationSettings.backupReminderInterval || 7;
+            }
+            
             document.getElementById('notification-quiet-hours').checked = this.notificationSettings.quietHoursEnabled;
             document.getElementById('notification-quiet-start').value = this.notificationSettings.quietHoursStart;
             document.getElementById('notification-quiet-end').value = this.notificationSettings.quietHoursEnd;
