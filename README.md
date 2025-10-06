@@ -13,6 +13,7 @@ App per un insegnamento basato su IA, evoluzione del progetto docente-plus con i
 - **🏫 Gestione Classi**: Crea, modifica ed elimina le tue classi con dettagli completi
 - **📚 Discipline**: Gestione materie insegnate con autocomplete intelligente
 - **📅 Anno Scolastico**: Configurazione anno scolastico con date inizio/fine personalizzabili
+- **📅 Orario Didattico**: Gestione dell'orario settimanale con vista giornaliera e settimanale (lun-ven, 8-14)
 - **Dashboard Intuitiva**: Panoramica rapida di lezioni, studenti e attività con selezione classe attiva
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
 - **📋 Gestione Attività**: Sistema completo per pianificare e monitorare attività didattiche (esercitazioni, laboratori, progetti, compiti)
@@ -99,6 +100,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Gestione Classi**: Creazione, modifica, eliminazione classi
 - **Gestione Studenti**: Organizzazione degli studenti
 - **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
+- **📅 Gestione Orario Didattico**: Orario settimanale interattivo con vista giornaliera/settimanale, assegnazione classi e tipi di attività (teoria, disegno, laboratorio), esclusione automatica weekend, integrazione con attività
 - **📋 Gestione Attività Didattiche**: Sistema completo per pianificare, monitorare e gestire attività (lezioni, esercitazioni, laboratori, progetti, compiti, verifiche)
 - **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
 - **🔔 Notifiche e Promemoria**: Sistema completo di notifiche automatiche e promemoria personalizzabili
@@ -150,6 +152,40 @@ Visualizza statistiche rapide su:
 2. Oppure "Genera con IA" per una generazione assistita
 3. Compila i campi richiesti
 4. Salva e visualizza nella lista
+
+### 📅 Gestione Orario Didattico
+
+La sezione "Orario" ti permette di gestire il tuo orario settimanale in modo interattivo:
+
+#### Funzionalità Principali
+1. **Vista Settimanale**: Visualizza l'intera settimana dal lunedì al venerdì in una griglia
+2. **Vista Giornaliera**: Visualizza in dettaglio l'orario di un singolo giorno
+3. **Slot Orari**: Configura gli slot dalle 8:00 alle 14:00 (6 ore al giorno)
+4. **Esclusione Weekend**: Sabato e domenica sono automaticamente esclusi
+
+#### Configurazione Orario
+1. **Clicca su una cella** per modificare lo slot orario
+2. **Seleziona la classe** dal menu a tendina
+3. **Scegli il tipo di attività**:
+   - **T** (Teoria) - Badge blu
+   - **D** (Disegno) - Badge arancione
+   - **L** (Laboratorio) - Badge verde
+4. Salva o elimina lo slot
+
+#### Avvio Attività
+1. Clicca il pulsante **"Avvia"** su uno slot configurato
+2. Viene mostrata una finestra con le attività disponibili per la classe:
+   - Attività in corso
+   - Attività pianificate
+   - Attività completate di recente
+3. Seleziona un'attività per gestirla
+
+#### Navigazione
+- **Settimana Precedente/Successiva**: Naviga tra le settimane
+- **Giorno Precedente/Successivo**: Naviga tra i giorni (solo giorni lavorativi)
+- **Toggle Vista**: Passa da vista settimanale a giornaliera e viceversa
+
+> **Nota**: L'orario viene salvato automaticamente e incluso nei backup JSON, PDF ed Excel.
 
 ### Gestione Studenti
 1. Aggiungi studenti con nome, email e classe
