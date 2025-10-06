@@ -5,17 +5,47 @@ class DocentePlusPlus {
     constructor() {
         this.lessons = [];
         this.students = [];
+        this.classes = [];
+        this.subjects = [];
         this.settings = {};
         this.chatMessages = [];
         this.activeClass = '';
         this.selectedFile = null;
-        this.materials = []; // Store uploaded materials/files
+        this.evaluationCriteria = [];
+        this.evaluationGrids = [];
+        this.evaluations = [];
+        this.notifications = [];
+        this.reminders = [];
+        this.activities = [];
+        this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
+        this.notificationSettings = {
+            browserNotifications: true,
+            emailNotifications: false,
+            lessonReminders: true,
+            remindersBefore24h: true,
+            remindersBefore1h: true,
+            backupReminders: true,
+            backupReminderInterval: 7, // days
+            lastBackupDate: null,
+            quietHoursEnabled: false,
+            quietHoursStart: '22:00',
+            quietHoursEnd: '07:00'
+        };
+        this.notificationFilter = 'all'; // all, lesson-reminder, activity-reminder, custom-reminder, backup, system
+        this.notificationCheckInterval = null;
+        this.scheduleView = 'weekly'; // weekly or daily
+        this.currentScheduleDate = null; // Will be set to current/next weekday
         this.init();
     }
 
     init() {
         // Load data from localStorage
         this.loadData();
+        
+        // Check if onboarding is needed
+        if (!this.isOnboardingComplete()) {
+            this.showOnboarding();
+        }
         
         // Set up event listeners
         this.setupEventListeners();
@@ -24,9 +54,17 @@ class DocentePlusPlus {
         this.renderDashboard();
         this.renderLessons();
         this.renderStudents();
-        this.renderMaterials();
+        this.renderClasses();
+        this.renderEvaluations();
+        this.renderActivities();
+        this.renderSchedule();
         this.loadSettings();
         this.loadActiveClass();
+        this.updateClassSelectors();
+        
+        // Initialize notification system
+        this.requestNotificationPermission();
+        this.startNotificationChecks();
         
         console.log('Docente++ initialized successfully');
     }
@@ -57,6 +95,33 @@ class DocentePlusPlus {
             });
         }
 
+        // Class form
+        const classForm = document.getElementById('class-form');
+        if (classForm) {
+            classForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveClass();
+            });
+        }
+
+        // Activity form
+        const activityForm = document.getElementById('activity-form');
+        if (activityForm) {
+            activityForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addActivity();
+            });
+        }
+
+        // Onboarding form
+        const onboardingForm = document.getElementById('onboarding-form');
+        if (onboardingForm) {
+            onboardingForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.completeOnboarding();
+            });
+        }
+
         // AI input
         const aiInput = document.getElementById('ai-input');
         if (aiInput) {
@@ -66,6 +131,189 @@ class DocentePlusPlus {
                 }
             });
         }
+
+        // Subject inputs
+        this.setupSubjectInput('onboarding-subjects', 'subjects-suggestions', 'selected-subjects-display');
+        this.setupSubjectInput('teacher-subjects-settings', 'subjects-suggestions-settings', 'selected-subjects-display-settings');
+    }
+
+    // Onboarding methods
+    isOnboardingComplete() {
+        return localStorage.getItem('onboarding-complete') === 'true';
+    }
+
+    showOnboarding() {
+        const modal = document.getElementById('onboarding-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            
+            // Prefill email if available
+            const email = localStorage.getItem('teacher-email');
+            if (email) {
+                document.getElementById('onboarding-email').value = email;
+            }
+        }
+    }
+
+    completeOnboarding() {
+        // Get all form values
+        const firstName = document.getElementById('onboarding-first-name').value;
+        const lastName = document.getElementById('onboarding-last-name').value;
+        const email = document.getElementById('onboarding-email').value;
+        const schoolLevel = document.getElementById('onboarding-school-level').value;
+        const schoolName = document.getElementById('onboarding-school-name').value;
+        const schoolYear = document.getElementById('onboarding-school-year').value;
+        const yearStart = document.getElementById('onboarding-year-start').value;
+        const yearEnd = document.getElementById('onboarding-year-end').value;
+
+        // Save to localStorage
+        localStorage.setItem('teacher-first-name', firstName);
+        localStorage.setItem('teacher-last-name', lastName);
+        localStorage.setItem('teacher-email', email);
+        localStorage.setItem('school-level', schoolLevel);
+        localStorage.setItem('school-name', schoolName);
+        localStorage.setItem('school-year', schoolYear);
+        localStorage.setItem('school-year-start', yearStart);
+        localStorage.setItem('school-year-end', yearEnd);
+        localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
+        localStorage.setItem('onboarding-complete', 'true');
+
+        // Hide onboarding modal
+        document.getElementById('onboarding-modal').style.display = 'none';
+
+        // Load settings to reflect changes
+        this.loadSettings();
+        this.renderDashboard();
+
+        // Show welcome message
+        alert(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`);
+    }
+
+    // Subject management methods
+    getCommonSubjects() {
+        return [
+            'Italiano',
+            'Matematica',
+            'Scienze',
+            'Storia',
+            'Geografia',
+            'Inglese',
+            'Francese',
+            'Spagnolo',
+            'Tedesco',
+            'Arte e Immagine',
+            'Musica',
+            'Educazione Fisica',
+            'Tecnologia',
+            'Religione',
+            'Educazione Civica',
+            'Fisica',
+            'Chimica',
+            'Biologia',
+            'Filosofia',
+            'Latino',
+            'Greco',
+            'Informatica',
+            'Diritto ed Economia'
+        ];
+    }
+
+    setupSubjectInput(inputId, suggestionsId, displayId) {
+        const input = document.getElementById(inputId);
+        const suggestionsDiv = document.getElementById(suggestionsId);
+        const displayDiv = document.getElementById(displayId);
+
+        if (!input || !suggestionsDiv || !displayDiv) return;
+
+        // Render existing subjects
+        this.renderSubjects(displayDiv);
+
+        // Handle input
+        input.addEventListener('input', (e) => {
+            const value = e.target.value.trim().toLowerCase();
+            if (value.length > 0) {
+                const commonSubjects = this.getCommonSubjects();
+                const filtered = commonSubjects.filter(s => 
+                    s.toLowerCase().includes(value) && 
+                    !this.subjects.includes(s)
+                );
+
+                if (filtered.length > 0) {
+                    suggestionsDiv.innerHTML = filtered.map(subject => 
+                        `<div class="subject-suggestion-item" data-subject="${subject}">${subject}</div>`
+                    ).join('');
+                    suggestionsDiv.classList.add('active');
+
+                    // Add click handlers to suggestions
+                    suggestionsDiv.querySelectorAll('.subject-suggestion-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            this.addSubject(item.dataset.subject);
+                            this.renderSubjects(displayDiv);
+                            input.value = '';
+                            suggestionsDiv.classList.remove('active');
+                        });
+                    });
+                } else {
+                    suggestionsDiv.classList.remove('active');
+                }
+            } else {
+                suggestionsDiv.classList.remove('active');
+            }
+        });
+
+        // Handle Enter key
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = input.value.trim();
+                if (value) {
+                    this.addSubject(value);
+                    this.renderSubjects(displayDiv);
+                    input.value = '';
+                    suggestionsDiv.classList.remove('active');
+                }
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.classList.remove('active');
+            }
+        });
+    }
+
+    addSubject(subject) {
+        const normalizedSubject = subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase();
+        if (!this.subjects.includes(normalizedSubject)) {
+            this.subjects.push(normalizedSubject);
+        }
+    }
+
+    removeSubject(subject) {
+        this.subjects = this.subjects.filter(s => s !== subject);
+    }
+
+    renderSubjects(displayDiv) {
+        if (!displayDiv) return;
+
+        if (this.subjects.length === 0) {
+            displayDiv.innerHTML = '<span style="color: var(--text-secondary); padding: 10px;">Nessuna disciplina aggiunta</span>';
+        } else {
+            displayDiv.innerHTML = this.subjects.map(subject => `
+                <span class="subject-tag">
+                    ${subject}
+                    <span class="remove-subject" onclick="app.removeSubject('${subject}'); app.renderAllSubjects();">×</span>
+                </span>
+            `).join('');
+        }
+    }
+
+    renderAllSubjects() {
+        const displayOnboarding = document.getElementById('selected-subjects-display');
+        const displaySettings = document.getElementById('selected-subjects-display-settings');
+        this.renderSubjects(displayOnboarding);
+        this.renderSubjects(displaySettings);
     }
 
     switchTab(tabName) {
@@ -81,9 +329,9 @@ class DocentePlusPlus {
         });
         document.getElementById(tabName).classList.add('active');
 
-        // Refresh materials when switching to materials tab
-        if (tabName === 'materials') {
-            this.renderMaterials();
+        // Refresh notifications when switching to notifications tab
+        if (tabName === 'notifications') {
+            this.renderNotifications();
         }
     }
 
@@ -91,7 +339,20 @@ class DocentePlusPlus {
     renderDashboard() {
         document.getElementById('lesson-count').textContent = this.lessons.length;
         document.getElementById('student-count').textContent = this.students.length;
-        document.getElementById('evaluation-count').textContent = '0';
+        
+        // Count in-progress activities
+        const inProgressActivities = this.activities.filter(a => a.status === 'in-progress' || a.status === 'planned');
+        document.getElementById('activity-count').textContent = inProgressActivities.length;
+        
+        // Count pending evaluations (those without a score or from the last 7 days)
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const pendingEvaluations = this.evaluations.filter(e => {
+            if (!e.score) return true;
+            const evalDate = new Date(e.date);
+            return evalDate >= sevenDaysAgo;
+        });
+        document.getElementById('evaluation-count').textContent = pendingEvaluations.length;
         
         const apiKey = localStorage.getItem('openrouter-api-key');
         document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
@@ -148,6 +409,7 @@ class DocentePlusPlus {
             title: document.getElementById('lesson-title').value,
             subject: document.getElementById('lesson-subject').value,
             date: document.getElementById('lesson-date').value,
+            time: document.getElementById('lesson-time').value || '09:00',
             description: document.getElementById('lesson-description').value,
             createdAt: new Date().toISOString()
         };
@@ -183,37 +445,17 @@ class DocentePlusPlus {
 
         lessonsList.innerHTML = this.lessons
             .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map(lesson => {
-                const linkedMaterials = lesson.materials ? 
-                    this.materials.filter(m => lesson.materials.includes(m.id)) : [];
-                
-                return `
-                    <div class="lesson-item">
-                        <h4>${lesson.title}</h4>
-                        <p><strong>Materia:</strong> ${lesson.subject}</p>
-                        <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')}</p>
-                        <p>${lesson.description || 'Nessuna descrizione'}</p>
-                        ${linkedMaterials.length > 0 ? `
-                            <div class="lesson-materials">
-                                <strong>📎 Materiali allegati:</strong>
-                                <ul class="materials-list-inline">
-                                    ${linkedMaterials.map(m => `
-                                        <li>
-                                            <button class="material-link-btn" onclick="app.downloadMaterial(${m.id})" aria-label="Scarica ${m.name}">
-                                                📄 ${m.name}
-                                            </button>
-                                            <button class="material-unlink-btn" onclick="app.unlinkMaterialFromLesson(${m.id}, ${lesson.id})" aria-label="Rimuovi ${m.name} dalla lezione" title="Rimuovi dalla lezione">✕</button>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        <div class="item-actions">
-                            <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
-                        </div>
+            .map(lesson => `
+                <div class="lesson-item">
+                    <h4>${lesson.title}</h4>
+                    <p><strong>Materia:</strong> ${lesson.subject}</p>
+                    <p><strong>Data:</strong> ${new Date(lesson.date).toLocaleDateString('it-IT')} ${lesson.time ? 'alle ' + lesson.time : ''}</p>
+                    <p>${lesson.description || 'Nessuna descrizione'}</p>
+                    <div class="item-actions">
+                        <button class="btn btn-danger" onclick="app.deleteLesson(${lesson.id})">Elimina</button>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
     }
 
     async generateLessonWithAI() {
@@ -371,36 +613,1392 @@ ${lessonData.evaluation || 'N/D'}
         `).join('');
     }
 
+    // Activity management methods
+    showAddActivityForm() {
+        document.getElementById('activity-form-title').textContent = 'Nuova Attività';
+        document.getElementById('activity-edit-id').value = '';
+        document.getElementById('add-activity-form').style.display = 'block';
+        this.updateActivityFormSelectors();
+    }
+
+    hideAddActivityForm() {
+        document.getElementById('add-activity-form').style.display = 'none';
+        document.getElementById('activity-form').reset();
+        document.getElementById('activity-edit-id').value = '';
+    }
+
+    showEditActivityForm(id) {
+        const activity = this.activities.find(a => a.id === id);
+        if (!activity) return;
+
+        document.getElementById('activity-form-title').textContent = 'Modifica Attività';
+        document.getElementById('activity-edit-id').value = id;
+        document.getElementById('activity-title').value = activity.title;
+        document.getElementById('activity-type').value = activity.type;
+        document.getElementById('activity-description').value = activity.description || '';
+        document.getElementById('activity-deadline').value = activity.deadline || '';
+        document.getElementById('activity-priority').value = activity.priority || 'medium';
+        document.getElementById('activity-progress').value = activity.progress || 0;
+        document.getElementById('activity-notes').value = activity.notes || '';
+        
+        this.updateActivityFormSelectors();
+        
+        if (activity.classId) {
+            document.getElementById('activity-class').value = activity.classId;
+        }
+        if (activity.studentId) {
+            document.getElementById('activity-student').value = activity.studentId;
+        }
+        
+        document.getElementById('add-activity-form').style.display = 'block';
+    }
+
+    updateActivityFormSelectors() {
+        const classSelector = document.getElementById('activity-class');
+        const studentSelector = document.getElementById('activity-student');
+        
+        if (classSelector) {
+            classSelector.innerHTML = '<option value="">Nessuna (generale)</option>' +
+                this.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+        
+        if (studentSelector) {
+            studentSelector.innerHTML = '<option value="">Nessuno (tutta la classe)</option>' +
+                this.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+    }
+
+    addActivity() {
+        const editId = document.getElementById('activity-edit-id').value;
+        
+        if (editId) {
+            // Edit existing activity
+            const activity = this.activities.find(a => a.id == editId);
+            if (activity) {
+                activity.title = document.getElementById('activity-title').value;
+                activity.type = document.getElementById('activity-type').value;
+                activity.description = document.getElementById('activity-description').value;
+                activity.deadline = document.getElementById('activity-deadline').value;
+                activity.classId = document.getElementById('activity-class').value || null;
+                activity.studentId = document.getElementById('activity-student').value || null;
+                activity.priority = document.getElementById('activity-priority').value || 'medium';
+                activity.progress = parseInt(document.getElementById('activity-progress').value) || 0;
+                activity.notes = document.getElementById('activity-notes').value || '';
+                activity.updatedAt = new Date().toISOString();
+            }
+        } else {
+            // Create new activity
+            const activity = {
+                id: Date.now(),
+                title: document.getElementById('activity-title').value,
+                type: document.getElementById('activity-type').value,
+                description: document.getElementById('activity-description').value,
+                deadline: document.getElementById('activity-deadline').value,
+                classId: document.getElementById('activity-class').value || null,
+                studentId: document.getElementById('activity-student').value || null,
+                priority: document.getElementById('activity-priority').value || 'medium',
+                progress: parseInt(document.getElementById('activity-progress').value) || 0,
+                notes: document.getElementById('activity-notes').value || '',
+                status: 'planned',
+                createdAt: new Date().toISOString()
+            };
+
+            this.activities.push(activity);
+        }
+
+        this.saveData();
+        this.renderActivities();
+        this.renderDashboard();
+        this.hideAddActivityForm();
+    }
+
+    deleteActivity(id) {
+        if (confirm('Sei sicuro di voler eliminare questa attività?')) {
+            this.activities = this.activities.filter(activity => activity.id !== id);
+            this.saveData();
+            this.renderActivities();
+            this.renderDashboard();
+        }
+    }
+
+    updateActivityStatus(id, newStatus) {
+        const activity = this.activities.find(a => a.id === id);
+        if (activity) {
+            activity.status = newStatus;
+            activity.updatedAt = new Date().toISOString();
+            this.saveData();
+            this.renderActivities();
+            this.renderDashboard();
+        }
+    }
+
+    filterActivities(filterType) {
+        this.activityFilter = filterType;
+        this.renderActivities();
+    }
+
+    renderActivitiesSummary() {
+        const totalActivities = this.activities.length;
+        const plannedActivities = this.activities.filter(a => a.status === 'planned').length;
+        const inProgressActivities = this.activities.filter(a => a.status === 'in-progress').length;
+        const completedActivities = this.activities.filter(a => a.status === 'completed').length;
+        
+        // Calculate overdue activities
+        const now = new Date();
+        const overdueActivities = this.activities.filter(a => {
+            if (!a.deadline || a.status === 'completed') return false;
+            return new Date(a.deadline) < now;
+        }).length;
+        
+        // Update summary cards
+        const totalEl = document.getElementById('total-activities');
+        const plannedEl = document.getElementById('planned-activities');
+        const inProgressEl = document.getElementById('inprogress-activities');
+        const completedEl = document.getElementById('completed-activities');
+        const overdueEl = document.getElementById('overdue-activities');
+        
+        if (totalEl) totalEl.textContent = totalActivities;
+        if (plannedEl) plannedEl.textContent = plannedActivities;
+        if (inProgressEl) inProgressEl.textContent = inProgressActivities;
+        if (completedEl) completedEl.textContent = completedActivities;
+        if (overdueEl) overdueEl.textContent = overdueActivities;
+    }
+
+    renderActivities() {
+        this.renderActivitiesSummary();
+        
+        const activitiesList = document.getElementById('activities-list');
+        
+        if (!activitiesList) return;
+
+        if (this.activities.length === 0) {
+            activitiesList.innerHTML = `
+                <div class="empty-state">
+                    <h3>Nessuna attività programmata</h3>
+                    <p>Inizia aggiungendo una nuova attività didattica</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Apply filter
+        let filteredActivities = this.activities;
+        const filterSelect = document.getElementById('activity-filter');
+        if (filterSelect) {
+            const filterValue = filterSelect.value;
+            if (filterValue && filterValue !== 'all') {
+                if (filterValue === 'planned' || filterValue === 'in-progress' || filterValue === 'completed') {
+                    filteredActivities = this.activities.filter(a => a.status === filterValue);
+                } else {
+                    filteredActivities = this.activities.filter(a => a.type === filterValue);
+                }
+            }
+        }
+
+        // Sort by deadline (newest first)
+        filteredActivities.sort((a, b) => {
+            if (!a.deadline) return 1;
+            if (!b.deadline) return -1;
+            return new Date(a.deadline) - new Date(b.deadline);
+        });
+
+        const activityTypeIcons = {
+            'lesson': '📚',
+            'exercise': '✏️',
+            'lab': '🔬',
+            'project': '📊',
+            'homework': '📝',
+            'exam': '📄'
+        };
+
+        const statusLabels = {
+            'planned': 'Pianificata',
+            'in-progress': 'In corso',
+            'completed': 'Completata'
+        };
+
+        const statusColors = {
+            'planned': '#3498db',
+            'in-progress': '#f39c12',
+            'completed': '#27ae60'
+        };
+
+        const priorityLabels = {
+            'low': 'Bassa',
+            'medium': 'Media',
+            'high': 'Alta'
+        };
+
+        const priorityColors = {
+            'low': '#95a5a6',
+            'medium': '#f39c12',
+            'high': '#e74c3c'
+        };
+
+        activitiesList.innerHTML = filteredActivities.map(activity => {
+            const cls = this.classes.find(c => c.id == activity.classId);
+            const student = this.students.find(s => s.id == activity.studentId);
+            const icon = activityTypeIcons[activity.type] || '📋';
+            const statusLabel = statusLabels[activity.status] || activity.status;
+            const statusColor = statusColors[activity.status] || '#95a5a6';
+            const priority = activity.priority || 'medium';
+            const priorityLabel = priorityLabels[priority];
+            const priorityColor = priorityColors[priority];
+            const progress = activity.progress || 0;
+
+            // Calculate if deadline is near (within 3 days)
+            const isDeadlineNear = activity.deadline ? 
+                (new Date(activity.deadline) - new Date()) < (3 * 24 * 60 * 60 * 1000) : false;
+
+            return `
+                <div class="activity-item" role="article" aria-labelledby="activity-title-${activity.id}">
+                    <div class="activity-header">
+                        <h4 id="activity-title-${activity.id}">${icon} ${activity.title}</h4>
+                        <div class="activity-badges">
+                            <span class="activity-status" style="background-color: ${statusColor}">${statusLabel}</span>
+                            <span class="activity-priority" style="background-color: ${priorityColor}">Priorità: ${priorityLabel}</span>
+                        </div>
+                    </div>
+                    <p><strong>Tipo:</strong> ${activity.type}</p>
+                    ${activity.description ? `<p><strong>Descrizione:</strong> ${activity.description}</p>` : ''}
+                    ${activity.deadline ? `<p><strong>Scadenza:</strong> ${new Date(activity.deadline).toLocaleDateString('it-IT')}${isDeadlineNear ? ' <span style="color: #e74c3c;">⚠️ Imminente</span>' : ''}</p>` : ''}
+                    ${cls ? `<p><strong>Classe:</strong> ${cls.name}</p>` : ''}
+                    ${student ? `<p><strong>Studente:</strong> ${student.name}</p>` : ''}
+                    ${progress > 0 ? `
+                        <div class="activity-progress" role="group" aria-label="Avanzamento attività">
+                            <label><strong>Avanzamento:</strong> ${progress}%</label>
+                            <div class="progress-bar" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Percentuale di completamento ${progress}%">
+                                <div class="progress-fill" style="width: ${progress}%; background-color: ${statusColor}"></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${activity.notes ? `<p><strong>Note:</strong> ${activity.notes}</p>` : ''}
+                    <div class="activity-actions">
+                        <button class="btn btn-secondary" onclick="app.showEditActivityForm(${activity.id})">✏️ Modifica</button>
+                        ${activity.status !== 'in-progress' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'in-progress')">▶️ In corso</button>` : ''}
+                        ${activity.status !== 'completed' ? `<button class="btn btn-success" onclick="app.updateActivityStatus(${activity.id}, 'completed')">✅ Completa</button>` : ''}
+                        ${activity.status === 'completed' ? `<button class="btn btn-secondary" onclick="app.updateActivityStatus(${activity.id}, 'planned')">↩️ Riapri</button>` : ''}
+                        <button class="btn btn-danger" onclick="app.deleteActivity(${activity.id})">🗑️ Elimina</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Schedule Management methods
+    getNextWeekday(date) {
+        const day = date.getDay();
+        // If Saturday (6) or Sunday (0), move to next Monday
+        if (day === 0) { // Sunday
+            date.setDate(date.getDate() + 1);
+        } else if (day === 6) { // Saturday
+            date.setDate(date.getDate() + 2);
+        }
+        return date;
+    }
+
+    getCurrentScheduleDate() {
+        if (this.currentScheduleDate) {
+            return new Date(this.currentScheduleDate);
+        }
+        const today = new Date();
+        return this.getNextWeekday(today);
+    }
+
+    setScheduleDate(dateStr) {
+        const date = new Date(dateStr);
+        this.currentScheduleDate = this.getNextWeekday(date).toISOString().split('T')[0];
+        this.renderSchedule();
+    }
+
+    getScheduleKey(date, hour) {
+        const dateStr = date.toISOString().split('T')[0];
+        return `${dateStr}-${hour}`;
+    }
+
+    updateScheduleSlot(date, hour, classId, activityType) {
+        const key = this.getScheduleKey(date, hour);
+        if (!classId && !activityType) {
+            delete this.schedule[key];
+        } else {
+            this.schedule[key] = {
+                classId: classId || null,
+                activityType: activityType || null
+            };
+        }
+        this.saveData();
+        this.renderSchedule();
+    }
+
+    getActivityTypeIcon(type) {
+        const icons = {
+            'theory': { icon: 'T', color: '#3498db', label: 'Teoria' },
+            'drawing': { icon: 'D', color: '#e67e22', label: 'Disegno' },
+            'lab': { icon: 'L', color: '#27ae60', label: 'Laboratorio' }
+        };
+        return icons[type] || { icon: '', color: '#95a5a6', label: '' };
+    }
+
+    showScheduleSlotEditor(date, hour) {
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key] || { classId: null, activityType: null };
+        
+        const classOptions = this.classes.map(c => 
+            `<option value="${c.id}" ${slot.classId == c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+
+        const activityOptions = ['theory', 'drawing', 'lab'].map(type => {
+            const info = this.getActivityTypeIcon(type);
+            return `<option value="${type}" ${slot.activityType === type ? 'selected' : ''}>${info.label}</option>`;
+        }).join('');
+
+        const dateStr = date.toISOString().split('T')[0];
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px;">
+                <h3>Modifica Slot Orario</h3>
+                <p><strong>Data:</strong> ${new Date(date).toLocaleDateString('it-IT')}</p>
+                <p><strong>Ora:</strong> ${hour}:00</p>
+                <div class="form-group">
+                    <label>Classe:</label>
+                    <select id="slot-class-select">
+                        <option value="">Nessuna classe</option>
+                        ${classOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo di Attività:</label>
+                    <select id="slot-activity-type-select">
+                        <option value="">Nessuna attività</option>
+                        ${activityOptions}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="app.saveScheduleSlot('${dateStr}', ${hour})">Salva</button>
+                    <button class="btn btn-secondary" onclick="app.closeScheduleSlotEditor()">Annulla</button>
+                    ${slot.classId || slot.activityType ? `<button class="btn btn-danger" onclick="app.clearScheduleSlot('${dateStr}', ${hour})">Elimina</button>` : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.currentScheduleModal = modal;
+    }
+
+    saveScheduleSlot(dateStr, hour) {
+        const classId = document.getElementById('slot-class-select').value;
+        const activityType = document.getElementById('slot-activity-type-select').value;
+        const date = new Date(dateStr);
+        this.updateScheduleSlot(date, hour, classId || null, activityType || null);
+        this.closeScheduleSlotEditor();
+    }
+
+    clearScheduleSlot(dateStr, hour) {
+        const date = new Date(dateStr);
+        this.updateScheduleSlot(date, hour, null, null);
+        this.closeScheduleSlotEditor();
+    }
+
+    closeScheduleSlotEditor() {
+        if (this.currentScheduleModal) {
+            this.currentScheduleModal.remove();
+            this.currentScheduleModal = null;
+        }
+    }
+
+    launchScheduleActivity(date, hour) {
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key];
+        
+        if (!slot || !slot.classId) {
+            alert('Seleziona prima una classe per questo slot orario');
+            return;
+        }
+
+        // Switch to activities tab and show activity selector
+        this.switchTab('activities');
+        
+        // Filter activities by class
+        const classActivities = this.activities.filter(a => a.classId == slot.classId);
+        
+        // Show activity selection modal
+        this.showActivitySelectionModal(slot, date, hour, classActivities);
+    }
+
+    showActivitySelectionModal(slot, date, hour, classActivities) {
+        const cls = this.classes.find(c => c.id == slot.classId);
+        const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+
+        const plannedActivities = classActivities.filter(a => a.status === 'planned');
+        const inProgressActivities = classActivities.filter(a => a.status === 'in-progress');
+        const recentActivities = classActivities
+            .filter(a => a.status === 'completed')
+            .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+            .slice(0, 5);
+
+        const renderActivityList = (activities, title) => {
+            if (activities.length === 0) return '';
+            return `
+                <div class="activity-section">
+                    <h4>${title}</h4>
+                    ${activities.map(a => `
+                        <div class="activity-option" onclick="app.selectScheduleActivity(${a.id})" style="cursor: pointer; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;">
+                            <strong>${a.title}</strong>
+                            <p style="margin: 5px 0; font-size: 0.9em;">${a.type} ${a.deadline ? '- Scadenza: ' + new Date(a.deadline).toLocaleDateString('it-IT') : ''}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                <h3>Seleziona Attività</h3>
+                <p><strong>Classe:</strong> ${cls ? cls.name : 'N/D'}</p>
+                ${activityTypeInfo ? `<p><strong>Tipo:</strong> ${activityTypeInfo.label}</p>` : ''}
+                <p><strong>Orario:</strong> ${new Date(date).toLocaleDateString('it-IT')} - ${hour}:00</p>
+                
+                ${renderActivityList(inProgressActivities, '📝 Attività In Corso')}
+                ${renderActivityList(plannedActivities, '📋 Attività Pianificate')}
+                ${renderActivityList(recentActivities, '✅ Attività Recenti')}
+                
+                ${classActivities.length === 0 ? '<p style="text-align: center; margin: 20px 0;">Nessuna attività disponibile per questa classe</p>' : ''}
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="app.closeActivitySelectionModal()">Chiudi</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+    }
+
+    selectScheduleActivity(activityId) {
+        // Update activity status to in-progress if not already
+        const activity = this.activities.find(a => a.id === activityId);
+        if (activity && activity.status !== 'in-progress') {
+            this.updateActivityStatus(activityId, 'in-progress');
+        }
+        this.closeActivitySelectionModal();
+        this.switchTab('activities');
+        // Scroll to the activity
+        setTimeout(() => {
+            const activityElement = document.querySelector(`[onclick*="deleteActivity(${activityId})"]`);
+            if (activityElement) {
+                activityElement.closest('.activity-item').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+
+    closeActivitySelectionModal() {
+        if (this.currentActivityModal) {
+            this.currentActivityModal.remove();
+            this.currentActivityModal = null;
+        }
+    }
+
+    toggleScheduleView() {
+        this.scheduleView = this.scheduleView === 'weekly' ? 'daily' : 'weekly';
+        this.renderSchedule();
+    }
+
+    navigateSchedule(direction) {
+        const currentDate = this.getCurrentScheduleDate();
+        
+        if (this.scheduleView === 'daily') {
+            // Move by 1 weekday
+            do {
+                currentDate.setDate(currentDate.getDate() + direction);
+            } while (currentDate.getDay() === 0 || currentDate.getDay() === 6);
+        } else {
+            // Move by 1 week
+            currentDate.setDate(currentDate.getDate() + (direction * 7));
+        }
+        
+        this.currentScheduleDate = this.getNextWeekday(currentDate).toISOString().split('T')[0];
+        this.renderSchedule();
+    }
+
+    renderSchedule() {
+        const scheduleContainer = document.getElementById('schedule-container');
+        if (!scheduleContainer) return;
+
+        const currentDate = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
+        
+        if (this.scheduleView === 'daily') {
+            this.renderDailySchedule(scheduleContainer, currentDate, hours);
+        } else {
+            this.renderWeeklySchedule(scheduleContainer, currentDate, hours);
+        }
+    }
+
+    renderDailySchedule(container, date, hours) {
+        const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
+        
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Precedente</button>
+                <h3>${dayName} ${date.toLocaleDateString('it-IT')}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Successivo ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📅 Vista Settimanale</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        <th>Classe e Attività</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => {
+                        const key = this.getScheduleKey(date, hour);
+                        const slot = this.schedule[key] || {};
+                        const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                        const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                        
+                        return `
+                            <tr>
+                                <td class="schedule-hour">${hour}:00 - ${hour + 1}:00</td>
+                                <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                    ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">Nessuna classe</div>'}
+                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;">${activityInfo.icon}</div>` : ''}
+                                    ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-left: 10px; font-size: 0.8em;">Avvia</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    renderWeeklySchedule(container, startDate, hours) {
+        // Get Monday of the week
+        const monday = new Date(startDate);
+        const day = monday.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // adjust when day is sunday
+        monday.setDate(monday.getDate() + diff);
+
+        const weekDays = [];
+        for (let i = 0; i < 5; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            weekDays.push(date);
+        }
+
+        const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Precedente</button>
+                <h3>Settimana dal ${weekDays[0].toLocaleDateString('it-IT')} al ${weekDays[4].toLocaleDateString('it-IT')}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Successiva ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📆 Vista Giornaliera</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        ${dayNames.map((name, i) => `<th>${name}<br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => `
+                        <tr>
+                            <td class="schedule-hour">${hour}:00</td>
+                            ${weekDays.map(date => {
+                                const key = this.getScheduleKey(date, hour);
+                                const slot = this.schedule[key] || {};
+                                const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                                const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                                
+                                return `
+                                    <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                        ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">-</div>'}
+                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-top: 3px;">${activityInfo.icon}</div>` : ''}
+                                        ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-top: 5px; font-size: 0.7em; padding: 2px 6px;">Avvia</button>` : ''}
+                                    </td>
+                                `;
+                            }).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // Class Management methods
+    showAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'block';
+        document.getElementById('class-form-title').textContent = 'Nuova Classe';
+        document.getElementById('class-edit-id').value = '';
+    }
+
+    hideAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'none';
+        document.getElementById('class-form').reset();
+        document.getElementById('class-edit-id').value = '';
+    }
+
+    saveClass() {
+        const editId = document.getElementById('class-edit-id').value;
+        const className = document.getElementById('class-name').value.trim();
+        const year = document.getElementById('class-year').value;
+        const section = document.getElementById('class-section').value.trim();
+        const studentsCount = document.getElementById('class-students-count').value;
+
+        if (!className) {
+            alert('Il nome della classe è obbligatorio');
+            return;
+        }
+
+        if (editId) {
+            // Edit existing class
+            const classIndex = this.classes.findIndex(c => c.id === parseInt(editId));
+            if (classIndex !== -1) {
+                this.classes[classIndex] = {
+                    ...this.classes[classIndex],
+                    name: className,
+                    year: year,
+                    section: section,
+                    studentsCount: studentsCount ? parseInt(studentsCount) : 0,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+        } else {
+            // Add new class
+            const newClass = {
+                id: Date.now(),
+                name: className,
+                year: year,
+                section: section,
+                studentsCount: studentsCount ? parseInt(studentsCount) : 0,
+                createdAt: new Date().toISOString()
+            };
+            this.classes.push(newClass);
+        }
+
+        this.saveData();
+        this.renderClasses();
+        this.updateClassSelectors();
+        this.hideAddClassForm();
+    }
+
+    editClass(id) {
+        const classToEdit = this.classes.find(c => c.id === id);
+        if (!classToEdit) return;
+
+        document.getElementById('add-class-form').style.display = 'block';
+        document.getElementById('class-form-title').textContent = 'Modifica Classe';
+        document.getElementById('class-edit-id').value = classToEdit.id;
+        document.getElementById('class-name').value = classToEdit.name;
+        document.getElementById('class-year').value = classToEdit.year || '';
+        document.getElementById('class-section').value = classToEdit.section || '';
+        document.getElementById('class-students-count').value = classToEdit.studentsCount || '';
+
+        // Scroll to form
+        document.getElementById('add-class-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    deleteClass(id) {
+        const classToDelete = this.classes.find(c => c.id === id);
+        if (!classToDelete) return;
+
+        if (confirm(`Sei sicuro di voler eliminare la classe ${classToDelete.name}?`)) {
+            this.classes = this.classes.filter(c => c.id !== id);
+            
+            // If this was the active class, clear it
+            if (this.activeClass === classToDelete.name) {
+                this.activeClass = '';
+                localStorage.removeItem('active-class');
+            }
+
+            this.saveData();
+            this.renderClasses();
+            this.updateClassSelectors();
+            this.renderDashboard();
+        }
+    }
+
+    renderClasses() {
+        const classesList = document.getElementById('classes-list');
+        
+        if (!classesList) return;
+
+        if (this.classes.length === 0) {
+            classesList.innerHTML = `
+                <div class="empty-state">
+                    <h3>Nessuna classe configurata</h3>
+                    <p>Inizia aggiungendo le tue classi per organizzare al meglio la didattica</p>
+                </div>
+            `;
+            return;
+        }
+
+        classesList.innerHTML = this.classes
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map(cls => `
+                <div class="class-item">
+                    <h4>${cls.name}</h4>
+                    ${cls.year ? `<p><strong>Anno:</strong> ${cls.year}°</p>` : ''}
+                    ${cls.section ? `<p><strong>Sezione:</strong> ${cls.section}</p>` : ''}
+                    <p><strong>Studenti:</strong> ${cls.studentsCount || 0}</p>
+                    <div class="item-actions">
+                        <button class="btn btn-secondary" onclick="app.editClass(${cls.id})">Modifica</button>
+                        <button class="btn btn-danger" onclick="app.deleteClass(${cls.id})">Elimina</button>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    updateClassSelectors() {
+        const selector = document.getElementById('active-class-selector');
+        if (!selector) return;
+
+        const currentValue = selector.value;
+        
+        // Clear and rebuild options
+        selector.innerHTML = '<option value="">Seleziona una classe</option>';
+        
+        this.classes
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.name;
+                option.textContent = cls.name;
+                selector.appendChild(option);
+            });
+
+        // Restore selection if it still exists
+        if (currentValue && this.classes.some(c => c.name === currentValue)) {
+            selector.value = currentValue;
+        } else if (this.activeClass && this.classes.some(c => c.name === this.activeClass)) {
+            selector.value = this.activeClass;
+        }
+    }
+
+    // Evaluation Management methods
+    showAddCriterionForm() {
+        document.getElementById('add-criterion-form').style.display = 'block';
+    }
+
+    hideAddCriterionForm() {
+        document.getElementById('add-criterion-form').style.display = 'none';
+        document.getElementById('criterion-form').reset();
+    }
+
+    addCriterion() {
+        const name = document.getElementById('criterion-name').value;
+        const description = document.getElementById('criterion-description').value;
+        const subject = document.getElementById('criterion-subject').value;
+        const type = document.getElementById('criterion-type').value;
+
+        if (!name) {
+            alert('Inserisci un nome per il criterio');
+            return;
+        }
+
+        const criterion = {
+            id: Date.now(),
+            name,
+            description,
+            subject,
+            type,
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluationCriteria.push(criterion);
+        this.saveData();
+        this.renderEvaluations();
+        this.hideAddCriterionForm();
+    }
+
+    deleteCriterion(id) {
+        if (confirm('Sei sicuro di voler eliminare questo criterio?')) {
+            this.evaluationCriteria = this.evaluationCriteria.filter(c => c.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+        }
+    }
+
+    showAddGridForm() {
+        document.getElementById('add-grid-form').style.display = 'block';
+    }
+
+    hideAddGridForm() {
+        document.getElementById('add-grid-form').style.display = 'none';
+        document.getElementById('grid-form').reset();
+    }
+
+    addGrid() {
+        const name = document.getElementById('grid-name').value;
+        const description = document.getElementById('grid-description').value;
+        const subject = document.getElementById('grid-subject').value;
+
+        if (!name) {
+            alert('Inserisci un nome per la griglia');
+            return;
+        }
+
+        const grid = {
+            id: Date.now(),
+            name,
+            description,
+            subject,
+            levels: [
+                { name: 'Eccellente', score: 10, description: 'Prestazione eccellente' },
+                { name: 'Buono', score: 8, description: 'Prestazione buona' },
+                { name: 'Sufficiente', score: 6, description: 'Prestazione sufficiente' },
+                { name: 'Insufficiente', score: 4, description: 'Prestazione insufficiente' }
+            ],
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluationGrids.push(grid);
+        this.saveData();
+        this.renderEvaluations();
+        this.hideAddGridForm();
+    }
+
+    deleteGrid(id) {
+        if (confirm('Sei sicuro di voler eliminare questa griglia?')) {
+            this.evaluationGrids = this.evaluationGrids.filter(g => g.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+        }
+    }
+
+    showAddEvaluationForm() {
+        document.getElementById('add-evaluation-form').style.display = 'block';
+        this.updateEvaluationFormSelectors();
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('evaluation-date').value = today;
+    }
+
+    hideAddEvaluationForm() {
+        document.getElementById('add-evaluation-form').style.display = 'none';
+        document.getElementById('evaluation-form').reset();
+    }
+
+    updateEvaluationFormSelectors() {
+        // Update student selector
+        const studentSelect = document.getElementById('evaluation-student');
+        if (studentSelect) {
+            studentSelect.innerHTML = '<option value="">Seleziona studente</option>';
+            this.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                studentSelect.appendChild(option);
+            });
+        }
+
+        // Update class selector
+        const classSelect = document.getElementById('evaluation-class');
+        if (classSelect) {
+            classSelect.innerHTML = '<option value="">Seleziona classe</option>';
+            this.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                classSelect.appendChild(option);
+            });
+        }
+
+        // Update criterion selector
+        const criterionSelect = document.getElementById('evaluation-criterion');
+        if (criterionSelect) {
+            criterionSelect.innerHTML = '<option value="">Seleziona criterio</option>';
+            this.evaluationCriteria.forEach(criterion => {
+                const option = document.createElement('option');
+                option.value = criterion.id;
+                option.textContent = criterion.name;
+                criterionSelect.appendChild(option);
+            });
+        }
+
+        // Update grid selector
+        const gridSelect = document.getElementById('evaluation-grid');
+        if (gridSelect) {
+            gridSelect.innerHTML = '<option value="">Seleziona griglia</option>';
+            this.evaluationGrids.forEach(grid => {
+                const option = document.createElement('option');
+                option.value = grid.id;
+                option.textContent = grid.name;
+                gridSelect.appendChild(option);
+            });
+        }
+
+        // Update subject selector
+        const subjectSelect = document.getElementById('evaluation-subject');
+        if (subjectSelect) {
+            subjectSelect.innerHTML = '<option value="">Seleziona disciplina</option>';
+            this.subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+        }
+    }
+
+    addEvaluation() {
+        const studentId = document.getElementById('evaluation-student').value;
+        const classId = document.getElementById('evaluation-class').value;
+        const criterionId = document.getElementById('evaluation-criterion').value;
+        const gridId = document.getElementById('evaluation-grid').value;
+        const subjectId = document.getElementById('evaluation-subject').value;
+        const score = document.getElementById('evaluation-score').value;
+        const notes = document.getElementById('evaluation-notes').value;
+        const date = document.getElementById('evaluation-date').value;
+
+        if (!studentId && !classId) {
+            alert('Seleziona uno studente o una classe');
+            return;
+        }
+
+        if (!criterionId && !gridId) {
+            alert('Seleziona un criterio o una griglia di valutazione');
+            return;
+        }
+
+        const evaluation = {
+            id: Date.now(),
+            studentId: studentId || null,
+            classId: classId || null,
+            criterionId: criterionId || null,
+            gridId: gridId || null,
+            subjectId: subjectId || null,
+            score: score || null,
+            notes,
+            date: date || new Date().toISOString().split('T')[0],
+            createdAt: new Date().toISOString()
+        };
+
+        this.evaluations.push(evaluation);
+        this.saveData();
+        this.renderEvaluations();
+        this.renderDashboard();
+        this.hideAddEvaluationForm();
+    }
+
+    deleteEvaluation(id) {
+        if (confirm('Sei sicuro di voler eliminare questa valutazione?')) {
+            this.evaluations = this.evaluations.filter(e => e.id !== id);
+            this.saveData();
+            this.renderEvaluations();
+            this.renderDashboard();
+        }
+    }
+
+    renderEvaluations() {
+        // Render criteria list
+        const criteriaList = document.getElementById('criteria-list');
+        if (criteriaList) {
+            if (this.evaluationCriteria.length === 0) {
+                criteriaList.innerHTML = '<p class="empty-state">Nessun criterio di valutazione. Creane uno!</p>';
+            } else {
+                criteriaList.innerHTML = this.evaluationCriteria.map(criterion => `
+                    <div class="card evaluation-item">
+                        <h4>${criterion.name}</h4>
+                        <p><strong>Tipo:</strong> ${criterion.type || 'Non specificato'}</p>
+                        <p><strong>Disciplina:</strong> ${criterion.subject || 'Non specificata'}</p>
+                        <p>${criterion.description || ''}</p>
+                        <div class="evaluation-actions">
+                            <button class="btn btn-danger" onclick="app.deleteCriterion(${criterion.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render grids list
+        const gridsList = document.getElementById('grids-list');
+        if (gridsList) {
+            if (this.evaluationGrids.length === 0) {
+                gridsList.innerHTML = '<p class="empty-state">Nessuna griglia di valutazione. Creane una!</p>';
+            } else {
+                gridsList.innerHTML = this.evaluationGrids.map(grid => `
+                    <div class="card evaluation-item">
+                        <h4>${grid.name}</h4>
+                        <p><strong>Disciplina:</strong> ${grid.subject || 'Non specificata'}</p>
+                        <p>${grid.description || ''}</p>
+                        <div class="grid-levels">
+                            <strong>Livelli:</strong>
+                            ${grid.levels.map(level => `
+                                <div class="level-item">
+                                    <span class="level-name">${level.name}</span>
+                                    <span class="level-score">${level.score}/10</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="evaluation-actions">
+                            <button class="btn btn-danger" onclick="app.deleteGrid(${grid.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render evaluations list
+        const evaluationsList = document.getElementById('evaluations-list');
+        if (evaluationsList) {
+            if (this.evaluations.length === 0) {
+                evaluationsList.innerHTML = '<p class="empty-state">Nessuna valutazione registrata.</p>';
+            } else {
+                evaluationsList.innerHTML = this.evaluations.map(evaluation => {
+                    const student = this.students.find(s => s.id == evaluation.studentId);
+                    const cls = this.classes.find(c => c.id == evaluation.classId);
+                    const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                    const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+
+                    return `
+                        <div class="card evaluation-item">
+                            <div class="evaluation-header">
+                                <h4>${student ? student.name : (cls ? 'Classe: ' + cls.name : 'N/D')}</h4>
+                                <span class="evaluation-date">${evaluation.date}</span>
+                            </div>
+                            <p><strong>Criterio/Griglia:</strong> ${criterion ? criterion.name : (grid ? grid.name : 'N/D')}</p>
+                            ${evaluation.subjectId ? `<p><strong>Disciplina:</strong> ${evaluation.subjectId}</p>` : ''}
+                            ${evaluation.score ? `<p><strong>Voto:</strong> ${evaluation.score}/10</p>` : ''}
+                            ${evaluation.notes ? `<p><strong>Note:</strong> ${evaluation.notes}</p>` : ''}
+                            <div class="evaluation-actions">
+                                <button class="btn btn-danger" onclick="app.deleteEvaluation(${evaluation.id})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Initialize results filters
+        this.initializeResultsFilters();
+        // Render results view
+        this.renderResults();
+    }
+
+
+    initializeResultsFilters() {
+        // Populate filter selectors
+        const filterClass = document.getElementById('filter-class');
+        if (filterClass) {
+            filterClass.innerHTML = '<option value="">Tutte le classi</option>';
+            this.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                filterClass.appendChild(option);
+            });
+        }
+
+        const filterSubject = document.getElementById('filter-subject');
+        if (filterSubject) {
+            filterSubject.innerHTML = '<option value="">Tutte le discipline</option>';
+            
+            // Get unique subjects from evaluations and this.subjects
+            const allSubjects = new Set();
+            this.subjects.forEach(s => allSubjects.add(s));
+            this.evaluations.forEach(e => {
+                if (e.subjectId) allSubjects.add(e.subjectId);
+            });
+            
+            Array.from(allSubjects).sort().forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                filterSubject.appendChild(option);
+            });
+        }
+
+        const filterStudent = document.getElementById('filter-student');
+        if (filterStudent) {
+            filterStudent.innerHTML = '<option value="">Tutti gli studenti</option>';
+            this.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = student.name;
+                filterStudent.appendChild(option);
+            });
+        }
+    }
+
+    filterResults() {
+        this.renderResults();
+    }
+
+    toggleResultsView() {
+        const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
+        const newMode = viewMode === 'by-student' ? 'by-class' : 'by-student';
+        localStorage.setItem('results-view-mode', newMode);
+        this.renderResults();
+    }
+
+    renderResults() {
+        const resultsDisplay = document.getElementById('results-display');
+        if (!resultsDisplay) return;
+
+        const filterClassId = document.getElementById('filter-class')?.value || '';
+        const filterSubject = document.getElementById('filter-subject')?.value || '';
+        const filterStudentId = document.getElementById('filter-student')?.value || '';
+
+        // Filter evaluations
+        let filteredEvaluations = this.evaluations.filter(evaluation => {
+            if (filterClassId) {
+                let matchesClass = false;
+                
+                // Check if evaluation is for the class directly
+                if (evaluation.classId == filterClassId) {
+                    matchesClass = true;
+                }
+                // Or if evaluation is for a student in the class
+                else if (evaluation.studentId) {
+                    const student = this.students.find(s => s.id == evaluation.studentId);
+                    const cls = this.classes.find(c => c.id == filterClassId);
+                    if (student && cls && student.class === cls.name) {
+                        matchesClass = true;
+                    }
+                }
+                
+                if (!matchesClass) return false;
+            }
+            if (filterSubject && evaluation.subjectId != filterSubject) return false;
+            if (filterStudentId && evaluation.studentId != filterStudentId) return false;
+            return true;
+        });
+
+        const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
+
+        if (filteredEvaluations.length === 0) {
+            resultsDisplay.innerHTML = '<p class="empty-state">Nessuna valutazione corrisponde ai filtri selezionati.</p>';
+            return;
+        }
+
+        if (viewMode === 'by-student') {
+            this.renderResultsByStudent(resultsDisplay, filteredEvaluations);
+        } else {
+            this.renderResultsByClass(resultsDisplay, filteredEvaluations);
+        }
+    }
+
+    renderResultsByStudent(container, evaluations) {
+        const studentGroups = {};
+        
+        evaluations.forEach(evaluation => {
+            if (evaluation.studentId) {
+                if (!studentGroups[evaluation.studentId]) {
+                    studentGroups[evaluation.studentId] = [];
+                }
+                studentGroups[evaluation.studentId].push(evaluation);
+            }
+        });
+
+        let html = '<h4>📊 Risultati per Studente</h4>';
+        
+        Object.keys(studentGroups).forEach(studentId => {
+            const student = this.students.find(s => s.id == studentId);
+            const studentEvaluations = studentGroups[studentId];
+            const avgScore = this.calculateAverageScore(studentEvaluations);
+            
+            html += `
+                <div class="card student-results">
+                    <div class="student-results-header">
+                        <h5>${student ? student.name : 'Studente sconosciuto'}</h5>
+                        ${avgScore !== null ? `<span class="avg-score">Media: ${avgScore.toFixed(2)}/10</span>` : ''}
+                    </div>
+                    <div class="student-evaluations">
+                        ${studentEvaluations.map(evaluation => {
+                            const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                            const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+                            return `
+                                <div class="evaluation-row">
+                                    <span class="eval-date">${evaluation.date}</span>
+                                    <span class="eval-criterion">${criterion ? criterion.name : (grid ? grid.name : 'N/D')}</span>
+                                    ${evaluation.subjectId ? `<span class="eval-subject">${evaluation.subjectId}</span>` : ''}
+                                    ${evaluation.score ? `<span class="eval-score">${evaluation.score}/10</span>` : '<span class="eval-score">-</span>'}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    renderResultsByClass(container, evaluations) {
+        const classGroups = {};
+        
+        evaluations.forEach(evaluation => {
+            let className = null;
+            
+            // Get class from evaluation or from student
+            if (evaluation.classId) {
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                className = cls ? cls.name : null;
+            } else if (evaluation.studentId) {
+                const student = this.students.find(s => s.id == evaluation.studentId);
+                className = student ? student.class : null;
+            }
+            
+            if (className) {
+                if (!classGroups[className]) {
+                    classGroups[className] = [];
+                }
+                classGroups[className].push(evaluation);
+            }
+        });
+
+        let html = '<h4>📊 Risultati Aggregati per Classe</h4>';
+        
+        Object.keys(classGroups).forEach(className => {
+            const classEvaluations = classGroups[className];
+            const avgScore = this.calculateAverageScore(classEvaluations);
+            const subjectStats = this.calculateSubjectStats(classEvaluations);
+            
+            html += `
+                <div class="card class-results">
+                    <div class="class-results-header">
+                        <h5>${className}</h5>
+                        ${avgScore !== null ? `<span class="avg-score">Media Generale: ${avgScore.toFixed(2)}/10</span>` : ''}
+                    </div>
+                    <div class="class-stats">
+                        <p><strong>Totale Valutazioni:</strong> ${classEvaluations.length}</p>
+                        ${subjectStats ? `
+                            <div class="subject-stats">
+                                <strong>Medie per Disciplina:</strong>
+                                ${Object.keys(subjectStats).map(subject => `
+                                    <div class="subject-stat-row">
+                                        <span>${subject}</span>
+                                        <span>${subjectStats[subject].avg.toFixed(2)}/10 (${subjectStats[subject].count} valutazioni)</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    calculateAverageScore(evaluations) {
+        const scored = evaluations.filter(e => e.score !== null && e.score !== '');
+        if (scored.length === 0) return null;
+        const sum = scored.reduce((acc, e) => acc + parseFloat(e.score), 0);
+        return sum / scored.length;
+    }
+
+    calculateSubjectStats(evaluations) {
+        const stats = {};
+        
+        evaluations.forEach(evaluation => {
+            if (evaluation.subjectId && evaluation.score) {
+                if (!stats[evaluation.subjectId]) {
+                    stats[evaluation.subjectId] = { sum: 0, count: 0 };
+                }
+                stats[evaluation.subjectId].sum += parseFloat(evaluation.score);
+                stats[evaluation.subjectId].count++;
+            }
+        });
+
+        Object.keys(stats).forEach(subject => {
+            stats[subject].avg = stats[subject].sum / stats[subject].count;
+        });
+
+        return Object.keys(stats).length > 0 ? stats : null;
+    }
+
+    async generateCriteriaWithAI() {
+        const subject = prompt('Per quale disciplina vuoi generare i criteri di valutazione?');
+        if (!subject) return;
+
+        const topic = prompt('Quale argomento o competenza vuoi valutare?');
+        if (!topic) return;
+
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            alert('Configura la tua API Key di OpenRouter nelle impostazioni prima di usare questa funzione');
+            return;
+        }
+
+        const loadingMsg = document.getElementById('chat-messages');
+        if (loadingMsg) {
+            const tempDiv = document.createElement('div');
+            tempDiv.className = 'message assistant-message';
+            tempDiv.textContent = '🤖 Generazione criteri di valutazione in corso...';
+            loadingMsg.appendChild(tempDiv);
+            loadingMsg.scrollTop = loadingMsg.scrollHeight;
+        }
+
+        try {
+            const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
+            const response = await this.callOpenRouterAPI(
+                `Genera 4-6 criteri di valutazione dettagliati per la disciplina "${subject}" sull'argomento "${topic}". 
+                Per ogni criterio fornisci:
+                - Nome del criterio
+                - Descrizione dettagliata
+                - Tipo (es. conoscenza, competenza, abilità)
+                
+                Rispondi in formato JSON array con questa struttura:
+                [{"name": "...", "description": "...", "type": "..."}]`,
+                apiKey,
+                modelId
+            );
+
+            if (response && response.content) {
+                try {
+                    const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        const criteria = JSON.parse(jsonMatch[0]);
+                        
+                        criteria.forEach(c => {
+                            this.evaluationCriteria.push({
+                                id: Date.now() + Math.random(),
+                                name: c.name,
+                                description: c.description,
+                                subject: subject,
+                                type: c.type,
+                                createdAt: new Date().toISOString()
+                            });
+                        });
+
+                        this.saveData();
+                        this.renderEvaluations();
+                        alert(`${criteria.length} criteri di valutazione generati con successo!`);
+                    }
+                } catch (e) {
+                    console.error('Error parsing AI response:', e);
+                    alert('Errore nella generazione dei criteri. Riprova.');
+                }
+            }
+        } catch (error) {
+            console.error('Error generating criteria:', error);
+            alert('Errore nella generazione dei criteri');
+        }
+    }
+
     // AI Assistant methods
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (file) {
-            // Validate file size (max 5MB for localStorage compatibility)
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            if (file.size > maxSize) {
-                alert('Il file è troppo grande. La dimensione massima è 5MB.');
-                event.target.value = '';
-                return;
-            }
-
-            // Validate file type
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'text/plain', 
-                                  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-            const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.txt', '.doc', '.docx'];
-            
-            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-            if (!allowedExtensions.includes(fileExtension) && !allowedTypes.includes(file.type)) {
-                alert('Tipo di file non supportato. Sono accettati solo: PDF, immagini (JPG, PNG), TXT, DOC, DOCX');
-                event.target.value = '';
-                return;
-            }
-
             this.selectedFile = file;
             const displayElement = document.getElementById('selected-file-display');
             displayElement.innerHTML = `
                 <div class="file-info">
                     <span class="file-name">📄 ${file.name} (${this.formatFileSize(file.size)})</span>
-                    <button class="remove-file-btn" onclick="app.clearSelectedFile()" aria-label="Rimuovi file selezionato">Rimuovi</button>
+                    <button class="remove-file-btn" onclick="app.clearSelectedFile()">Rimuovi</button>
                 </div>
             `;
             displayElement.classList.add('active');
@@ -433,207 +2031,45 @@ ${lessonData.evaluation || 'N/D'}
         if (!message && !this.selectedFile) return;
 
         const apiKey = localStorage.getItem('openrouter-api-key');
-
-        // Handle file upload first (before API key check)
-        let savedFileId = null;
-        if (this.selectedFile) {
-            try {
-                // Save file to materials
-                savedFileId = await this.saveFileMaterial(this.selectedFile, message);
-                const fileInfo = `📎 File salvato: ${this.selectedFile.name}`;
-                this.addChatMessage('system', fileInfo);
-                
-                // Add note about AI model compatibility
-                this.addChatMessage('system', 'Nota: Il file è stato salvato nei materiali. La maggior parte dei modelli OpenRouter non supporta l\'elaborazione diretta di file, ma il file è disponibile nella sezione materiali della lezione.');
-                
-                // Clear the selected file after saving
-                this.clearSelectedFile();
-            } catch (error) {
-                console.error('Error saving file:', error);
-                this.addChatMessage('system', `Errore nel salvataggio del file: ${error.message}`);
-                this.clearSelectedFile();
-            }
-        }
         
-        // If there's a message to send to AI, check for API key
-        if (message) {
-            if (!apiKey) {
-                alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
-                this.switchTab('settings');
-                return;
-            }
+        if (!apiKey) {
+            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
+            this.switchTab('settings');
+            return;
+        }
 
-            // Build user message with context
-            let userMessage = message;
-            if (this.activeClass) {
-                userMessage = `[Classe: ${this.activeClass}] ${message}`;
-            }
+        // Build user message with context
+        let userMessage = message;
+        if (this.activeClass) {
+            userMessage = `[Classe: ${this.activeClass}] ${message}`;
+        }
 
-            this.addChatMessage('user', message);
+        this.addChatMessage('user', message);
+        
+        // Handle file upload
+        if (this.selectedFile) {
+            const fileInfo = `📎 File allegato: ${this.selectedFile.name}`;
+            this.addChatMessage('system', fileInfo);
+            
+            // Check if file is supported (basic check - most models don't support file uploads via this API)
+            this.addChatMessage('system', 'Nota: Il file è stato selezionato, ma la maggior parte dei modelli OpenRouter non supporta l\'upload diretto di file. Il file verrà ignorato in questa richiesta.');
+            
+            // Clear the selected file after attempting to send
+            this.clearSelectedFile();
         }
         
         input.value = '';
 
-        // Only call AI if there's a message and API key
-        if (message && apiKey) {
-            try {
-                const userMessage = this.activeClass ? `[Classe: ${this.activeClass}] ${message}` : message;
-                const response = await this.callOpenRouterAPI(userMessage, apiKey);
-                
-                if (response && response.content) {
-                    this.addChatMessage('ai', response.content);
-                }
-            } catch (error) {
-                console.error('Error calling AI:', error);
-                this.addChatMessage('system', `Errore: ${error.message}`);
+        try {
+            const response = await this.callOpenRouterAPI(userMessage, apiKey);
+            
+            if (response && response.content) {
+                this.addChatMessage('ai', response.content);
             }
+        } catch (error) {
+            console.error('Error calling AI:', error);
+            this.addChatMessage('system', `Errore: ${error.message}`);
         }
-    }
-
-    async saveFileMaterial(file, description = '') {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                try {
-                    const material = {
-                        id: Date.now(),
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        data: e.target.result, // Base64 encoded data
-                        description: description,
-                        uploadedAt: new Date().toISOString(),
-                        linkedToClass: this.activeClass || null,
-                        linkedToLessonId: null // Can be linked later
-                    };
-                    
-                    this.materials.push(material);
-                    this.saveData();
-                    resolve(material.id);
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            
-            reader.onerror = () => {
-                reject(new Error('Errore nella lettura del file'));
-            };
-            
-            reader.readAsDataURL(file);
-        });
-    }
-
-    deleteMaterial(materialId) {
-        if (confirm('Sei sicuro di voler eliminare questo materiale?')) {
-            this.materials = this.materials.filter(m => m.id !== materialId);
-            
-            // Remove references from lessons
-            this.lessons.forEach(lesson => {
-                if (lesson.materials && lesson.materials.includes(materialId)) {
-                    lesson.materials = lesson.materials.filter(id => id !== materialId);
-                }
-            });
-            
-            this.saveData();
-            this.renderMaterials();
-        }
-    }
-
-    linkMaterialToLesson(materialId, lessonId) {
-        const lesson = this.lessons.find(l => l.id === lessonId);
-        if (lesson) {
-            if (!lesson.materials) {
-                lesson.materials = [];
-            }
-            if (!lesson.materials.includes(materialId)) {
-                lesson.materials.push(materialId);
-            }
-            
-            const material = this.materials.find(m => m.id === materialId);
-            if (material) {
-                material.linkedToLessonId = lessonId;
-            }
-            
-            this.saveData();
-            this.renderLessons();
-            this.renderMaterials();
-        }
-    }
-
-    unlinkMaterialFromLesson(materialId, lessonId) {
-        const lesson = this.lessons.find(l => l.id === lessonId);
-        if (lesson && lesson.materials) {
-            lesson.materials = lesson.materials.filter(id => id !== materialId);
-            
-            const material = this.materials.find(m => m.id === materialId);
-            if (material && material.linkedToLessonId === lessonId) {
-                material.linkedToLessonId = null;
-            }
-            
-            this.saveData();
-            this.renderLessons();
-            this.renderMaterials();
-        }
-    }
-
-    downloadMaterial(materialId) {
-        const material = this.materials.find(m => m.id === materialId);
-        if (!material) return;
-
-        const link = document.createElement('a');
-        link.href = material.data;
-        link.download = material.name;
-        link.click();
-    }
-
-    renderMaterials() {
-        const materialsList = document.getElementById('materials-list');
-        if (!materialsList) return;
-
-        if (this.materials.length === 0) {
-            materialsList.innerHTML = `
-                <div class="empty-state">
-                    <h3>Nessun materiale caricato</h3>
-                    <p>I file caricati tramite la chat IA appariranno qui</p>
-                </div>
-            `;
-            return;
-        }
-
-        materialsList.innerHTML = this.materials
-            .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
-            .map(material => {
-                const linkedLesson = material.linkedToLessonId ? 
-                    this.lessons.find(l => l.id === material.linkedToLessonId) : null;
-                
-                return `
-                    <div class="material-item">
-                        <div class="material-header">
-                            <h4>📎 ${material.name}</h4>
-                            <span class="material-size">${this.formatFileSize(material.size)}</span>
-                        </div>
-                        ${material.description ? `<p class="material-description">${material.description}</p>` : ''}
-                        <div class="material-meta">
-                            <span>📅 ${new Date(material.uploadedAt).toLocaleDateString('it-IT')}</span>
-                            ${material.linkedToClass ? `<span>🎯 Classe: ${material.linkedToClass}</span>` : ''}
-                            ${linkedLesson ? `<span>📚 Lezione: ${linkedLesson.title}</span>` : ''}
-                        </div>
-                        <div class="material-actions">
-                            <button class="btn btn-primary" onclick="app.downloadMaterial(${material.id})" aria-label="Scarica ${material.name}">📥 Scarica</button>
-                            ${!material.linkedToLessonId ? `
-                                <select onchange="if(this.value) app.linkMaterialToLesson(${material.id}, parseInt(this.value))" class="lesson-link-select" aria-label="Collega a lezione">
-                                    <option value="">Collega a lezione...</option>
-                                    ${this.lessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('')}
-                                </select>
-                            ` : `
-                                <button class="btn btn-secondary" onclick="app.unlinkMaterialFromLesson(${material.id}, ${material.linkedToLessonId})" aria-label="Scollega dalla lezione">🔗 Scollega</button>
-                            `}
-                            <button class="btn btn-danger" onclick="app.deleteMaterial(${material.id})" aria-label="Elimina ${material.name}">🗑️ Elimina</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
     }
 
     quickAIPrompt(prompt) {
@@ -711,9 +2147,14 @@ ${lessonData.evaluation || 'N/D'}
     saveSettings() {
         const apiKey = document.getElementById('openrouter-api-key').value;
         const modelId = document.getElementById('openrouter-model-id').value;
-        const teacherName = document.getElementById('teacher-name').value;
+        const firstName = document.getElementById('teacher-first-name').value;
+        const lastName = document.getElementById('teacher-last-name').value;
+        const email = document.getElementById('teacher-email').value;
+        const schoolLevel = document.getElementById('school-level').value;
         const schoolName = document.getElementById('school-name').value;
         const schoolYear = document.getElementById('school-year').value;
+        const yearStart = document.getElementById('school-year-start').value;
+        const yearEnd = document.getElementById('school-year-end').value;
 
         if (apiKey) {
             localStorage.setItem('openrouter-api-key', apiKey);
@@ -721,8 +2162,17 @@ ${lessonData.evaluation || 'N/D'}
         if (modelId) {
             localStorage.setItem('openrouter-model-id', modelId);
         }
-        if (teacherName) {
-            localStorage.setItem('teacher-name', teacherName);
+        if (firstName) {
+            localStorage.setItem('teacher-first-name', firstName);
+        }
+        if (lastName) {
+            localStorage.setItem('teacher-last-name', lastName);
+        }
+        if (email) {
+            localStorage.setItem('teacher-email', email);
+        }
+        if (schoolLevel) {
+            localStorage.setItem('school-level', schoolLevel);
         }
         if (schoolName) {
             localStorage.setItem('school-name', schoolName);
@@ -730,6 +2180,15 @@ ${lessonData.evaluation || 'N/D'}
         if (schoolYear) {
             localStorage.setItem('school-year', schoolYear);
         }
+        if (yearStart) {
+            localStorage.setItem('school-year-start', yearStart);
+        }
+        if (yearEnd) {
+            localStorage.setItem('school-year-end', yearEnd);
+        }
+
+        // Save subjects
+        localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
 
         this.renderDashboard();
         alert('Impostazioni salvate con successo!');
@@ -738,9 +2197,15 @@ ${lessonData.evaluation || 'N/D'}
     loadSettings() {
         const apiKey = localStorage.getItem('openrouter-api-key');
         const modelId = localStorage.getItem('openrouter-model-id');
-        const teacherName = localStorage.getItem('teacher-name');
+        const firstName = localStorage.getItem('teacher-first-name');
+        const lastName = localStorage.getItem('teacher-last-name');
+        const email = localStorage.getItem('teacher-email');
+        const schoolLevel = localStorage.getItem('school-level');
         const schoolName = localStorage.getItem('school-name');
         const schoolYear = localStorage.getItem('school-year');
+        const yearStart = localStorage.getItem('school-year-start');
+        const yearEnd = localStorage.getItem('school-year-end');
+        const subjectsData = localStorage.getItem('teacher-subjects');
 
         if (apiKey) {
             document.getElementById('openrouter-api-key').value = apiKey;
@@ -748,8 +2213,21 @@ ${lessonData.evaluation || 'N/D'}
         if (modelId) {
             document.getElementById('openrouter-model-id').value = modelId;
         }
-        if (teacherName) {
-            document.getElementById('teacher-name').value = teacherName;
+        if (firstName) {
+            const firstNameInput = document.getElementById('teacher-first-name');
+            if (firstNameInput) firstNameInput.value = firstName;
+        }
+        if (lastName) {
+            const lastNameInput = document.getElementById('teacher-last-name');
+            if (lastNameInput) lastNameInput.value = lastName;
+        }
+        if (email) {
+            const emailInput = document.getElementById('teacher-email');
+            if (emailInput) emailInput.value = email;
+        }
+        if (schoolLevel) {
+            const schoolLevelInput = document.getElementById('school-level');
+            if (schoolLevelInput) schoolLevelInput.value = schoolLevel;
         }
         if (schoolName) {
             document.getElementById('school-name').value = schoolName;
@@ -757,12 +2235,31 @@ ${lessonData.evaluation || 'N/D'}
         if (schoolYear) {
             document.getElementById('school-year').value = schoolYear;
         }
+        if (yearStart) {
+            const yearStartInput = document.getElementById('school-year-start');
+            if (yearStartInput) yearStartInput.value = yearStart;
+        }
+        if (yearEnd) {
+            const yearEndInput = document.getElementById('school-year-end');
+            if (yearEndInput) yearEndInput.value = yearEnd;
+        }
+
+        // Load subjects
+        if (subjectsData) {
+            try {
+                this.subjects = JSON.parse(subjectsData);
+                this.renderAllSubjects();
+            } catch (e) {
+                console.error('Error loading subjects:', e);
+                this.subjects = [];
+            }
+        }
 
         // Initialize API key status icon
         const statusIcon = document.getElementById('api-key-status');
         if (statusIcon) {
             statusIcon.textContent = '⚪';
-            statusIcon.className = 'api-key-status unverified';
+            statusIcon.className = 'api-key-status';
             statusIcon.title = 'Non verificata';
         }
     }
@@ -831,15 +2328,24 @@ ${lessonData.evaluation || 'N/D'}
     saveData() {
         localStorage.setItem('docente-plus-lessons', JSON.stringify(this.lessons));
         localStorage.setItem('docente-plus-students', JSON.stringify(this.students));
-        localStorage.setItem('docente-plus-materials', JSON.stringify(this.materials));
-        localStorage.setItem('docente-plus-chat-messages', JSON.stringify(this.chatMessages));
+        localStorage.setItem('docente-plus-classes', JSON.stringify(this.classes));
+        localStorage.setItem('docente-plus-evaluation-criteria', JSON.stringify(this.evaluationCriteria));
+        localStorage.setItem('docente-plus-evaluation-grids', JSON.stringify(this.evaluationGrids));
+        localStorage.setItem('docente-plus-evaluations', JSON.stringify(this.evaluations));
+        localStorage.setItem('docente-plus-notifications', JSON.stringify(this.notifications));
+        localStorage.setItem('docente-plus-reminders', JSON.stringify(this.reminders));
+        localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
+        localStorage.setItem('docente-plus-activities', JSON.stringify(this.activities));
+        localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
     }
 
     loadData() {
         const lessonsData = localStorage.getItem('docente-plus-lessons');
         const studentsData = localStorage.getItem('docente-plus-students');
-        const materialsData = localStorage.getItem('docente-plus-materials');
-        const chatMessagesData = localStorage.getItem('docente-plus-chat-messages');
+        const classesData = localStorage.getItem('docente-plus-classes');
+        const evaluationCriteriaData = localStorage.getItem('docente-plus-evaluation-criteria');
+        const evaluationGridsData = localStorage.getItem('docente-plus-evaluation-grids');
+        const evaluationsData = localStorage.getItem('docente-plus-evaluations');
 
         if (lessonsData) {
             try {
@@ -859,54 +2365,797 @@ ${lessonData.evaluation || 'N/D'}
             }
         }
 
-        if (materialsData) {
+        if (classesData) {
             try {
-                this.materials = JSON.parse(materialsData);
+                this.classes = JSON.parse(classesData);
             } catch (e) {
-                console.error('Error loading materials:', e);
-                this.materials = [];
+                console.error('Error loading classes:', e);
+                this.classes = [];
             }
         }
 
-        if (chatMessagesData) {
+        if (evaluationCriteriaData) {
             try {
-                this.chatMessages = JSON.parse(chatMessagesData);
-                // Restore chat messages to UI
-                this.chatMessages.forEach(msg => {
-                    const messagesContainer = document.getElementById('chat-messages');
-                    if (messagesContainer) {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = `message ${msg.type}`;
-                        messageDiv.textContent = msg.content;
-                        messagesContainer.appendChild(messageDiv);
-                    }
-                });
+                this.evaluationCriteria = JSON.parse(evaluationCriteriaData);
             } catch (e) {
-                console.error('Error loading chat messages:', e);
-                this.chatMessages = [];
+                console.error('Error loading evaluation criteria:', e);
+                this.evaluationCriteria = [];
+            }
+        }
+
+        if (evaluationGridsData) {
+            try {
+                this.evaluationGrids = JSON.parse(evaluationGridsData);
+            } catch (e) {
+                console.error('Error loading evaluation grids:', e);
+                this.evaluationGrids = [];
+            }
+        }
+
+        if (evaluationsData) {
+            try {
+                this.evaluations = JSON.parse(evaluationsData);
+            } catch (e) {
+                console.error('Error loading evaluations:', e);
+                this.evaluations = [];
+            }
+        }
+
+        // Load notifications
+        const notificationsData = localStorage.getItem('docente-plus-notifications');
+        if (notificationsData) {
+            try {
+                this.notifications = JSON.parse(notificationsData);
+            } catch (e) {
+                console.error('Error loading notifications:', e);
+                this.notifications = [];
+            }
+        }
+
+        // Load reminders
+        const remindersData = localStorage.getItem('docente-plus-reminders');
+        if (remindersData) {
+            try {
+                this.reminders = JSON.parse(remindersData);
+            } catch (e) {
+                console.error('Error loading reminders:', e);
+                this.reminders = [];
+            }
+        }
+
+        // Load notification settings
+        const notificationSettingsData = localStorage.getItem('docente-plus-notification-settings');
+        if (notificationSettingsData) {
+            try {
+                this.notificationSettings = JSON.parse(notificationSettingsData);
+            } catch (e) {
+                console.error('Error loading notification settings:', e);
+            }
+        }
+
+        // Load activities
+        const activitiesData = localStorage.getItem('docente-plus-activities');
+        if (activitiesData) {
+            try {
+                this.activities = JSON.parse(activitiesData);
+            } catch (e) {
+                console.error('Error loading activities:', e);
+                this.activities = [];
+            }
+        }
+
+        // Load schedule
+        const scheduleData = localStorage.getItem('docente-plus-schedule');
+        if (scheduleData) {
+            try {
+                this.schedule = JSON.parse(scheduleData);
+            } catch (e) {
+                console.error('Error loading schedule:', e);
+                this.schedule = {};
             }
         }
     }
 
     exportData() {
+        // Store the export type and show format selection modal
+        this.currentExportType = 'data';
+        this.showExportModal();
+    }
+
+    exportEvaluations() {
+        // Store the export type and show format selection modal
+        this.currentExportType = 'evaluations';
+        this.showExportModal();
+    }
+
+    showExportModal() {
+        const modal = document.getElementById('export-format-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    closeExportModal() {
+        const modal = document.getElementById('export-format-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentExportType = null;
+    }
+
+    executeExport(format) {
+        this.closeExportModal();
+        
+        if (this.currentExportType === 'data') {
+            this.exportDataInFormat(format);
+        } else if (this.currentExportType === 'evaluations') {
+            this.exportEvaluationsInFormat(format);
+        }
+    }
+
+    exportDataInFormat(format) {
         const data = {
             lessons: this.lessons,
             students: this.students,
-            materials: this.materials,
-            chatMessages: this.chatMessages,
+            classes: this.classes,
+            subjects: this.subjects,
+            activities: this.activities,
+            schedule: this.schedule,
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations,
+            notifications: this.notifications,
+            reminders: this.reminders,
+            notificationSettings: this.notificationSettings,
+            teacherProfile: {
+                firstName: localStorage.getItem('teacher-first-name'),
+                lastName: localStorage.getItem('teacher-last-name'),
+                email: localStorage.getItem('teacher-email'),
+                schoolLevel: localStorage.getItem('school-level'),
+                schoolName: localStorage.getItem('school-name'),
+                schoolYear: localStorage.getItem('school-year'),
+                schoolYearStart: localStorage.getItem('school-year-start'),
+                schoolYearEnd: localStorage.getItem('school-year-end')
+            },
             exportDate: new Date().toISOString()
         };
 
+        switch(format) {
+            case 'json':
+                this.exportAsJSON(data, 'docente-plus-export');
+                break;
+            case 'pdf':
+                this.exportDataAsPDF(data);
+                break;
+            case 'excel':
+                this.exportDataAsExcel(data);
+                break;
+        }
+
+        // Track backup date
+        this.notificationSettings.lastBackupDate = new Date().toISOString();
+        this.saveData();
+
+        // Create backup notification
+        this.createNotification({
+            title: '✅ Backup Completato',
+            message: `I tuoi dati sono stati esportati con successo in formato ${format.toUpperCase()}`,
+            type: 'system',
+            notificationId: `backup-success-${Date.now()}`
+        });
+    }
+
+    exportEvaluationsInFormat(format) {
+        // Calculate statistics for export
+        const stats = {
+            totalEvaluations: this.evaluations.length,
+            totalStudents: new Set(this.evaluations.map(e => e.studentId).filter(id => id)).size,
+            totalClasses: new Set(this.evaluations.map(e => e.classId).filter(id => id)).size,
+            averageScore: this.calculateAverageScore(this.evaluations),
+            evaluationsBySubject: {},
+            evaluationsByClass: {}
+        };
+
+        // Calculate by subject
+        this.subjects.forEach(subject => {
+            const subjectEvals = this.evaluations.filter(e => e.subjectId === subject);
+            if (subjectEvals.length > 0) {
+                stats.evaluationsBySubject[subject] = {
+                    count: subjectEvals.length,
+                    averageScore: this.calculateAverageScore(subjectEvals)
+                };
+            }
+        });
+
+        // Calculate by class
+        this.classes.forEach(cls => {
+            const classEvals = this.evaluations.filter(e => e.classId == cls.id);
+            if (classEvals.length > 0) {
+                stats.evaluationsByClass[cls.name] = {
+                    count: classEvals.length,
+                    averageScore: this.calculateAverageScore(classEvals)
+                };
+            }
+        });
+
+        const data = {
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations.map(evaluation => {
+                const student = this.students.find(s => s.id == evaluation.studentId);
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+
+                return {
+                    ...evaluation,
+                    studentName: student ? student.name : null,
+                    className: cls ? cls.name : null,
+                    criterionName: criterion ? criterion.name : null,
+                    gridName: grid ? grid.name : null,
+                    subjectName: evaluation.subjectId || null
+                };
+            }),
+            statistics: stats,
+            exportDate: new Date().toISOString()
+        };
+
+        switch(format) {
+            case 'json':
+                this.exportAsJSON(data, 'valutazioni-export');
+                break;
+            case 'pdf':
+                this.exportEvaluationsAsPDF(data);
+                break;
+            case 'excel':
+                this.exportEvaluationsAsExcel(data);
+                break;
+        }
+
+        alert(`Valutazioni esportate con successo in formato ${format.toUpperCase()}!`);
+    }
+
+    exportAsJSON(data, filename) {
         const dataStr = JSON.stringify(data, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         
         const link = document.createElement('a');
         link.href = url;
-        link.download = `docente-plus-export-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `${filename}-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         
         URL.revokeObjectURL(url);
+    }
+
+    exportDataAsPDF(data) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Title
+        doc.setFontSize(20);
+        doc.text('Docente++ - Export Dati Completo', 14, 20);
+        
+        // Teacher info
+        doc.setFontSize(12);
+        doc.text(`Docente: ${data.teacherProfile.firstName} ${data.teacherProfile.lastName}`, 14, 30);
+        doc.text(`Scuola: ${data.teacherProfile.schoolName || 'N/D'}`, 14, 37);
+        doc.text(`Anno Scolastico: ${data.teacherProfile.schoolYear || 'N/D'}`, 14, 44);
+        doc.text(`Data Export: ${new Date(data.exportDate).toLocaleDateString('it-IT')}`, 14, 51);
+        
+        let yPos = 65;
+
+        // Summary statistics
+        doc.setFontSize(14);
+        doc.text('Riepilogo', 14, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.text(`Lezioni: ${data.lessons.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Studenti: ${data.students.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Classi: ${data.classes.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Discipline: ${data.subjects.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Attività: ${data.activities.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Slot Orario Configurati: ${Object.keys(data.schedule || {}).length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Valutazioni: ${data.evaluations.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Criteri di Valutazione: ${data.evaluationCriteria.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Griglie di Valutazione: ${data.evaluationGrids.length}`, 14, yPos);
+        yPos += 15;
+
+        // Classes table
+        if (data.classes.length > 0) {
+            doc.setFontSize(14);
+            doc.text('Classi', 14, yPos);
+            yPos += 7;
+            
+            const classesData = data.classes.map(c => [
+                c.name,
+                c.year || 'N/D',
+                c.section || 'N/D',
+                c.studentsCount || 0
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Nome', 'Anno', 'Sezione', 'N. Studenti']],
+                body: classesData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Students table (if space available)
+        if (data.students.length > 0 && yPos < 250) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Studenti', 14, yPos);
+            yPos += 7;
+            
+            const studentsData = data.students.slice(0, 20).map(s => {
+                const cls = data.classes.find(c => c.id == s.classId);
+                return [s.name, cls ? cls.name : 'N/D'];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Nome Studente', 'Classe']],
+                body: studentsData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Schedule summary
+        const scheduleEntries = Object.keys(data.schedule || {}).length;
+        if (scheduleEntries > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Orario Didattico', 14, yPos);
+            yPos += 7;
+            
+            const scheduleData = Object.entries(data.schedule).map(([key, slot]) => {
+                const [dateStr, hour] = key.split('-').slice(0, 2);
+                const hourStr = key.split('-')[2];
+                const date = new Date(dateStr);
+                const dayName = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'][date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                return [
+                    `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
+                    `${hourStr}:00`,
+                    cls ? cls.name : 'N/D',
+                    activityTypes[slot.activityType] || 'N/D'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Giorno', 'Ora', 'Classe', 'Tipo Attività']],
+                body: scheduleData,
+                theme: 'grid',
+                styles: { fontSize: 8 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Activities table
+        if (data.activities && data.activities.length > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Attività Didattiche', 14, yPos);
+            yPos += 7;
+            
+            const activitiesData = data.activities.slice(0, 30).map(a => {
+                const cls = data.classes.find(c => c.id == a.classId);
+                const statusLabels = {
+                    'planned': 'Pianificata',
+                    'in-progress': 'In corso',
+                    'completed': 'Completata'
+                };
+                const typeLabels = {
+                    'lesson': 'Lezione',
+                    'exercise': 'Esercitazione',
+                    'lab': 'Laboratorio',
+                    'project': 'Progetto',
+                    'homework': 'Compiti',
+                    'exam': 'Verifica'
+                };
+                return [
+                    a.title || 'N/D',
+                    typeLabels[a.type] || a.type || 'N/D',
+                    cls ? cls.name : 'Generale',
+                    statusLabels[a.status] || a.status || 'N/D',
+                    a.deadline ? new Date(a.deadline).toLocaleDateString('it-IT') : '-'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Titolo', 'Tipo', 'Classe', 'Stato', 'Scadenza']],
+                body: activitiesData,
+                theme: 'striped',
+                styles: { fontSize: 8 }
+            });
+        }
+
+        // Footer with privacy note
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128);
+            doc.text('Documento generato da Docente++ - Dati riservati', 14, 285);
+            doc.text(`Pagina ${i} di ${pageCount}`, 170, 285);
+        }
+        
+        doc.save(`docente-plus-export-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    exportEvaluationsAsPDF(data) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Title
+        doc.setFontSize(20);
+        doc.text('Docente++ - Export Valutazioni', 14, 20);
+        
+        // Teacher info
+        const teacherName = `${localStorage.getItem('teacher-first-name') || ''} ${localStorage.getItem('teacher-last-name') || ''}`.trim();
+        doc.setFontSize(12);
+        if (teacherName) {
+            doc.text(`Docente: ${teacherName}`, 14, 30);
+        }
+        doc.text(`Data Export: ${new Date(data.exportDate).toLocaleDateString('it-IT')}`, 14, 37);
+        
+        let yPos = 50;
+
+        // Statistics
+        doc.setFontSize(14);
+        doc.text('Statistiche', 14, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.text(`Totale Valutazioni: ${data.statistics.totalEvaluations}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Studenti Valutati: ${data.statistics.totalStudents}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Classi: ${data.statistics.totalClasses}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Media Generale: ${data.statistics.averageScore ? data.statistics.averageScore.toFixed(2) : 'N/D'}`, 14, yPos);
+        yPos += 15;
+
+        // Statistics by subject
+        if (Object.keys(data.statistics.evaluationsBySubject).length > 0) {
+            doc.setFontSize(14);
+            doc.text('Statistiche per Disciplina', 14, yPos);
+            yPos += 7;
+            
+            const subjectData = Object.entries(data.statistics.evaluationsBySubject).map(([subject, stats]) => [
+                subject,
+                stats.count,
+                stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D'
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Disciplina', 'N. Valutazioni', 'Media']],
+                body: subjectData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Evaluations table
+        if (data.evaluations.length > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Valutazioni', 14, yPos);
+            yPos += 7;
+            
+            const evaluationsData = data.evaluations.slice(0, 50).map(e => [
+                e.studentName || 'N/D',
+                e.className || 'N/D',
+                e.subjectName || 'N/D',
+                e.score || 'N/D',
+                new Date(e.date).toLocaleDateString('it-IT')
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Studente', 'Classe', 'Disciplina', 'Voto', 'Data']],
+                body: evaluationsData,
+                theme: 'striped',
+                styles: { fontSize: 8 }
+            });
+        }
+
+        // Footer with privacy note
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128);
+            doc.text('Documento generato da Docente++ - Dati riservati e protetti', 14, 285);
+            doc.text(`Pagina ${i} di ${pageCount}`, 170, 285);
+        }
+        
+        doc.save(`valutazioni-export-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    exportDataAsExcel(data) {
+        const wb = XLSX.utils.book_new();
+        
+        // Teacher Profile sheet
+        const profileData = [
+            ['Campo', 'Valore'],
+            ['Nome', data.teacherProfile.firstName],
+            ['Cognome', data.teacherProfile.lastName],
+            ['Email', data.teacherProfile.email],
+            ['Scuola', data.teacherProfile.schoolName],
+            ['Livello Scuola', data.teacherProfile.schoolLevel],
+            ['Anno Scolastico', data.teacherProfile.schoolYear],
+            ['Inizio Anno', data.teacherProfile.schoolYearStart],
+            ['Fine Anno', data.teacherProfile.schoolYearEnd],
+            ['Data Export', new Date(data.exportDate).toLocaleDateString('it-IT')]
+        ];
+        const wsProfile = XLSX.utils.aoa_to_sheet(profileData);
+        XLSX.utils.book_append_sheet(wb, wsProfile, 'Profilo Docente');
+
+        // Classes sheet
+        if (data.classes.length > 0) {
+            const classesData = [
+                ['Nome', 'Anno', 'Sezione', 'N. Studenti', 'Data Creazione']
+            ];
+            data.classes.forEach(c => {
+                classesData.push([
+                    c.name,
+                    c.year || '',
+                    c.section || '',
+                    c.studentsCount || 0,
+                    c.createdAt ? new Date(c.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsClasses = XLSX.utils.aoa_to_sheet(classesData);
+            XLSX.utils.book_append_sheet(wb, wsClasses, 'Classi');
+        }
+
+        // Students sheet
+        if (data.students.length > 0) {
+            const studentsData = [
+                ['Nome Studente', 'Classe', 'Data Inserimento']
+            ];
+            data.students.forEach(s => {
+                const cls = data.classes.find(c => c.id == s.classId);
+                studentsData.push([
+                    s.name,
+                    cls ? cls.name : '',
+                    s.createdAt ? new Date(s.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsStudents = XLSX.utils.aoa_to_sheet(studentsData);
+            XLSX.utils.book_append_sheet(wb, wsStudents, 'Studenti');
+        }
+
+        // Lessons sheet
+        if (data.lessons.length > 0) {
+            const lessonsData = [
+                ['Disciplina', 'Classe', 'Argomento', 'Data', 'Ora Inizio', 'Ora Fine', 'Note']
+            ];
+            data.lessons.forEach(l => {
+                const cls = data.classes.find(c => c.id == l.classId);
+                lessonsData.push([
+                    l.subject || '',
+                    cls ? cls.name : '',
+                    l.topic || '',
+                    l.date || '',
+                    l.startTime || '',
+                    l.endTime || '',
+                    l.notes || ''
+                ]);
+            });
+            const wsLessons = XLSX.utils.aoa_to_sheet(lessonsData);
+            XLSX.utils.book_append_sheet(wb, wsLessons, 'Lezioni');
+        }
+
+        // Activities sheet
+        if (data.activities && data.activities.length > 0) {
+            const activitiesData = [
+                ['Titolo', 'Tipo', 'Descrizione', 'Scadenza', 'Classe', 'Studente', 'Stato', 'Data Creazione']
+            ];
+            data.activities.forEach(a => {
+                const cls = data.classes.find(c => c.id == a.classId);
+                const student = data.students.find(s => s.id == a.studentId);
+                activitiesData.push([
+                    a.title || '',
+                    a.type || '',
+                    a.description || '',
+                    a.deadline ? new Date(a.deadline).toLocaleDateString('it-IT') : '',
+                    cls ? cls.name : '',
+                    student ? student.name : '',
+                    a.status || '',
+                    a.createdAt ? new Date(a.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsActivities = XLSX.utils.aoa_to_sheet(activitiesData);
+            XLSX.utils.book_append_sheet(wb, wsActivities, 'Attività');
+        }
+
+        // Evaluations sheet
+        if (data.evaluations.length > 0) {
+            const evaluationsData = [
+                ['Studente', 'Classe', 'Disciplina', 'Voto', 'Criterio', 'Griglia', 'Data', 'Note']
+            ];
+            data.evaluations.forEach(e => {
+                const student = data.students.find(s => s.id == e.studentId);
+                const cls = data.classes.find(c => c.id == e.classId);
+                const criterion = data.evaluationCriteria.find(c => c.id == e.criterionId);
+                const grid = data.evaluationGrids.find(g => g.id == e.gridId);
+                
+                evaluationsData.push([
+                    student ? student.name : '',
+                    cls ? cls.name : '',
+                    e.subjectId || '',
+                    e.score || '',
+                    criterion ? criterion.name : '',
+                    grid ? grid.name : '',
+                    e.date || '',
+                    e.notes || ''
+                ]);
+            });
+            const wsEvaluations = XLSX.utils.aoa_to_sheet(evaluationsData);
+            XLSX.utils.book_append_sheet(wb, wsEvaluations, 'Valutazioni');
+        }
+
+        // Subjects sheet
+        if (data.subjects.length > 0) {
+            const subjectsData = [['Disciplina']];
+            data.subjects.forEach(s => {
+                subjectsData.push([s]);
+            });
+            const wsSubjects = XLSX.utils.aoa_to_sheet(subjectsData);
+            XLSX.utils.book_append_sheet(wb, wsSubjects, 'Discipline');
+        }
+
+        // Schedule sheet
+        if (data.schedule && Object.keys(data.schedule).length > 0) {
+            const scheduleData = [
+                ['Giorno', 'Data', 'Ora', 'Classe', 'Tipo Attività']
+            ];
+            Object.entries(data.schedule).forEach(([key, slot]) => {
+                const [dateStr, hourStr] = key.split('-');
+                const date = new Date(dateStr);
+                const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                const dayName = dayNames[date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                
+                scheduleData.push([
+                    dayName,
+                    date.toLocaleDateString('it-IT'),
+                    `${hourStr}:00`,
+                    cls ? cls.name : '',
+                    activityTypes[slot.activityType] || ''
+                ]);
+            });
+            const wsSchedule = XLSX.utils.aoa_to_sheet(scheduleData);
+            XLSX.utils.book_append_sheet(wb, wsSchedule, 'Orario');
+        }
+
+        // Write file
+        XLSX.writeFile(wb, `docente-plus-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    exportEvaluationsAsExcel(data) {
+        const wb = XLSX.utils.book_new();
+        
+        // Statistics sheet
+        const statsData = [
+            ['Statistiche Generali', ''],
+            ['Totale Valutazioni', data.statistics.totalEvaluations],
+            ['Studenti Valutati', data.statistics.totalStudents],
+            ['Classi', data.statistics.totalClasses],
+            ['Media Generale', data.statistics.averageScore ? data.statistics.averageScore.toFixed(2) : 'N/D'],
+            ['', ''],
+            ['Statistiche per Disciplina', ''],
+            ['Disciplina', 'N. Valutazioni', 'Media']
+        ];
+        
+        Object.entries(data.statistics.evaluationsBySubject).forEach(([subject, stats]) => {
+            statsData.push([subject, stats.count, stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D']);
+        });
+        
+        statsData.push(['', '']);
+        statsData.push(['Statistiche per Classe', '']);
+        statsData.push(['Classe', 'N. Valutazioni', 'Media']);
+        
+        Object.entries(data.statistics.evaluationsByClass).forEach(([className, stats]) => {
+            statsData.push([className, stats.count, stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D']);
+        });
+        
+        const wsStats = XLSX.utils.aoa_to_sheet(statsData);
+        XLSX.utils.book_append_sheet(wb, wsStats, 'Statistiche');
+
+        // Evaluations sheet
+        if (data.evaluations.length > 0) {
+            const evaluationsData = [
+                ['Studente', 'Classe', 'Disciplina', 'Voto', 'Criterio', 'Griglia', 'Data', 'Note']
+            ];
+            data.evaluations.forEach(e => {
+                evaluationsData.push([
+                    e.studentName || '',
+                    e.className || '',
+                    e.subjectName || '',
+                    e.score || '',
+                    e.criterionName || '',
+                    e.gridName || '',
+                    e.date || '',
+                    e.notes || ''
+                ]);
+            });
+            const wsEvaluations = XLSX.utils.aoa_to_sheet(evaluationsData);
+            XLSX.utils.book_append_sheet(wb, wsEvaluations, 'Valutazioni');
+        }
+
+        // Criteria sheet
+        if (data.evaluationCriteria.length > 0) {
+            const criteriaData = [
+                ['Nome Criterio', 'Disciplina', 'Tipo', 'Descrizione']
+            ];
+            data.evaluationCriteria.forEach(c => {
+                criteriaData.push([
+                    c.name || '',
+                    c.subject || '',
+                    c.type || '',
+                    c.description || ''
+                ]);
+            });
+            const wsCriteria = XLSX.utils.aoa_to_sheet(criteriaData);
+            XLSX.utils.book_append_sheet(wb, wsCriteria, 'Criteri');
+        }
+
+        // Grids sheet
+        if (data.evaluationGrids.length > 0) {
+            const gridsData = [
+                ['Nome Griglia', 'Disciplina', 'N. Livelli']
+            ];
+            data.evaluationGrids.forEach(g => {
+                gridsData.push([
+                    g.name || '',
+                    g.subject || '',
+                    g.levels ? g.levels.length : 0
+                ]);
+            });
+            const wsGrids = XLSX.utils.aoa_to_sheet(gridsData);
+            XLSX.utils.book_append_sheet(wb, wsGrids, 'Griglie');
+        }
+
+        // Write file
+        XLSX.writeFile(wb, `valutazioni-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     importData() {
@@ -929,18 +3178,68 @@ ${lessonData.evaluation || 'N/D'}
                     if (data.students) {
                         this.students = data.students;
                     }
-                    if (data.materials) {
-                        this.materials = data.materials;
+                    if (data.classes) {
+                        this.classes = data.classes;
                     }
-                    if (data.chatMessages) {
-                        this.chatMessages = data.chatMessages;
+                    if (data.subjects) {
+                        this.subjects = data.subjects;
+                        localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
+                    }
+                    if (data.activities) {
+                        this.activities = data.activities;
+                    }
+                    if (data.schedule) {
+                        this.schedule = data.schedule;
+                    }
+                    if (data.evaluationCriteria) {
+                        this.evaluationCriteria = data.evaluationCriteria;
+                    }
+                    if (data.evaluationGrids) {
+                        this.evaluationGrids = data.evaluationGrids;
+                    }
+                    if (data.evaluations) {
+                        this.evaluations = data.evaluations;
+                    }
+                    if (data.notifications) {
+                        this.notifications = data.notifications;
+                    }
+                    if (data.reminders) {
+                        this.reminders = data.reminders;
+                    }
+                    if (data.notificationSettings) {
+                        this.notificationSettings = data.notificationSettings;
+                    }
+                    if (data.teacherProfile) {
+                        const profile = data.teacherProfile;
+                        if (profile.firstName) localStorage.setItem('teacher-first-name', profile.firstName);
+                        if (profile.lastName) localStorage.setItem('teacher-last-name', profile.lastName);
+                        if (profile.email) localStorage.setItem('teacher-email', profile.email);
+                        if (profile.schoolLevel) localStorage.setItem('school-level', profile.schoolLevel);
+                        if (profile.schoolName) localStorage.setItem('school-name', profile.schoolName);
+                        if (profile.schoolYear) localStorage.setItem('school-year', profile.schoolYear);
+                        if (profile.schoolYearStart) localStorage.setItem('school-year-start', profile.schoolYearStart);
+                        if (profile.schoolYearEnd) localStorage.setItem('school-year-end', profile.schoolYearEnd);
                     }
                     
                     this.saveData();
                     this.renderLessons();
                     this.renderStudents();
-                    this.renderMaterials();
+                    this.renderClasses();
+                    this.renderActivities();
+                    this.renderSchedule();
+                    this.renderEvaluations();
+                    this.renderNotifications();
+                    this.updateClassSelectors();
+                    this.loadSettings();
                     this.renderDashboard();
+                    
+                    // Create import success notification
+                    this.createNotification({
+                        title: '✅ Importazione Completata',
+                        message: 'I dati sono stati importati e ripristinati con successo',
+                        type: 'system',
+                        notificationId: `import-success-${Date.now()}`
+                    });
                     
                     alert('Dati importati con successo!');
                 } catch (error) {
@@ -953,6 +3252,515 @@ ${lessonData.evaluation || 'N/D'}
         };
         
         input.click();
+    }
+
+    // Notification Management Methods
+    requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted');
+                } else {
+                    console.log('Notification permission denied');
+                }
+            });
+        }
+    }
+
+    startNotificationChecks() {
+        // Check for notifications every 5 minutes
+        this.notificationCheckInterval = setInterval(() => {
+            this.checkAndSendNotifications();
+        }, 5 * 60 * 1000); // 5 minutes
+
+        // Also check immediately
+        this.checkAndSendNotifications();
+    }
+
+    checkAndSendNotifications() {
+        const now = new Date();
+
+        // Check if we're in quiet hours
+        if (this.isQuietHours(now)) {
+            return;
+        }
+
+        // Check lesson reminders
+        if (this.notificationSettings.lessonReminders) {
+            this.checkLessonReminders(now);
+        }
+
+        // Check activity deadline reminders
+        this.checkActivityDeadlineReminders(now);
+
+        // Check custom reminders
+        this.checkCustomReminders(now);
+
+        // Check backup reminders
+        if (this.notificationSettings.backupReminders) {
+            this.checkBackupReminders(now);
+        }
+    }
+
+    isQuietHours(date) {
+        if (!this.notificationSettings.quietHoursEnabled) {
+            return false;
+        }
+
+        const currentTime = date.getHours() * 60 + date.getMinutes();
+        const [startHour, startMin] = this.notificationSettings.quietHoursStart.split(':').map(Number);
+        const [endHour, endMin] = this.notificationSettings.quietHoursEnd.split(':').map(Number);
+        const startTime = startHour * 60 + startMin;
+        const endTime = endHour * 60 + endMin;
+
+        if (startTime < endTime) {
+            return currentTime >= startTime && currentTime <= endTime;
+        } else {
+            // Quiet hours span midnight
+            return currentTime >= startTime || currentTime <= endTime;
+        }
+    }
+
+    checkLessonReminders(now) {
+        this.lessons.forEach(lesson => {
+            const lessonDate = new Date(lesson.date + 'T' + lesson.time);
+            const timeDiff = lessonDate - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+            // Check for 24-hour reminder
+            if (this.notificationSettings.remindersBefore24h && 
+                hoursDiff > 23.5 && hoursDiff <= 24.5) {
+                const notificationId = `lesson-24h-${lesson.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '📚 Promemoria Lezione (24 ore)',
+                        message: `Domani alle ${lesson.time}: ${lesson.title}`,
+                        type: 'lesson-reminder',
+                        relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for 1-hour reminder
+            if (this.notificationSettings.remindersBefore1h && 
+                hoursDiff > 0.5 && hoursDiff <= 1.5) {
+                const notificationId = `lesson-1h-${lesson.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '📚 Promemoria Lezione (1 ora)',
+                        message: `Tra un\'ora: ${lesson.title}`,
+                        type: 'lesson-reminder',
+                        relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+        });
+    }
+
+    checkActivityDeadlineReminders(now) {
+        this.activities.forEach(activity => {
+            // Skip completed activities or those without deadlines
+            if (activity.status === 'completed' || !activity.deadline) {
+                return;
+            }
+
+            const deadlineDate = new Date(activity.deadline);
+            const timeDiff = deadlineDate - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+            const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+
+            // Check for 3-day reminder
+            if (daysDiff > 2.9 && daysDiff <= 3.1) {
+                const notificationId = `activity-3d-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '📋 Promemoria Attività (3 giorni)',
+                        message: `Scadenza tra 3 giorni${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for 24-hour reminder
+            if (hoursDiff > 23.5 && hoursDiff <= 24.5) {
+                const notificationId = `activity-24h-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '📋 Promemoria Attività (24 ore)',
+                        message: `Scadenza domani${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+
+            // Check for overdue
+            if (timeDiff < 0 && timeDiff > -24 * 60 * 60 * 1000) {
+                const notificationId = `activity-overdue-${activity.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    const cls = this.classes.find(c => c.id == activity.classId);
+                    const classInfo = cls ? ` per ${cls.name}` : '';
+                    this.createNotification({
+                        title: '⚠️ Attività Scaduta',
+                        message: `Scadenza superata${classInfo}: ${activity.title}`,
+                        type: 'activity-reminder',
+                        relatedId: activity.id,
+                        notificationId: notificationId
+                    });
+                }
+            }
+        });
+    }
+
+    checkCustomReminders(now) {
+        this.reminders.forEach(reminder => {
+            if (reminder.dismissed || reminder.notified) {
+                return;
+            }
+
+            const reminderDate = new Date(reminder.dateTime);
+            const timeDiff = reminderDate - now;
+
+            if (timeDiff <= 0 && timeDiff > -5 * 60 * 1000) { // Within 5 minutes of reminder time
+                this.createNotification({
+                    title: `🔔 ${reminder.title}`,
+                    message: reminder.message,
+                    type: 'custom-reminder',
+                    relatedId: reminder.id,
+                    notificationId: `reminder-${reminder.id}`
+                });
+                reminder.notified = true;
+                this.saveData();
+            }
+        });
+    }
+
+    hasNotificationBeenSent(notificationId) {
+        return this.notifications.some(n => n.notificationId === notificationId);
+    }
+
+    checkBackupReminders(now) {
+        const lastBackup = this.notificationSettings.lastBackupDate;
+        const interval = this.notificationSettings.backupReminderInterval;
+        
+        if (!lastBackup) {
+            // First time - suggest backup after 7 days of use
+            const firstUseDate = localStorage.getItem('docente-plus-first-use');
+            if (!firstUseDate) {
+                localStorage.setItem('docente-plus-first-use', now.toISOString());
+                return;
+            }
+            
+            const daysSinceFirstUse = (now - new Date(firstUseDate)) / (1000 * 60 * 60 * 24);
+            if (daysSinceFirstUse >= 7) {
+                const notificationId = 'backup-initial';
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '💾 Promemoria Backup',
+                        message: 'È consigliato eseguire un backup dei tuoi dati. Vai in Impostazioni > Esporta Dati',
+                        type: 'backup',
+                        notificationId: notificationId
+                    });
+                }
+            }
+        } else {
+            // Check if it's time for regular backup reminder
+            const lastBackupDate = new Date(lastBackup);
+            const daysSinceBackup = (now - lastBackupDate) / (1000 * 60 * 60 * 24);
+            
+            if (daysSinceBackup >= interval) {
+                const notificationId = `backup-${lastBackupDate.toISOString()}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '💾 Promemoria Backup Periodico',
+                        message: `Sono passati ${Math.floor(daysSinceBackup)} giorni dall'ultimo backup. Esporta i tuoi dati per sicurezza.`,
+                        type: 'backup',
+                        notificationId: notificationId
+                    });
+                }
+            }
+        }
+    }
+
+    createNotification(data) {
+        const notification = {
+            id: Date.now(),
+            ...data,
+            createdAt: new Date().toISOString(),
+            read: false
+        };
+
+        this.notifications.unshift(notification);
+        this.saveData();
+
+        // Send browser notification
+        if (this.notificationSettings.browserNotifications && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification(notification.title, {
+                body: notification.message,
+                icon: '🎓',
+                tag: notification.notificationId
+            });
+        }
+
+        // Update UI if on notifications tab
+        this.renderNotifications();
+    }
+
+    addReminder() {
+        const title = document.getElementById('reminder-title').value;
+        const message = document.getElementById('reminder-message').value;
+        const date = document.getElementById('reminder-date').value;
+        const time = document.getElementById('reminder-time').value;
+
+        if (!title || !date || !time) {
+            alert('Inserisci titolo, data e ora per il promemoria');
+            return;
+        }
+
+        const reminder = {
+            id: Date.now(),
+            title,
+            message,
+            dateTime: `${date}T${time}`,
+            createdAt: new Date().toISOString(),
+            notified: false,
+            dismissed: false
+        };
+
+        this.reminders.push(reminder);
+        this.saveData();
+        this.renderNotifications();
+        this.hideAddReminderForm();
+
+        // Clear form
+        document.getElementById('reminder-title').value = '';
+        document.getElementById('reminder-message').value = '';
+        document.getElementById('reminder-date').value = '';
+        document.getElementById('reminder-time').value = '';
+    }
+
+    deleteReminder(id) {
+        if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
+            this.reminders = this.reminders.filter(r => r.id !== id);
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    dismissReminder(id) {
+        const reminder = this.reminders.find(r => r.id === id);
+        if (reminder) {
+            reminder.dismissed = true;
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    markNotificationRead(id) {
+        const notification = this.notifications.find(n => n.id === id);
+        if (notification) {
+            notification.read = true;
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    markAllNotificationsRead() {
+        this.notifications.forEach(n => n.read = true);
+        this.saveData();
+        this.renderNotifications();
+    }
+
+    deleteNotification(id) {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+        this.saveData();
+        this.renderNotifications();
+    }
+
+    clearAllNotifications() {
+        if (confirm('Sei sicuro di voler eliminare tutte le notifiche?')) {
+            this.notifications = [];
+            this.saveData();
+            this.renderNotifications();
+        }
+    }
+
+    saveNotificationSettings() {
+        this.notificationSettings.browserNotifications = document.getElementById('notification-browser').checked;
+        this.notificationSettings.emailNotifications = document.getElementById('notification-email').checked;
+        this.notificationSettings.lessonReminders = document.getElementById('notification-lesson-reminders').checked;
+        this.notificationSettings.remindersBefore24h = document.getElementById('notification-24h').checked;
+        this.notificationSettings.remindersBefore1h = document.getElementById('notification-1h').checked;
+        this.notificationSettings.backupReminders = document.getElementById('notification-backup-reminders').checked;
+        
+        const backupInterval = document.getElementById('notification-backup-interval').value;
+        if (backupInterval) {
+            this.notificationSettings.backupReminderInterval = parseInt(backupInterval);
+        }
+        
+        this.notificationSettings.quietHoursEnabled = document.getElementById('notification-quiet-hours').checked;
+        this.notificationSettings.quietHoursStart = document.getElementById('notification-quiet-start').value;
+        this.notificationSettings.quietHoursEnd = document.getElementById('notification-quiet-end').value;
+
+        this.saveData();
+        alert('Impostazioni notifiche salvate!');
+    }
+
+    showAddReminderForm() {
+        document.getElementById('add-reminder-form').style.display = 'block';
+    }
+
+    hideAddReminderForm() {
+        document.getElementById('add-reminder-form').style.display = 'none';
+    }
+
+    filterNotifications(filter) {
+        this.notificationFilter = filter;
+        this.renderNotifications();
+    }
+
+    getNotificationStats() {
+        const stats = {
+            total: this.notifications.length,
+            unread: this.notifications.filter(n => !n.read).length,
+            byType: {}
+        };
+
+        // Count by type
+        this.notifications.forEach(n => {
+            const type = n.type || 'other';
+            stats.byType[type] = (stats.byType[type] || 0) + 1;
+        });
+
+        return stats;
+    }
+
+    renderNotifications() {
+        // Render notifications list
+        const notificationsList = document.getElementById('notifications-list');
+        if (notificationsList) {
+            const stats = this.getNotificationStats();
+            const unreadCount = stats.unread;
+            const notificationsHeader = document.getElementById('notifications-header');
+            if (notificationsHeader) {
+                notificationsHeader.innerHTML = `
+                    <h3>🔔 Notifiche Recenti</h3>
+                    ${unreadCount > 0 ? `<span class="badge">${unreadCount} non lette</span>` : ''}
+                `;
+            }
+
+            // Add filter buttons
+            const filterSection = document.getElementById('notifications-filter');
+            if (filterSection) {
+                filterSection.innerHTML = `
+                    <div class="notification-filters">
+                        <button class="filter-btn ${this.notificationFilter === 'all' ? 'active' : ''}" onclick="app.filterNotifications('all')">
+                            Tutte (${stats.total})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'lesson-reminder' ? 'active' : ''}" onclick="app.filterNotifications('lesson-reminder')">
+                            📚 Lezioni (${stats.byType['lesson-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'activity-reminder' ? 'active' : ''}" onclick="app.filterNotifications('activity-reminder')">
+                            📋 Attività (${stats.byType['activity-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'custom-reminder' ? 'active' : ''}" onclick="app.filterNotifications('custom-reminder')">
+                            ⏰ Promemoria (${stats.byType['custom-reminder'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'backup' ? 'active' : ''}" onclick="app.filterNotifications('backup')">
+                            💾 Backup (${stats.byType['backup'] || 0})
+                        </button>
+                        <button class="filter-btn ${this.notificationFilter === 'system' ? 'active' : ''}" onclick="app.filterNotifications('system')">
+                            ⚙️ Sistema (${stats.byType['system'] || 0})
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Filter notifications based on current filter
+            let filteredNotifications = this.notifications;
+            if (this.notificationFilter !== 'all') {
+                filteredNotifications = this.notifications.filter(n => n.type === this.notificationFilter);
+            }
+
+            if (filteredNotifications.length === 0) {
+                notificationsList.innerHTML = '<p class="empty-state">Nessuna notifica</p>';
+            } else {
+                notificationsList.innerHTML = filteredNotifications.slice(0, 50).map(notification => `
+                    <div class="notification-item ${notification.read ? 'read' : 'unread'} notification-type-${notification.type || 'other'}">
+                        <div class="notification-header">
+                            <h4>${notification.title}</h4>
+                            <span class="notification-time">${new Date(notification.createdAt).toLocaleString('it-IT')}</span>
+                        </div>
+                        <p>${notification.message}</p>
+                        <div class="notification-actions">
+                            ${!notification.read ? `<button class="btn btn-sm" onclick="app.markNotificationRead(${notification.id})">Segna come letta</button>` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="app.deleteNotification(${notification.id})">Elimina</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render reminders list
+        const remindersList = document.getElementById('reminders-list');
+        if (remindersList) {
+            const activeReminders = this.reminders.filter(r => !r.dismissed);
+            
+            if (activeReminders.length === 0) {
+                remindersList.innerHTML = '<p class="empty-state">Nessun promemoria attivo</p>';
+            } else {
+                remindersList.innerHTML = activeReminders.map(reminder => {
+                    const reminderDate = new Date(reminder.dateTime);
+                    const isPast = reminderDate < new Date();
+                    
+                    return `
+                        <div class="reminder-item ${isPast ? 'past' : 'upcoming'}">
+                            <div class="reminder-header">
+                                <h4>${reminder.title}</h4>
+                                <span class="reminder-time">${reminderDate.toLocaleString('it-IT')}</span>
+                            </div>
+                            ${reminder.message ? `<p>${reminder.message}</p>` : ''}
+                            <div class="reminder-actions">
+                                <button class="btn btn-sm" onclick="app.dismissReminder(${reminder.id})">Archivia</button>
+                                <button class="btn btn-sm btn-danger" onclick="app.deleteReminder(${reminder.id})">Elimina</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Load notification settings into form
+        const browserCheckbox = document.getElementById('notification-browser');
+        if (browserCheckbox) {
+            browserCheckbox.checked = this.notificationSettings.browserNotifications;
+            document.getElementById('notification-email').checked = this.notificationSettings.emailNotifications;
+            document.getElementById('notification-lesson-reminders').checked = this.notificationSettings.lessonReminders;
+            document.getElementById('notification-24h').checked = this.notificationSettings.remindersBefore24h;
+            document.getElementById('notification-1h').checked = this.notificationSettings.remindersBefore1h;
+            
+            const backupCheckbox = document.getElementById('notification-backup-reminders');
+            if (backupCheckbox) {
+                backupCheckbox.checked = this.notificationSettings.backupReminders;
+            }
+            const backupIntervalInput = document.getElementById('notification-backup-interval');
+            if (backupIntervalInput) {
+                backupIntervalInput.value = this.notificationSettings.backupReminderInterval || 7;
+            }
+            
+            document.getElementById('notification-quiet-hours').checked = this.notificationSettings.quietHoursEnabled;
+            document.getElementById('notification-quiet-start').value = this.notificationSettings.quietHoursStart;
+            document.getElementById('notification-quiet-end').value = this.notificationSettings.quietHoursEnd;
+        }
     }
 }
 
