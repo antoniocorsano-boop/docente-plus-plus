@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docente++ - Gestione Didattica con IA</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- PDF and Excel Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -91,6 +95,36 @@
         </div>
     </div>
 
+    <!-- Export Format Selection Modal -->
+    <div id="export-format-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>📥 Seleziona Formato di Esportazione</h2>
+            <p id="export-description">Scegli il formato in cui desideri esportare i dati:</p>
+            
+            <div class="export-format-options">
+                <div class="format-option" onclick="app.executeExport('json')">
+                    <div class="format-icon">📄</div>
+                    <h3>JSON</h3>
+                    <p>Formato dati strutturato, ideale per backup e importazione</p>
+                </div>
+                <div class="format-option" onclick="app.executeExport('pdf')">
+                    <div class="format-icon">📕</div>
+                    <h3>PDF</h3>
+                    <p>Documento formattato pronto per la stampa e condivisione</p>
+                </div>
+                <div class="format-option" onclick="app.executeExport('excel')">
+                    <div class="format-icon">📊</div>
+                    <h3>Excel</h3>
+                    <p>Foglio di calcolo per analisi avanzate (XLSX)</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="app.closeExportModal()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <h1>🎓 Docente++</h1>
@@ -100,9 +134,12 @@
         <nav class="tabs">
             <button class="tab-button active" data-tab="dashboard">Dashboard</button>
             <button class="tab-button" data-tab="lessons">Lezioni</button>
+            <button class="tab-button" data-tab="schedule">Orario</button>
+            <button class="tab-button" data-tab="activities">Attività</button>
             <button class="tab-button" data-tab="students">Studenti</button>
             <button class="tab-button" data-tab="classes">Classi</button>
-            <button class="tab-button" data-tab="materials">Materiali</button>
+            <button class="tab-button" data-tab="evaluations">Valutazioni</button>
+            <button class="tab-button" data-tab="notifications">Notifiche</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
         </nav>
@@ -127,6 +164,11 @@
                     <h3>👥 Studenti</h3>
                     <p class="stat-number" id="student-count">0</p>
                     <p class="stat-label">Studenti totali</p>
+                </div>
+                <div class="card">
+                    <h3>📋 Attività</h3>
+                    <p class="stat-number" id="activity-count">0</p>
+                    <p class="stat-label">Attività in corso</p>
                 </div>
                 <div class="card">
                     <h3>✅ Valutazioni</h3>
@@ -160,9 +202,15 @@
                         <label for="lesson-subject">Materia:</label>
                         <input type="text" id="lesson-subject" required>
                     </div>
-                    <div class="form-group">
-                        <label for="lesson-date">Data:</label>
-                        <input type="date" id="lesson-date" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lesson-date">Data:</label>
+                            <input type="date" id="lesson-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lesson-time">Ora:</label>
+                            <input type="time" id="lesson-time" value="09:00" required>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="lesson-description">Descrizione:</label>
@@ -176,6 +224,144 @@
             </div>
 
             <div id="lessons-list" class="lessons-list"></div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <h2>📅 Orario Didattico</h2>
+            <div class="schedule-info">
+                <p>Gestisci il tuo orario settimanale. Clicca su una cella per assegnare una classe e un tipo di attività (Teoria, Disegno, Laboratorio).</p>
+                <p><small>Gli slot orari vanno dalle 8:00 alle 14:00, dal lunedì al venerdì. Sabato e domenica sono automaticamente esclusi.</small></p>
+            </div>
+            <div id="schedule-container"></div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <h2>Gestione Attività Didattiche</h2>
+            
+            <!-- Activities Summary Section -->
+            <div id="activities-summary" class="summary-section" role="region" aria-label="Riepilogo statistiche attività">
+                <h3>Riepilogo Attività</h3>
+                <div class="summary-cards" role="group" aria-label="Statistiche attività didattiche">
+                    <div class="summary-card">
+                        <div class="summary-icon">📋</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="total-activities">0</p>
+                            <p class="summary-label">Totali</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">📅</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="planned-activities">0</p>
+                            <p class="summary-label">Pianificate</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">▶️</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="inprogress-activities">0</p>
+                            <p class="summary-label">In Corso</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">✅</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="completed-activities">0</p>
+                            <p class="summary-label">Completate</p>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon">⚠️</div>
+                        <div class="summary-content">
+                            <p class="summary-number" id="overdue-activities">0</p>
+                            <p class="summary-label">Scadute</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="app.showAddActivityForm()">➕ Nuova Attività</button>
+                <select id="activity-filter" class="filter-select" onchange="app.renderActivities()">
+                    <option value="all">Tutte le attività</option>
+                    <option value="planned">Pianificate</option>
+                    <option value="in-progress">In corso</option>
+                    <option value="completed">Completate</option>
+                    <option value="lesson">Lezioni</option>
+                    <option value="exercise">Esercitazioni</option>
+                    <option value="lab">Laboratori</option>
+                    <option value="project">Progetti</option>
+                    <option value="homework">Compiti</option>
+                    <option value="exam">Verifiche</option>
+                </select>
+            </div>
+            
+            <div id="add-activity-form" class="form-container" style="display: none;">
+                <h3 id="activity-form-title">Nuova Attività</h3>
+                <form id="activity-form">
+                    <input type="hidden" id="activity-edit-id">
+                    <div class="form-group">
+                        <label for="activity-title">Titolo: *</label>
+                        <input type="text" id="activity-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-type">Tipo di Attività: *</label>
+                        <select id="activity-type" required>
+                            <option value="lesson">Lezione</option>
+                            <option value="exercise">Esercitazione</option>
+                            <option value="lab">Laboratorio</option>
+                            <option value="project">Progetto</option>
+                            <option value="homework">Compiti</option>
+                            <option value="exam">Verifica</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-priority">Priorità:</label>
+                        <select id="activity-priority">
+                            <option value="low">Bassa</option>
+                            <option value="medium" selected>Media</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-description">Descrizione:</label>
+                        <textarea id="activity-description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-deadline">Scadenza:</label>
+                        <input type="date" id="activity-deadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-progress">Avanzamento (%):</label>
+                        <input type="number" id="activity-progress" min="0" max="100" value="0">
+                        <small>Percentuale di completamento dell'attività (0-100)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-class">Assegna a Classe:</label>
+                        <select id="activity-class">
+                            <option value="">Nessuna (generale)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-student">Assegna a Studente:</label>
+                        <select id="activity-student">
+                            <option value="">Nessuno (tutta la classe)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-notes">Note/Feedback:</label>
+                        <textarea id="activity-notes" rows="3" placeholder="Aggiungi note o feedback sull'attività"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva</button>
+                        <button type="button" class="btn btn-secondary" onclick="app.hideAddActivityForm()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="activities-list" class="activities-list"></div>
         </div>
 
         <!-- Students Tab -->
@@ -255,13 +441,180 @@
             <div id="classes-list" class="classes-list"></div>
         </div>
 
-        <!-- Materials Tab -->
-        <div id="materials" class="tab-content">
-            <h2>Gestione Materiali</h2>
-            <div class="materials-info">
-                <p>I materiali caricati tramite l'Assistente IA vengono salvati qui e possono essere collegati alle lezioni.</p>
+        <!-- Evaluations Tab -->
+        <div id="evaluations" class="tab-content">
+            <h2>Gestione Valutazioni</h2>
+            
+            <!-- Evaluation Criteria Section -->
+            <div class="evaluation-section">
+                <h3>📋 Criteri di Valutazione</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddCriterionForm()">➕ Nuovo Criterio</button>
+                    <button class="btn btn-secondary" onclick="app.generateCriteriaWithAI()">🤖 Genera con IA</button>
+                </div>
+
+                <div id="add-criterion-form" class="form-container" style="display: none;">
+                    <h4>Nuovo Criterio di Valutazione</h4>
+                    <form id="criterion-form" onsubmit="event.preventDefault(); app.addCriterion();">
+                        <div class="form-group">
+                            <label for="criterion-name">Nome Criterio: *</label>
+                            <input type="text" id="criterion-name" placeholder="es. Comprensione del testo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-description">Descrizione:</label>
+                            <textarea id="criterion-description" rows="3" placeholder="Descrivi il criterio di valutazione"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-subject">Disciplina:</label>
+                            <input type="text" id="criterion-subject" placeholder="es. Italiano">
+                        </div>
+                        <div class="form-group">
+                            <label for="criterion-type">Tipo:</label>
+                            <select id="criterion-type">
+                                <option value="">Seleziona tipo</option>
+                                <option value="conoscenza">Conoscenza</option>
+                                <option value="competenza">Competenza</option>
+                                <option value="abilità">Abilità</option>
+                                <option value="atteggiamento">Atteggiamento</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddCriterionForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="criteria-list" class="criteria-list"></div>
             </div>
-            <div id="materials-list" class="materials-list"></div>
+
+            <!-- Evaluation Grids Section -->
+            <div class="evaluation-section">
+                <h3>📊 Griglie di Valutazione (Rubriche)</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddGridForm()">➕ Nuova Griglia</button>
+                </div>
+
+                <div id="add-grid-form" class="form-container" style="display: none;">
+                    <h4>Nuova Griglia di Valutazione</h4>
+                    <form id="grid-form" onsubmit="event.preventDefault(); app.addGrid();">
+                        <div class="form-group">
+                            <label for="grid-name">Nome Griglia: *</label>
+                            <input type="text" id="grid-name" placeholder="es. Rubrica di Italiano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grid-description">Descrizione:</label>
+                            <textarea id="grid-description" rows="3" placeholder="Descrivi la griglia di valutazione"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="grid-subject">Disciplina:</label>
+                            <input type="text" id="grid-subject" placeholder="es. Italiano">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddGridForm()">Annulla</button>
+                        </div>
+                        <small>Nota: La griglia sarà creata con 4 livelli di default (Eccellente, Buono, Sufficiente, Insufficiente)</small>
+                    </form>
+                </div>
+
+                <div id="grids-list" class="grids-list"></div>
+            </div>
+
+            <!-- Evaluations Section -->
+            <div class="evaluation-section">
+                <h3>✅ Valutazioni Assegnate</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddEvaluationForm()">➕ Nuova Valutazione</button>
+                    <button class="btn btn-secondary" onclick="app.exportEvaluations()">📥 Esporta Valutazioni</button>
+                </div>
+
+                <div id="add-evaluation-form" class="form-container" style="display: none;">
+                    <h4>Nuova Valutazione</h4>
+                    <form id="evaluation-form" onsubmit="event.preventDefault(); app.addEvaluation();">
+                        <div class="form-group">
+                            <label for="evaluation-student">Studente:</label>
+                            <select id="evaluation-student">
+                                <option value="">Seleziona studente</option>
+                            </select>
+                            <small>Oppure seleziona una classe qui sotto</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-class">Classe:</label>
+                            <select id="evaluation-class">
+                                <option value="">Seleziona classe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-criterion">Criterio:</label>
+                            <select id="evaluation-criterion">
+                                <option value="">Seleziona criterio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-grid">Griglia:</label>
+                            <select id="evaluation-grid">
+                                <option value="">Seleziona griglia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-subject">Disciplina:</label>
+                            <select id="evaluation-subject">
+                                <option value="">Seleziona disciplina</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-score">Voto (opzionale):</label>
+                            <input type="number" id="evaluation-score" min="0" max="10" step="0.5" placeholder="es. 8">
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-date">Data:</label>
+                            <input type="date" id="evaluation-date" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluation-notes">Note:</label>
+                            <textarea id="evaluation-notes" rows="3" placeholder="Aggiungi note sulla valutazione"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddEvaluationForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="evaluations-list" class="evaluations-list"></div>
+            </div>
+
+            <!-- Assessment Results and Analytics Section -->
+            <div class="evaluation-section">
+                <h3>📈 Risultati e Statistiche</h3>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="app.toggleResultsView()">🔄 Cambia Visualizzazione</button>
+                </div>
+
+                <div id="results-filters" class="filters-container">
+                    <div class="filter-group">
+                        <label for="filter-class">Filtra per Classe:</label>
+                        <select id="filter-class" onchange="app.filterResults()">
+                            <option value="">Tutte le classi</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-subject">Filtra per Disciplina:</label>
+                        <select id="filter-subject" onchange="app.filterResults()">
+                            <option value="">Tutte le discipline</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-student">Filtra per Studente:</label>
+                        <select id="filter-student" onchange="app.filterResults()">
+                            <option value="">Tutti gli studenti</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="results-display" class="results-display"></div>
+            </div>
         </div>
 
         <!-- AI Assistant Tab -->
@@ -274,8 +627,8 @@
                         <label for="ai-file-input" class="file-upload-label">
                             📎 Allega file (PDF, immagini, txt, ecc.)
                         </label>
-                        <input type="file" id="ai-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" onchange="app.handleFileSelect(event)" aria-label="Seleziona file da caricare">
-                        <div id="selected-file-display" class="selected-file-display" role="status" aria-live="polite"></div>
+                        <input type="file" id="ai-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx" onchange="app.handleFileSelect(event)">
+                        <div id="selected-file-display" class="selected-file-display"></div>
                     </div>
                     <div class="chat-input-container">
                         <textarea id="ai-input" placeholder="Chiedi all'assistente IA di aiutarti con la pianificazione delle lezioni, idee didattiche, valutazioni..." rows="3"></textarea>
@@ -289,6 +642,142 @@
                     <button class="suggestion-btn" onclick="app.quickAIPrompt('Suggerisci attività didattiche interattive')">🎯 Attività interattive</button>
                     <button class="suggestion-btn" onclick="app.quickAIPrompt('Genera criteri di valutazione')">📊 Criteri valutazione</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications" class="tab-content">
+            <h2>🔔 Notifiche e Promemoria</h2>
+            
+            <!-- Notifications Section -->
+            <div class="notification-section">
+                <div class="section-header" id="notifications-header">
+                    <h3>🔔 Notifiche Recenti</h3>
+                </div>
+                <div class="section-actions">
+                    <button class="btn btn-secondary" onclick="app.markAllNotificationsRead()">✓ Segna tutte come lette</button>
+                    <button class="btn btn-secondary" onclick="app.clearAllNotifications()">🗑️ Elimina tutte</button>
+                </div>
+                <!-- Filter section -->
+                <div id="notifications-filter" class="notifications-filter"></div>
+                <div id="notifications-list" class="notifications-list"></div>
+            </div>
+
+            <!-- Reminders Section -->
+            <div class="reminder-section">
+                <h3>⏰ Promemoria Personali</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddReminderForm()">➕ Nuovo Promemoria</button>
+                </div>
+
+                <div id="add-reminder-form" class="form-container" style="display: none;">
+                    <h4>Crea Promemoria</h4>
+                    <form onsubmit="event.preventDefault(); app.addReminder();">
+                        <div class="form-group">
+                            <label for="reminder-title">Titolo: *</label>
+                            <input type="text" id="reminder-title" placeholder="Titolo del promemoria" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminder-message">Messaggio:</label>
+                            <textarea id="reminder-message" placeholder="Descrizione del promemoria" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reminder-date">Data: *</label>
+                                <input type="date" id="reminder-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="reminder-time">Ora: *</label>
+                                <input type="time" id="reminder-time" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Salva Promemoria</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddReminderForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="reminders-list" class="reminders-list"></div>
+            </div>
+
+            <!-- Notification Settings Section -->
+            <div class="notification-settings-section">
+                <h3>⚙️ Impostazioni Notifiche</h3>
+                <form id="notification-settings-form" onsubmit="event.preventDefault(); app.saveNotificationSettings();">
+                    <div class="settings-group">
+                        <h4>Canali di Notifica</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-browser">
+                                🌐 Notifiche Browser
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-email" disabled>
+                                📧 Notifiche Email (prossimamente)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Promemoria Automatici</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-lesson-reminders">
+                                📚 Promemoria per lezioni programmate
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-24h">
+                                ⏰ Avviso 24 ore prima della lezione
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-1h">
+                                ⏰ Avviso 1 ora prima della lezione
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-backup-reminders">
+                                💾 Promemoria backup periodici
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-left: 25px;">
+                            <label for="notification-backup-interval">Intervallo backup (giorni):</label>
+                            <input type="number" id="notification-backup-interval" min="1" max="365" value="7" style="width: 100px;">
+                            <small>Ricevi un promemoria ogni X giorni per eseguire un backup</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4>Orari Silenzio</h4>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-quiet-hours">
+                                🌙 Abilita orari di silenzio
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="notification-quiet-start">Inizio:</label>
+                                <input type="time" id="notification-quiet-start">
+                            </div>
+                            <div class="form-group">
+                                <label for="notification-quiet-end">Fine:</label>
+                                <input type="time" id="notification-quiet-end">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
+                    </div>
+                </form>
             </div>
         </div>
 
