@@ -3920,8 +3920,13 @@ ${lessonData.evaluation || 'N/D'}
                         resolve({ type: 'text', data: e.target.result, raw: e.target.result });
                         
                     } else if (extension === 'pdf') {
-                        // For PDF, we'll just store the raw data and let AI handle it
-                        resolve({ type: 'pdf', data: null, raw: e.target.result });
+                        // Extract text from PDF using PDF.js
+                        this.extractTextFromPDF(e.target.result).then(pdfText => {
+                            resolve({ type: 'pdf', data: pdfText, raw: e.target.result });
+                        }).catch(err => {
+                            console.error('PDF extraction error:', err);
+                            resolve({ type: 'pdf', data: null, raw: e.target.result });
+                        });
                     } else {
                         reject(new Error('Formato file non supportato'));
                     }
@@ -3932,12 +3937,38 @@ ${lessonData.evaluation || 'N/D'}
             
             reader.onerror = () => reject(new Error('Errore nella lettura del file'));
             
-            if (extension === 'xlsx' || extension === 'xls') {
+            if (extension === 'pdf') {
+                reader.readAsArrayBuffer(file);
+            } else if (extension === 'xlsx' || extension === 'xls') {
                 reader.readAsBinaryString(file);
             } else {
                 reader.readAsText(file);
             }
         });
+    }
+
+    async extractTextFromPDF(arrayBuffer) {
+        // Configure PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        try {
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n';
+            }
+
+            return fullText;
+        } catch (error) {
+            console.error('Error extracting text from PDF:', error);
+            throw error;
+        }
     }
 
     async classifyDocument(file, fileData) {
@@ -3966,7 +3997,8 @@ ${lessonData.evaluation || 'N/D'}
             } else if (fileData.type === 'text' || fileData.type === 'json') {
                 dataPreview = fileData.raw.substring(0, 1000);
             } else if (fileData.type === 'pdf') {
-                dataPreview = 'Documento PDF (contenuto non analizzabile in questa versione)';
+                // Use extracted text from PDF
+                dataPreview = fileData.data ? fileData.data.substring(0, 1500) : 'Documento PDF (contenuto non estratto)';
             }
 
             const prompt = `Analizza questo documento e classifica il tipo di contenuto.
@@ -4380,8 +4412,399 @@ Rispondi SOLO in formato JSON con questa struttura:
     }
 
     processActivitiesImport() {
-        alert('Importazione attività sarà disponibile in una prossima versione');
-        // TODO: Implement activities import
+        if (!this.currentImportData) {
+            alert('Nessun dato da importare');
+            return;
+        }
+
+        const { file, fileData } = this.currentImportData;
+        const previewDiv = document.getElementById('document-preview');
+        const previewContent = document.getElementById('preview-content');
+        
+        // Hide classification, show preview
+        document.getElementById('document-classification').style.display = 'none';
+        previewDiv.style.display = 'block';
+
+        let activitiesData = [];
+
+        // Extract activities based on file type
+        if (fileData.type === 'csv' || fileData.type === 'excel') {
+            activitiesData = this.extractActivitiesFromTabularData(fileData.data);
+        } else if (fileData.type === 'json') {
+            activitiesData = this.extractActivitiesFromJSON(fileData.data);
+        } else if (fileData.type === 'pdf' && fileData.data) {
+            // Extract activities from PDF text
+            activitiesData = this.extractActivitiesFromPDF(fileData.data);
+        } else if (fileData.type === 'text' && fileData.data) {
+            // Extract from plain text
+            activitiesData = this.extractActivitiesFromPDF(fileData.data);
+        }
+
+        // Store for confirmation
+        this.currentImportData.activitiesData = activitiesData;
+
+        // Show preview
+        if (activitiesData.length === 0) {
+            previewContent.innerHTML = `
+                <div class="warning-message">
+                    ⚠️ Nessuna attività trovata nel file.
+                    <p>Verifica che il documento contenga informazioni su attività didattiche per i livelli: Prima, Seconda, Terza Media.</p>
+                </div>
+            `;
+        } else {
+            // Group by class level
+            const groupedActivities = this.groupActivitiesByClass(activitiesData);
+            
+            previewContent.innerHTML = `
+                <p><strong>Trovate ${activitiesData.length} attività da importare</strong></p>
+                ${this.renderActivitiesPreviewTable(groupedActivities)}
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="app.confirmActivitiesImport()">
+                        ✅ Conferma Importazione
+                    </button>
+                    <button class="btn btn-secondary" onclick="app.cancelImport()">
+                        ❌ Annulla
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    extractActivitiesFromPDF(textContent) {
+        const activities = [];
+        
+        // Pattern to detect class levels
+        const classPatterns = {
+            'Prima': /\b(?:prima|1[°^ª]|classe prima)\b/gi,
+            'Seconda': /\b(?:seconda|2[°^ª]|classe seconda)\b/gi,
+            'Terza': /\b(?:terza|3[°^ª]|classe terza)\b/gi
+        };
+
+        // Split content by sections (using common delimiters)
+        const sections = textContent.split(/\n\n+|\r\n\r\n+/);
+        
+        let currentClass = null;
+        
+        for (let section of sections) {
+            section = section.trim();
+            if (!section) continue;
+
+            // Detect class level in section
+            for (let [className, pattern] of Object.entries(classPatterns)) {
+                if (pattern.test(section)) {
+                    currentClass = className;
+                    break;
+                }
+            }
+
+            // Extract activities from section
+            // Look for activity indicators like: numbers, bullets, dashes, activity types
+            const activityPatterns = [
+                /(?:^|\n)\s*[-•·]\s*(.+?)(?=\n|$)/gm,  // Bullet points
+                /(?:^|\n)\s*\d+[.)]\s*(.+?)(?=\n|$)/gm,  // Numbered lists
+                /(?:lezione|laboratorio|esercitazione|progetto|verifica|compito):\s*(.+?)(?=\n|$)/gi,  // Activity types
+            ];
+
+            for (let pattern of activityPatterns) {
+                let match;
+                while ((match = pattern.exec(section)) !== null) {
+                    const title = match[1].trim();
+                    if (title && title.length > 10 && title.length < 200) {
+                        // Determine activity type from keywords
+                        const type = this.detectActivityType(title);
+                        
+                        activities.push({
+                            title: title,
+                            type: type,
+                            classLevel: currentClass || 'Generale',
+                            description: '',
+                            status: 'planned',
+                            source: 'PDF Import'
+                        });
+                    }
+                }
+            }
+        }
+
+        // If no activities found with patterns, try a more general approach
+        if (activities.length === 0) {
+            // Split by lines and look for meaningful content
+            const lines = textContent.split(/\n/).filter(line => {
+                const trimmed = line.trim();
+                return trimmed.length > 15 && trimmed.length < 200 && !trimmed.match(/^[0-9\s.]+$/);
+            });
+
+            let currentClass = 'Prima';  // Default starting class
+            
+            for (let line of lines) {
+                // Check for class level markers
+                for (let [className, pattern] of Object.entries(classPatterns)) {
+                    if (pattern.test(line)) {
+                        currentClass = className;
+                        break;
+                    }
+                }
+
+                // If line contains activity-related keywords, consider it an activity
+                if (this.looksLikeActivity(line)) {
+                    activities.push({
+                        title: line.trim(),
+                        type: this.detectActivityType(line),
+                        classLevel: currentClass,
+                        description: '',
+                        status: 'planned',
+                        source: 'PDF Import'
+                    });
+                }
+            }
+        }
+
+        return activities;
+    }
+
+    detectActivityType(text) {
+        const lowerText = text.toLowerCase();
+        
+        if (lowerText.match(/\b(?:lezione|spiegazione|introduzione|teoria)\b/)) return 'lesson';
+        if (lowerText.match(/\b(?:laboratorio|pratica|esperimento)\b/)) return 'lab';
+        if (lowerText.match(/\b(?:esercitazione|esercizi|attività)\b/)) return 'exercise';
+        if (lowerText.match(/\b(?:progetto|elaborato)\b/)) return 'project';
+        if (lowerText.match(/\b(?:compito|compiti|homework)\b/)) return 'homework';
+        if (lowerText.match(/\b(?:verifica|test|esame|valutazione)\b/)) return 'exam';
+        
+        return 'lesson';  // Default type
+    }
+
+    looksLikeActivity(text) {
+        const activityKeywords = [
+            'disegno', 'progetto', 'laboratorio', 'costruzione', 'realizzazione',
+            'studio', 'analisi', 'ricerca', 'presentazione', 'lavoro',
+            'esercitazione', 'compito', 'verifica', 'lezione', 'introduzione',
+            'applicazione', 'sviluppo', 'tecnologia', 'materiali', 'strumenti'
+        ];
+
+        const lowerText = text.toLowerCase();
+        return activityKeywords.some(keyword => lowerText.includes(keyword));
+    }
+
+    extractActivitiesFromTabularData(data) {
+        const activities = [];
+        
+        const fieldMappings = {
+            titolo: 'title',
+            title: 'title',
+            attivita: 'title',
+            attività: 'title',
+            tipo: 'type',
+            type: 'type',
+            classe: 'classLevel',
+            class: 'classLevel',
+            livello: 'classLevel',
+            descrizione: 'description',
+            description: 'description',
+            stato: 'status',
+            status: 'status'
+        };
+
+        data.forEach(row => {
+            const activity = {
+                title: '',
+                type: 'lesson',
+                classLevel: 'Generale',
+                description: '',
+                status: 'planned',
+                source: 'Tabular Import'
+            };
+
+            // Map fields
+            for (let [key, value] of Object.entries(row)) {
+                const normalizedKey = key.toLowerCase().trim();
+                const mappedField = fieldMappings[normalizedKey];
+                
+                if (mappedField && value) {
+                    activity[mappedField] = String(value).trim();
+                }
+            }
+
+            if (activity.title) {
+                activities.push(activity);
+            }
+        });
+
+        return activities;
+    }
+
+    extractActivitiesFromJSON(data) {
+        const activities = [];
+        
+        // Handle different JSON structures
+        let items = Array.isArray(data) ? data : (data.activities || data.attivita || []);
+        
+        items.forEach(item => {
+            if (item.title || item.titolo || item.attivita) {
+                activities.push({
+                    title: item.title || item.titolo || item.attivita || '',
+                    type: item.type || item.tipo || 'lesson',
+                    classLevel: item.classLevel || item.classe || item.livello || 'Generale',
+                    description: item.description || item.descrizione || '',
+                    status: item.status || item.stato || 'planned',
+                    source: 'JSON Import'
+                });
+            }
+        });
+
+        return activities;
+    }
+
+    groupActivitiesByClass(activities) {
+        const grouped = {
+            'Prima': [],
+            'Seconda': [],
+            'Terza': [],
+            'Generale': []
+        };
+
+        activities.forEach(activity => {
+            const classLevel = activity.classLevel || 'Generale';
+            if (grouped[classLevel]) {
+                grouped[classLevel].push(activity);
+            } else {
+                grouped['Generale'].push(activity);
+            }
+        });
+
+        return grouped;
+    }
+
+    renderActivitiesPreviewTable(groupedActivities) {
+        let html = '';
+        
+        for (let [classLevel, activities] of Object.entries(groupedActivities)) {
+            if (activities.length === 0) continue;
+
+            const typeLabels = {
+                'lesson': '📚 Lezione',
+                'exercise': '✏️ Esercitazione',
+                'lab': '🔬 Laboratorio',
+                'project': '📊 Progetto',
+                'homework': '📝 Compiti',
+                'exam': '📄 Verifica'
+            };
+
+            html += `
+                <div class="class-activities-group" style="margin-bottom: 20px;">
+                    <h4>📘 ${classLevel} Media (${activities.length} attività)</h4>
+                    <div class="preview-table-container">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Titolo</th>
+                                    <th>Tipo</th>
+                                    <th>Stato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${activities.map(a => `
+                                    <tr>
+                                        <td>${a.title || 'N/D'}</td>
+                                        <td>${typeLabels[a.type] || a.type}</td>
+                                        <td>${a.status === 'planned' ? 'Pianificata' : a.status}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        return html;
+    }
+
+    confirmActivitiesImport() {
+        if (!this.currentImportData || !this.currentImportData.activitiesData) {
+            alert('Nessuna attività da importare');
+            return;
+        }
+
+        const activitiesData = this.currentImportData.activitiesData;
+        const file = this.currentImportData.file;
+
+        // Map class levels to actual class IDs if available
+        const classMapping = this.createClassMapping(activitiesData);
+
+        // Import activities
+        activitiesData.forEach(activityData => {
+            const classId = classMapping[activityData.classLevel] || null;
+            
+            const activity = {
+                id: Date.now() + Math.random(),
+                title: activityData.title,
+                description: activityData.description || `Importata da ${file.name}`,
+                type: activityData.type,
+                classId: classId,
+                status: activityData.status || 'planned',
+                priority: 'medium',
+                deadline: null,
+                createdAt: new Date().toISOString(),
+                importSource: file.name,
+                importedAt: new Date().toISOString()
+            };
+
+            this.activities.push(activity);
+        });
+
+        // Save to localStorage
+        this.saveData();
+
+        // Record import
+        this.recordImportedDocument({
+            fileName: file.name,
+            classificationType: 'ATTIVITA',
+            importedCount: activitiesData.length,
+            timestamp: new Date().toISOString()
+        });
+
+        // Render updated activities
+        this.renderActivities();
+
+        // Show success message
+        const previewContent = document.getElementById('preview-content');
+        previewContent.innerHTML = `
+            <div class="success-message">
+                ✅ <strong>Importazione completata con successo!</strong>
+                <p>${activitiesData.length} attività sono state importate e sono ora disponibili nella sezione Attività.</p>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.switchTab('activities')">
+                    📋 Vai alle Attività
+                </button>
+                <button class="btn btn-secondary" onclick="app.cancelImport()">
+                    🔙 Chiudi
+                </button>
+            </div>
+        `;
+    }
+
+    createClassMapping(activitiesData) {
+        const mapping = {};
+        
+        // Get unique class levels from activities
+        const classLevels = [...new Set(activitiesData.map(a => a.classLevel))];
+        
+        // Try to match with existing classes
+        classLevels.forEach(level => {
+            const matchingClass = this.classes.find(c => 
+                c.name.toLowerCase().includes(level.toLowerCase()) ||
+                c.year === level
+            );
+            
+            if (matchingClass) {
+                mapping[level] = matchingClass.id;
+            }
+        });
+
+        return mapping;
     }
 
     cancelImport() {
