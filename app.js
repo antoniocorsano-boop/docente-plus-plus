@@ -17,6 +17,7 @@ class DocentePlusPlus {
         this.notifications = [];
         this.reminders = [];
         this.activities = [];
+        this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -32,6 +33,8 @@ class DocentePlusPlus {
         };
         this.notificationFilter = 'all'; // all, lesson-reminder, custom-reminder, backup, system
         this.notificationCheckInterval = null;
+        this.scheduleView = 'weekly'; // weekly or daily
+        this.currentScheduleDate = null; // Will be set to current/next weekday
         this.init();
     }
 
@@ -54,6 +57,7 @@ class DocentePlusPlus {
         this.renderClasses();
         this.renderEvaluations();
         this.renderActivities();
+        this.renderSchedule();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
@@ -764,6 +768,357 @@ ${lessonData.evaluation || 'N/D'}
                 </div>
             `;
         }).join('');
+    }
+
+    // Schedule Management methods
+    getNextWeekday(date) {
+        const day = date.getDay();
+        // If Saturday (6) or Sunday (0), move to next Monday
+        if (day === 0) { // Sunday
+            date.setDate(date.getDate() + 1);
+        } else if (day === 6) { // Saturday
+            date.setDate(date.getDate() + 2);
+        }
+        return date;
+    }
+
+    getCurrentScheduleDate() {
+        if (this.currentScheduleDate) {
+            return new Date(this.currentScheduleDate);
+        }
+        const today = new Date();
+        return this.getNextWeekday(today);
+    }
+
+    setScheduleDate(dateStr) {
+        const date = new Date(dateStr);
+        this.currentScheduleDate = this.getNextWeekday(date).toISOString().split('T')[0];
+        this.renderSchedule();
+    }
+
+    getScheduleKey(date, hour) {
+        const dateStr = date.toISOString().split('T')[0];
+        return `${dateStr}-${hour}`;
+    }
+
+    updateScheduleSlot(date, hour, classId, activityType) {
+        const key = this.getScheduleKey(date, hour);
+        if (!classId && !activityType) {
+            delete this.schedule[key];
+        } else {
+            this.schedule[key] = {
+                classId: classId || null,
+                activityType: activityType || null
+            };
+        }
+        this.saveData();
+        this.renderSchedule();
+    }
+
+    getActivityTypeIcon(type) {
+        const icons = {
+            'theory': { icon: 'T', color: '#3498db', label: 'Teoria' },
+            'drawing': { icon: 'D', color: '#e67e22', label: 'Disegno' },
+            'lab': { icon: 'L', color: '#27ae60', label: 'Laboratorio' }
+        };
+        return icons[type] || { icon: '', color: '#95a5a6', label: '' };
+    }
+
+    showScheduleSlotEditor(date, hour) {
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key] || { classId: null, activityType: null };
+        
+        const classOptions = this.classes.map(c => 
+            `<option value="${c.id}" ${slot.classId == c.id ? 'selected' : ''}>${c.name}</option>`
+        ).join('');
+
+        const activityOptions = ['theory', 'drawing', 'lab'].map(type => {
+            const info = this.getActivityTypeIcon(type);
+            return `<option value="${type}" ${slot.activityType === type ? 'selected' : ''}>${info.label}</option>`;
+        }).join('');
+
+        const dateStr = date.toISOString().split('T')[0];
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px;">
+                <h3>Modifica Slot Orario</h3>
+                <p><strong>Data:</strong> ${new Date(date).toLocaleDateString('it-IT')}</p>
+                <p><strong>Ora:</strong> ${hour}:00</p>
+                <div class="form-group">
+                    <label>Classe:</label>
+                    <select id="slot-class-select">
+                        <option value="">Nessuna classe</option>
+                        ${classOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo di Attività:</label>
+                    <select id="slot-activity-type-select">
+                        <option value="">Nessuna attività</option>
+                        ${activityOptions}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="app.saveScheduleSlot('${dateStr}', ${hour})">Salva</button>
+                    <button class="btn btn-secondary" onclick="app.closeScheduleSlotEditor()">Annulla</button>
+                    ${slot.classId || slot.activityType ? `<button class="btn btn-danger" onclick="app.clearScheduleSlot('${dateStr}', ${hour})">Elimina</button>` : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.currentScheduleModal = modal;
+    }
+
+    saveScheduleSlot(dateStr, hour) {
+        const classId = document.getElementById('slot-class-select').value;
+        const activityType = document.getElementById('slot-activity-type-select').value;
+        const date = new Date(dateStr);
+        this.updateScheduleSlot(date, hour, classId || null, activityType || null);
+        this.closeScheduleSlotEditor();
+    }
+
+    clearScheduleSlot(dateStr, hour) {
+        const date = new Date(dateStr);
+        this.updateScheduleSlot(date, hour, null, null);
+        this.closeScheduleSlotEditor();
+    }
+
+    closeScheduleSlotEditor() {
+        if (this.currentScheduleModal) {
+            this.currentScheduleModal.remove();
+            this.currentScheduleModal = null;
+        }
+    }
+
+    launchScheduleActivity(date, hour) {
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key];
+        
+        if (!slot || !slot.classId) {
+            alert('Seleziona prima una classe per questo slot orario');
+            return;
+        }
+
+        // Switch to activities tab and show activity selector
+        this.switchTab('activities');
+        
+        // Filter activities by class
+        const classActivities = this.activities.filter(a => a.classId == slot.classId);
+        
+        // Show activity selection modal
+        this.showActivitySelectionModal(slot, date, hour, classActivities);
+    }
+
+    showActivitySelectionModal(slot, date, hour, classActivities) {
+        const cls = this.classes.find(c => c.id == slot.classId);
+        const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+
+        const plannedActivities = classActivities.filter(a => a.status === 'planned');
+        const inProgressActivities = classActivities.filter(a => a.status === 'in-progress');
+        const recentActivities = classActivities
+            .filter(a => a.status === 'completed')
+            .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+            .slice(0, 5);
+
+        const renderActivityList = (activities, title) => {
+            if (activities.length === 0) return '';
+            return `
+                <div class="activity-section">
+                    <h4>${title}</h4>
+                    ${activities.map(a => `
+                        <div class="activity-option" onclick="app.selectScheduleActivity(${a.id})" style="cursor: pointer; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;">
+                            <strong>${a.title}</strong>
+                            <p style="margin: 5px 0; font-size: 0.9em;">${a.type} ${a.deadline ? '- Scadenza: ' + new Date(a.deadline).toLocaleDateString('it-IT') : ''}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                <h3>Seleziona Attività</h3>
+                <p><strong>Classe:</strong> ${cls ? cls.name : 'N/D'}</p>
+                ${activityTypeInfo ? `<p><strong>Tipo:</strong> ${activityTypeInfo.label}</p>` : ''}
+                <p><strong>Orario:</strong> ${new Date(date).toLocaleDateString('it-IT')} - ${hour}:00</p>
+                
+                ${renderActivityList(inProgressActivities, '📝 Attività In Corso')}
+                ${renderActivityList(plannedActivities, '📋 Attività Pianificate')}
+                ${renderActivityList(recentActivities, '✅ Attività Recenti')}
+                
+                ${classActivities.length === 0 ? '<p style="text-align: center; margin: 20px 0;">Nessuna attività disponibile per questa classe</p>' : ''}
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="app.closeActivitySelectionModal()">Chiudi</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+    }
+
+    selectScheduleActivity(activityId) {
+        // Update activity status to in-progress if not already
+        const activity = this.activities.find(a => a.id === activityId);
+        if (activity && activity.status !== 'in-progress') {
+            this.updateActivityStatus(activityId, 'in-progress');
+        }
+        this.closeActivitySelectionModal();
+        this.switchTab('activities');
+        // Scroll to the activity
+        setTimeout(() => {
+            const activityElement = document.querySelector(`[onclick*="deleteActivity(${activityId})"]`);
+            if (activityElement) {
+                activityElement.closest('.activity-item').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+
+    closeActivitySelectionModal() {
+        if (this.currentActivityModal) {
+            this.currentActivityModal.remove();
+            this.currentActivityModal = null;
+        }
+    }
+
+    toggleScheduleView() {
+        this.scheduleView = this.scheduleView === 'weekly' ? 'daily' : 'weekly';
+        this.renderSchedule();
+    }
+
+    navigateSchedule(direction) {
+        const currentDate = this.getCurrentScheduleDate();
+        
+        if (this.scheduleView === 'daily') {
+            // Move by 1 weekday
+            do {
+                currentDate.setDate(currentDate.getDate() + direction);
+            } while (currentDate.getDay() === 0 || currentDate.getDay() === 6);
+        } else {
+            // Move by 1 week
+            currentDate.setDate(currentDate.getDate() + (direction * 7));
+        }
+        
+        this.currentScheduleDate = this.getNextWeekday(currentDate).toISOString().split('T')[0];
+        this.renderSchedule();
+    }
+
+    renderSchedule() {
+        const scheduleContainer = document.getElementById('schedule-container');
+        if (!scheduleContainer) return;
+
+        const currentDate = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
+        
+        if (this.scheduleView === 'daily') {
+            this.renderDailySchedule(scheduleContainer, currentDate, hours);
+        } else {
+            this.renderWeeklySchedule(scheduleContainer, currentDate, hours);
+        }
+    }
+
+    renderDailySchedule(container, date, hours) {
+        const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
+        
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Precedente</button>
+                <h3>${dayName} ${date.toLocaleDateString('it-IT')}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Successivo ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📅 Vista Settimanale</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        <th>Classe e Attività</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => {
+                        const key = this.getScheduleKey(date, hour);
+                        const slot = this.schedule[key] || {};
+                        const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                        const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                        
+                        return `
+                            <tr>
+                                <td class="schedule-hour">${hour}:00 - ${hour + 1}:00</td>
+                                <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                    ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">Nessuna classe</div>'}
+                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;">${activityInfo.icon}</div>` : ''}
+                                    ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-left: 10px; font-size: 0.8em;">Avvia</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    renderWeeklySchedule(container, startDate, hours) {
+        // Get Monday of the week
+        const monday = new Date(startDate);
+        const day = monday.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // adjust when day is sunday
+        monday.setDate(monday.getDate() + diff);
+
+        const weekDays = [];
+        for (let i = 0; i < 5; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            weekDays.push(date);
+        }
+
+        const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Precedente</button>
+                <h3>Settimana dal ${weekDays[0].toLocaleDateString('it-IT')} al ${weekDays[4].toLocaleDateString('it-IT')}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Successiva ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📆 Vista Giornaliera</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        ${dayNames.map((name, i) => `<th>${name}<br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => `
+                        <tr>
+                            <td class="schedule-hour">${hour}:00</td>
+                            ${weekDays.map(date => {
+                                const key = this.getScheduleKey(date, hour);
+                                const slot = this.schedule[key] || {};
+                                const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                                const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                                
+                                return `
+                                    <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                        ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">-</div>'}
+                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-top: 3px;">${activityInfo.icon}</div>` : ''}
+                                        ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-top: 5px; font-size: 0.7em; padding: 2px 6px;">Avvia</button>` : ''}
+                                    </td>
+                                `;
+                            }).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
     // Class Management methods
@@ -1866,6 +2221,7 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-reminders', JSON.stringify(this.reminders));
         localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
         localStorage.setItem('docente-plus-activities', JSON.stringify(this.activities));
+        localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
     }
 
     loadData() {
@@ -1972,6 +2328,17 @@ ${lessonData.evaluation || 'N/D'}
                 this.activities = [];
             }
         }
+
+        // Load schedule
+        const scheduleData = localStorage.getItem('docente-plus-schedule');
+        if (scheduleData) {
+            try {
+                this.schedule = JSON.parse(scheduleData);
+            } catch (e) {
+                console.error('Error loading schedule:', e);
+                this.schedule = {};
+            }
+        }
     }
 
     exportData() {
@@ -2018,6 +2385,7 @@ ${lessonData.evaluation || 'N/D'}
             classes: this.classes,
             subjects: this.subjects,
             activities: this.activities,
+            schedule: this.schedule,
             evaluationCriteria: this.evaluationCriteria,
             evaluationGrids: this.evaluationGrids,
             evaluations: this.evaluations,
@@ -2177,6 +2545,8 @@ ${lessonData.evaluation || 'N/D'}
         yPos += 7;
         doc.text(`Attività: ${data.activities.length}`, 14, yPos);
         yPos += 7;
+        doc.text(`Slot Orario Configurati: ${Object.keys(data.schedule || {}).length}`, 14, yPos);
+        yPos += 7;
         doc.text(`Valutazioni: ${data.evaluations.length}`, 14, yPos);
         yPos += 7;
         doc.text(`Criteri di Valutazione: ${data.evaluationCriteria.length}`, 14, yPos);
@@ -2229,6 +2599,43 @@ ${lessonData.evaluation || 'N/D'}
                 body: studentsData,
                 theme: 'grid',
                 styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Schedule summary
+        const scheduleEntries = Object.keys(data.schedule || {}).length;
+        if (scheduleEntries > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Orario Didattico', 14, yPos);
+            yPos += 7;
+            
+            const scheduleData = Object.entries(data.schedule).map(([key, slot]) => {
+                const [dateStr, hour] = key.split('-').slice(0, 2);
+                const hourStr = key.split('-')[2];
+                const date = new Date(dateStr);
+                const dayName = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'][date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                return [
+                    `${dayName} ${date.getDate()}/${date.getMonth() + 1}`,
+                    `${hourStr}:00`,
+                    cls ? cls.name : 'N/D',
+                    activityTypes[slot.activityType] || 'N/D'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Giorno', 'Ora', 'Classe', 'Tipo Attività']],
+                body: scheduleData,
+                theme: 'grid',
+                styles: { fontSize: 8 }
             });
         }
 
@@ -2474,6 +2881,31 @@ ${lessonData.evaluation || 'N/D'}
             XLSX.utils.book_append_sheet(wb, wsSubjects, 'Discipline');
         }
 
+        // Schedule sheet
+        if (data.schedule && Object.keys(data.schedule).length > 0) {
+            const scheduleData = [
+                ['Giorno', 'Data', 'Ora', 'Classe', 'Tipo Attività']
+            ];
+            Object.entries(data.schedule).forEach(([key, slot]) => {
+                const [dateStr, hourStr] = key.split('-');
+                const date = new Date(dateStr);
+                const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                const dayName = dayNames[date.getDay()];
+                const cls = data.classes.find(c => c.id == slot.classId);
+                const activityTypes = { 'theory': 'Teoria', 'drawing': 'Disegno', 'lab': 'Laboratorio' };
+                
+                scheduleData.push([
+                    dayName,
+                    date.toLocaleDateString('it-IT'),
+                    `${hourStr}:00`,
+                    cls ? cls.name : '',
+                    activityTypes[slot.activityType] || ''
+                ]);
+            });
+            const wsSchedule = XLSX.utils.aoa_to_sheet(scheduleData);
+            XLSX.utils.book_append_sheet(wb, wsSchedule, 'Orario');
+        }
+
         // Write file
         XLSX.writeFile(wb, `docente-plus-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
@@ -2596,6 +3028,9 @@ ${lessonData.evaluation || 'N/D'}
                     if (data.activities) {
                         this.activities = data.activities;
                     }
+                    if (data.schedule) {
+                        this.schedule = data.schedule;
+                    }
                     if (data.evaluationCriteria) {
                         this.evaluationCriteria = data.evaluationCriteria;
                     }
@@ -2631,6 +3066,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.renderStudents();
                     this.renderClasses();
                     this.renderActivities();
+                    this.renderSchedule();
                     this.renderEvaluations();
                     this.renderNotifications();
                     this.updateClassSelectors();
