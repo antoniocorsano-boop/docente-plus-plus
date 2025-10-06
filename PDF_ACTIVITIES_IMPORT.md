@@ -147,19 +147,23 @@ TERZA MEDIA
 Dopo l'importazione, ogni attività può essere:
 
 - ✏️ Modificata - Titolo, descrizione, tipo, scadenza
-- 🎯 Assegnata - A una classe specifica
+- 🎯 Assegnata - A una classe specifica (il docente sceglie manualmente)
 - 📅 Pianificata - Nel calendario/orario didattico
 - ✅ Tracciata - Stato: pianificata, in corso, completata
 - 🗑️ Eliminata - Se non più necessaria
 
-## Mappatura Classi
+**Nota importante**: Le attività importate sono per livelli generali (Prima, Seconda, Terza Media) e non vengono automaticamente assegnate a sezioni specifiche. Il docente può successivamente assegnarle manualmente alle sezioni desiderate (es. Prima A, Prima B, etc.).
 
-Il sistema tenta automaticamente di mappare i livelli classe alle classi esistenti:
+## Livelli Classe
 
-- Se hai una classe "1A" o "Prima A" → mappata a "Prima"
-- Se hai una classe "2B" o "Seconda B" → mappata a "Seconda"
-- Se hai una classe "3C" o "Terza C" → mappata a "Terza"
-- Attività non mappate → rimangono come "Generale"
+Le attività vengono importate con indicazione del livello generale:
+
+- **Prima Media** - Attività per tutte le sezioni della prima
+- **Seconda Media** - Attività per tutte le sezioni della seconda  
+- **Terza Media** - Attività per tutte le sezioni della terza
+- **Generale** - Attività non specifiche per livello
+
+Il docente può poi assegnare manualmente ciascuna attività alla sezione specifica desiderata.
 
 ## Troubleshooting
 
@@ -173,8 +177,8 @@ Il sistema tenta automaticamente di mappare i livelli classe alle classi esisten
 ### Classificazione errata delle classi
 - **Causa**: Pattern non standard nel PDF
 - **Soluzione**:
-  1. Dopo l'importazione, modifica manualmente le classi
-  2. Usa nomenclatura standard (Prima/Seconda/Terza)
+  1. Le attività sono importate a livello generale (Prima, Seconda, Terza)
+  2. Il docente può assegnare manualmente alle sezioni specifiche dopo l'importazione
 
 ### Tipo attività non corretto
 - **Causa**: Keywords non riconosciute
@@ -217,8 +221,9 @@ Il sistema tenta automaticamente di mappare i livelli classe alle classi esisten
 3. **Valida i risultati**:
    - Vai a "📋 Attività"
    - Verifica presenza attività importate
-   - Controlla associazione classi
-   - Testa modifica e assegnazione
+   - Controlla livelli classe (Prima, Seconda, Terza Media)
+   - Assegna manualmente alle sezioni specifiche se necessario
+   - Testa modifica e pianificazione
 
 ### Test con CSV
 
@@ -236,7 +241,7 @@ titolo,tipo,classe,descrizione
 1. **PDF Solo Testo**: Non supporta PDF basati solo su immagini (richiede OCR esterno)
 2. **Pattern Fissi**: Il riconoscimento si basa su pattern comuni italiani
 3. **Classificazione IA**: Opzionale, richiede OpenRouter API key
-4. **Mapping Classi**: Automatico solo per nomenclatura standard
+4. **Livelli Generali**: Le attività sono importate per livelli generali (Prima, Seconda, Terza Media) e non vengono assegnate automaticamente a sezioni specifiche
 
 ## Sviluppi Futuri
 

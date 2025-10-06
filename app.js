@@ -4730,25 +4730,25 @@ Rispondi SOLO in formato JSON con questa struttura:
         const activitiesData = this.currentImportData.activitiesData;
         const file = this.currentImportData.file;
 
-        // Map class levels to actual class IDs if available
-        const classMapping = this.createClassMapping(activitiesData);
-
-        // Import activities
+        // Import activities without automatic class mapping
+        // Activities are for general grade levels (Prima, Seconda, Terza) not specific sections
         activitiesData.forEach(activityData => {
-            const classId = classMapping[activityData.classLevel] || null;
+            const classLevel = activityData.classLevel || 'Generale';
+            const levelLabel = classLevel !== 'Generale' ? ` - ${classLevel} Media` : '';
             
             const activity = {
                 id: Date.now() + Math.random(),
                 title: activityData.title,
-                description: activityData.description || `Importata da ${file.name}`,
+                description: activityData.description || `Importata da ${file.name}${levelLabel}`,
                 type: activityData.type,
-                classId: classId,
+                classId: null, // Keep null for general level activities
                 status: activityData.status || 'planned',
                 priority: 'medium',
                 deadline: null,
                 createdAt: new Date().toISOString(),
                 importSource: file.name,
-                importedAt: new Date().toISOString()
+                importedAt: new Date().toISOString(),
+                classLevel: classLevel // Store the grade level for reference
             };
 
             this.activities.push(activity);
@@ -4787,24 +4787,10 @@ Rispondi SOLO in formato JSON con questa struttura:
     }
 
     createClassMapping(activitiesData) {
-        const mapping = {};
-        
-        // Get unique class levels from activities
-        const classLevels = [...new Set(activitiesData.map(a => a.classLevel))];
-        
-        // Try to match with existing classes
-        classLevels.forEach(level => {
-            const matchingClass = this.classes.find(c => 
-                c.name.toLowerCase().includes(level.toLowerCase()) ||
-                c.year === level
-            );
-            
-            if (matchingClass) {
-                mapping[level] = matchingClass.id;
-            }
-        });
-
-        return mapping;
+        // NOTE: This function is kept for backward compatibility but is no longer used
+        // Activities are imported at general level (Prima, Seconda, Terza) without
+        // automatic assignment to specific class sections
+        return {};
     }
 
     cancelImport() {

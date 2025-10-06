@@ -65,7 +65,7 @@
    - Simulazione import file TXT
    - Anteprima generata correttamente
    - Importazione confermata: 24 attività
-   - Mapping classi: Prima A, Seconda B, Terza C
+   - Livelli classe: Prima, Seconda, Terza Media (generali, non assegnate a sezioni specifiche)
    - Visualizzazione in sezione Attività: ✅
 
 3. **Test Classificazione Automatica** ✅
@@ -82,7 +82,7 @@
 | Parsing testuale | ✅ Funzionante | Pattern multipli efficaci |
 | Riconoscimento classi | ✅ Funzionante | Tutti i pattern supportati |
 | Classificazione attività | ✅ Funzionante | 6 tipi riconosciuti |
-| Mapping classi | ✅ Funzionante | Associazione automatica |
+| Livelli classe | ✅ Funzionante | Prima, Seconda, Terza (generali) |
 | UI/UX | ✅ Funzionante | Anteprima chiara e completa |
 | Persistenza | ✅ Funzionante | LocalStorage integrato |
 | Integrazione | ✅ Funzionante | Seamless con app esistente |

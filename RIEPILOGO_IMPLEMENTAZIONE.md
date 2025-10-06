@@ -35,7 +35,8 @@ Tutti i requisiti specificati nel problema sono stati soddisfatti:
 
 ### 5. Gestione e Visualizzazione ✅
 - Anteprima organizzata per classe
-- Mapping automatico alle classi esistenti
+- Import di attività a livello generale (Prima, Seconda, Terza Media)
+- Assegnazione manuale a sezioni specifiche da parte del docente
 - Import con conferma
 - Tutte le attività disponibili per modifica/assegnazione
 
@@ -77,13 +78,11 @@ Tutti i requisiti specificati nel problema sono stati soddisfatti:
    - Compiti: `compito|compiti|homework`
    - Verifica: `verifica|test|esame|valutazione`
 
-4. **Mapping Classi Automatico**
-   ```javascript
-   createClassMapping(activitiesData)
-   ```
-   - Cerca classi esistenti nel sistema
-   - Associa per nome (es. "Prima A" → "Prima")
-   - Mantiene attività non mappate come "Generale"
+4. **Gestione Livelli Classe**
+   - Le attività vengono importate a livello generale (Prima, Seconda, Terza Media)
+   - Non vengono assegnate automaticamente a sezioni specifiche
+   - Il docente può successivamente assegnarle manualmente alle sezioni desiderate
+   - Informazione del livello salvata nella descrizione e campo `classLevel`
 
 5. **UI/UX Completa**
    - Anteprima tabellare organizzata per classe
@@ -129,9 +128,10 @@ Tutti i requisiti specificati nel problema sono stati soddisfatti:
 - **Distribuzione**: Corretta
 - **Risultato**: ✅ PASS
 
-### Test 4: Mapping e Import
-- **Classi create**: Prima A, Seconda B, Terza C
-- **Mapping automatico**: 24/24 attività associate
+### Test 4: Import e Visualizzazione
+- **Attività importate**: 24 totali
+- **Livelli classe**: Prima, Seconda, Terza Media (livelli generali)
+- **Assegnazione sezioni**: Manuale da parte del docente
 - **Persistenza**: ✅ Salvate in localStorage
 - **Visualizzazione**: ✅ Tutte visibili in app
 - **Risultato**: ✅ PASS
@@ -253,11 +253,13 @@ Raggruppamento per Classe
     ↓
 Anteprima UI
     ↓
-Mapping Classi Esistenti
+Import con Livello Classe
     ↓
-Import e Persistenza
+Persistenza (classId=null, classLevel salvato)
     ↓
 Visualizzazione in App
+    ↓
+Assegnazione Manuale a Sezioni (opzionale)
 ```
 
 ### Pattern Matching
