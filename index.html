@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docente++ - Gestione Didattica con IA</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- PDF and Excel Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -88,6 +92,36 @@
                     <button type="submit" class="btn btn-primary">Inizia ad Usare Docente++</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Export Format Selection Modal -->
+    <div id="export-format-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>📥 Seleziona Formato di Esportazione</h2>
+            <p id="export-description">Scegli il formato in cui desideri esportare i dati:</p>
+            
+            <div class="export-format-options">
+                <div class="format-option" onclick="app.executeExport('json')">
+                    <div class="format-icon">📄</div>
+                    <h3>JSON</h3>
+                    <p>Formato dati strutturato, ideale per backup e importazione</p>
+                </div>
+                <div class="format-option" onclick="app.executeExport('pdf')">
+                    <div class="format-icon">📕</div>
+                    <h3>PDF</h3>
+                    <p>Documento formattato pronto per la stampa e condivisione</p>
+                </div>
+                <div class="format-option" onclick="app.executeExport('excel')">
+                    <div class="format-icon">📊</div>
+                    <h3>Excel</h3>
+                    <p>Foglio di calcolo per analisi avanzate (XLSX)</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="app.closeExportModal()">Annulla</button>
+            </div>
         </div>
     </div>
 

@@ -1045,73 +1045,6 @@ ${lessonData.evaluation || 'N/D'}
         this.renderResults();
     }
 
-    exportEvaluations() {
-        // Calculate statistics for export
-        const stats = {
-            totalEvaluations: this.evaluations.length,
-            totalStudents: new Set(this.evaluations.map(e => e.studentId).filter(id => id)).size,
-            totalClasses: new Set(this.evaluations.map(e => e.classId).filter(id => id)).size,
-            averageScore: this.calculateAverageScore(this.evaluations),
-            evaluationsBySubject: {},
-            evaluationsByClass: {}
-        };
-
-        // Calculate by subject
-        this.subjects.forEach(subject => {
-            const subjectEvals = this.evaluations.filter(e => e.subjectId === subject);
-            if (subjectEvals.length > 0) {
-                stats.evaluationsBySubject[subject] = {
-                    count: subjectEvals.length,
-                    averageScore: this.calculateAverageScore(subjectEvals)
-                };
-            }
-        });
-
-        // Calculate by class
-        this.classes.forEach(cls => {
-            const classEvals = this.evaluations.filter(e => e.classId == cls.id);
-            if (classEvals.length > 0) {
-                stats.evaluationsByClass[cls.name] = {
-                    count: classEvals.length,
-                    averageScore: this.calculateAverageScore(classEvals)
-                };
-            }
-        });
-
-        const data = {
-            evaluationCriteria: this.evaluationCriteria,
-            evaluationGrids: this.evaluationGrids,
-            evaluations: this.evaluations.map(evaluation => {
-                const student = this.students.find(s => s.id == evaluation.studentId);
-                const cls = this.classes.find(c => c.id == evaluation.classId);
-                const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
-                const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
-
-                return {
-                    ...evaluation,
-                    studentName: student ? student.name : null,
-                    className: cls ? cls.name : null,
-                    criterionName: criterion ? criterion.name : null,
-                    gridName: grid ? grid.name : null,
-                    subjectName: evaluation.subjectId || null
-                };
-            }),
-            statistics: stats,
-            exportDate: new Date().toISOString()
-        };
-
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `valutazioni-export-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        
-        URL.revokeObjectURL(url);
-        alert('Valutazioni esportate con successo con statistiche!');
-    }
 
     initializeResultsFilters() {
         // Populate filter selectors
@@ -1858,6 +1791,43 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     exportData() {
+        // Store the export type and show format selection modal
+        this.currentExportType = 'data';
+        this.showExportModal();
+    }
+
+    exportEvaluations() {
+        // Store the export type and show format selection modal
+        this.currentExportType = 'evaluations';
+        this.showExportModal();
+    }
+
+    showExportModal() {
+        const modal = document.getElementById('export-format-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    closeExportModal() {
+        const modal = document.getElementById('export-format-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentExportType = null;
+    }
+
+    executeExport(format) {
+        this.closeExportModal();
+        
+        if (this.currentExportType === 'data') {
+            this.exportDataInFormat(format);
+        } else if (this.currentExportType === 'evaluations') {
+            this.exportEvaluationsInFormat(format);
+        }
+    }
+
+    exportDataInFormat(format) {
         const data = {
             lessons: this.lessons,
             students: this.students,
@@ -1882,16 +1852,17 @@ ${lessonData.evaluation || 'N/D'}
             exportDate: new Date().toISOString()
         };
 
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `docente-plus-export-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        
-        URL.revokeObjectURL(url);
+        switch(format) {
+            case 'json':
+                this.exportAsJSON(data, 'docente-plus-export');
+                break;
+            case 'pdf':
+                this.exportDataAsPDF(data);
+                break;
+            case 'excel':
+                this.exportDataAsExcel(data);
+                break;
+        }
 
         // Track backup date
         this.notificationSettings.lastBackupDate = new Date().toISOString();
@@ -1900,10 +1871,489 @@ ${lessonData.evaluation || 'N/D'}
         // Create backup notification
         this.createNotification({
             title: '✅ Backup Completato',
-            message: 'I tuoi dati sono stati esportati con successo',
+            message: `I tuoi dati sono stati esportati con successo in formato ${format.toUpperCase()}`,
             type: 'system',
             notificationId: `backup-success-${Date.now()}`
         });
+    }
+
+    exportEvaluationsInFormat(format) {
+        // Calculate statistics for export
+        const stats = {
+            totalEvaluations: this.evaluations.length,
+            totalStudents: new Set(this.evaluations.map(e => e.studentId).filter(id => id)).size,
+            totalClasses: new Set(this.evaluations.map(e => e.classId).filter(id => id)).size,
+            averageScore: this.calculateAverageScore(this.evaluations),
+            evaluationsBySubject: {},
+            evaluationsByClass: {}
+        };
+
+        // Calculate by subject
+        this.subjects.forEach(subject => {
+            const subjectEvals = this.evaluations.filter(e => e.subjectId === subject);
+            if (subjectEvals.length > 0) {
+                stats.evaluationsBySubject[subject] = {
+                    count: subjectEvals.length,
+                    averageScore: this.calculateAverageScore(subjectEvals)
+                };
+            }
+        });
+
+        // Calculate by class
+        this.classes.forEach(cls => {
+            const classEvals = this.evaluations.filter(e => e.classId == cls.id);
+            if (classEvals.length > 0) {
+                stats.evaluationsByClass[cls.name] = {
+                    count: classEvals.length,
+                    averageScore: this.calculateAverageScore(classEvals)
+                };
+            }
+        });
+
+        const data = {
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations.map(evaluation => {
+                const student = this.students.find(s => s.id == evaluation.studentId);
+                const cls = this.classes.find(c => c.id == evaluation.classId);
+                const criterion = this.evaluationCriteria.find(c => c.id == evaluation.criterionId);
+                const grid = this.evaluationGrids.find(g => g.id == evaluation.gridId);
+
+                return {
+                    ...evaluation,
+                    studentName: student ? student.name : null,
+                    className: cls ? cls.name : null,
+                    criterionName: criterion ? criterion.name : null,
+                    gridName: grid ? grid.name : null,
+                    subjectName: evaluation.subjectId || null
+                };
+            }),
+            statistics: stats,
+            exportDate: new Date().toISOString()
+        };
+
+        switch(format) {
+            case 'json':
+                this.exportAsJSON(data, 'valutazioni-export');
+                break;
+            case 'pdf':
+                this.exportEvaluationsAsPDF(data);
+                break;
+            case 'excel':
+                this.exportEvaluationsAsExcel(data);
+                break;
+        }
+
+        alert(`Valutazioni esportate con successo in formato ${format.toUpperCase()}!`);
+    }
+
+    exportAsJSON(data, filename) {
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${filename}-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    }
+
+    exportDataAsPDF(data) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Title
+        doc.setFontSize(20);
+        doc.text('Docente++ - Export Dati Completo', 14, 20);
+        
+        // Teacher info
+        doc.setFontSize(12);
+        doc.text(`Docente: ${data.teacherProfile.firstName} ${data.teacherProfile.lastName}`, 14, 30);
+        doc.text(`Scuola: ${data.teacherProfile.schoolName || 'N/D'}`, 14, 37);
+        doc.text(`Anno Scolastico: ${data.teacherProfile.schoolYear || 'N/D'}`, 14, 44);
+        doc.text(`Data Export: ${new Date(data.exportDate).toLocaleDateString('it-IT')}`, 14, 51);
+        
+        let yPos = 65;
+
+        // Summary statistics
+        doc.setFontSize(14);
+        doc.text('Riepilogo', 14, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.text(`Lezioni: ${data.lessons.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Studenti: ${data.students.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Classi: ${data.classes.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Discipline: ${data.subjects.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Valutazioni: ${data.evaluations.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Criteri di Valutazione: ${data.evaluationCriteria.length}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Griglie di Valutazione: ${data.evaluationGrids.length}`, 14, yPos);
+        yPos += 15;
+
+        // Classes table
+        if (data.classes.length > 0) {
+            doc.setFontSize(14);
+            doc.text('Classi', 14, yPos);
+            yPos += 7;
+            
+            const classesData = data.classes.map(c => [
+                c.name,
+                c.year || 'N/D',
+                c.section || 'N/D',
+                c.studentsCount || 0
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Nome', 'Anno', 'Sezione', 'N. Studenti']],
+                body: classesData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Students table (if space available)
+        if (data.students.length > 0 && yPos < 250) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Studenti', 14, yPos);
+            yPos += 7;
+            
+            const studentsData = data.students.slice(0, 20).map(s => {
+                const cls = data.classes.find(c => c.id == s.classId);
+                return [s.name, cls ? cls.name : 'N/D'];
+            });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Nome Studente', 'Classe']],
+                body: studentsData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+        }
+
+        // Footer with privacy note
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128);
+            doc.text('Documento generato da Docente++ - Dati riservati', 14, 285);
+            doc.text(`Pagina ${i} di ${pageCount}`, 170, 285);
+        }
+        
+        doc.save(`docente-plus-export-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    exportEvaluationsAsPDF(data) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Title
+        doc.setFontSize(20);
+        doc.text('Docente++ - Export Valutazioni', 14, 20);
+        
+        // Teacher info
+        const teacherName = `${localStorage.getItem('teacher-first-name') || ''} ${localStorage.getItem('teacher-last-name') || ''}`.trim();
+        doc.setFontSize(12);
+        if (teacherName) {
+            doc.text(`Docente: ${teacherName}`, 14, 30);
+        }
+        doc.text(`Data Export: ${new Date(data.exportDate).toLocaleDateString('it-IT')}`, 14, 37);
+        
+        let yPos = 50;
+
+        // Statistics
+        doc.setFontSize(14);
+        doc.text('Statistiche', 14, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.text(`Totale Valutazioni: ${data.statistics.totalEvaluations}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Studenti Valutati: ${data.statistics.totalStudents}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Classi: ${data.statistics.totalClasses}`, 14, yPos);
+        yPos += 7;
+        doc.text(`Media Generale: ${data.statistics.averageScore ? data.statistics.averageScore.toFixed(2) : 'N/D'}`, 14, yPos);
+        yPos += 15;
+
+        // Statistics by subject
+        if (Object.keys(data.statistics.evaluationsBySubject).length > 0) {
+            doc.setFontSize(14);
+            doc.text('Statistiche per Disciplina', 14, yPos);
+            yPos += 7;
+            
+            const subjectData = Object.entries(data.statistics.evaluationsBySubject).map(([subject, stats]) => [
+                subject,
+                stats.count,
+                stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D'
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Disciplina', 'N. Valutazioni', 'Media']],
+                body: subjectData,
+                theme: 'grid',
+                styles: { fontSize: 9 }
+            });
+            
+            yPos = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Evaluations table
+        if (data.evaluations.length > 0) {
+            if (yPos > 240) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('Valutazioni', 14, yPos);
+            yPos += 7;
+            
+            const evaluationsData = data.evaluations.slice(0, 50).map(e => [
+                e.studentName || 'N/D',
+                e.className || 'N/D',
+                e.subjectName || 'N/D',
+                e.score || 'N/D',
+                new Date(e.date).toLocaleDateString('it-IT')
+            ]);
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Studente', 'Classe', 'Disciplina', 'Voto', 'Data']],
+                body: evaluationsData,
+                theme: 'striped',
+                styles: { fontSize: 8 }
+            });
+        }
+
+        // Footer with privacy note
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128);
+            doc.text('Documento generato da Docente++ - Dati riservati e protetti', 14, 285);
+            doc.text(`Pagina ${i} di ${pageCount}`, 170, 285);
+        }
+        
+        doc.save(`valutazioni-export-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    exportDataAsExcel(data) {
+        const wb = XLSX.utils.book_new();
+        
+        // Teacher Profile sheet
+        const profileData = [
+            ['Campo', 'Valore'],
+            ['Nome', data.teacherProfile.firstName],
+            ['Cognome', data.teacherProfile.lastName],
+            ['Email', data.teacherProfile.email],
+            ['Scuola', data.teacherProfile.schoolName],
+            ['Livello Scuola', data.teacherProfile.schoolLevel],
+            ['Anno Scolastico', data.teacherProfile.schoolYear],
+            ['Inizio Anno', data.teacherProfile.schoolYearStart],
+            ['Fine Anno', data.teacherProfile.schoolYearEnd],
+            ['Data Export', new Date(data.exportDate).toLocaleDateString('it-IT')]
+        ];
+        const wsProfile = XLSX.utils.aoa_to_sheet(profileData);
+        XLSX.utils.book_append_sheet(wb, wsProfile, 'Profilo Docente');
+
+        // Classes sheet
+        if (data.classes.length > 0) {
+            const classesData = [
+                ['Nome', 'Anno', 'Sezione', 'N. Studenti', 'Data Creazione']
+            ];
+            data.classes.forEach(c => {
+                classesData.push([
+                    c.name,
+                    c.year || '',
+                    c.section || '',
+                    c.studentsCount || 0,
+                    c.createdAt ? new Date(c.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsClasses = XLSX.utils.aoa_to_sheet(classesData);
+            XLSX.utils.book_append_sheet(wb, wsClasses, 'Classi');
+        }
+
+        // Students sheet
+        if (data.students.length > 0) {
+            const studentsData = [
+                ['Nome Studente', 'Classe', 'Data Inserimento']
+            ];
+            data.students.forEach(s => {
+                const cls = data.classes.find(c => c.id == s.classId);
+                studentsData.push([
+                    s.name,
+                    cls ? cls.name : '',
+                    s.createdAt ? new Date(s.createdAt).toLocaleDateString('it-IT') : ''
+                ]);
+            });
+            const wsStudents = XLSX.utils.aoa_to_sheet(studentsData);
+            XLSX.utils.book_append_sheet(wb, wsStudents, 'Studenti');
+        }
+
+        // Lessons sheet
+        if (data.lessons.length > 0) {
+            const lessonsData = [
+                ['Disciplina', 'Classe', 'Argomento', 'Data', 'Ora Inizio', 'Ora Fine', 'Note']
+            ];
+            data.lessons.forEach(l => {
+                const cls = data.classes.find(c => c.id == l.classId);
+                lessonsData.push([
+                    l.subject || '',
+                    cls ? cls.name : '',
+                    l.topic || '',
+                    l.date || '',
+                    l.startTime || '',
+                    l.endTime || '',
+                    l.notes || ''
+                ]);
+            });
+            const wsLessons = XLSX.utils.aoa_to_sheet(lessonsData);
+            XLSX.utils.book_append_sheet(wb, wsLessons, 'Lezioni');
+        }
+
+        // Evaluations sheet
+        if (data.evaluations.length > 0) {
+            const evaluationsData = [
+                ['Studente', 'Classe', 'Disciplina', 'Voto', 'Criterio', 'Griglia', 'Data', 'Note']
+            ];
+            data.evaluations.forEach(e => {
+                const student = data.students.find(s => s.id == e.studentId);
+                const cls = data.classes.find(c => c.id == e.classId);
+                const criterion = data.evaluationCriteria.find(c => c.id == e.criterionId);
+                const grid = data.evaluationGrids.find(g => g.id == e.gridId);
+                
+                evaluationsData.push([
+                    student ? student.name : '',
+                    cls ? cls.name : '',
+                    e.subjectId || '',
+                    e.score || '',
+                    criterion ? criterion.name : '',
+                    grid ? grid.name : '',
+                    e.date || '',
+                    e.notes || ''
+                ]);
+            });
+            const wsEvaluations = XLSX.utils.aoa_to_sheet(evaluationsData);
+            XLSX.utils.book_append_sheet(wb, wsEvaluations, 'Valutazioni');
+        }
+
+        // Subjects sheet
+        if (data.subjects.length > 0) {
+            const subjectsData = [['Disciplina']];
+            data.subjects.forEach(s => {
+                subjectsData.push([s]);
+            });
+            const wsSubjects = XLSX.utils.aoa_to_sheet(subjectsData);
+            XLSX.utils.book_append_sheet(wb, wsSubjects, 'Discipline');
+        }
+
+        // Write file
+        XLSX.writeFile(wb, `docente-plus-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    exportEvaluationsAsExcel(data) {
+        const wb = XLSX.utils.book_new();
+        
+        // Statistics sheet
+        const statsData = [
+            ['Statistiche Generali', ''],
+            ['Totale Valutazioni', data.statistics.totalEvaluations],
+            ['Studenti Valutati', data.statistics.totalStudents],
+            ['Classi', data.statistics.totalClasses],
+            ['Media Generale', data.statistics.averageScore ? data.statistics.averageScore.toFixed(2) : 'N/D'],
+            ['', ''],
+            ['Statistiche per Disciplina', ''],
+            ['Disciplina', 'N. Valutazioni', 'Media']
+        ];
+        
+        Object.entries(data.statistics.evaluationsBySubject).forEach(([subject, stats]) => {
+            statsData.push([subject, stats.count, stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D']);
+        });
+        
+        statsData.push(['', '']);
+        statsData.push(['Statistiche per Classe', '']);
+        statsData.push(['Classe', 'N. Valutazioni', 'Media']);
+        
+        Object.entries(data.statistics.evaluationsByClass).forEach(([className, stats]) => {
+            statsData.push([className, stats.count, stats.averageScore ? stats.averageScore.toFixed(2) : 'N/D']);
+        });
+        
+        const wsStats = XLSX.utils.aoa_to_sheet(statsData);
+        XLSX.utils.book_append_sheet(wb, wsStats, 'Statistiche');
+
+        // Evaluations sheet
+        if (data.evaluations.length > 0) {
+            const evaluationsData = [
+                ['Studente', 'Classe', 'Disciplina', 'Voto', 'Criterio', 'Griglia', 'Data', 'Note']
+            ];
+            data.evaluations.forEach(e => {
+                evaluationsData.push([
+                    e.studentName || '',
+                    e.className || '',
+                    e.subjectName || '',
+                    e.score || '',
+                    e.criterionName || '',
+                    e.gridName || '',
+                    e.date || '',
+                    e.notes || ''
+                ]);
+            });
+            const wsEvaluations = XLSX.utils.aoa_to_sheet(evaluationsData);
+            XLSX.utils.book_append_sheet(wb, wsEvaluations, 'Valutazioni');
+        }
+
+        // Criteria sheet
+        if (data.evaluationCriteria.length > 0) {
+            const criteriaData = [
+                ['Nome Criterio', 'Disciplina', 'Tipo', 'Descrizione']
+            ];
+            data.evaluationCriteria.forEach(c => {
+                criteriaData.push([
+                    c.name || '',
+                    c.subject || '',
+                    c.type || '',
+                    c.description || ''
+                ]);
+            });
+            const wsCriteria = XLSX.utils.aoa_to_sheet(criteriaData);
+            XLSX.utils.book_append_sheet(wb, wsCriteria, 'Criteri');
+        }
+
+        // Grids sheet
+        if (data.evaluationGrids.length > 0) {
+            const gridsData = [
+                ['Nome Griglia', 'Disciplina', 'N. Livelli']
+            ];
+            data.evaluationGrids.forEach(g => {
+                gridsData.push([
+                    g.name || '',
+                    g.subject || '',
+                    g.levels ? g.levels.length : 0
+                ]);
+            });
+            const wsGrids = XLSX.utils.aoa_to_sheet(gridsData);
+            XLSX.utils.book_append_sheet(wb, wsGrids, 'Griglie');
+        }
+
+        // Write file
+        XLSX.writeFile(wb, `valutazioni-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     importData() {
