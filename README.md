@@ -201,6 +201,7 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 - **[🧪 News Testing Guide](docs/NEWS_TESTING_GUIDE.md)** - Guida test modulo News
 - **[🧪 Piano Test Beta](docs/BETA_TEST_PLAN.md)** - Piano completo test per release Beta 1.0
 - **[📝 Feedback Utente](docs/FEEDBACK_UTENTE.md)** - Raccolta feedback utenti e roadmap miglioramenti
+- **[🗺️ Roadmap Operativa](docs/ROADMAP.md)** - Roadmap incrementale sviluppo per macro-temi
 
 ### Documentazione PWA
 
