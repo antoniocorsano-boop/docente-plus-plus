@@ -76,8 +76,8 @@ self.addEventListener('fetch', (event) => {
   
   // Non intercettare le chiamate API esterne (OpenRouter, ecc.)
   if (url.origin !== location.origin && !isCDNResource(request.url)) {
-    return; // Lascia passare le richieste API
-  }
+    event.respondWith(fetch(request)); // Lascia passare le richieste API
+    return;
   
   event.respondWith(
     caches.match(request).then((response) => {
