@@ -986,10 +986,17 @@
                     .then((registration) => {
                         console.log('✅ Service Worker registered successfully:', registration.scope);
                         
-                        // Check for updates periodically
+                        // Check for updates periodically (every 30 minutes)
                         setInterval(() => {
                             registration.update();
-                        }, 60000); // Check every minute
+                        }, 1800000); // Check every 30 minutes
+                        
+                        // Also check for updates when the page becomes visible
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.visibilityState === 'visible') {
+                                registration.update();
+                            }
+                        });
                         
                         // Listen for updates
                         registration.addEventListener('updatefound', () => {
