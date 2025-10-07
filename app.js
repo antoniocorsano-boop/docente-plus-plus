@@ -1057,6 +1057,7 @@ ${lessonData.evaluation || 'N/D'}
         }
         this.saveData();
         this.renderSchedule();
+        this.renderTodaySchedulePreview(); // Update dashboard preview
     }
 
     getActivityTypeIcon(type) {
