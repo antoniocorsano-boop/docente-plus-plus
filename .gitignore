@@ -33,3 +33,6 @@ node_modules/
 
 # OS files
 Thumbs.db
+
+# Test results
+pwa-test-results.json

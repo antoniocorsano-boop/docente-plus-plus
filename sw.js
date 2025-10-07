@@ -78,6 +78,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== location.origin && !isCDNResource(request.url)) {
     event.respondWith(fetch(request)); // Lascia passare le richieste API
     return;
+  }
   
   event.respondWith(
     caches.match(request).then((response) => {
