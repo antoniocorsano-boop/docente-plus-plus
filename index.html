@@ -13,6 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- PDF.js for PDF text extraction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- RSS Parser for RSS/Atom feeds -->
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -144,6 +146,7 @@
             <button class="tab-button" data-tab="classes">Classi</button>
             <button class="tab-button" data-tab="evaluations">Valutazioni</button>
             <button class="tab-button" data-tab="notifications">Notifiche</button>
+            <button class="tab-button" data-tab="news">📰 News</button>
             <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
             <button class="tab-button" data-tab="document-import">🤖 Importa/gestisci con IA</button>
             <button class="tab-button" data-tab="settings">Impostazioni</button>
@@ -635,6 +638,80 @@
             </div>
         </div>
 
+        <!-- News Tab -->
+        <div id="news" class="tab-content">
+            <h2>📰 News e Feed RSS/Atom</h2>
+            <p class="section-description">
+                Gestisci le tue fonti RSS/Atom e visualizza le news. Usa l'agente IA per analizzare le news e creare automaticamente attività, scadenze e circolari.
+            </p>
+
+            <!-- RSS Feeds Management Section -->
+            <div class="news-section">
+                <h3>📡 Fonti RSS/Atom</h3>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="app.showAddFeedForm()">➕ Aggiungi Fonte RSS</button>
+                    <button class="btn btn-secondary" onclick="app.refreshAllFeeds()">🔄 Aggiorna Tutte</button>
+                </div>
+
+                <div id="add-feed-form" class="form-container" style="display: none;">
+                    <h4>Aggiungi Fonte RSS/Atom</h4>
+                    <form onsubmit="event.preventDefault(); app.addRSSFeed();">
+                        <div class="form-group">
+                            <label for="feed-name">Nome Fonte: *</label>
+                            <input type="text" id="feed-name" placeholder="es. MIUR - Notizie" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="feed-url">URL Feed RSS/Atom: *</label>
+                            <input type="url" id="feed-url" placeholder="https://esempio.com/feed.xml" required>
+                            <small>Inserisci l'URL del feed RSS o Atom</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="feed-category">Categoria:</label>
+                            <select id="feed-category">
+                                <option value="istituzionale">Istituzionale</option>
+                                <option value="normativa">Normativa</option>
+                                <option value="didattica">Didattica</option>
+                                <option value="circolari">Circolari</option>
+                                <option value="altro">Altro</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Aggiungi</button>
+                            <button type="button" class="btn btn-secondary" onclick="app.hideAddFeedForm()">Annulla</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="feeds-list" class="feeds-list"></div>
+            </div>
+
+            <!-- News List Section -->
+            <div class="news-section">
+                <h3>📄 Ultime News</h3>
+                <div class="section-actions">
+                    <div class="filter-group">
+                        <label for="news-filter-source">Filtra per fonte:</label>
+                        <select id="news-filter-source" onchange="app.filterNews()">
+                            <option value="">Tutte le fonti</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="news-filter-category">Filtra per categoria:</label>
+                        <select id="news-filter-category" onchange="app.filterNews()">
+                            <option value="">Tutte le categorie</option>
+                            <option value="istituzionale">Istituzionale</option>
+                            <option value="normativa">Normativa</option>
+                            <option value="didattica">Didattica</option>
+                            <option value="circolari">Circolari</option>
+                            <option value="altro">Altro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="news-list" class="news-list"></div>
+            </div>
+        </div>
+
         <!-- AI Assistant Tab -->
         <div id="ai-assistant" class="tab-content">
             <h2>Assistente IA OpenRouter</h2>
@@ -954,6 +1031,58 @@
                 <div style="margin-top: 20px;">
                     <button class="btn btn-secondary" onclick="app.exportData()">📥 Esporta Dati</button>
                     <button class="btn btn-secondary" onclick="app.importData()">📤 Importa Dati</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Agent Button -->
+    <div id="ai-fab" class="ai-fab" onclick="app.toggleAIAgentModal()" title="Apri Agente IA per analisi news">
+        🤖
+    </div>
+
+    <!-- AI Agent Modal for News Analysis -->
+    <div id="ai-agent-modal" class="modal" style="display: none;">
+        <div class="modal-content ai-agent-content">
+            <div class="modal-header">
+                <h2>🤖 Agente IA - Analisi Contestuale News</h2>
+                <button class="close-btn" onclick="app.closeAIAgentModal()">✕</button>
+            </div>
+            
+            <div class="ai-agent-body">
+                <div class="form-group">
+                    <label for="ai-agent-news-url">URL News da Analizzare:</label>
+                    <input type="url" id="ai-agent-news-url" placeholder="https://esempio.com/news-articolo" />
+                    <small>Inserisci l'URL della news per l'analisi contestuale</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="ai-agent-context">Richiesta Specifica (opzionale):</label>
+                    <textarea id="ai-agent-context" rows="3" placeholder="es. Estrai le date importanti e crea promemoria per le scadenze"></textarea>
+                    <small>Specifica cosa vuoi che l'agente analizzi o faccia</small>
+                </div>
+
+                <div class="ai-agent-suggestions">
+                    <p><strong>Analisi disponibili:</strong></p>
+                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai tutte le date e scadenze menzionate')">📅 Date e Scadenze</button>
+                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Identifica documenti e allegati da scaricare')">📎 Documenti</button>
+                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai soggetti coinvolti e destinatari')">👥 Soggetti</button>
+                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Crea un riepilogo e proponi azioni da intraprendere')">📋 Riepilogo e Azioni</button>
+                </div>
+
+                <div class="ai-agent-results" id="ai-agent-results" style="display: none;">
+                    <h4>📊 Risultati Analisi</h4>
+                    <div id="ai-agent-results-content"></div>
+                    
+                    <div class="ai-agent-actions" id="ai-agent-actions" style="display: none;">
+                        <h5>✅ Azioni Proposte</h5>
+                        <div id="ai-agent-proposed-actions"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="app.analyzeNewsWithAI()">🔍 Analizza con IA</button>
+                    <button class="btn btn-secondary" onclick="app.closeAIAgentModal()">Chiudi</button>
                 </div>
             </div>
         </div>
