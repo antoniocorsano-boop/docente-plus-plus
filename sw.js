@@ -104,7 +104,7 @@ self.addEventListener('fetch', (event) => {
         console.log('[SW] Fetch failed, offline mode:', error);
         
         // Se è una richiesta HTML, ritorna la pagina principale dalla cache
-        if (request.headers.get('accept').includes('text/html')) {
+        if (request.headers.get('accept')?.includes('text/html')) {
           return caches.match('/index.html');
         }
         
