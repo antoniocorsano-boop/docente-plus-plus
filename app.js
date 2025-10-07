@@ -48,6 +48,11 @@ class DocentePlusPlus {
         this.recordingStartTime = null;
         this.recordingTimer = null;
         
+        // News and RSS Feeds Module
+        this.rssFeeds = [];
+        this.newsItems = [];
+        this.newsFilter = { source: '', category: '' };
+        
         this.init();
     }
 
@@ -73,6 +78,8 @@ class DocentePlusPlus {
         this.renderSchedule();
         this.renderImportedDocuments();
         this.renderRecordings();
+        this.renderFeeds();
+        this.renderNews();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
@@ -2399,6 +2406,8 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
         localStorage.setItem('docente-plus-activities', JSON.stringify(this.activities));
         localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
+        localStorage.setItem('docente-plus-rss-feeds', JSON.stringify(this.rssFeeds));
+        localStorage.setItem('docente-plus-news-items', JSON.stringify(this.newsItems));
     }
 
     loadData() {
@@ -2525,6 +2534,28 @@ ${lessonData.evaluation || 'N/D'}
             } catch (e) {
                 console.error('Error loading imported documents:', e);
                 this.importedDocuments = [];
+            }
+        }
+
+        // Load RSS feeds
+        const rssFeedsData = localStorage.getItem('docente-plus-rss-feeds');
+        if (rssFeedsData) {
+            try {
+                this.rssFeeds = JSON.parse(rssFeedsData);
+            } catch (e) {
+                console.error('Error loading RSS feeds:', e);
+                this.rssFeeds = [];
+            }
+        }
+
+        // Load news items
+        const newsItemsData = localStorage.getItem('docente-plus-news-items');
+        if (newsItemsData) {
+            try {
+                this.newsItems = JSON.parse(newsItemsData);
+            } catch (e) {
+                console.error('Error loading news items:', e);
+                this.newsItems = [];
             }
         }
     }
@@ -5011,6 +5042,477 @@ Rispondi SOLO in formato JSON con questa struttura:
             this.audioRecordings = this.audioRecordings.filter(r => r.id !== id);
             this.renderRecordings();
         }
+    }
+
+    // ==========================================
+    // NEWS AND RSS FEEDS MODULE
+    // ==========================================
+
+    showAddFeedForm() {
+        document.getElementById('add-feed-form').style.display = 'block';
+    }
+
+    hideAddFeedForm() {
+        document.getElementById('add-feed-form').style.display = 'none';
+        document.getElementById('feed-name').value = '';
+        document.getElementById('feed-url').value = '';
+        document.getElementById('feed-category').value = 'istituzionale';
+    }
+
+    async addRSSFeed() {
+        const name = document.getElementById('feed-name').value.trim();
+        const url = document.getElementById('feed-url').value.trim();
+        const category = document.getElementById('feed-category').value;
+
+        if (!name || !url) {
+            alert('Inserisci nome e URL del feed');
+            return;
+        }
+
+        const feed = {
+            id: Date.now().toString(),
+            name: name,
+            url: url,
+            category: category,
+            addedDate: new Date().toISOString(),
+            lastFetched: null,
+            itemCount: 0,
+            active: true
+        };
+
+        this.rssFeeds.push(feed);
+        this.saveData();
+        this.hideAddFeedForm();
+        this.renderFeeds();
+
+        // Fetch news from this feed immediately
+        await this.fetchFeedNews(feed.id);
+    }
+
+    async fetchFeedNews(feedId) {
+        const feed = this.rssFeeds.find(f => f.id === feedId);
+        if (!feed) return;
+
+        try {
+            // Use a CORS proxy to fetch the RSS feed
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const response = await fetch(corsProxy + encodeURIComponent(feed.url));
+            
+            if (!response.ok) {
+                throw new Error('Errore nel caricamento del feed');
+            }
+
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+            // Check for RSS or Atom format
+            const items = xmlDoc.querySelectorAll('item');
+            const entries = xmlDoc.querySelectorAll('entry');
+
+            let newsArray = [];
+
+            if (items.length > 0) {
+                // RSS format
+                items.forEach(item => {
+                    const newsItem = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        feedId: feedId,
+                        feedName: feed.name,
+                        category: feed.category,
+                        title: item.querySelector('title')?.textContent || 'Senza titolo',
+                        link: item.querySelector('link')?.textContent || '',
+                        description: item.querySelector('description')?.textContent || '',
+                        pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+                        fetchedDate: new Date().toISOString()
+                    };
+                    newsArray.push(newsItem);
+                });
+            } else if (entries.length > 0) {
+                // Atom format
+                entries.forEach(entry => {
+                    const newsItem = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        feedId: feedId,
+                        feedName: feed.name,
+                        category: feed.category,
+                        title: entry.querySelector('title')?.textContent || 'Senza titolo',
+                        link: entry.querySelector('link')?.getAttribute('href') || '',
+                        description: entry.querySelector('summary')?.textContent || entry.querySelector('content')?.textContent || '',
+                        pubDate: entry.querySelector('published')?.textContent || entry.querySelector('updated')?.textContent || new Date().toISOString(),
+                        fetchedDate: new Date().toISOString()
+                    };
+                    newsArray.push(newsItem);
+                });
+            }
+
+            // Add news items that don't already exist
+            newsArray.forEach(newsItem => {
+                const exists = this.newsItems.some(n => n.link === newsItem.link && n.feedId === feedId);
+                if (!exists) {
+                    this.newsItems.unshift(newsItem);
+                }
+            });
+
+            // Update feed metadata
+            feed.lastFetched = new Date().toISOString();
+            feed.itemCount = newsArray.length;
+
+            this.saveData();
+            this.renderFeeds();
+            this.renderNews();
+            this.updateNewsFilters();
+
+            return newsArray.length;
+
+        } catch (error) {
+            console.error('Error fetching feed:', error);
+            alert(`Errore nel caricamento del feed "${feed.name}": ${error.message}`);
+            return 0;
+        }
+    }
+
+    async refreshAllFeeds() {
+        if (this.rssFeeds.length === 0) {
+            alert('Nessun feed RSS configurato');
+            return;
+        }
+
+        const feedsList = document.getElementById('feeds-list');
+        if (feedsList) {
+            feedsList.innerHTML = '<div class="loading-spinner">🔄 Aggiornamento feed in corso...</div>';
+        }
+
+        let totalNews = 0;
+        for (const feed of this.rssFeeds.filter(f => f.active)) {
+            const count = await this.fetchFeedNews(feed.id);
+            totalNews += count;
+        }
+
+        alert(`Aggiornamento completato! ${totalNews} nuove news caricate.`);
+    }
+
+    deleteFeed(feedId) {
+        if (!confirm('Sei sicuro di voler eliminare questa fonte RSS?')) {
+            return;
+        }
+
+        // Remove feed
+        this.rssFeeds = this.rssFeeds.filter(f => f.id !== feedId);
+        
+        // Remove associated news
+        this.newsItems = this.newsItems.filter(n => n.feedId !== feedId);
+        
+        this.saveData();
+        this.renderFeeds();
+        this.renderNews();
+        this.updateNewsFilters();
+    }
+
+    toggleFeedActive(feedId) {
+        const feed = this.rssFeeds.find(f => f.id === feedId);
+        if (feed) {
+            feed.active = !feed.active;
+            this.saveData();
+            this.renderFeeds();
+        }
+    }
+
+    renderFeeds() {
+        const feedsList = document.getElementById('feeds-list');
+        if (!feedsList) return;
+
+        if (this.rssFeeds.length === 0) {
+            feedsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📡</div>
+                    <p>Nessuna fonte RSS configurata</p>
+                    <p><small>Aggiungi una fonte RSS per iniziare a ricevere news</small></p>
+                </div>
+            `;
+            return;
+        }
+
+        feedsList.innerHTML = this.rssFeeds.map(feed => {
+            const lastFetched = feed.lastFetched 
+                ? new Date(feed.lastFetched).toLocaleString('it-IT')
+                : 'Mai';
+
+            return `
+                <div class="feed-item">
+                    <div class="feed-item-header">
+                        <div>
+                            <div class="feed-item-title">${feed.name}</div>
+                            <span class="feed-item-category">${feed.category}</span>
+                        </div>
+                        <div>
+                            ${feed.active ? '✅' : '⏸️'}
+                        </div>
+                    </div>
+                    <div class="feed-item-url">${feed.url}</div>
+                    <div class="feed-item-meta">
+                        <span>📊 ${feed.itemCount} news</span>
+                        <span>🕐 Ultimo aggiornamento: ${lastFetched}</span>
+                    </div>
+                    <div class="feed-item-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="app.fetchFeedNews('${feed.id}')">🔄 Aggiorna</button>
+                        <button class="btn btn-sm btn-secondary" onclick="app.toggleFeedActive('${feed.id}')">${feed.active ? '⏸️ Disattiva' : '▶️ Attiva'}</button>
+                        <button class="btn btn-sm btn-danger" onclick="app.deleteFeed('${feed.id}')">🗑️ Elimina</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    filterNews() {
+        const sourceFilter = document.getElementById('news-filter-source').value;
+        const categoryFilter = document.getElementById('news-filter-category').value;
+        
+        this.newsFilter = {
+            source: sourceFilter,
+            category: categoryFilter
+        };
+
+        this.renderNews();
+    }
+
+    renderNews() {
+        const newsList = document.getElementById('news-list');
+        if (!newsList) return;
+
+        let filteredNews = [...this.newsItems];
+
+        // Apply filters
+        if (this.newsFilter.source) {
+            filteredNews = filteredNews.filter(n => n.feedId === this.newsFilter.source);
+        }
+        if (this.newsFilter.category) {
+            filteredNews = filteredNews.filter(n => n.category === this.newsFilter.category);
+        }
+
+        // Sort by date (newest first)
+        filteredNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+        if (filteredNews.length === 0) {
+            newsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📰</div>
+                    <p>Nessuna news disponibile</p>
+                    <p><small>Aggiungi fonti RSS e aggiorna per vedere le news</small></p>
+                </div>
+            `;
+            return;
+        }
+
+        newsList.innerHTML = filteredNews.slice(0, 50).map(news => {
+            const pubDate = new Date(news.pubDate).toLocaleString('it-IT');
+            const description = news.description.length > 300 
+                ? news.description.substring(0, 300) + '...'
+                : news.description;
+
+            return `
+                <div class="news-item">
+                    <div class="news-item-header">
+                        <div>
+                            <div class="news-item-title">
+                                <a href="${news.link}" target="_blank" rel="noopener noreferrer">${news.title}</a>
+                            </div>
+                            <div class="news-item-meta">
+                                <span class="news-item-source">📡 ${news.feedName}</span>
+                                <span>🏷️ ${news.category}</span>
+                                <span>📅 ${pubDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item-description">${this.stripHtml(description)}</div>
+                    <div class="news-item-actions">
+                        <a href="${news.link}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">📖 Leggi</a>
+                        <button class="btn btn-sm btn-secondary" onclick="app.openAIAgentWithNews('${news.link}', '${this.escapeHtml(news.title)}')">🤖 Analizza con IA</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    updateNewsFilters() {
+        const sourceSelect = document.getElementById('news-filter-source');
+        if (!sourceSelect) return;
+
+        // Populate source filter
+        const currentValue = sourceSelect.value;
+        sourceSelect.innerHTML = '<option value="">Tutte le fonti</option>';
+        this.rssFeeds.forEach(feed => {
+            const option = document.createElement('option');
+            option.value = feed.id;
+            option.textContent = feed.name;
+            if (feed.id === currentValue) {
+                option.selected = true;
+            }
+            sourceSelect.appendChild(option);
+        });
+    }
+
+    stripHtml(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML.replace(/"/g, '&quot;');
+    }
+
+    // ==========================================
+    // AI AGENT FOR NEWS ANALYSIS
+    // ==========================================
+
+    toggleAIAgentModal() {
+        const modal = document.getElementById('ai-agent-modal');
+        if (modal) {
+            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+        }
+    }
+
+    closeAIAgentModal() {
+        const modal = document.getElementById('ai-agent-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Clear form
+        document.getElementById('ai-agent-news-url').value = '';
+        document.getElementById('ai-agent-context').value = '';
+        document.getElementById('ai-agent-results').style.display = 'none';
+    }
+
+    openAIAgentWithNews(newsUrl, newsTitle) {
+        this.toggleAIAgentModal();
+        document.getElementById('ai-agent-news-url').value = newsUrl;
+        document.getElementById('ai-agent-context').value = `Analizza questa news: "${newsTitle}" ed estrai date, scadenze, documenti e soggetti coinvolti.`;
+    }
+
+    setAIAgentPrompt(prompt) {
+        document.getElementById('ai-agent-context').value = prompt;
+    }
+
+    async analyzeNewsWithAI() {
+        const newsUrl = document.getElementById('ai-agent-news-url').value.trim();
+        const context = document.getElementById('ai-agent-context').value.trim();
+
+        if (!newsUrl) {
+            alert('Inserisci l\'URL della news da analizzare');
+            return;
+        }
+
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
+            this.switchTab('settings');
+            return;
+        }
+
+        // Show loading state
+        const resultsDiv = document.getElementById('ai-agent-results');
+        const resultsContent = document.getElementById('ai-agent-results-content');
+        const actionsDiv = document.getElementById('ai-agent-actions');
+        
+        resultsDiv.style.display = 'block';
+        resultsContent.innerHTML = '<div class="loading-spinner">🤖 Analisi in corso...</div>';
+        actionsDiv.style.display = 'none';
+
+        try {
+            // Build the AI prompt
+            const prompt = `
+Analizza la news disponibile al seguente URL: ${newsUrl}
+
+${context ? `Richiesta specifica: ${context}` : 'Estrai tutte le informazioni rilevanti per un docente.'}
+
+Fornisci un'analisi strutturata con:
+1. 📅 DATE E SCADENZE: Identifica tutte le date importanti e scadenze menzionate
+2. 📎 DOCUMENTI: Elenca eventuali documenti, moduli o allegati menzionati
+3. 👥 SOGGETTI: Identifica destinatari, uffici, responsabili coinvolti
+4. 📋 AZIONI CONSIGLIATE: Proponi azioni concrete che il docente dovrebbe intraprendere
+
+Per ogni azione consigliata, specifica il tipo (es. SCADENZA, PROMEMORIA, CIRCOLARE, ATTIVITÀ) e i dettagli necessari.
+
+Rispondi in italiano in modo chiaro e strutturato.
+            `;
+
+            const response = await this.callOpenRouterAPI(prompt, apiKey);
+
+            if (response && response.content) {
+                resultsContent.innerHTML = response.content.replace(/\n/g, '<br>');
+
+                // Try to extract proposed actions from the response
+                this.extractProposedActions(response.content);
+            }
+
+        } catch (error) {
+            console.error('Error analyzing news with AI:', error);
+            resultsContent.innerHTML = `<div class="error-message">Errore nell'analisi: ${error.message}</div>`;
+        }
+    }
+
+    extractProposedActions(aiResponse) {
+        const actionsDiv = document.getElementById('ai-agent-actions');
+        const proposedActionsDiv = document.getElementById('ai-agent-proposed-actions');
+
+        // Simple parsing to extract actions
+        // This is a basic implementation - in a real scenario, you might want structured output from the AI
+        const lines = aiResponse.split('\n');
+        const actions = [];
+
+        let inActionsSection = false;
+        for (const line of lines) {
+            if (line.toLowerCase().includes('azioni consigliate') || line.toLowerCase().includes('azioni proposte')) {
+                inActionsSection = true;
+                continue;
+            }
+
+            if (inActionsSection && line.trim()) {
+                // Look for action indicators
+                if (line.match(/SCADENZA|PROMEMORIA|CIRCOLARE|ATTIVITÀ|TODO/i)) {
+                    actions.push({
+                        text: line.trim(),
+                        type: this.detectActionType(line)
+                    });
+                }
+            }
+        }
+
+        if (actions.length > 0) {
+            actionsDiv.style.display = 'block';
+            proposedActionsDiv.innerHTML = actions.map((action, index) => `
+                <div class="proposed-action-item">
+                    <div class="proposed-action-text">
+                        <span class="proposed-action-type">${action.type}</span>
+                        ${action.text}
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="app.createItemFromAction(${index}, '${action.type}')">✅ Crea</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    detectActionType(text) {
+        if (text.match(/SCADENZA|deadline|entro|scade/i)) return 'SCADENZA';
+        if (text.match(/PROMEMORIA|ricorda|reminder/i)) return 'PROMEMORIA';
+        if (text.match(/CIRCOLARE|comunicazione|avviso/i)) return 'CIRCOLARE';
+        if (text.match(/ATTIVITÀ|compito|task/i)) return 'ATTIVITÀ';
+        return 'AZIONE';
+    }
+
+    createItemFromAction(actionIndex, actionType) {
+        // This would create an actual item based on the action type
+        // For now, we'll show an alert
+        alert(`Funzionalità in sviluppo: Creazione automatica di ${actionType} dall'analisi IA.`);
+        
+        // In a full implementation, this would:
+        // - Extract details from the action text
+        // - Create a reminder, activity, or notification based on the type
+        // - Save to the appropriate data structure
+        // - Navigate to the relevant section
     }
 }
 
