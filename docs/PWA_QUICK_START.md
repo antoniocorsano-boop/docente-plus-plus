@@ -110,4 +110,4 @@ grep -E "(manifest|serviceWorker|theme-color)" index.html
 
 - **Full Guide**: [PWA_INSTALLATION.md](PWA_INSTALLATION.md)
 - **Implementation**: [PWA_IMPLEMENTATION_SUMMARY.md](PWA_IMPLEMENTATION_SUMMARY.md)
-- **Main Docs**: [README.md](README.md)
+- **Main Docs**: [README.md](../README.md)
