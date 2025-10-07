@@ -1,8 +1,8 @@
 # 🎓 Docente++ 
 
-**Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter**
+**Progressive Web App per la gestione della didattica dell'insegnante potenziata da IA OpenRouter**
 
-App per un insegnamento basato su IA, evoluzione del progetto docente-plus con interfaccia web completa.
+App installabile per un insegnamento basato su IA, evoluzione del progetto docente-plus con interfaccia web completa e supporto PWA.
 
 ## 📋 Caratteristiche
 
@@ -23,6 +23,7 @@ App per un insegnamento basato su IA, evoluzione del progetto docente-plus con i
 - **Generazione Automatica**: Crea piani di lezione completi con l'IA
 - **Persistenza Dati**: Tutti i dati salvati localmente nel browser
 - **Import/Export**: Backup e ripristino completo di profilo, classi e dati
+- **📱 PWA - Progressive Web App**: Installabile su smartphone, tablet e desktop con funzionamento offline
 
 ### Funzionalità IA
 
@@ -493,6 +494,42 @@ docente-plus-plus/
 - **LocalStorage API**: Persistenza dati lato client
 - **OpenRouter API**: Intelligenza artificiale per assistenza didattica
 - **Fetch API**: Comunicazione con servizi esterni
+- **PWA (Progressive Web App)**: Installabile e funzionante offline
+- **Service Worker**: Cache e funzionamento offline
+
+## 📱 Progressive Web App (PWA)
+
+Docente++ è una **Progressive Web App** completa che può essere installata su smartphone, tablet e desktop come un'app nativa!
+
+### Funzionalità PWA
+
+- ✅ **Installazione diretta**: Aggiungi l'app alla schermata home
+- 📴 **Funzionamento offline**: Accedi ai tuoi dati anche senza connessione internet
+- ⚡ **Caricamento istantaneo**: Cache intelligente per performance ottimali
+- 🔄 **Aggiornamenti automatici**: Sempre la versione più recente
+- 📱 **Esperienza nativa**: Si comporta come un'app installata
+
+### Come Installare
+
+#### 📱 **Android (Chrome/Edge)**
+1. Apri il sito in Chrome o Edge
+2. Tocca il banner "Installa Docente++" che appare in basso
+3. Oppure: Menu (⋮) → "Installa app"
+4. L'app sarà aggiunta alla schermata home
+
+#### 🍎 **iOS (Safari)**
+1. Apri il sito in Safari
+2. Tocca il pulsante Condividi (quadrato con freccia)
+3. Seleziona "Aggiungi a Home"
+4. L'icona apparirà sulla schermata home
+
+#### 💻 **Desktop (Chrome/Edge)**
+1. Apri il sito in Chrome o Edge
+2. Clicca sull'icona "Installa" (⊕) nella barra degli indirizzi
+3. Oppure: Menu → "Installa Docente++"
+4. L'app sarà disponibile nel menu Start/Applicazioni
+
+📖 **Guida completa**: Vedi [PWA_INSTALLATION.md](PWA_INSTALLATION.md) per istruzioni dettagliate e test
 
 ## 🎨 Caratteristiche del Design
 
