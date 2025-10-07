@@ -131,7 +131,7 @@ Mario,Rossi,mario@example.com,3A,2005-03-15,San Mario - 19 Gennaio,Studente ecce
 ## 📖 More Information
 
 - **Full Guide**: See `DOCUMENT_IMPORT_MODULE.md`
-- **README**: See `README.md` section "Gestione Studenti"
+- **README**: See `../README.md` section "Guida all'Uso"
 - **Technical Details**: See `IMPLEMENTATION_SUMMARY.md`
 
 ## 🆘 Need Help?
