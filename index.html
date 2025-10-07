@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter">
+    <meta name="theme-color" content="#4a90e2">
     <title>Docente++ - Gestione Didattica con IA</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons for iOS -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Docente++">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    
     <link rel="stylesheet" href="styles.css">
     <!-- PDF and Excel Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1089,5 +1105,161 @@
     </div>
 
     <script src="app.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates periodically (every 30 minutes)
+                        setInterval(() => {
+                            registration.update();
+                        }, 1800000); // Check every 30 minutes
+                        
+                        // Also check for updates when the page becomes visible
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.visibilityState === 'visible') {
+                                registration.update();
+                            }
+                        });
+                        
+                        // Listen for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available, show update notification
+                                    if (confirm('È disponibile un aggiornamento dell\'app. Vuoi ricaricare?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+            
+            // Handle service worker controller change
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            
+            // Show install button or notification
+            console.log('💡 PWA può essere installata!');
+            
+            // You can show a custom install button here
+            // For now, we'll just log it
+            showPWAInstallPrompt();
+        });
+        
+        function showPWAInstallPrompt() {
+            // Create a subtle notification for PWA installation
+            const installPrompt = document.createElement('div');
+            installPrompt.id = 'pwa-install-prompt';
+            installPrompt.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4a90e2;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                animation: slideUp 0.3s ease-out;
+            `;
+            
+            installPrompt.innerHTML = `
+                <span>📱 Installa Docente++ sul tuo dispositivo</span>
+                <button id="pwa-install-btn" style="
+                    background: white;
+                    color: #4a90e2;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    cursor: pointer;
+                ">Installa</button>
+                <button id="pwa-dismiss-btn" style="
+                    background: transparent;
+                    color: white;
+                    border: 1px solid white;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                ">Dopo</button>
+            `;
+            
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideUp {
+                    from {
+                        transform: translateX(-50%) translateY(100px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(-50%) translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(installPrompt);
+            
+            // Install button click
+            document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                }
+                installPrompt.remove();
+            });
+            
+            // Dismiss button click
+            document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+                installPrompt.remove();
+            });
+            
+            // Auto-dismiss after 10 seconds
+            setTimeout(() => {
+                if (installPrompt.parentNode) {
+                    installPrompt.remove();
+                }
+            }, 10000);
+        }
+        
+        // Track when the app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installata con successo!');
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 </html>
