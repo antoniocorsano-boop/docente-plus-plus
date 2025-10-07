@@ -160,9 +160,14 @@ I contributi sono benvenuti! Per contribuire:
 4. Push al branch (`git push origin feature/NuovaFunzionalità`)
 5. Apri una Pull Request
 
-## 🐛 Segnalazione Bug
+## 🐛 Segnalazione Bug e Feedback
 
-Per segnalare bug o richiedere nuove funzionalità, apri una [Issue](https://github.com/antbrogame-a11y/docente-plus-plus/issues) su GitHub.
+Vogliamo rendere Docente++ sempre migliore! Il tuo feedback è prezioso:
+
+- **🐛 Segnala un Bug:** [Apri Bug Report](https://github.com/antbrogame-a11y/docente-plus-plus/issues/new?template=bug_report.md)
+- **💡 Condividi Feedback:** [Invia Suggerimenti](https://github.com/antbrogame-a11y/docente-plus-plus/issues/new?template=feedback.md)
+- **📋 Vedi Feedback Raccolti:** [Documento Feedback Utente](docs/FEEDBACK_UTENTE.md)
+- **🧪 Piano Test Beta:** [Piano Test Completo](docs/BETA_TEST_PLAN.md)
 
 ## 👨‍💻 Autore
 
@@ -194,6 +199,8 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 - **[📊 Test Results](docs/IMPLEMENTATION_TEST_RESULTS.md)** - Risultati test implementazione
 - **[📝 Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Sommario generale implementazioni
 - **[🧪 News Testing Guide](docs/NEWS_TESTING_GUIDE.md)** - Guida test modulo News
+- **[🧪 Piano Test Beta](docs/BETA_TEST_PLAN.md)** - Piano completo test per release Beta 1.0
+- **[📝 Feedback Utente](docs/FEEDBACK_UTENTE.md)** - Raccolta feedback utenti e roadmap miglioramenti
 
 ### Documentazione PWA
 
