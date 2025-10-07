@@ -130,6 +130,12 @@ L'assistente IA OpenRouter può aiutarti con:
   - Export in PDF, Excel e JSON
 - **✅ Gestione Valutazioni Avanzata**: Sistema completo per criteri, griglie e valutazioni personalizzate con supporto IA
 - **🔔 Notifiche e Promemoria**: Sistema completo di notifiche automatiche e promemoria personalizzabili
+- **📰 News e Feed RSS/Atom**: Aggregazione automatica news da fonti RSS/Atom con agente IA per analisi contestuale
+  - Gestione fonti RSS/Atom categorizzate
+  - Visualizzazione news aggregate con filtri
+  - Floating Action Button per agente IA sempre accessibile
+  - Analisi automatica news per estrarre date, scadenze, documenti e soggetti
+  - Creazione assistita di attività e promemoria da news
 - **Gestione Materie**: Gestione discipline con autocomplete intelligente
 - **Configurazione Anno Scolastico**: Date inizio/fine personalizzabili
 - **Dashboard Intuitiva**: Panoramica di lezioni, studenti e attività
@@ -400,6 +406,87 @@ Il sistema supporta diverse categorie di notifiche:
 3. Inserisci titolo, messaggio, data e ora
 4. Il promemoria apparirà nella lista e ti notificherà al momento opportuno
 5. Puoi archiviare o eliminare promemoria completati
+
+### 📰 News e Feed RSS/Atom
+
+La sezione News ti permette di aggregare automaticamente notizie da fonti esterne e utilizzare l'intelligenza artificiale per analizzarle e creare automaticamente attività, scadenze e promemoria.
+
+#### Gestione Fonti RSS/Atom
+
+1. **Aggiungere una fonte**:
+   - Vai alla sezione "📰 News"
+   - Clicca "➕ Aggiungi Fonte RSS"
+   - Inserisci nome fonte, URL del feed RSS/Atom e categoria
+   - Clicca "Aggiungi"
+
+2. **Categorie disponibili**:
+   - **Istituzionale**: Comunicazioni MIUR, USR, enti pubblici
+   - **Normativa**: Leggi, decreti, circolari ministeriali
+   - **Didattica**: Risorse didattiche, metodologie, progetti
+   - **Circolari**: Circolari scolastiche interne
+   - **Altro**: Altre fonti di interesse
+
+3. **Gestire le fonti**:
+   - **🔄 Aggiorna**: Recupera nuove news da una fonte specifica
+   - **🔄 Aggiorna Tutte**: Aggiorna tutte le fonti attive contemporaneamente
+   - **⏸️ Disattiva/▶️ Attiva**: Sospendi temporaneamente una fonte senza eliminarla
+   - **🗑️ Elimina**: Rimuovi definitivamente una fonte e le sue news
+
+#### Visualizzazione News
+
+1. Le news vengono aggregate automaticamente nella sezione "📄 Ultime News"
+2. Ogni news mostra:
+   - Titolo cliccabile
+   - Fonte e categoria
+   - Data di pubblicazione
+   - Descrizione/anteprima
+3. **Filtri disponibili**:
+   - **Per fonte**: Visualizza solo news da una fonte specifica
+   - **Per categoria**: Filtra per categoria (Istituzionale, Normativa, ecc.)
+4. **Azioni**:
+   - **📖 Leggi**: Apri la news originale nel browser
+   - **🤖 Analizza con IA**: Avvia l'analisi contestuale con l'agente IA
+
+#### Agente IA per Analisi News
+
+Il **Floating Action Button (🤖)** sempre visibile in basso a destra ti permette di accedere all'agente IA da qualsiasi pagina.
+
+**Modalità di utilizzo**:
+
+1. **Da una news specifica**:
+   - Clicca "🤖 Analizza con IA" sulla news di interesse
+   - L'agente si apre con URL e titolo già precompilati
+   - Seleziona un'analisi predefinita o inserisci una richiesta personalizzata
+   - Clicca "🔍 Analizza con IA"
+
+2. **Da qualsiasi pagina**:
+   - Clicca il pulsante 🤖 in basso a destra
+   - Inserisci manualmente l'URL della news da analizzare
+   - Scegli il tipo di analisi desiderata
+
+**Tipi di analisi disponibili**:
+
+- **📅 Date e Scadenze**: L'IA identifica tutte le date importanti, scadenze e termini menzionati nella news
+- **📎 Documenti**: Estrae l'elenco di documenti, moduli, allegati da scaricare o consultare
+- **👥 Soggetti**: Identifica destinatari, uffici, responsabili e soggetti coinvolti
+- **📋 Riepilogo e Azioni**: Crea un riepilogo strutturato e propone azioni concrete da intraprendere
+
+**Azioni proposte dall'IA**:
+
+Dopo l'analisi, l'agente può proporre automaticamente:
+- **SCADENZA**: Date da segnare in calendario
+- **PROMEMORIA**: Avvisi da impostare per non dimenticare
+- **CIRCOLARE**: Comunicazioni da diffondere
+- **ATTIVITÀ**: Compiti o attività da pianificare
+
+Ogni azione proposta include un pulsante "✅ Crea" per crearla direttamente nell'app (funzionalità in sviluppo).
+
+**Requisiti**:
+- API key OpenRouter configurata nelle Impostazioni
+- News accessibile pubblicamente (no paywall)
+- Connessione internet attiva
+
+Per maggiori dettagli, consulta la [documentazione completa del modulo News](NEWS_RSS_MODULE.md).
 
 #### Gestione e Filtri Notifiche
 - **Filtri per Categoria**: Visualizza solo le notifiche di una specifica categoria (Tutte, Lezioni, Promemoria, Backup, Sistema)
