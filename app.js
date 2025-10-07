@@ -53,6 +53,10 @@ class DocentePlusPlus {
         this.newsItems = [];
         this.newsFilter = { source: '', category: '' };
         
+        // Smart Daily Schedule Module
+        this.lessonSessions = []; // Active lesson sessions with student evaluations
+        this.currentLessonSession = null; // Currently active lesson session
+        
         this.init();
     }
 
@@ -410,6 +414,62 @@ class DocentePlusPlus {
         
         // Update active class display
         this.updateClassDisplay();
+        
+        // Render today's schedule preview
+        this.renderTodaySchedulePreview();
+    }
+    
+    renderTodaySchedulePreview() {
+        const previewContainer = document.getElementById('today-schedule-preview');
+        if (!previewContainer) return;
+        
+        const today = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
+        const todaySlots = [];
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                const cls = this.classes.find(c => c.id == slot.classId);
+                const activityType = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                todaySlots.push({
+                    hour,
+                    class: cls,
+                    activityType,
+                    slot
+                });
+            }
+        });
+        
+        if (todaySlots.length === 0) {
+            previewContainer.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna lezione programmata per oggi</p>';
+            return;
+        }
+        
+        previewContainer.innerHTML = `
+            <div class="today-schedule-list">
+                ${todaySlots.map(({ hour, class: cls, activityType, slot }) => `
+                    <div class="today-schedule-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${activityType ? activityType.color : '#ddd'};">
+                        <div style="flex: 0 0 60px; font-weight: bold; font-size: 1.1em;">${hour}:00</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">${cls ? cls.name : 'N/D'}</div>
+                            ${activityType ? `<div style="font-size: 0.9em; color: #666;">${activityType.label}</div>` : ''}
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="app.startLessonSession('${today.toISOString()}', ${hour})" style="margin-left: 10px;">
+                            ▶ Avvia
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    goToTodaySchedule() {
+        this.scheduleView = 'daily';
+        this.currentScheduleDate = this.getCurrentScheduleDate();
+        this.switchTab('schedule');
+        this.renderSchedule();
     }
 
     // Class Management methods
@@ -1164,6 +1224,613 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     closeActivitySelectionModal() {
+        if (this.currentActivityModal) {
+            this.currentActivityModal.remove();
+            this.currentActivityModal = null;
+        }
+    }
+    
+    // Smart Daily Schedule Management Methods
+    
+    startLessonSession(dateStr, hour) {
+        const date = new Date(dateStr);
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key];
+        
+        if (!slot || !slot.classId) {
+            alert('Seleziona prima una classe per questo slot orario');
+            return;
+        }
+        
+        const cls = this.classes.find(c => c.id == slot.classId);
+        if (!cls) {
+            alert('Classe non trovata');
+            return;
+        }
+        
+        // Show step-by-step activity selection modal
+        this.showSmartActivitySelectionModal(date, hour, slot, cls);
+    }
+    
+    showSmartActivitySelectionModal(date, hour, slot, cls) {
+        const classActivities = this.activities.filter(a => a.classId == slot.classId);
+        const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+        
+        const plannedActivities = classActivities.filter(a => a.status === 'planned');
+        const inProgressActivities = classActivities.filter(a => a.status === 'in-progress');
+        
+        // Get AI suggestions for activities if API key is available
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content lesson-session-modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <h3>🎓 Avvia Lezione</h3>
+                
+                <div class="lesson-info-section" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <strong style="font-size: 1.1em;">${cls.name}</strong>
+                            <div style="color: #666; font-size: 0.9em;">${new Date(date).toLocaleDateString('it-IT')} - ${hour}:00</div>
+                        </div>
+                        ${activityTypeInfo ? `<span style="background: ${activityTypeInfo.color}; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.9em;">${activityTypeInfo.label}</span>` : ''}
+                    </div>
+                </div>
+                
+                <div class="step-indicator" style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 0 20px;">
+                    <div class="step active" style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background: #4a90e2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold;">1</div>
+                        <div style="font-size: 0.85em;">Seleziona Attività</div>
+                    </div>
+                    <div style="flex: 1; border-top: 2px dashed #ddd; margin-top: 20px;"></div>
+                    <div class="step" style="text-align: center; opacity: 0.5;">
+                        <div style="width: 40px; height: 40px; background: #ddd; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold;">2</div>
+                        <div style="font-size: 0.85em;">Valuta Studenti</div>
+                    </div>
+                </div>
+                
+                ${apiKey ? `
+                    <div class="ai-suggestion-section" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 1.3em;">🤖</span>
+                            <strong>Suggerimenti IA</strong>
+                        </div>
+                        <div id="ai-activity-suggestions" style="font-size: 0.95em; color: #1976d2;">
+                            <em>Caricamento suggerimenti...</em>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="app.generateActivitySuggestions('${date.toISOString()}', ${hour}, ${slot.classId})" style="margin-top: 10px; font-size: 0.85em;">
+                            🔄 Rigenera Suggerimenti
+                        </button>
+                    </div>
+                ` : ''}
+                
+                <div class="activity-selection-section">
+                    <h4 style="margin-bottom: 15px;">Scegli un'attività da svolgere:</h4>
+                    
+                    ${inProgressActivities.length > 0 ? `
+                        <div class="activity-group" style="margin-bottom: 20px;">
+                            <h5 style="color: #ff9800; margin-bottom: 10px;">📝 Attività In Corso</h5>
+                            ${inProgressActivities.map(a => `
+                                <div class="activity-card selectable" onclick="app.selectActivityForSession(${a.id}, '${date.toISOString()}', ${hour})" style="padding: 15px; margin: 10px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <strong style="font-size: 1.05em;">${a.title}</strong>
+                                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">${a.type}</div>
+                                            ${a.deadline ? `<div style="color: #f44336; font-size: 0.85em; margin-top: 3px;">⏰ Scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')}</div>` : ''}
+                                        </div>
+                                        <span style="background: #ff9800; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8em;">In corso</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${plannedActivities.length > 0 ? `
+                        <div class="activity-group" style="margin-bottom: 20px;">
+                            <h5 style="color: #2196f3; margin-bottom: 10px;">📋 Attività Pianificate</h5>
+                            ${plannedActivities.map(a => `
+                                <div class="activity-card selectable" onclick="app.selectActivityForSession(${a.id}, '${date.toISOString()}', ${hour})" style="padding: 15px; margin: 10px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <strong style="font-size: 1.05em;">${a.title}</strong>
+                                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">${a.type}</div>
+                                            ${a.deadline ? `<div style="color: #f44336; font-size: 0.85em; margin-top: 3px;">⏰ Scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')}</div>` : ''}
+                                        </div>
+                                        <span style="background: #2196f3; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8em;">Pianificata</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${classActivities.length === 0 ? `
+                        <div style="text-align: center; padding: 40px 20px; color: #999;">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📋</div>
+                            <p>Nessuna attività disponibile per questa classe</p>
+                            <button class="btn btn-secondary" onclick="app.closeSmartActivityModal(); app.switchTab('activities');" style="margin-top: 15px;">
+                                ➕ Crea Nuova Attività
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="form-actions" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <button class="btn btn-secondary" onclick="app.closeSmartActivityModal()">Annulla</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+        
+        // Load AI suggestions if API key exists
+        if (apiKey) {
+            this.generateActivitySuggestions(date.toISOString(), hour, slot.classId);
+        }
+        
+        // Add hover effect styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .activity-card.selectable:hover {
+                border-color: #4a90e2 !important;
+                box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+                transform: translateY(-2px);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    async generateActivitySuggestions(dateStr, hour, classId) {
+        const suggestionsDiv = document.getElementById('ai-activity-suggestions');
+        if (!suggestionsDiv) return;
+        
+        suggestionsDiv.innerHTML = '<em>Analisi in corso...</em>';
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            suggestionsDiv.innerHTML = '<em style="color: #f44336;">API key non configurata</em>';
+            return;
+        }
+        
+        const cls = this.classes.find(c => c.id == classId);
+        const date = new Date(dateStr);
+        const classActivities = this.activities.filter(a => a.classId == classId);
+        
+        const prompt = `Sei un assistente IA per insegnanti. Analizza il contesto e suggerisci quale attività sia più opportuna per questa lezione.
+
+Contesto:
+- Classe: ${cls ? cls.name : 'N/D'}
+- Data: ${date.toLocaleDateString('it-IT')} 
+- Ora: ${hour}:00
+- Giorno della settimana: ${['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()]}
+
+Attività disponibili:
+${classActivities.map(a => `- ${a.title} (${a.type}, stato: ${a.status}${a.deadline ? ', scadenza: ' + new Date(a.deadline).toLocaleDateString('it-IT') : ''})`).join('\n')}
+
+Fornisci un suggerimento breve (massimo 2-3 righe) su quale attività svolgere e perché, considerando scadenze, continuità didattica e il giorno della settimana. Se non ci sono attività, suggerisci brevemente cosa fare.`;
+
+        try {
+            const response = await this.callOpenRouterAPI(prompt);
+            suggestionsDiv.innerHTML = response.replace(/\n/g, '<br>');
+        } catch (error) {
+            console.error('Error getting AI suggestions:', error);
+            suggestionsDiv.innerHTML = '<em style="color: #f44336;">Errore nel caricamento dei suggerimenti</em>';
+        }
+    }
+    
+    selectActivityForSession(activityId, dateStr, hour) {
+        const activity = this.activities.find(a => a.id === activityId);
+        if (!activity) return;
+        
+        // Update activity status to in-progress if not already
+        if (activity.status !== 'in-progress') {
+            this.updateActivityStatus(activityId, 'in-progress');
+        }
+        
+        const date = new Date(dateStr);
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key];
+        const cls = this.classes.find(c => c.id == slot.classId);
+        
+        // Close the activity selection modal
+        this.closeSmartActivityModal();
+        
+        // Create and start the lesson session
+        this.createLessonSession(date, hour, slot, cls, activity);
+    }
+    
+    createLessonSession(date, hour, slot, cls, activity) {
+        const session = {
+            id: Date.now(),
+            date: date.toISOString(),
+            hour: hour,
+            classId: slot.classId,
+            className: cls.name,
+            activityId: activity.id,
+            activityTitle: activity.title,
+            activityType: activity.type,
+            startTime: new Date().toISOString(),
+            endTime: null,
+            studentEvaluations: [],
+            notes: '',
+            status: 'active'
+        };
+        
+        this.currentLessonSession = session;
+        this.lessonSessions.push(session);
+        this.saveData();
+        
+        // Show student evaluation interface
+        this.showStudentEvaluationInterface(session);
+    }
+    
+    showStudentEvaluationInterface(session) {
+        const classStudents = this.students.filter(s => s.class === session.className);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content student-evaluation-modal" style="max-width: 900px; max-height: 95vh; overflow-y: auto;">
+                <div class="lesson-session-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;">
+                    <h3 style="margin: 0 0 10px 0; color: white;">🎓 Lezione in Corso</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <div style="font-size: 1.1em; font-weight: 500;">${session.className}</div>
+                            <div style="opacity: 0.9; font-size: 0.9em;">${session.activityTitle}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.9em; opacity: 0.9;">${new Date(session.date).toLocaleDateString('it-IT')}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">${session.hour}:00 - ${session.hour + 1}:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="student-evaluation-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">👥 Valutazioni Studenti (${classStudents.length})</h4>
+                        <button class="btn btn-sm btn-secondary" onclick="app.generateAllEvaluationSuggestions()" style="font-size: 0.85em;">
+                            🤖 Suggerimenti IA per Tutti
+                        </button>
+                    </div>
+                    
+                    ${classStudents.length === 0 ? `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <p>Nessuno studente trovato per questa classe</p>
+                            <button class="btn btn-secondary" onclick="app.endLessonSession(); app.switchTab('students');">
+                                ➕ Aggiungi Studenti
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="students-grid" style="display: grid; gap: 15px;">
+                            ${classStudents.map(student => this.renderStudentEvaluationCard(student, session)).join('')}
+                        </div>
+                    `}
+                </div>
+                
+                <div class="lesson-notes-section" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                    <h4>📝 Note Generali della Lezione</h4>
+                    <textarea id="lesson-notes-input" placeholder="Aggiungi note generali sulla lezione (argomenti trattati, materiali utilizzati, osservazioni generali...)" style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical;">${session.notes || ''}</textarea>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; gap: 10px;">
+                    <button class="btn btn-danger" onclick="app.cancelLessonSession()">Annulla Lezione</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="app.saveLessonSessionProgress()">💾 Salva Progresso</button>
+                        <button class="btn btn-primary" onclick="app.endLessonSession()">✅ Termina Lezione</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+    }
+    
+    renderStudentEvaluationCard(student, session) {
+        const existingEval = session.studentEvaluations.find(e => e.studentId === student.id);
+        const studentId = student.id;
+        
+        return `
+            <div class="student-eval-card" id="student-eval-${studentId}" style="background: #f8f9fa; padding: 18px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <strong style="font-size: 1.05em;">${student.name}</strong>
+                    </div>
+                    <button class="btn btn-sm" onclick="app.generateEvaluationSuggestion(${studentId})" style="font-size: 0.75em; padding: 4px 8px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9;">
+                        🤖 IA
+                    </button>
+                </div>
+                
+                <div class="evaluation-inputs" style="display: grid; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Voto</label>
+                        <div style="display: flex; gap: 5px;">
+                            ${[4, 5, 6, 7, 8, 9, 10].map(grade => `
+                                <button class="grade-btn" onclick="app.setStudentGrade(${studentId}, ${grade})" data-grade="${grade}" style="flex: 1; padding: 8px; border: 2px solid ${existingEval && existingEval.grade === grade ? '#4a90e2' : '#ddd'}; background: ${existingEval && existingEval.grade === grade ? '#4a90e2' : 'white'}; color: ${existingEval && existingEval.grade === grade ? 'white' : '#333'}; border-radius: 6px; cursor: pointer; font-weight: ${existingEval && existingEval.grade === grade ? 'bold' : 'normal'}; transition: all 0.2s;">
+                                    ${grade}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Comportamento</label>
+                        <div style="display: flex; gap: 8px;">
+                            ${['😊', '😐', '😟'].map((emoji, idx) => {
+                                const behaviorValues = ['positivo', 'neutro', 'negativo'];
+                                const behaviorValue = behaviorValues[idx];
+                                const isSelected = existingEval && existingEval.behavior === behaviorValue;
+                                return `
+                                    <button class="behavior-btn" onclick="app.setStudentBehavior(${studentId}, '${behaviorValue}')" style="flex: 1; padding: 10px; border: 2px solid ${isSelected ? '#4a90e2' : '#ddd'}; background: ${isSelected ? '#e3f2fd' : 'white'}; border-radius: 6px; cursor: pointer; font-size: 1.5em; transition: all 0.2s;">
+                                        ${emoji}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Osservazioni</label>
+                        <textarea id="observations-${studentId}" placeholder="Note comportamentali, partecipazione, difficoltà riscontrate..." style="width: 100%; min-height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 0.9em; resize: vertical;">${existingEval ? existingEval.observations || '' : ''}</textarea>
+                        <div id="ai-suggestions-${studentId}" style="margin-top: 8px; font-size: 0.85em; color: #1976d2; font-style: italic; display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    setStudentGrade(studentId, grade) {
+        if (!this.currentLessonSession) return;
+        
+        let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
+        if (!evaluation) {
+            evaluation = {
+                studentId: studentId,
+                grade: null,
+                behavior: null,
+                observations: '',
+                aiSuggestion: null
+            };
+            this.currentLessonSession.studentEvaluations.push(evaluation);
+        }
+        
+        evaluation.grade = grade;
+        evaluation.observations = document.getElementById(`observations-${studentId}`)?.value || '';
+        this.saveData();
+        
+        // Update UI - refresh the card
+        const card = document.getElementById(`student-eval-${studentId}`);
+        if (card) {
+            const student = this.students.find(s => s.id === studentId);
+            card.outerHTML = this.renderStudentEvaluationCard(student, this.currentLessonSession);
+        }
+    }
+    
+    setStudentBehavior(studentId, behavior) {
+        if (!this.currentLessonSession) return;
+        
+        let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
+        if (!evaluation) {
+            evaluation = {
+                studentId: studentId,
+                grade: null,
+                behavior: null,
+                observations: '',
+                aiSuggestion: null
+            };
+            this.currentLessonSession.studentEvaluations.push(evaluation);
+        }
+        
+        evaluation.behavior = behavior;
+        evaluation.observations = document.getElementById(`observations-${studentId}`)?.value || '';
+        this.saveData();
+        
+        // Update UI - refresh the card
+        const card = document.getElementById(`student-eval-${studentId}`);
+        if (card) {
+            const student = this.students.find(s => s.id === studentId);
+            card.outerHTML = this.renderStudentEvaluationCard(student, this.currentLessonSession);
+        }
+    }
+    
+    async generateEvaluationSuggestion(studentId) {
+        const suggestionsDiv = document.getElementById(`ai-suggestions-${studentId}`);
+        if (!suggestionsDiv) return;
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            alert('Configura la tua API key di OpenRouter nelle impostazioni per usare i suggerimenti IA');
+            return;
+        }
+        
+        suggestionsDiv.style.display = 'block';
+        suggestionsDiv.innerHTML = '🤖 Generazione suggerimento...';
+        
+        const student = this.students.find(s => s.id === studentId);
+        const session = this.currentLessonSession;
+        
+        const prompt = `Sei un assistente IA per insegnanti. Genera 2-3 brevi suggerimenti di osservazioni in itinere per lo studente durante questa lezione.
+
+Studente: ${student.name}
+Classe: ${session.className}
+Attività: ${session.activityTitle} (${session.activityType})
+Data: ${new Date(session.date).toLocaleDateString('it-IT')}
+
+Genera suggerimenti specifici e costruttivi relativi a: partecipazione, impegno, comprensione, collaborazione. 
+Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
+
+        try {
+            const response = await this.callOpenRouterAPI(prompt);
+            
+            // Parse the response and create clickable suggestions
+            const suggestions = response.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+            
+            if (suggestions.length > 0) {
+                suggestionsDiv.innerHTML = `
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; margin-top: 5px;">
+                        <div style="font-weight: 500; margin-bottom: 8px; color: #1976d2;">💡 Suggerimenti IA:</div>
+                        ${suggestions.map(s => {
+                            const text = s.replace(/^[-•]\s*/, '').trim();
+                            return `
+                                <div onclick="app.applySuggestion(${studentId}, '${text.replace(/'/g, "\\'")}')" style="padding: 6px 10px; margin: 4px 0; background: white; border-radius: 4px; cursor: pointer; border: 1px solid #90caf9; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='white'">
+                                    ${text}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                suggestionsDiv.innerHTML = response;
+            }
+        } catch (error) {
+            console.error('Error generating suggestion:', error);
+            suggestionsDiv.innerHTML = '❌ Errore nel generare suggerimenti';
+        }
+    }
+    
+    applySuggestion(studentId, suggestion) {
+        const textArea = document.getElementById(`observations-${studentId}`);
+        if (!textArea) return;
+        
+        const currentText = textArea.value.trim();
+        textArea.value = currentText ? `${currentText}\n- ${suggestion}` : `- ${suggestion}`;
+        
+        // Save to session
+        if (this.currentLessonSession) {
+            let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
+            if (!evaluation) {
+                evaluation = {
+                    studentId: studentId,
+                    grade: null,
+                    behavior: null,
+                    observations: '',
+                    aiSuggestion: null
+                };
+                this.currentLessonSession.studentEvaluations.push(evaluation);
+            }
+            evaluation.observations = textArea.value;
+            this.saveData();
+        }
+        
+        // Visual feedback
+        textArea.style.background = '#e8f5e9';
+        setTimeout(() => {
+            textArea.style.background = 'white';
+        }, 500);
+    }
+    
+    async generateAllEvaluationSuggestions() {
+        if (!this.currentLessonSession) return;
+        
+        const classStudents = this.students.filter(s => s.class === this.currentLessonSession.className);
+        
+        for (const student of classStudents) {
+            await this.generateEvaluationSuggestion(student.id);
+            // Small delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+    }
+    
+    saveLessonSessionProgress() {
+        if (!this.currentLessonSession) return;
+        
+        // Save notes
+        const notesInput = document.getElementById('lesson-notes-input');
+        if (notesInput) {
+            this.currentLessonSession.notes = notesInput.value;
+        }
+        
+        // Save all student observations
+        const classStudents = this.students.filter(s => s.class === this.currentLessonSession.className);
+        classStudents.forEach(student => {
+            const observationsInput = document.getElementById(`observations-${student.id}`);
+            if (observationsInput) {
+                let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === student.id);
+                if (!evaluation) {
+                    evaluation = {
+                        studentId: student.id,
+                        grade: null,
+                        behavior: null,
+                        observations: '',
+                        aiSuggestion: null
+                    };
+                    this.currentLessonSession.studentEvaluations.push(evaluation);
+                }
+                evaluation.observations = observationsInput.value;
+            }
+        });
+        
+        this.saveData();
+        
+        // Visual feedback
+        alert('✅ Progresso salvato con successo!');
+    }
+    
+    endLessonSession() {
+        if (!this.currentLessonSession) return;
+        
+        // Save all data
+        this.saveLessonSessionProgress();
+        
+        // Mark session as completed
+        this.currentLessonSession.endTime = new Date().toISOString();
+        this.currentLessonSession.status = 'completed';
+        
+        // Save evaluations to main evaluations array
+        this.currentLessonSession.studentEvaluations.forEach(evalData => {
+            if (evalData.grade || evalData.observations) {
+                const student = this.students.find(s => s.id === evalData.studentId);
+                if (student) {
+                    this.evaluations.push({
+                        id: Date.now() + Math.random(),
+                        studentId: evalData.studentId,
+                        studentName: student.name,
+                        date: this.currentLessonSession.date,
+                        activity: this.currentLessonSession.activityTitle,
+                        score: evalData.grade,
+                        behavior: evalData.behavior,
+                        notes: evalData.observations,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            }
+        });
+        
+        this.saveData();
+        
+        // Close modal
+        this.closeSmartActivityModal();
+        
+        // Show summary
+        const evaluatedCount = this.currentLessonSession.studentEvaluations.filter(e => e.grade || e.observations).length;
+        alert(`✅ Lezione terminata!\n\n${evaluatedCount} studenti valutati\nDati salvati con successo.`);
+        
+        this.currentLessonSession = null;
+        
+        // Refresh dashboard and evaluations
+        this.renderDashboard();
+        this.renderEvaluations();
+    }
+    
+    cancelLessonSession() {
+        if (!confirm('Sei sicuro di voler annullare questa lezione? I dati non salvati andranno persi.')) {
+            return;
+        }
+        
+        // Remove session from array
+        if (this.currentLessonSession) {
+            this.lessonSessions = this.lessonSessions.filter(s => s.id !== this.currentLessonSession.id);
+            this.currentLessonSession = null;
+            this.saveData();
+        }
+        
+        this.closeSmartActivityModal();
+    }
+    
+    closeSmartActivityModal() {
         if (this.currentActivityModal) {
             this.currentActivityModal.remove();
             this.currentActivityModal = null;
