@@ -123,7 +123,7 @@ self.addEventListener('fetch', (event) => {
 
 // Helper per verificare se è una risorsa CDN da cachare
 function isCDNResource(url) {
-  return CDN_ASSETS.some(cdnUrl => url.startsWith(cdnUrl));
+  return CDN_ASSETS.some(cdnUrl => url === cdnUrl);
 }
 
 // Gestione messaggi dal client
