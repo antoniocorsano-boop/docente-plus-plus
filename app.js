@@ -6347,10 +6347,12 @@ Rispondi in italiano in modo chiaro e strutturato.
         if (savedPosition) {
             try {
                 this.aiFabPosition = JSON.parse(savedPosition);
-                fab.style.bottom = this.aiFabPosition.bottom;
-                fab.style.right = this.aiFabPosition.right;
-                fab.style.top = this.aiFabPosition.top || 'auto';
-                fab.style.left = this.aiFabPosition.left || 'auto';
+                if (this.aiFabPosition.left && this.aiFabPosition.top) {
+                    fab.style.left = this.aiFabPosition.left;
+                    fab.style.top = this.aiFabPosition.top;
+                    fab.style.right = 'auto';
+                    fab.style.bottom = 'auto';
+                }
             } catch (e) {
                 console.error('Error loading AI FAB position:', e);
             }
@@ -6403,8 +6405,19 @@ Rispondi in italiano in modo chiaro e strutturato.
             const deltaX = currentX - startX;
             const deltaY = currentY - startY;
 
-            const newLeft = initialLeft + deltaX;
-            const newTop = initialTop + deltaY;
+            let newLeft = initialLeft + deltaX;
+            let newTop = initialTop + deltaY;
+
+            // Boundary checking to keep FAB within viewport
+            const fabRect = fab.getBoundingClientRect();
+            const fabWidth = fabRect.width;
+            const fabHeight = fabRect.height;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Ensure FAB stays within viewport boundaries
+            newLeft = Math.max(0, Math.min(newLeft, viewportWidth - fabWidth));
+            newTop = Math.max(0, Math.min(newTop, viewportHeight - fabHeight));
 
             // Update position
             fab.style.left = `${newLeft}px`;
@@ -6421,18 +6434,12 @@ Rispondi in italiano in modo chiaro e strutturato.
             isDragging = false;
             fab.classList.remove('dragging');
 
-            // Save position
+            // Save position (only left and top for simplicity)
             const rect = fab.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-
-            // Convert to bottom/right for consistency
-            const bottom = `${viewportHeight - rect.bottom}px`;
-            const right = `${viewportWidth - rect.right}px`;
-            const top = `${rect.top}px`;
-            const left = `${rect.left}px`;
-
-            this.aiFabPosition = { bottom, right, top, left };
+            this.aiFabPosition = {
+                left: `${rect.left}px`,
+                top: `${rect.top}px`
+            };
             localStorage.setItem('ai-fab-position', JSON.stringify(this.aiFabPosition));
 
             e.preventDefault();
