@@ -18,6 +18,9 @@ class DocentePlusPlus {
         this.reminders = [];
         this.activities = [];
         this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
+        this.currentActiveTab = 'dashboard'; // Track current active tab for AI context
+        this.aiFabEnabled = true; // AI FAB visibility setting
+        this.aiFabPosition = null; // AI FAB custom position
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -87,6 +90,9 @@ class DocentePlusPlus {
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
+        
+        // Initialize AI FAB
+        this.initializeAIFAB();
         
         // Initialize notification system
         this.requestNotificationPermission();
@@ -399,6 +405,9 @@ class DocentePlusPlus {
     }
 
     switchTab(tabName) {
+        // Update current active tab for AI context
+        this.currentActiveTab = tabName;
+        
         // Update active button
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
@@ -445,11 +454,11 @@ class DocentePlusPlus {
         // Render today's schedule preview
         this.renderTodaySchedulePreview();
         
-        // Render today's tasks
-        this.renderTodayTasks();
+        // Render things to do
+        this.renderThingsToDo();
         
-        // Render AI contextual suggestions
-        this.renderAIContextualSuggestions();
+        // Render AI suggestions
+        this.renderAISuggestions();
     }
     
     renderTodaySchedulePreview() {
@@ -505,291 +514,260 @@ class DocentePlusPlus {
         this.renderSchedule();
     }
     
-    renderTodayTasks() {
-        const previewContainer = document.getElementById('today-tasks-preview');
-        if (!previewContainer) return;
+    renderThingsToDo() {
+        const container = document.getElementById('things-todo-list');
+        if (!container) return;
         
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const todos = [];
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
         
-        // Get today's activities (planned or in-progress with deadline today)
-        const todayActivities = this.activities.filter(a => {
-            if (!a.deadline) return false;
-            const deadline = new Date(a.deadline);
-            deadline.setHours(0, 0, 0, 0);
-            return (a.status === 'planned' || a.status === 'in-progress') && 
-                   deadline.getTime() === today.getTime();
-        });
+        // Add upcoming activities with deadlines
+        const upcomingActivities = this.activities
+            .filter(a => {
+                if (a.status === 'completed') return false;
+                if (!a.dueDate) return false;
+                const dueDate = new Date(a.dueDate);
+                return dueDate <= nextWeek;
+            })
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5);
         
-        // Get today's reminders
-        const todayReminders = this.reminders.filter(r => {
-            if (r.completed) return false;
-            const reminderDate = new Date(r.date);
-            reminderDate.setHours(0, 0, 0, 0);
-            return reminderDate.getTime() === today.getTime();
-        });
-        
-        // Get pending evaluations for today's classes
-        const todaySchedule = [];
-        const hours = [8, 9, 10, 11, 12, 13];
-        hours.forEach(hour => {
-            const key = this.getScheduleKey(today, hour);
-            const slot = this.schedule[key];
-            if (slot && slot.classId) {
-                todaySchedule.push(slot.classId);
-            }
-        });
-        
-        const pendingEvaluations = this.evaluations.filter(e => {
-            if (e.score) return false; // Has score, not pending
-            const evalDate = new Date(e.date);
-            evalDate.setHours(0, 0, 0, 0);
-            return evalDate.getTime() <= today.getTime();
-        });
-        
-        // Build tasks list
-        const tasks = [];
-        
-        // Add activities
-        todayActivities.forEach(activity => {
-            const cls = activity.classId ? this.classes.find(c => c.id == activity.classId) : null;
-            tasks.push({
+        upcomingActivities.forEach(activity => {
+            const dueDate = new Date(activity.dueDate);
+            const isOverdue = dueDate < now;
+            const isDueToday = dueDate.toDateString() === now.toDateString();
+            const isDueTomorrow = dueDate.toDateString() === tomorrow.toDateString();
+            
+            let dueDateText = dueDate.toLocaleDateString('it-IT');
+            if (isOverdue) dueDateText = `🔴 Scaduta: ${dueDateText}`;
+            else if (isDueToday) dueDateText = `⚠️ Oggi`;
+            else if (isDueTomorrow) dueDateText = `⏰ Domani`;
+            
+            todos.push({
                 type: 'activity',
-                icon: '📋',
+                priority: isOverdue ? 3 : isDueToday ? 2 : 1,
                 title: activity.title,
-                subtitle: cls ? `Classe: ${cls.name}` : 'Generale',
-                color: '#4a90e2'
+                subtitle: dueDateText,
+                action: `app.switchTab('activities')`,
+                icon: '📋'
             });
         });
         
-        // Add reminders
-        todayReminders.forEach(reminder => {
-            tasks.push({
-                type: 'reminder',
-                icon: '🔔',
-                title: reminder.title,
-                subtitle: reminder.description || 'Promemoria',
-                color: '#f39c12'
-            });
-        });
+        // Add pending evaluations
+        const pendingEvaluations = this.evaluations
+            .filter(e => !e.score)
+            .slice(0, 3);
         
-        // Add pending evaluations summary
-        if (pendingEvaluations.length > 0) {
-            tasks.push({
+        pendingEvaluations.forEach(evaluation => {
+            const student = this.students.find(s => s.id === evaluation.studentId);
+            todos.push({
                 type: 'evaluation',
-                icon: '✅',
-                title: `${pendingEvaluations.length} valutazioni da completare`,
-                subtitle: 'Clicca per andare alle valutazioni',
-                color: '#27ae60',
-                action: () => this.switchTab('evaluations')
+                priority: 1,
+                title: `Valuta: ${student ? student.name : 'Studente'}`,
+                subtitle: `${evaluation.criterion || 'Valutazione'}`,
+                action: `app.switchTab('evaluations')`,
+                icon: '✅'
             });
-        }
+        });
         
-        if (tasks.length === 0) {
-            previewContainer.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna attività in programma per oggi. Ottimo lavoro! 🎉</p>';
+        // Add custom reminders for today/tomorrow
+        const upcomingReminders = this.reminders
+            .filter(r => {
+                const reminderDate = new Date(r.date);
+                return reminderDate <= tomorrow;
+            })
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 3);
+        
+        upcomingReminders.forEach(reminder => {
+            const reminderDate = new Date(reminder.date);
+            const isDueToday = reminderDate.toDateString() === now.toDateString();
+            
+            todos.push({
+                type: 'reminder',
+                priority: isDueToday ? 2 : 1,
+                title: reminder.title,
+                subtitle: isDueToday ? '⏰ Oggi' : '📅 Domani',
+                action: `app.switchTab('notifications')`,
+                icon: '🔔'
+            });
+        });
+        
+        // Sort by priority
+        todos.sort((a, b) => b.priority - a.priority);
+        
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna cosa da fare in scadenza</p>';
             return;
         }
         
-        previewContainer.innerHTML = `
-            <div class="tasks-list">
-                ${tasks.map(task => `
-                    <div class="task-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${task.color}; ${task.action ? 'cursor: pointer;' : ''}" ${task.action ? `onclick="app.handleTaskAction('${task.type}')"` : ''}>
-                        <div style="flex: 0 0 40px; font-size: 1.5em;">${task.icon}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 500; color: #2c3e50;">${task.title}</div>
-                            <div style="font-size: 0.9em; color: #7f8c8d;">${task.subtitle}</div>
-                        </div>
-                    </div>
-                `).join('')}
+        container.innerHTML = `
+            <div class="todos-list">
+                ${todos.slice(0, 8).map(todo => this.renderTodoItem(todo)).join('')}
             </div>
         `;
     }
     
-    handleTaskAction(taskType) {
-        // Centralized handler for task actions
-        switch(taskType) {
-            case 'evaluation':
-                this.switchTab('evaluations');
-                break;
-            case 'activity':
-                this.switchTab('activities');
-                break;
-            case 'reminder':
-                this.switchTab('notifications');
-                break;
-            default:
-                console.warn('Unknown task type:', taskType);
-        }
+    renderTodoItem(todo) {
+        return `
+            <div class="todo-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="${todo.action}">
+                <div style="font-size: 1.5em; margin-right: 12px;">${todo.icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">${todo.title}</div>
+                    <div style="font-size: 0.85em; color: #666;">${todo.subtitle}</div>
+                </div>
+                <div style="color: var(--primary-color);">→</div>
+            </div>
+        `;
     }
     
-    evaluationAction() {
-        // Legacy method - redirects to centralized handler
-        this.handleTaskAction('evaluation');
-    }
-    
-    async renderAIContextualSuggestions() {
-        const suggestionsContainer = document.getElementById('ai-contextual-suggestions');
-        if (!suggestionsContainer) return;
+    async renderAISuggestions() {
+        const container = document.getElementById('ai-suggestions-content');
+        if (!container) return;
         
         const apiKey = localStorage.getItem('openrouter-api-key');
         
         if (!apiKey) {
-            suggestionsContainer.innerHTML = `
-                <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+            container.innerHTML = `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
                     <p style="margin: 0; color: #856404;">
-                        <strong>💡 Configura l'API Key</strong><br>
-                        Per ricevere suggerimenti contestuali dall'assistente IA, configura la tua OpenRouter API Key nelle <a href="#" onclick="app.switchTab('settings'); return false;" style="color: #856404; text-decoration: underline;">Impostazioni</a>.
+                        ⚠️ Configura la tua API key OpenRouter nelle impostazioni per ricevere suggerimenti personalizzati dall'IA.
                     </p>
+                    <button class="btn btn-sm btn-primary" onclick="app.switchTab('settings')" style="margin-top: 10px;">
+                        Vai alle Impostazioni
+                    </button>
                 </div>
             `;
             return;
         }
         
-        // Show loading state
-        suggestionsContainer.innerHTML = `
-            <div style="padding: 20px; text-align: center; color: #999;">
-                <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
-                <p>Generazione suggerimenti in corso...</p>
+        container.innerHTML = `
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1976d2;">
+                    🤖 Generazione suggerimenti in corso...
+                </p>
             </div>
         `;
         
         try {
-            // Gather context
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentDay = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][now.getDay()];
+            const suggestions = await this.generateDashboardSuggestions();
             
-            // Get current/next lesson from schedule
-            const today = this.getCurrentScheduleDate();
-            const todaySlots = [];
-            const hours = [8, 9, 10, 11, 12, 13];
-            hours.forEach(hour => {
-                const key = this.getScheduleKey(today, hour);
-                const slot = this.schedule[key];
-                if (slot && slot.classId) {
-                    const cls = this.classes.find(c => c.id == slot.classId);
-                    todaySlots.push({ hour, class: cls, slot });
-                }
-            });
+            // Sanitize by creating text nodes and formatting with <br> for line breaks
+            const sanitizedSuggestions = this.sanitizeAISuggestions(suggestions);
             
-            const nextLesson = todaySlots.find(s => s.hour >= currentHour);
-            const currentLesson = todaySlots.find(s => s.hour === currentHour);
-            
-            // Get upcoming deadlines
-            const upcomingActivities = this.activities.filter(a => {
-                if (!a.deadline || a.status === 'completed') return false;
-                const deadline = new Date(a.deadline);
-                const daysUntil = Math.floor((deadline - now) / (1000 * 60 * 60 * 24));
-                return daysUntil >= 0 && daysUntil <= 7;
-            });
-            
-            // Build context for AI
-            let contextText = `Oggi è ${currentDay}, ore ${currentHour}:00.\n\n`;
-            
-            if (currentLesson) {
-                contextText += `Lezione in corso: ${currentLesson.class.name}\n`;
-            } else if (nextLesson) {
-                contextText += `Prossima lezione: ${nextLesson.class.name} alle ${nextLesson.hour}:00\n`;
-            } else {
-                contextText += `Nessuna lezione programmata oggi.\n`;
-            }
-            
-            if (todaySlots.length > 0) {
-                contextText += `\nLezioni di oggi:\n${todaySlots.map(s => `- ${s.hour}:00: ${s.class.name}`).join('\n')}\n`;
-            }
-            
-            if (upcomingActivities.length > 0) {
-                contextText += `\nAttività in scadenza nei prossimi 7 giorni:\n${upcomingActivities.slice(0, 5).map(a => `- ${a.title} (scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')})`).join('\n')}\n`;
-            }
-            
-            contextText += `\nStudenti totali: ${this.students.length}\n`;
-            contextText += `Classi: ${this.classes.length}\n`;
-            
-            // Call AI
-            const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
-            
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: modelId,
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'Sei un assistente IA per insegnanti. Fornisci 3-4 suggerimenti pratici e contestuali basati sulla situazione attuale del docente. Sii conciso, pratico e utile. Usa emoji appropriate.'
-                        },
-                        {
-                            role: 'user',
-                            content: `Basandoti su questo contesto, dammi 3-4 suggerimenti pratici per la giornata:\n\n${contextText}\n\nSuggerimenti (uno per riga, massimo 2 frasi ciascuno):`
-                        }
-                    ],
-                    max_tokens: 300,
-                    temperature: 0.7
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            const aiText = data.choices[0]?.message?.content || '';
-            
-            // Parse suggestions (split by newlines, filter empty)
-            // More robust parsing that handles various AI response formats
-            const suggestions = aiText
-                .split('\n')
-                .filter(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return false;
-                    // Skip common AI intro phrases (multilingual support)
-                    if (trimmed.match(/^(suggerimenti|ecco|basandoti|here|suggestions|voici)/i)) return false;
-                    return true;
-                })
-                .map(line => line.replace(/^[-•*]\s*/, '').replace(/^\d+[\.)]\s*/, '').trim())
-                .filter(s => s.length > 10 && s.length < 200); // Reasonable length bounds
-            
-            if (suggestions.length === 0) {
-                throw new Error('No suggestions generated');
-            }
-            
-            // Render suggestions
-            suggestionsContainer.innerHTML = `
-                <div class="ai-suggestions-list">
-                    ${suggestions.map((suggestion, index) => `
-                        <div class="ai-suggestion-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <div style="display: flex; align-items: flex-start;">
-                                <div style="flex: 0 0 30px; font-size: 1.2em; margin-right: 10px;">💡</div>
-                                <div style="flex: 1; line-height: 1.5;">${suggestion}</div>
-                            </div>
-                        </div>
-                    `).join('')}
+            container.innerHTML = `
+                <div class="ai-suggestions-content" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    ${sanitizedSuggestions}
                 </div>
-                <p style="font-size: 0.85em; color: #999; margin-top: 15px; text-align: center;">
-                    Suggerimenti generati dall'IA • <a href="#" onclick="app.refreshAISuggestions(); return false;" style="color: #4a90e2;">Aggiorna</a>
-                </p>
             `;
-            
         } catch (error) {
             console.error('Error generating AI suggestions:', error);
-            suggestionsContainer.innerHTML = `
-                <div style="padding: 20px; background: #f8d7da; border-radius: 8px; border-left: 4px solid #dc3545;">
+            container.innerHTML = `
+                <div style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
                     <p style="margin: 0; color: #721c24;">
-                        <strong>⚠️ Errore</strong><br>
-                        Non è stato possibile generare i suggerimenti. Riprova più tardi.
+                        ❌ Errore nella generazione dei suggerimenti. Riprova più tardi.
                     </p>
                 </div>
             `;
         }
     }
     
-    refreshAISuggestions() {
-        this.renderAIContextualSuggestions();
+    sanitizeAISuggestions(suggestions) {
+        if (!suggestions) return '<p style="color: var(--text-secondary); font-style: italic;">Nessun suggerimento disponibile</p>';
+        
+        // Split by double newlines to get paragraphs
+        const paragraphs = suggestions.split('\n\n').filter(p => p.trim());
+        
+        // Create safe HTML with only line breaks
+        return paragraphs
+            .map(p => {
+                // Escape HTML but preserve line breaks
+                const escaped = p
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;')
+                    .replace(/\n/g, '<br>');
+                return `<p style="margin: 10px 0; color: var(--text-primary); line-height: 1.6;">${escaped}</p>`;
+            })
+            .join('');
+    }
+    
+    async generateDashboardSuggestions() {
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) return '';
+        
+        // Build context about today's situation
+        const today = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+        const todaySlots = [];
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                const cls = this.classes.find(c => c.id == slot.classId);
+                todaySlots.push({
+                    hour,
+                    class: cls ? cls.name : 'N/D',
+                    activityType: slot.activityType
+                });
+            }
+        });
+        
+        const now = new Date();
+        const upcomingActivities = this.activities
+            .filter(a => a.status !== 'completed' && a.dueDate)
+            .filter(a => new Date(a.dueDate) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
+            .slice(0, 3);
+        
+        const pendingEvaluations = this.evaluations.filter(e => !e.score).length;
+        
+        const teacherName = localStorage.getItem('teacher-first-name') || 'Docente';
+        
+        let prompt = `Sei un assistente IA per insegnanti. Genera 3-4 suggerimenti brevi e concreti per la giornata dell'insegnante ${teacherName}.
+
+Situazione di oggi (${today.toLocaleDateString('it-IT')}):`;
+        
+        if (todaySlots.length > 0) {
+            prompt += `\n\nLezioni programmate oggi:`;
+            todaySlots.forEach(slot => {
+                prompt += `\n- ${slot.hour}:00 - ${slot.class}`;
+                if (slot.activityType) {
+                    const typeLabel = slot.activityType === 'theory' ? 'Teoria' : 
+                                    slot.activityType === 'drawing' ? 'Disegno' : 'Laboratorio';
+                    prompt += ` (${typeLabel})`;
+                }
+            });
+        } else {
+            prompt += `\n\nNessuna lezione programmata per oggi.`;
+        }
+        
+        if (upcomingActivities.length > 0) {
+            prompt += `\n\nAttività in scadenza:`;
+            upcomingActivities.forEach(a => {
+                prompt += `\n- ${a.title} (scadenza: ${new Date(a.dueDate).toLocaleDateString('it-IT')})`;
+            });
+        }
+        
+        if (pendingEvaluations > 0) {
+            prompt += `\n\nValutazioni da completare: ${pendingEvaluations}`;
+        }
+        
+        prompt += `\n\nGenera suggerimenti pratici in formato testo semplice. 
+Ogni suggerimento deve essere breve (max 2 righe) e azionabile. 
+Usa emoji all'inizio di ogni suggerimento.
+Separa i suggerimenti con doppio a capo.`;
+        
+        const response = await this.callOpenRouterAPI(prompt, apiKey);
+        return response.content || '';
+    }
+    
+    async refreshAISuggestions() {
+        await this.renderAISuggestions();
     }
 
     // Class Management methods
@@ -3247,6 +3225,12 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         // Save subjects
         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
 
+        // Save AI FAB settings
+        const aiFabEnabled = document.getElementById('ai-fab-enabled').checked;
+        localStorage.setItem('ai-fab-enabled', JSON.stringify(aiFabEnabled));
+        this.aiFabEnabled = aiFabEnabled;
+        this.updateAIFABVisibility();
+
         this.renderDashboard();
         alert('Impostazioni salvate con successo!');
     }
@@ -3309,6 +3293,21 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             } catch (e) {
                 console.error('Error loading subjects:', e);
                 this.subjects = [];
+            }
+        }
+
+        // Load AI FAB settings
+        const aiFabEnabledData = localStorage.getItem('ai-fab-enabled');
+        if (aiFabEnabledData !== null) {
+            try {
+                this.aiFabEnabled = JSON.parse(aiFabEnabledData);
+                const aiFabCheckbox = document.getElementById('ai-fab-enabled');
+                if (aiFabCheckbox) {
+                    aiFabCheckbox.checked = this.aiFabEnabled;
+                }
+            } catch (e) {
+                console.error('Error loading AI FAB settings:', e);
+                this.aiFabEnabled = true;
             }
         }
 
@@ -6359,7 +6358,54 @@ Rispondi SOLO in formato JSON con questa struttura:
     toggleAIAgentModal() {
         const modal = document.getElementById('ai-agent-modal');
         if (modal) {
-            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+            const isOpening = modal.style.display === 'none';
+            modal.style.display = isOpening ? 'flex' : 'none';
+            
+            if (isOpening) {
+                // Update modal content based on current context
+                this.updateAIModalContext();
+            }
+        }
+    }
+
+    updateAIModalContext() {
+        const currentTab = this.currentActiveTab;
+        
+        // Update modal title
+        const titleElement = document.getElementById('ai-agent-modal-title');
+        if (titleElement) {
+            titleElement.textContent = this.getContextualTitle(currentTab);
+        }
+
+        // Update current section display
+        const sectionElement = document.getElementById('ai-current-section');
+        if (sectionElement) {
+            sectionElement.textContent = this.getSectionName(currentTab);
+        }
+
+        // Update contextual suggestions
+        const suggestionsContainer = document.getElementById('ai-suggestions-buttons');
+        if (suggestionsContainer) {
+            const suggestions = this.getContextualSuggestions(currentTab);
+            suggestionsContainer.innerHTML = suggestions.map(s => 
+                `<button class="suggestion-btn" onclick="app.setAIAgentPrompt('${s.prompt.replace(/'/g, "\\'")}')">${s.icon} ${s.text}</button>`
+            ).join('');
+        }
+
+        // Show/hide URL input based on section (only show for news)
+        const urlGroup = document.getElementById('ai-agent-url-group');
+        if (urlGroup) {
+            urlGroup.style.display = currentTab === 'news' ? 'block' : 'none';
+        }
+
+        // Update context help text
+        const contextHelp = document.getElementById('ai-agent-context-help');
+        if (contextHelp) {
+            if (currentTab === 'news') {
+                contextHelp.textContent = 'Specifica cosa vuoi che l\'agente analizzi dalla news';
+            } else {
+                contextHelp.textContent = `Specifica cosa vuoi che l'agente faccia per aiutarti in questa sezione`;
+            }
         }
     }
 
@@ -6387,9 +6433,16 @@ Rispondi SOLO in formato JSON con questa struttura:
     async analyzeNewsWithAI() {
         const newsUrl = document.getElementById('ai-agent-news-url').value.trim();
         const context = document.getElementById('ai-agent-context').value.trim();
+        const currentTab = this.currentActiveTab;
 
-        if (!newsUrl) {
+        // For news tab, require URL. For other tabs, just need context
+        if (currentTab === 'news' && !newsUrl) {
             alert('Inserisci l\'URL della news da analizzare');
+            return;
+        }
+
+        if (!context) {
+            alert('Inserisci una richiesta per l\'agente IA');
             return;
         }
 
@@ -6410,11 +6463,14 @@ Rispondi SOLO in formato JSON con questa struttura:
         actionsDiv.style.display = 'none';
 
         try {
-            // Build the AI prompt
-            const prompt = `
+            let prompt = '';
+            
+            if (currentTab === 'news') {
+                // News-specific analysis
+                prompt = `
 Analizza la news disponibile al seguente URL: ${newsUrl}
 
-${context ? `Richiesta specifica: ${context}` : 'Estrai tutte le informazioni rilevanti per un docente.'}
+${context}
 
 Fornisci un'analisi strutturata con:
 1. 📅 DATE E SCADENZE: Identifica tutte le date importanti e scadenze menzionate
@@ -6425,7 +6481,27 @@ Fornisci un'analisi strutturata con:
 Per ogni azione consigliata, specifica il tipo (es. SCADENZA, PROMEMORIA, CIRCOLARE, ATTIVITÀ) e i dettagli necessari.
 
 Rispondi in italiano in modo chiaro e strutturato.
-            `;
+                `;
+            } else {
+                // Contextual analysis for other sections
+                const sectionContext = this.getContextForAI(currentTab);
+                prompt = `
+Sei un assistente IA per un'applicazione di gestione didattica per docenti.
+
+SEZIONE CORRENTE: ${this.getSectionName(currentTab)}
+
+CONTESTO:
+${sectionContext}
+
+RICHIESTA DEL DOCENTE:
+${context}
+
+Fornisci una risposta utile, pratica e specifica per aiutare il docente nella sezione corrente.
+Se possibile, suggerisci azioni concrete che può intraprendere nell'app.
+
+Rispondi in italiano in modo chiaro e strutturato.
+                `;
+            }
 
             const response = await this.callOpenRouterAPI(prompt, apiKey);
 
@@ -6433,13 +6509,30 @@ Rispondi in italiano in modo chiaro e strutturato.
                 resultsContent.innerHTML = response.content.replace(/\n/g, '<br>');
 
                 // Try to extract proposed actions from the response
-                this.extractProposedActions(response.content);
+                if (currentTab === 'news') {
+                    this.extractProposedActions(response.content);
+                }
             }
 
         } catch (error) {
-            console.error('Error analyzing news with AI:', error);
+            console.error('Error analyzing with AI:', error);
             resultsContent.innerHTML = `<div class="error-message">Errore nell'analisi: ${error.message}</div>`;
         }
+    }
+
+    getContextForAI(tab) {
+        // Provide context about current section to the AI
+        const contexts = {
+            'dashboard': 'Il docente è nella dashboard principale dove può vedere una panoramica generale delle attività, lezioni e studenti.',
+            'lessons': `Il docente sta gestendo le lezioni. Attualmente ci sono ${this.lessons.length} lezioni registrate.`,
+            'students': `Il docente sta gestendo gli studenti. Ci sono ${this.students.length} studenti totali nelle sue classi.`,
+            'grades': 'Il docente sta gestendo le valutazioni degli studenti.',
+            'schedule': 'Il docente sta visualizzando e pianificando l\'orario delle lezioni.',
+            'activities': `Il docente sta gestendo le attività didattiche. Ci sono ${this.activities.length} attività programmate.`,
+            'settings': 'Il docente sta configurando le impostazioni dell\'applicazione.'
+        };
+
+        return contexts[tab] || 'Il docente sta usando l\'applicazione di gestione didattica.';
     }
 
     extractProposedActions(aiResponse) {
@@ -6501,6 +6594,237 @@ Rispondi in italiano in modo chiaro e strutturato.
         // - Create a reminder, activity, or notification based on the type
         // - Save to the appropriate data structure
         // - Navigate to the relevant section
+    }
+
+    // ==========================================
+    // AI FAB MANAGEMENT
+    // ==========================================
+
+    initializeAIFAB() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        // Load saved position
+        const savedPosition = localStorage.getItem('ai-fab-position');
+        if (savedPosition) {
+            try {
+                this.aiFabPosition = JSON.parse(savedPosition);
+                if (this.aiFabPosition.left && this.aiFabPosition.top) {
+                    fab.style.left = this.aiFabPosition.left;
+                    fab.style.top = this.aiFabPosition.top;
+                    fab.style.right = 'auto';
+                    fab.style.bottom = 'auto';
+                }
+            } catch (e) {
+                console.error('Error loading AI FAB position:', e);
+            }
+        }
+
+        // Make FAB draggable
+        this.makeAIFABDraggable(fab);
+
+        // Update visibility based on settings
+        this.updateAIFABVisibility();
+    }
+
+    makeAIFABDraggable(fab) {
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        const startDrag = (e) => {
+            isDragging = true;
+            fab.classList.add('dragging');
+
+            // Get initial position
+            const rect = fab.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            // Get mouse/touch position
+            if (e.type === 'touchstart') {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+
+            e.preventDefault();
+        };
+
+        const drag = (e) => {
+            if (!isDragging) return;
+
+            let currentX, currentY;
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            let newLeft = initialLeft + deltaX;
+            let newTop = initialTop + deltaY;
+
+            // Boundary checking to keep FAB within viewport
+            const fabRect = fab.getBoundingClientRect();
+            const fabWidth = fabRect.width;
+            const fabHeight = fabRect.height;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Ensure FAB stays within viewport boundaries
+            newLeft = Math.max(0, Math.min(newLeft, viewportWidth - fabWidth));
+            newTop = Math.max(0, Math.min(newTop, viewportHeight - fabHeight));
+
+            // Update position
+            fab.style.left = `${newLeft}px`;
+            fab.style.top = `${newTop}px`;
+            fab.style.right = 'auto';
+            fab.style.bottom = 'auto';
+
+            e.preventDefault();
+        };
+
+        const endDrag = (e) => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            fab.classList.remove('dragging');
+
+            // Save position (only left and top for simplicity)
+            const rect = fab.getBoundingClientRect();
+            this.aiFabPosition = {
+                left: `${rect.left}px`,
+                top: `${rect.top}px`
+            };
+            localStorage.setItem('ai-fab-position', JSON.stringify(this.aiFabPosition));
+
+            e.preventDefault();
+        };
+
+        // Mouse events
+        fab.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        fab.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag, { passive: false });
+    }
+
+    updateAIFABVisibility() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        if (this.aiFabEnabled) {
+            fab.classList.remove('hidden');
+        } else {
+            fab.classList.add('hidden');
+        }
+    }
+
+    resetAIFABPosition() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        // Reset to default position
+        fab.style.bottom = '30px';
+        fab.style.right = '30px';
+        fab.style.top = 'auto';
+        fab.style.left = 'auto';
+
+        // Clear saved position
+        this.aiFabPosition = null;
+        localStorage.removeItem('ai-fab-position');
+
+        alert('Posizione dell\'Agente IA ripristinata!');
+    }
+
+    getContextualSuggestions(tab) {
+        const suggestions = {
+            'dashboard': [
+                { icon: '📊', text: 'Genera un riepilogo della settimana', prompt: 'Crea un riepilogo delle attività e lezioni programmate per questa settimana' },
+                { icon: '📋', text: 'Suggerisci priorità', prompt: 'Analizza le mie attività e suggerisci le priorità per oggi' },
+                { icon: '💡', text: 'Consigli didattici', prompt: 'Dammi consigli per migliorare l\'organizzazione della mia didattica' }
+            ],
+            'lessons': [
+                { icon: '📝', text: 'Pianifica lezione', prompt: 'Aiutami a pianificare una lezione coinvolgente' },
+                { icon: '🎯', text: 'Obiettivi didattici', prompt: 'Suggerisci obiettivi didattici per questa lezione' },
+                { icon: '⏱️', text: 'Gestione tempi', prompt: 'Come posso gestire meglio i tempi della lezione?' }
+            ],
+            'students': [
+                { icon: '📈', text: 'Analizza progressi', prompt: 'Analizza i progressi degli studenti e suggerisci interventi' },
+                { icon: '🎓', text: 'Strategie personalizzate', prompt: 'Suggerisci strategie didattiche personalizzate per studenti in difficoltà' },
+                { icon: '📊', text: 'Report classe', prompt: 'Genera un report sulla situazione generale della classe' }
+            ],
+            'grades': [
+                { icon: '📊', text: 'Analizza voti', prompt: 'Analizza la distribuzione dei voti e suggerisci interventi' },
+                { icon: '📉', text: 'Identifica criticità', prompt: 'Identifica gli studenti con criticità nelle valutazioni' },
+                { icon: '📝', text: 'Suggerimenti valutazione', prompt: 'Dammi consigli per una valutazione più equa e formativa' }
+            ],
+            'schedule': [
+                { icon: '📅', text: 'Ottimizza orario', prompt: 'Suggerisci come ottimizzare la distribuzione delle attività' },
+                { icon: '⏰', text: 'Gestione scadenze', prompt: 'Aiutami a gestire le scadenze imminenti' },
+                { icon: '📋', text: 'Pianificazione mensile', prompt: 'Crea una pianificazione didattica per il prossimo mese' }
+            ],
+            'activities': [
+                { icon: '✅', text: 'Priorità attività', prompt: 'Quale attività dovrei completare per prima?' },
+                { icon: '📝', text: 'Nuova attività', prompt: 'Aiutami a creare un\'attività didattica coinvolgente' },
+                { icon: '🎯', text: 'Obiettivi attività', prompt: 'Suggerisci obiettivi per le attività programmate' }
+            ],
+            'news': [
+                { icon: '📅', text: 'Date e Scadenze', prompt: 'Estrai tutte le date e scadenze menzionate' },
+                { icon: '📎', text: 'Documenti', prompt: 'Identifica documenti e allegati da scaricare' },
+                { icon: '👥', text: 'Soggetti', prompt: 'Estrai soggetti coinvolti e destinatari' },
+                { icon: '📋', text: 'Riepilogo e Azioni', prompt: 'Crea un riepilogo e proponi azioni da intraprendere' }
+            ],
+            'settings': [
+                { icon: '⚙️', text: 'Ottimizza configurazione', prompt: 'Suggerisci come ottimizzare le mie impostazioni' },
+                { icon: '🤖', text: 'Guida IA', prompt: 'Spiegami come sfruttare al meglio l\'assistente IA' },
+                { icon: '💡', text: 'Suggerimenti personalizzazione', prompt: 'Come posso personalizzare l\'app per le mie esigenze?' }
+            ]
+        };
+
+        return suggestions[tab] || [
+            { icon: '💬', text: 'Assistenza generale', prompt: 'Come posso aiutarti?' },
+            { icon: '📚', text: 'Guida app', prompt: 'Spiegami le funzionalità dell\'app' }
+        ];
+    }
+
+    getContextualTitle(tab) {
+        const titles = {
+            'dashboard': '🤖 Agente IA - Assistente Dashboard',
+            'lessons': '🤖 Agente IA - Assistente Lezioni',
+            'students': '🤖 Agente IA - Assistente Studenti',
+            'grades': '🤖 Agente IA - Assistente Valutazioni',
+            'schedule': '🤖 Agente IA - Assistente Orario',
+            'activities': '🤖 Agente IA - Assistente Attività',
+            'news': '🤖 Agente IA - Analisi News',
+            'settings': '🤖 Agente IA - Assistente Configurazione'
+        };
+
+        return titles[tab] || '🤖 Agente IA - Assistente Contestuale';
+    }
+
+    getSectionName(tab) {
+        const names = {
+            'dashboard': 'Dashboard',
+            'lessons': 'Lezioni',
+            'students': 'Studenti',
+            'grades': 'Valutazioni',
+            'schedule': 'Orario',
+            'activities': 'Attività',
+            'news': 'News',
+            'settings': 'Impostazioni'
+        };
+
+        return names[tab] || 'Applicazione';
     }
 }
 
