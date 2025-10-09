@@ -162,39 +162,111 @@
             
             <nav class="tabs" id="main-nav">
                 <div class="menu-group">
-                    <div class="menu-group-title">🏠 Vista Generale</div>
-                    <button class="tab-button active" data-tab="home">Home</button>
+                    <div class="menu-group-title" data-group="vista-generale">
+                        <span class="menu-icon">🏠</span>
+                        <span class="menu-text">Vista Generale</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button active" data-tab="home">
+                            <span class="menu-icon">🏠</span>
+                            <span class="menu-text">Home</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="menu-group">
-                    <div class="menu-group-title">👨‍🏫 In Classe</div>
-                    <button class="tab-button" data-tab="lessons">Lezioni</button>
-                    <button class="tab-button" data-tab="schedule">Orario</button>
-                    <button class="tab-button" data-tab="evaluations">Valutazioni</button>
+                    <div class="menu-group-title" data-group="in-classe">
+                        <span class="menu-icon">👨‍🏫</span>
+                        <span class="menu-text">In Classe</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button" data-tab="lessons">
+                            <span class="menu-icon">📚</span>
+                            <span class="menu-text">Lezioni</span>
+                        </button>
+                        <button class="tab-button" data-tab="schedule">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Orario</span>
+                        </button>
+                        <button class="tab-button" data-tab="evaluations">
+                            <span class="menu-icon">✅</span>
+                            <span class="menu-text">Valutazioni</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="menu-group">
-                    <div class="menu-group-title">📋 Pianificazione</div>
-                    <button class="tab-button" data-tab="activities">Attività</button>
-                    <button class="tab-button" data-tab="notifications">Notifiche</button>
-                    <button class="tab-button" data-tab="news">News</button>
+                    <div class="menu-group-title" data-group="pianificazione">
+                        <span class="menu-icon">📋</span>
+                        <span class="menu-text">Pianificazione</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button" data-tab="activities">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Attività</span>
+                        </button>
+                        <button class="tab-button" data-tab="notifications">
+                            <span class="menu-icon">🔔</span>
+                            <span class="menu-text">Notifiche</span>
+                        </button>
+                        <button class="tab-button" data-tab="news">
+                            <span class="menu-icon">📰</span>
+                            <span class="menu-text">News</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="menu-group">
-                    <div class="menu-group-title">👥 Gestione</div>
-                    <button class="tab-button" data-tab="students">Studenti</button>
-                    <button class="tab-button" data-tab="classes">Classi</button>
+                    <div class="menu-group-title" data-group="gestione">
+                        <span class="menu-icon">👥</span>
+                        <span class="menu-text">Gestione</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button" data-tab="students">
+                            <span class="menu-icon">👤</span>
+                            <span class="menu-text">Studenti</span>
+                        </button>
+                        <button class="tab-button" data-tab="classes">
+                            <span class="menu-icon">🎓</span>
+                            <span class="menu-text">Classi</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="menu-group">
-                    <div class="menu-group-title">🤖 Strumenti IA</div>
-                    <button class="tab-button" data-tab="ai-assistant">Assistente IA</button>
-                    <button class="tab-button" data-tab="document-import">Importa con IA</button>
+                    <div class="menu-group-title" data-group="strumenti-ia">
+                        <span class="menu-icon">🤖</span>
+                        <span class="menu-text">Strumenti IA</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button" data-tab="ai-assistant">
+                            <span class="menu-icon">💬</span>
+                            <span class="menu-text">Assistente IA</span>
+                        </button>
+                        <button class="tab-button" data-tab="document-import">
+                            <span class="menu-icon">📄</span>
+                            <span class="menu-text">Importa con IA</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="menu-group">
-                    <div class="menu-group-title">⚙️ Sistema</div>
-                    <button class="tab-button" data-tab="settings">Impostazioni</button>
+                    <div class="menu-group-title" data-group="sistema">
+                        <span class="menu-icon">⚙️</span>
+                        <span class="menu-text">Sistema</span>
+                        <span class="menu-arrow">▼</span>
+                    </div>
+                    <div class="menu-items">
+                        <button class="tab-button" data-tab="settings">
+                            <span class="menu-icon">🔧</span>
+                            <span class="menu-text">Impostazioni</span>
+                        </button>
+                    </div>
                 </div>
             </nav>
         </div>
@@ -252,6 +324,23 @@
                         <span class="quick-count" id="home-evaluation-count">0</span>
                     </button>
                 </div>
+            </div>
+            
+            <!-- Things To Do Section -->
+            <div class="home-section">
+                <h2>✅ Cose da Fare</h2>
+                <div id="things-todo-list"></div>
+            </div>
+            
+            <!-- AI Suggestions Section -->
+            <div class="home-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">🤖 Suggerimenti IA</h2>
+                    <button class="btn btn-sm btn-secondary" onclick="app.refreshAISuggestions()" title="Aggiorna suggerimenti">
+                        🔄 Aggiorna
+                    </button>
+                </div>
+                <div id="ai-suggestions-content"></div>
             </div>
 
             <!-- Notifications and Reminders Section -->
@@ -1115,6 +1204,19 @@
                         <small>ID del modello OpenRouter da utilizzare (default: alibaba/tongyi-deepresearch-30b-a3b)</small>
                     </div>
 
+                    <h3 style="margin-top: 30px;">🤖 Agente IA Floating</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ai-fab-enabled" checked>
+                            Mostra Agente IA Floating
+                        </label>
+                        <small>Attiva/disattiva il pulsante dell'agente IA sempre visibile</small>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary" onclick="app.resetAIFABPosition()">🔄 Ripristina Posizione Agente IA</button>
+                        <small>Riporta l'agente IA alla posizione predefinita (in basso a destra)</small>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
                 </form>
                 <div style="margin-top: 20px;">
@@ -1126,37 +1228,38 @@
     </div>
 
     <!-- Floating AI Agent Button -->
-    <div id="ai-fab" class="ai-fab" onclick="app.toggleAIAgentModal()" title="Apri Agente IA per analisi news">
+    <div id="ai-fab" class="ai-fab" onclick="app.toggleAIAgentModal()" title="Apri Agente IA Contestuale">
         🤖
     </div>
 
-    <!-- AI Agent Modal for News Analysis -->
+    <!-- AI Agent Modal for Contextual Analysis -->
     <div id="ai-agent-modal" class="modal" style="display: none;">
         <div class="modal-content ai-agent-content">
             <div class="modal-header">
-                <h2>🤖 Agente IA - Analisi Contestuale News</h2>
+                <h2 id="ai-agent-modal-title">🤖 Agente IA - Assistente Contestuale</h2>
                 <button class="close-btn" onclick="app.closeAIAgentModal()">✕</button>
             </div>
             
             <div class="ai-agent-body">
-                <div class="form-group">
+                <div id="ai-agent-context-info" class="ai-context-info">
+                    <p><strong>Sezione corrente:</strong> <span id="ai-current-section">Dashboard</span></p>
+                </div>
+
+                <div class="form-group" id="ai-agent-url-group">
                     <label for="ai-agent-news-url">URL News da Analizzare:</label>
                     <input type="url" id="ai-agent-news-url" placeholder="https://esempio.com/news-articolo" />
                     <small>Inserisci l'URL della news per l'analisi contestuale</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="ai-agent-context">Richiesta Specifica (opzionale):</label>
-                    <textarea id="ai-agent-context" rows="3" placeholder="es. Estrai le date importanti e crea promemoria per le scadenze"></textarea>
-                    <small>Specifica cosa vuoi che l'agente analizzi o faccia</small>
+                    <label for="ai-agent-context">Richiesta per l'Agente IA:</label>
+                    <textarea id="ai-agent-context" rows="4" placeholder="es. Aiutami a creare una programmazione didattica per questa settimana"></textarea>
+                    <small id="ai-agent-context-help">Specifica cosa vuoi che l'agente faccia nella sezione corrente</small>
                 </div>
 
-                <div class="ai-agent-suggestions">
-                    <p><strong>Analisi disponibili:</strong></p>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai tutte le date e scadenze menzionate')">📅 Date e Scadenze</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Identifica documenti e allegati da scaricare')">📎 Documenti</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai soggetti coinvolti e destinatari')">👥 Soggetti</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Crea un riepilogo e proponi azioni da intraprendere')">📋 Riepilogo e Azioni</button>
+                <div class="ai-agent-suggestions" id="ai-agent-suggestions">
+                    <p><strong>Suggerimenti contestuali:</strong></p>
+                    <div id="ai-suggestions-buttons"></div>
                 </div>
 
                 <div class="ai-agent-results" id="ai-agent-results" style="display: none;">

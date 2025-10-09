@@ -43,6 +43,26 @@ header {
     box-shadow: var(--shadow);
 }
 
+/* Minimal header for non-settings pages */
+header.minimal {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8px 0;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+header.minimal h1 {
+    color: var(--text-primary);
+    font-size: 1.3em;
+    margin-bottom: 0;
+}
+
+header.minimal .subtitle {
+    display: none;
+}
+
 header h1 {
     font-size: 1.5em;
     margin-bottom: 3px;
@@ -117,6 +137,10 @@ header h1 {
     display: contents;
 }
 
+.menu-items {
+    display: contents;
+}
+
 .tab-button {
     padding: 8px 16px;
     border: none;
@@ -128,6 +152,18 @@ header h1 {
     font-weight: 500;
     transition: all 0.2s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-button .menu-icon {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.tab-button .menu-text {
+    line-height: 1;
 }
 
 .tab-button:hover {
@@ -152,6 +188,35 @@ header h1 {
     padding: 8px 12px;
     margin-bottom: 5px;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.menu-group-title .menu-icon {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.menu-group-title .menu-text {
+    flex: 1;
+    line-height: 1;
+}
+
+.menu-group-title .menu-arrow {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+    line-height: 1;
+}
+
+.menu-group.collapsed .menu-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group.collapsed .menu-items {
+    display: none;
 }
 
 .menu-dropdown {
@@ -2321,10 +2386,14 @@ header h1 {
     align-items: center;
     justify-content: center;
     font-size: 28px;
-    cursor: pointer;
+    cursor: move;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
     z-index: 999;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    touch-action: none;
 }
 
 .ai-fab:hover {
@@ -2334,6 +2403,16 @@ header h1 {
 
 .ai-fab:active {
     transform: scale(0.95);
+}
+
+.ai-fab.dragging {
+    cursor: grabbing;
+    transform: scale(1.05);
+    opacity: 0.8;
+}
+
+.ai-fab.hidden {
+    display: none !important;
 }
 
 /* AI Agent Modal */
@@ -2347,6 +2426,29 @@ header h1 {
     padding: 20px 0;
 }
 
+.ai-context-info {
+    background: var(--bg-color);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.ai-context-info p {
+    margin: 0;
+    font-size: 0.95em;
+    color: var(--text-secondary);
+}
+
+.ai-context-info strong {
+    color: var(--text-color);
+}
+
+.ai-context-info #ai-current-section {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
 .ai-agent-suggestions {
     background: var(--bg-color);
     padding: 15px;
@@ -2357,6 +2459,12 @@ header h1 {
 .ai-agent-suggestions p {
     margin-bottom: 10px;
     font-weight: 500;
+}
+
+#ai-suggestions-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .ai-agent-results {
@@ -2485,6 +2593,60 @@ header h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Things To Do Section Styles */
+.things-to-do-section {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-list {
+    margin: 15px 0;
+}
+
+.task-item {
+    transition: all 0.2s ease;
+}
+
+.task-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* AI Suggestions Section Styles */
+.ai-suggestions-section {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-suggestions-list {
+    margin: 15px 0;
+}
+
+.ai-suggestion-card {
+    transition: all 0.3s ease;
+    animation: slideInRight 0.4s ease;
+}
+
+.ai-suggestion-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 /* Lesson Session Modal Styles */
 .lesson-session-modal {
     font-size: 16px;
@@ -2552,7 +2714,7 @@ header h1 {
     
     /* Show menu group titles on mobile */
     .menu-group-title {
-        display: block;
+        display: flex;
     }
     
     .menu-group {
@@ -2560,11 +2722,19 @@ header h1 {
         margin-bottom: 15px;
     }
     
+    .menu-items {
+        display: block;
+    }
+    
     .tab-button {
         width: 100%;
         text-align: left;
         padding: 12px 16px;
+        padding-left: 40px; /* Indent submenu items */
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     /* Backdrop for mobile menu */
@@ -2729,4 +2899,61 @@ textarea {
     scroll-behavior: smooth;
 }
 
+/* Dashboard sections */
+.today-schedule-section,
+.things-todo-section,
+.ai-suggestions-section {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.today-schedule-section h3,
+.things-todo-section h3,
+.ai-suggestions-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.today-schedule-list,
+.todos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.today-schedule-item,
+.todo-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.today-schedule-item:hover,
+.todo-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-suggestions-content {
+    line-height: 1.8;
+}
+
+.ai-suggestions-content p {
+    margin: 10px 0;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .today-schedule-section,
+    .things-todo-section,
+    .ai-suggestions-section {
+        padding: 15px;
+    }
+    
+    .today-schedule-item,
+    .todo-item {
+        padding: 10px !important;
+    }
+}
 
