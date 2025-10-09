@@ -117,6 +117,10 @@ header h1 {
     display: contents;
 }
 
+.menu-items {
+    display: contents;
+}
+
 .tab-button {
     padding: 8px 16px;
     border: none;
@@ -128,6 +132,18 @@ header h1 {
     font-weight: 500;
     transition: all 0.2s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-button .menu-icon {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.tab-button .menu-text {
+    line-height: 1;
 }
 
 .tab-button:hover {
@@ -152,6 +168,35 @@ header h1 {
     padding: 8px 12px;
     margin-bottom: 5px;
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.menu-group-title .menu-icon {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.menu-group-title .menu-text {
+    flex: 1;
+    line-height: 1;
+}
+
+.menu-group-title .menu-arrow {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+    line-height: 1;
+}
+
+.menu-group.collapsed .menu-arrow {
+    transform: rotate(-90deg);
+}
+
+.menu-group.collapsed .menu-items {
+    display: none;
 }
 
 .menu-dropdown {
@@ -2391,7 +2436,7 @@ header h1 {
     
     /* Show menu group titles on mobile */
     .menu-group-title {
-        display: block;
+        display: flex;
     }
     
     .menu-group {
@@ -2399,11 +2444,19 @@ header h1 {
         margin-bottom: 15px;
     }
     
+    .menu-items {
+        display: block;
+    }
+    
     .tab-button {
         width: 100%;
         text-align: left;
         padding: 12px 16px;
+        padding-left: 40px; /* Indent submenu items */
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     /* Backdrop for mobile menu */
