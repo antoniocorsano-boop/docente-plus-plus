@@ -213,17 +213,25 @@ Questa roadmap traccia lo sviluppo incrementale di **Docente++** sulla base dei 
 
 ### 2.1 IA Contestuale con Suggerimenti
 **Priorità:** 🟠 Alta  
-**Stato:** 📋 Pianificato  
+**Stato:** ✅ Completato (Parziale - Agente IA Floating Contestuale)  
 **Fase:** 2  
 **Complessità:** 🔴 Alta
 
 #### Obiettivi
-- IA che suggerisce azioni in base a contesto
-- Proposta automatica task giornalieri
-- Integrazione nel flusso quotidiano
+- IA che suggerisce azioni in base a contesto ✅
+- Proposta automatica task giornalieri (in pianificazione)
+- Integrazione nel flusso quotidiano ✅
 
-#### Task
-- [ ] Implementare sistema analisi contesto:
+#### Task Completati
+- [x] Implementare Agente IA Floating contestuale
+  - Adattamento automatico alla sezione attiva
+  - Suggerimenti specifici per ogni area (Dashboard, Lezioni, Studenti, ecc.)
+  - Pulsante draggable e posizionabile
+  - Controlli visibilità nelle impostazioni
+  - Salvataggio preferenze utente
+
+#### Task Rimanenti
+- [ ] Implementare sistema analisi contesto avanzato:
   - Ora del giorno
   - Orario didattico corrente
   - Scadenze imminenti
@@ -296,24 +304,30 @@ Docente accede alle 8:00:
 
 ### 2.3 Agente IA Conversazionale
 **Priorità:** 🟡 Media  
-**Stato:** 💡 Pianificato  
+**Stato:** 🔄 In Pianificazione (Base completata)  
 **Fase:** 2-3  
 **Complessità:** 🔴 Alta
 
 #### Obiettivi
-- FAB IA diventa assistente completo
-- Dialogo aperto per gestione app
-- Comandi vocali e testuali
+- FAB IA diventa assistente completo ✅ (Fondamenta completate)
+- Dialogo aperto per gestione app (in pianificazione)
+- Comandi vocali e testuali (in pianificazione)
 
-#### Task
+#### Stato Attuale
+L'Agente IA Floating è ora contestuale e sempre disponibile:
+- ✅ Presente su tutte le pagine
+- ✅ Suggerimenti adattivi per sezione
+- ✅ Movibile e personalizzabile
+- ✅ Controlli visibilità in settings
+
+#### Task Rimanenti
 - [ ] Espandere FAB IA a chat completa:
   - Gestione dati ("Aggiungi voto 8 a Mario Rossi")
   - Ricerca informazioni ("Studenti con media <6?")
   - Automazione task ("Genera programmazione mese")
   - Supporto decisionale ("Cosa fare con studente X?")
-- [ ] Contestualizzazione in base a sezione attiva
 - [ ] Memoria conversazione multi-turn
-- [ ] Supporto comandi naturali
+- [ ] Supporto comandi naturali avanzati
 - [ ] Suggerimenti azioni eseguibili dall'IA
 
 #### Esempi Comandi
