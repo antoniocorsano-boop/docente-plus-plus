@@ -162,8 +162,8 @@
             
             <nav class="tabs" id="main-nav">
                 <div class="menu-group">
-                    <div class="menu-group-title">📊 Vista Generale</div>
-                    <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+                    <div class="menu-group-title">🏠 Vista Generale</div>
+                    <button class="tab-button active" data-tab="home">Home</button>
                 </div>
                 
                 <div class="menu-group">
@@ -201,51 +201,82 @@
         
         <div class="menu-backdrop" id="menu-backdrop"></div>
 
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active">
-            <h2>Dashboard</h2>
-            <div class="class-selector-container">
+        <!-- Home Tab -->
+        <div id="home" class="tab-content active">
+            <!-- Welcome Section -->
+            <div class="home-welcome-section">
+                <h1 id="home-welcome-message">Benvenuto in Docente++</h1>
+                <p id="home-welcome-subtitle" class="home-subtitle">La tua giornata didattica inizia qui</p>
+            </div>
+
+            <!-- Active Class Selector -->
+            <div class="home-class-selector">
                 <label for="active-class-selector">🎯 Classe Attiva:</label>
                 <select id="active-class-selector" onchange="app.setActiveClass(this.value)">
                     <option value="">Seleziona una classe</option>
                 </select>
                 <span id="current-class-display" class="current-class-badge">Nessuna classe selezionata</span>
             </div>
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>📚 Lezioni Programmate</h3>
-                    <p class="stat-number" id="lesson-count">0</p>
-                    <p class="stat-label">Lezioni questa settimana</p>
-                </div>
-                <div class="card">
-                    <h3>👥 Studenti</h3>
-                    <p class="stat-number" id="student-count">0</p>
-                    <p class="stat-label">Studenti totali</p>
-                </div>
-                <div class="card">
-                    <h3>📋 Attività</h3>
-                    <p class="stat-number" id="activity-count">0</p>
-                    <p class="stat-label">Attività in corso</p>
-                </div>
-                <div class="card">
-                    <h3>✅ Valutazioni</h3>
-                    <p class="stat-number" id="evaluation-count">0</p>
-                    <p class="stat-label">Da completare</p>
-                </div>
-                <div class="card">
-                    <h3>🤖 IA Attiva</h3>
-                    <p class="stat-number" id="ai-status">✓</p>
-                    <p class="stat-label">OpenRouter Ready</p>
-                </div>
-            </div>
             
-            <!-- Today's Schedule Quick Access -->
-            <div class="today-schedule-section" style="margin-top: 30px;">
-                <h3>📅 Orario di Oggi</h3>
+            <!-- Today's Schedule Section -->
+            <div class="home-section">
+                <h2>📅 Orario di Oggi</h2>
                 <div id="today-schedule-preview"></div>
                 <button class="btn btn-primary" onclick="app.goToTodaySchedule()" style="margin-top: 15px;">
                     📋 Vai all'Orario Completo
                 </button>
+            </div>
+
+            <!-- Quick Access Section -->
+            <div class="home-section">
+                <h2>⚡ Accesso Rapido</h2>
+                <div class="home-quick-access">
+                    <button class="btn-quick-access" onclick="app.switchTab('lessons')">
+                        <span class="quick-icon">📚</span>
+                        <span class="quick-label">Lezioni</span>
+                        <span class="quick-count" id="home-lesson-count">0</span>
+                    </button>
+                    <button class="btn-quick-access" onclick="app.switchTab('students')">
+                        <span class="quick-icon">👥</span>
+                        <span class="quick-label">Studenti</span>
+                        <span class="quick-count" id="home-student-count">0</span>
+                    </button>
+                    <button class="btn-quick-access" onclick="app.switchTab('activities')">
+                        <span class="quick-icon">📋</span>
+                        <span class="quick-label">Attività</span>
+                        <span class="quick-count" id="home-activity-count">0</span>
+                    </button>
+                    <button class="btn-quick-access" onclick="app.switchTab('evaluations')">
+                        <span class="quick-icon">✅</span>
+                        <span class="quick-label">Valutazioni</span>
+                        <span class="quick-count" id="home-evaluation-count">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notifications and Reminders Section -->
+            <div class="home-section">
+                <h2>🔔 Notifiche e Promemoria</h2>
+                <div id="home-notifications-preview">
+                    <p class="home-placeholder">Nessuna notifica per oggi</p>
+                </div>
+                <button class="btn btn-secondary" onclick="app.switchTab('notifications')" style="margin-top: 10px;">
+                    Vedi tutte le notifiche
+                </button>
+            </div>
+
+            <!-- AI Assistant Quick Access -->
+            <div class="home-section">
+                <h2>🤖 Assistente IA</h2>
+                <p id="home-ai-status">Stato IA: <span id="home-ai-ready">Non configurata</span></p>
+                <div class="home-ai-actions">
+                    <button class="btn btn-primary" onclick="app.switchTab('ai-assistant')">
+                        💬 Apri Assistente IA
+                    </button>
+                    <button class="btn btn-secondary" onclick="app.switchTab('document-import')">
+                        📄 Importa Documenti con IA
+                    </button>
+                </div>
             </div>
         </div>
 

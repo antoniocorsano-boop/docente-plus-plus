@@ -211,6 +211,167 @@ header h1 {
     margin-top: 20px;
 }
 
+/* Home Boarding Styles */
+.home-welcome-section {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+}
+
+.home-welcome-section h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.home-subtitle {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.home-class-selector {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.home-class-selector label {
+    font-weight: 600;
+}
+
+.home-section {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow);
+}
+
+.home-section h2 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.home-quick-access {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.btn-quick-access {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-quick-access:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-quick-access .quick-icon {
+    font-size: 2em;
+}
+
+.btn-quick-access .quick-label {
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.btn-quick-access .quick-count {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.btn-quick-access:hover .quick-count {
+    background: white;
+    color: var(--primary-color);
+}
+
+.home-placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.home-notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home-notification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-color);
+}
+
+.notification-icon {
+    font-size: 1.5em;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notification-content strong {
+    color: var(--text-primary);
+}
+
+.notification-content small {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+}
+
+.home-ai-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+#home-ai-status {
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+
 /* Cards */
 .card {
     background: var(--card-bg);
@@ -2485,6 +2646,32 @@ header h1 {
         width: 35px !important;
         height: 35px !important;
         font-size: 0.9em;
+    }
+    
+    /* Home page responsive styles */
+    .home-welcome-section h1 {
+        font-size: 1.5em;
+    }
+    
+    .home-subtitle {
+        font-size: 1em;
+    }
+    
+    .home-class-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .home-quick-access {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .home-ai-actions {
+        flex-direction: column;
+    }
+    
+    .home-ai-actions .btn {
+        width: 100%;
     }
 }
 
