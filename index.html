@@ -31,6 +31,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- RSS Parser for RSS/Atom feeds -->
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.13.0/dist/rss-parser.min.js"></script>
+    <!-- JSZip for backup ZIP creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -262,6 +264,10 @@
                         <span class="menu-arrow">▼</span>
                     </div>
                     <div class="menu-items">
+                        <button class="tab-button" data-tab="backup-restore">
+                            <span class="menu-icon">💾</span>
+                            <span class="menu-text">Backup & Ripristino</span>
+                        </button>
                         <button class="tab-button" data-tab="settings">
                             <span class="menu-icon">🔧</span>
                             <span class="menu-text">Impostazioni</span>
@@ -1115,6 +1121,51 @@
                 </div>
                 <div id="recording-status" class="recording-status"></div>
                 <div id="recordings-list" class="recordings-list"></div>
+            </div>
+        </div>
+
+        <!-- Backup & Restore Tab -->
+        <div id="backup-restore" class="tab-content">
+            <h2>💾 Backup & Ripristino</h2>
+            <p class="section-description">
+                Gestisci i backup dei tuoi dati. Crea backup manuali o programma backup automatici per proteggere le tue informazioni.
+            </p>
+
+            <!-- Backup Actions Section -->
+            <div class="backup-actions-section">
+                <h3>⚡ Azioni Rapide</h3>
+                <div class="backup-actions-grid">
+                    <button class="btn btn-primary btn-large" onclick="app.createManualBackup()">
+                        <span class="btn-icon">📦</span>
+                        <span class="btn-text">Crea Backup Ora</span>
+                    </button>
+                    <button class="btn btn-secondary btn-large" onclick="app.showRestoreBackupDialog()">
+                        <span class="btn-icon">📤</span>
+                        <span class="btn-text">Ripristina da File</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scheduled Backup Settings -->
+            <div class="backup-settings-section">
+                <h3>⏰ Backup Programmato</h3>
+                <div class="form-group">
+                    <label for="backup-frequency">Frequenza Backup Automatico:</label>
+                    <select id="backup-frequency" onchange="app.updateBackupSchedule()">
+                        <option value="never">Mai</option>
+                        <option value="daily">Giornaliero</option>
+                        <option value="weekly" selected>Settimanale</option>
+                        <option value="monthly">Mensile</option>
+                    </select>
+                    <small>I backup programmati vengono creati automaticamente quando l'app è aperta</small>
+                </div>
+                <div id="backup-schedule-info" class="backup-info"></div>
+            </div>
+
+            <!-- Backup List Section -->
+            <div class="backup-list-section">
+                <h3>📋 Backup Disponibili</h3>
+                <div id="backup-list" class="backup-list"></div>
             </div>
         </div>
 

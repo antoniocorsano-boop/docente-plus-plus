@@ -2957,3 +2957,213 @@ textarea {
     }
 }
 
+/* Backup & Restore Styles */
+.backup-actions-section,
+.backup-settings-section,
+.backup-list-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.backup-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.btn-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    font-size: 16px;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+.btn-large .btn-icon {
+    font-size: 32px;
+}
+
+.btn-large .btn-text {
+    font-weight: 600;
+}
+
+.btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.btn-large:active {
+    transform: translateY(0);
+}
+
+.backup-info {
+    margin-top: 10px;
+    padding: 12px;
+    background: #e8f4f8;
+    border-left: 4px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.backup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.backup-item {
+    background: #fafafa;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.2s ease;
+}
+
+.backup-item:hover {
+    background: #f0f0f0;
+    border-color: var(--primary-color);
+}
+
+.backup-item-info {
+    flex: 1;
+}
+
+.backup-item-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.backup-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.backup-item-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.backup-item-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.backup-item-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-download {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-download:hover {
+    background: #3a7bc8;
+}
+
+.btn-restore {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-restore:hover {
+    background: #40b868;
+}
+
+.btn-delete {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c0392b;
+}
+
+.backup-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.backup-empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+/* Mobile optimizations for backup section */
+@media (max-width: 768px) {
+    .backup-actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-large {
+        min-height: 80px;
+        padding: 15px;
+    }
+    
+    .btn-large .btn-icon {
+        font-size: 28px;
+    }
+    
+    .backup-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .backup-item-actions {
+        width: 100%;
+    }
+    
+    .backup-item-actions button {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
