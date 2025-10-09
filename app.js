@@ -444,6 +444,12 @@ class DocentePlusPlus {
         
         // Render today's schedule preview
         this.renderTodaySchedulePreview();
+        
+        // Render things to do
+        this.renderThingsToDo();
+        
+        // Render AI suggestions
+        this.renderAISuggestions();
     }
     
     renderTodaySchedulePreview() {
@@ -497,6 +503,262 @@ class DocentePlusPlus {
         this.currentScheduleDate = this.getCurrentScheduleDate();
         this.switchTab('schedule');
         this.renderSchedule();
+    }
+    
+    renderThingsToDo() {
+        const container = document.getElementById('things-todo-list');
+        if (!container) return;
+        
+        const todos = [];
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        // Add upcoming activities with deadlines
+        const upcomingActivities = this.activities
+            .filter(a => {
+                if (a.status === 'completed') return false;
+                if (!a.dueDate) return false;
+                const dueDate = new Date(a.dueDate);
+                return dueDate <= nextWeek;
+            })
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5);
+        
+        upcomingActivities.forEach(activity => {
+            const dueDate = new Date(activity.dueDate);
+            const isOverdue = dueDate < now;
+            const isDueToday = dueDate.toDateString() === now.toDateString();
+            const isDueTomorrow = dueDate.toDateString() === tomorrow.toDateString();
+            
+            let dueDateText = dueDate.toLocaleDateString('it-IT');
+            if (isOverdue) dueDateText = `🔴 Scaduta: ${dueDateText}`;
+            else if (isDueToday) dueDateText = `⚠️ Oggi`;
+            else if (isDueTomorrow) dueDateText = `⏰ Domani`;
+            
+            todos.push({
+                type: 'activity',
+                priority: isOverdue ? 3 : isDueToday ? 2 : 1,
+                title: activity.title,
+                subtitle: dueDateText,
+                action: `app.switchTab('activities')`,
+                icon: '📋'
+            });
+        });
+        
+        // Add pending evaluations
+        const pendingEvaluations = this.evaluations
+            .filter(e => !e.score)
+            .slice(0, 3);
+        
+        pendingEvaluations.forEach(evaluation => {
+            const student = this.students.find(s => s.id === evaluation.studentId);
+            todos.push({
+                type: 'evaluation',
+                priority: 1,
+                title: `Valuta: ${student ? student.name : 'Studente'}`,
+                subtitle: `${evaluation.criterion || 'Valutazione'}`,
+                action: `app.switchTab('evaluations')`,
+                icon: '✅'
+            });
+        });
+        
+        // Add custom reminders for today/tomorrow
+        const upcomingReminders = this.reminders
+            .filter(r => {
+                const reminderDate = new Date(r.date);
+                return reminderDate <= tomorrow;
+            })
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 3);
+        
+        upcomingReminders.forEach(reminder => {
+            const reminderDate = new Date(reminder.date);
+            const isDueToday = reminderDate.toDateString() === now.toDateString();
+            
+            todos.push({
+                type: 'reminder',
+                priority: isDueToday ? 2 : 1,
+                title: reminder.title,
+                subtitle: isDueToday ? '⏰ Oggi' : '📅 Domani',
+                action: `app.switchTab('notifications')`,
+                icon: '🔔'
+            });
+        });
+        
+        // Sort by priority
+        todos.sort((a, b) => b.priority - a.priority);
+        
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna cosa da fare in scadenza</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="todos-list">
+                ${todos.slice(0, 8).map(todo => this.renderTodoItem(todo)).join('')}
+            </div>
+        `;
+    }
+    
+    renderTodoItem(todo) {
+        return `
+            <div class="todo-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="${todo.action}">
+                <div style="font-size: 1.5em; margin-right: 12px;">${todo.icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">${todo.title}</div>
+                    <div style="font-size: 0.85em; color: #666;">${todo.subtitle}</div>
+                </div>
+                <div style="color: var(--primary-color);">→</div>
+            </div>
+        `;
+    }
+    
+    async renderAISuggestions() {
+        const container = document.getElementById('ai-suggestions-content');
+        if (!container) return;
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        if (!apiKey) {
+            container.innerHTML = `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0; color: #856404;">
+                        ⚠️ Configura la tua API key OpenRouter nelle impostazioni per ricevere suggerimenti personalizzati dall'IA.
+                    </p>
+                    <button class="btn btn-sm btn-primary" onclick="app.switchTab('settings')" style="margin-top: 10px;">
+                        Vai alle Impostazioni
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = `
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1976d2;">
+                    🤖 Generazione suggerimenti in corso...
+                </p>
+            </div>
+        `;
+        
+        try {
+            const suggestions = await this.generateDashboardSuggestions();
+            
+            // Sanitize by creating text nodes and formatting with <br> for line breaks
+            const sanitizedSuggestions = this.sanitizeAISuggestions(suggestions);
+            
+            container.innerHTML = `
+                <div class="ai-suggestions-content" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    ${sanitizedSuggestions}
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error generating AI suggestions:', error);
+            container.innerHTML = `
+                <div style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                    <p style="margin: 0; color: #721c24;">
+                        ❌ Errore nella generazione dei suggerimenti. Riprova più tardi.
+                    </p>
+                </div>
+            `;
+        }
+    }
+    
+    sanitizeAISuggestions(suggestions) {
+        if (!suggestions) return '<p style="color: var(--text-secondary); font-style: italic;">Nessun suggerimento disponibile</p>';
+        
+        // Split by double newlines to get paragraphs
+        const paragraphs = suggestions.split('\n\n').filter(p => p.trim());
+        
+        // Create safe HTML with only line breaks
+        return paragraphs
+            .map(p => {
+                // Escape HTML but preserve line breaks
+                const escaped = p
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;')
+                    .replace(/\n/g, '<br>');
+                return `<p style="margin: 10px 0; color: var(--text-primary); line-height: 1.6;">${escaped}</p>`;
+            })
+            .join('');
+    }
+    
+    async generateDashboardSuggestions() {
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) return '';
+        
+        // Build context about today's situation
+        const today = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+        const todaySlots = [];
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                const cls = this.classes.find(c => c.id == slot.classId);
+                todaySlots.push({
+                    hour,
+                    class: cls ? cls.name : 'N/D',
+                    activityType: slot.activityType
+                });
+            }
+        });
+        
+        const now = new Date();
+        const upcomingActivities = this.activities
+            .filter(a => a.status !== 'completed' && a.dueDate)
+            .filter(a => new Date(a.dueDate) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
+            .slice(0, 3);
+        
+        const pendingEvaluations = this.evaluations.filter(e => !e.score).length;
+        
+        const teacherName = localStorage.getItem('teacher-first-name') || 'Docente';
+        
+        let prompt = `Sei un assistente IA per insegnanti. Genera 3-4 suggerimenti brevi e concreti per la giornata dell'insegnante ${teacherName}.
+
+Situazione di oggi (${today.toLocaleDateString('it-IT')}):`;
+        
+        if (todaySlots.length > 0) {
+            prompt += `\n\nLezioni programmate oggi:`;
+            todaySlots.forEach(slot => {
+                prompt += `\n- ${slot.hour}:00 - ${slot.class}`;
+                if (slot.activityType) {
+                    const typeLabel = slot.activityType === 'theory' ? 'Teoria' : 
+                                    slot.activityType === 'drawing' ? 'Disegno' : 'Laboratorio';
+                    prompt += ` (${typeLabel})`;
+                }
+            });
+        } else {
+            prompt += `\n\nNessuna lezione programmata per oggi.`;
+        }
+        
+        if (upcomingActivities.length > 0) {
+            prompt += `\n\nAttività in scadenza:`;
+            upcomingActivities.forEach(a => {
+                prompt += `\n- ${a.title} (scadenza: ${new Date(a.dueDate).toLocaleDateString('it-IT')})`;
+            });
+        }
+        
+        if (pendingEvaluations > 0) {
+            prompt += `\n\nValutazioni da completare: ${pendingEvaluations}`;
+        }
+        
+        prompt += `\n\nGenera suggerimenti pratici in formato testo semplice. 
+Ogni suggerimento deve essere breve (max 2 righe) e azionabile. 
+Usa emoji all'inizio di ogni suggerimento.
+Separa i suggerimenti con doppio a capo.`;
+        
+        const response = await this.callOpenRouterAPI(prompt, apiKey);
+        return response.content || '';
+    }
+    
+    async refreshAISuggestions() {
+        await this.renderAISuggestions();
     }
 
     // Class Management methods
