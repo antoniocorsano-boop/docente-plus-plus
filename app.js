@@ -444,6 +444,12 @@ class DocentePlusPlus {
         
         // Render today's schedule preview
         this.renderTodaySchedulePreview();
+        
+        // Render today's tasks
+        this.renderTodayTasks();
+        
+        // Render AI contextual suggestions
+        this.renderAIContextualSuggestions();
     }
     
     renderTodaySchedulePreview() {
@@ -497,6 +503,268 @@ class DocentePlusPlus {
         this.currentScheduleDate = this.getCurrentScheduleDate();
         this.switchTab('schedule');
         this.renderSchedule();
+    }
+    
+    renderTodayTasks() {
+        const previewContainer = document.getElementById('today-tasks-preview');
+        if (!previewContainer) return;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        // Get today's activities (planned or in-progress with deadline today)
+        const todayActivities = this.activities.filter(a => {
+            if (!a.deadline) return false;
+            const deadline = new Date(a.deadline);
+            deadline.setHours(0, 0, 0, 0);
+            return (a.status === 'planned' || a.status === 'in-progress') && 
+                   deadline.getTime() === today.getTime();
+        });
+        
+        // Get today's reminders
+        const todayReminders = this.reminders.filter(r => {
+            if (r.completed) return false;
+            const reminderDate = new Date(r.date);
+            reminderDate.setHours(0, 0, 0, 0);
+            return reminderDate.getTime() === today.getTime();
+        });
+        
+        // Get pending evaluations for today's classes
+        const todaySchedule = [];
+        const hours = [8, 9, 10, 11, 12, 13];
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                todaySchedule.push(slot.classId);
+            }
+        });
+        
+        const pendingEvaluations = this.evaluations.filter(e => {
+            if (e.score) return false; // Has score, not pending
+            const evalDate = new Date(e.date);
+            evalDate.setHours(0, 0, 0, 0);
+            return evalDate.getTime() <= today.getTime();
+        });
+        
+        // Build tasks list
+        const tasks = [];
+        
+        // Add activities
+        todayActivities.forEach(activity => {
+            const cls = activity.classId ? this.classes.find(c => c.id == activity.classId) : null;
+            tasks.push({
+                type: 'activity',
+                icon: '📋',
+                title: activity.title,
+                subtitle: cls ? `Classe: ${cls.name}` : 'Generale',
+                color: '#4a90e2'
+            });
+        });
+        
+        // Add reminders
+        todayReminders.forEach(reminder => {
+            tasks.push({
+                type: 'reminder',
+                icon: '🔔',
+                title: reminder.title,
+                subtitle: reminder.description || 'Promemoria',
+                color: '#f39c12'
+            });
+        });
+        
+        // Add pending evaluations summary
+        if (pendingEvaluations.length > 0) {
+            tasks.push({
+                type: 'evaluation',
+                icon: '✅',
+                title: `${pendingEvaluations.length} valutazioni da completare`,
+                subtitle: 'Clicca per andare alle valutazioni',
+                color: '#27ae60',
+                action: () => this.switchTab('evaluations')
+            });
+        }
+        
+        if (tasks.length === 0) {
+            previewContainer.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna attività in programma per oggi. Ottimo lavoro! 🎉</p>';
+            return;
+        }
+        
+        previewContainer.innerHTML = `
+            <div class="tasks-list">
+                ${tasks.map(task => `
+                    <div class="task-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${task.color}; ${task.action ? 'cursor: pointer;' : ''}" ${task.action ? `onclick="app.${task.type}Action()"` : ''}>
+                        <div style="flex: 0 0 40px; font-size: 1.5em;">${task.icon}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; color: #2c3e50;">${task.title}</div>
+                            <div style="font-size: 0.9em; color: #7f8c8d;">${task.subtitle}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    evaluationAction() {
+        this.switchTab('evaluations');
+    }
+    
+    async renderAIContextualSuggestions() {
+        const suggestionsContainer = document.getElementById('ai-contextual-suggestions');
+        if (!suggestionsContainer) return;
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        if (!apiKey) {
+            suggestionsContainer.innerHTML = `
+                <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0; color: #856404;">
+                        <strong>💡 Configura l'API Key</strong><br>
+                        Per ricevere suggerimenti contestuali dall'assistente IA, configura la tua OpenRouter API Key nelle <a href="#" onclick="app.switchTab('settings'); return false;" style="color: #856404; text-decoration: underline;">Impostazioni</a>.
+                    </p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Show loading state
+        suggestionsContainer.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: #999;">
+                <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
+                <p>Generazione suggerimenti in corso...</p>
+            </div>
+        `;
+        
+        try {
+            // Gather context
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentDay = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][now.getDay()];
+            
+            // Get current/next lesson from schedule
+            const today = this.getCurrentScheduleDate();
+            const todaySlots = [];
+            const hours = [8, 9, 10, 11, 12, 13];
+            hours.forEach(hour => {
+                const key = this.getScheduleKey(today, hour);
+                const slot = this.schedule[key];
+                if (slot && slot.classId) {
+                    const cls = this.classes.find(c => c.id == slot.classId);
+                    todaySlots.push({ hour, class: cls, slot });
+                }
+            });
+            
+            const nextLesson = todaySlots.find(s => s.hour >= currentHour);
+            const currentLesson = todaySlots.find(s => s.hour === currentHour);
+            
+            // Get upcoming deadlines
+            const upcomingActivities = this.activities.filter(a => {
+                if (!a.deadline || a.status === 'completed') return false;
+                const deadline = new Date(a.deadline);
+                const daysUntil = Math.floor((deadline - now) / (1000 * 60 * 60 * 24));
+                return daysUntil >= 0 && daysUntil <= 7;
+            });
+            
+            // Build context for AI
+            let contextText = `Oggi è ${currentDay}, ore ${currentHour}:00.\n\n`;
+            
+            if (currentLesson) {
+                contextText += `Lezione in corso: ${currentLesson.class.name}\n`;
+            } else if (nextLesson) {
+                contextText += `Prossima lezione: ${nextLesson.class.name} alle ${nextLesson.hour}:00\n`;
+            } else {
+                contextText += `Nessuna lezione programmata oggi.\n`;
+            }
+            
+            if (todaySlots.length > 0) {
+                contextText += `\nLezioni di oggi:\n${todaySlots.map(s => `- ${s.hour}:00: ${s.class.name}`).join('\n')}\n`;
+            }
+            
+            if (upcomingActivities.length > 0) {
+                contextText += `\nAttività in scadenza nei prossimi 7 giorni:\n${upcomingActivities.slice(0, 5).map(a => `- ${a.title} (scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')})`).join('\n')}\n`;
+            }
+            
+            contextText += `\nStudenti totali: ${this.students.length}\n`;
+            contextText += `Classi: ${this.classes.length}\n`;
+            
+            // Call AI
+            const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
+            
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: modelId,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'Sei un assistente IA per insegnanti. Fornisci 3-4 suggerimenti pratici e contestuali basati sulla situazione attuale del docente. Sii conciso, pratico e utile. Usa emoji appropriate.'
+                        },
+                        {
+                            role: 'user',
+                            content: `Basandoti su questo contesto, dammi 3-4 suggerimenti pratici per la giornata:\n\n${contextText}\n\nSuggerimenti (uno per riga, massimo 2 frasi ciascuno):`
+                        }
+                    ],
+                    max_tokens: 300,
+                    temperature: 0.7
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const aiText = data.choices[0]?.message?.content || '';
+            
+            // Parse suggestions (split by newlines, filter empty)
+            const suggestions = aiText
+                .split('\n')
+                .filter(line => line.trim() && !line.match(/^(Suggerimenti|Ecco|Basandoti)/i))
+                .map(line => line.replace(/^[-•*]\s*/, '').trim())
+                .filter(s => s.length > 10);
+            
+            if (suggestions.length === 0) {
+                throw new Error('No suggestions generated');
+            }
+            
+            // Render suggestions
+            suggestionsContainer.innerHTML = `
+                <div class="ai-suggestions-list">
+                    ${suggestions.map((suggestion, index) => `
+                        <div class="ai-suggestion-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: flex-start;">
+                                <div style="flex: 0 0 30px; font-size: 1.2em; margin-right: 10px;">💡</div>
+                                <div style="flex: 1; line-height: 1.5;">${suggestion}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="font-size: 0.85em; color: #999; margin-top: 15px; text-align: center;">
+                    Suggerimenti generati dall'IA • <a href="#" onclick="app.refreshAISuggestions(); return false;" style="color: #4a90e2;">Aggiorna</a>
+                </p>
+            `;
+            
+        } catch (error) {
+            console.error('Error generating AI suggestions:', error);
+            suggestionsContainer.innerHTML = `
+                <div style="padding: 20px; background: #f8d7da; border-radius: 8px; border-left: 4px solid #dc3545;">
+                    <p style="margin: 0; color: #721c24;">
+                        <strong>⚠️ Errore</strong><br>
+                        Non è stato possibile generare i suggerimenti. Riprova più tardi.
+                    </p>
+                </div>
+            `;
+        }
+    }
+    
+    refreshAISuggestions() {
+        this.renderAIContextualSuggestions();
     }
 
     // Class Management methods

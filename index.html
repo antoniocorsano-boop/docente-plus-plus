@@ -247,6 +247,23 @@
                     📋 Vai all'Orario Completo
                 </button>
             </div>
+            
+            <!-- Things To Do Section -->
+            <div class="things-to-do-section" style="margin-top: 30px;">
+                <h3>✅ Cose da Fare Oggi</h3>
+                <div id="today-tasks-preview"></div>
+            </div>
+            
+            <!-- AI Contextual Suggestions -->
+            <div class="ai-suggestions-section" style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>🤖 Suggerimenti dell'Assistente IA</h3>
+                    <button class="btn btn-sm btn-secondary" onclick="app.refreshAISuggestions()" style="font-size: 0.9em;">
+                        🔄 Aggiorna
+                    </button>
+                </div>
+                <div id="ai-contextual-suggestions"></div>
+            </div>
         </div>
 
         <!-- Lessons Tab -->
