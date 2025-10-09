@@ -60,6 +60,17 @@ class DocentePlusPlus {
         this.lessonSessions = []; // Active lesson sessions with student evaluations
         this.currentLessonSession = null; // Currently active lesson session
         
+        // Backup & Restore Module
+        this.backups = []; // Stored backups metadata
+        this.backupSettings = {
+            frequency: 'weekly', // never, daily, weekly, monthly
+            lastBackupDate: null,
+            nextBackupDate: null
+        };
+        this.backupTimer = null;
+        this.MAX_BACKUPS = 10; // Maximum number of backups to keep
+        this.BACKUP_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+        
         this.init();
     }
 
@@ -106,6 +117,9 @@ class DocentePlusPlus {
         // Initialize notification system
         this.requestNotificationPermission();
         this.startNotificationChecks();
+        
+        // Initialize backup system
+        this.initBackupSystem();
         
         console.log('Docente++ initialized successfully');
     }
@@ -611,13 +625,19 @@ class DocentePlusPlus {
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        const tabButton = document.querySelector(`[data-tab="${tabName}"]`);
+        if (tabButton) {
+            tabButton.classList.add('active');
+        }
 
         // Update active content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        document.getElementById(tabName).classList.add('active');
+        const tabContent = document.getElementById(tabName);
+        if (tabContent) {
+            tabContent.classList.add('active');
+        }
 
         // Update header style based on active tab
         const header = document.querySelector('header');
@@ -632,6 +652,12 @@ class DocentePlusPlus {
         // Refresh notifications when switching to notifications tab
         if (tabName === 'notifications') {
             this.renderNotifications();
+        }
+        
+        // Initialize backup list when switching to backup-restore tab
+        if (tabName === 'backup-restore') {
+            this.renderBackupList();
+            this.updateBackupScheduleInfo();
         }
     }
 
@@ -3729,6 +3755,8 @@ this.renderHome();
         localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
         localStorage.setItem('docente-plus-rss-feeds', JSON.stringify(this.rssFeeds));
         localStorage.setItem('docente-plus-news-items', JSON.stringify(this.newsItems));
+        localStorage.setItem('docente-plus-backups', JSON.stringify(this.backups));
+        localStorage.setItem('docente-plus-backup-settings', JSON.stringify(this.backupSettings));
     }
 
     loadData() {
@@ -3877,6 +3905,27 @@ this.renderHome();
             } catch (e) {
                 console.error('Error loading news items:', e);
                 this.newsItems = [];
+            }
+        }
+
+        // Load backups metadata
+        const backupsData = localStorage.getItem('docente-plus-backups');
+        if (backupsData) {
+            try {
+                this.backups = JSON.parse(backupsData);
+            } catch (e) {
+                console.error('Error loading backups:', e);
+                this.backups = [];
+            }
+        }
+
+        // Load backup settings
+        const backupSettingsData = localStorage.getItem('docente-plus-backup-settings');
+        if (backupSettingsData) {
+            try {
+                this.backupSettings = JSON.parse(backupSettingsData);
+            } catch (e) {
+                console.error('Error loading backup settings:', e);
             }
         }
     }
@@ -4677,6 +4726,638 @@ this.renderHome();
         };
         
         input.click();
+    }
+
+    // Backup & Restore Management Methods
+    
+    /**
+     * Initialize backup system
+     */
+    initBackupSystem() {
+        this.loadBackupSettings();
+        this.renderBackupList();
+        this.startBackupScheduler();
+    }
+
+    /**
+     * Load backup settings from localStorage
+     */
+    loadBackupSettings() {
+        const frequencySelect = document.getElementById('backup-frequency');
+        if (frequencySelect && this.backupSettings.frequency) {
+            frequencySelect.value = this.backupSettings.frequency;
+        }
+        this.updateBackupScheduleInfo();
+    }
+
+    /**
+     * Create a manual backup
+     */
+    async createManualBackup() {
+        try {
+            const backupData = this.collectBackupData();
+            const backupId = `backup-${Date.now()}`;
+            const backupDate = new Date().toISOString();
+            
+            // Calculate backup size
+            const backupString = JSON.stringify(backupData);
+            const backupSize = new Blob([backupString]).size;
+            
+            // Store backup metadata
+            const backupMetadata = {
+                id: backupId,
+                name: `Backup Manuale - ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}`,
+                date: backupDate,
+                size: backupSize,
+                type: 'manual',
+                data: backupData
+            };
+            
+            this.backups.unshift(backupMetadata);
+            
+            // Keep only last MAX_BACKUPS backups
+            if (this.backups.length > this.MAX_BACKUPS) {
+                this.backups = this.backups.slice(0, this.MAX_BACKUPS);
+            }
+            
+            this.backupSettings.lastBackupDate = backupDate;
+            this.saveData();
+            this.renderBackupList();
+            this.updateBackupScheduleInfo();
+            
+            // Show success notification
+            this.createNotification({
+                title: '✅ Backup Creato',
+                message: 'Il backup è stato creato con successo',
+                type: 'system',
+                notificationId: `backup-created-${Date.now()}`
+            });
+            
+            // Show visual feedback
+            this.showTemporaryMessage('Backup creato con successo! 💾', 'success');
+            
+        } catch (error) {
+            console.error('Error creating backup:', error);
+            this.showTemporaryMessage('Errore durante la creazione del backup', 'error');
+        }
+    }
+
+    /**
+     * Create scheduled backup
+     */
+    async createScheduledBackup() {
+        if (this.backupSettings.frequency === 'never') {
+            return;
+        }
+        
+        const now = new Date();
+        const lastBackup = this.backupSettings.lastBackupDate ? new Date(this.backupSettings.lastBackupDate) : null;
+        
+        // Check if backup is needed
+        let shouldBackup = false;
+        
+        if (!lastBackup) {
+            shouldBackup = true;
+        } else {
+            const hoursSinceLastBackup = (now - lastBackup) / (1000 * 60 * 60);
+            
+            switch (this.backupSettings.frequency) {
+                case 'daily':
+                    shouldBackup = hoursSinceLastBackup >= 24;
+                    break;
+                case 'weekly':
+                    shouldBackup = hoursSinceLastBackup >= 168; // 7 days
+                    break;
+                case 'monthly':
+                    shouldBackup = hoursSinceLastBackup >= 720; // 30 days
+                    break;
+            }
+        }
+        
+        if (shouldBackup) {
+            try {
+                const backupData = this.collectBackupData();
+                const backupId = `backup-auto-${Date.now()}`;
+                const backupDate = new Date().toISOString();
+                
+                const backupString = JSON.stringify(backupData);
+                const backupSize = new Blob([backupString]).size;
+                
+                const backupMetadata = {
+                    id: backupId,
+                    name: `Backup Automatico - ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}`,
+                    date: backupDate,
+                    size: backupSize,
+                    type: 'scheduled',
+                    data: backupData
+                };
+                
+                this.backups.unshift(backupMetadata);
+                
+                if (this.backups.length > this.MAX_BACKUPS) {
+                    this.backups = this.backups.slice(0, this.MAX_BACKUPS);
+                }
+                
+                this.backupSettings.lastBackupDate = backupDate;
+                this.saveData();
+                this.renderBackupList();
+                this.updateBackupScheduleInfo();
+                
+                this.createNotification({
+                    title: '✅ Backup Automatico Completato',
+                    message: 'Il backup programmato è stato creato con successo',
+                    type: 'system',
+                    notificationId: `auto-backup-${Date.now()}`
+                });
+                
+            } catch (error) {
+                console.error('Error creating scheduled backup:', error);
+            }
+        }
+    }
+
+    /**
+     * Collect all data for backup
+     */
+    collectBackupData() {
+        return {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            lessons: this.lessons,
+            students: this.students,
+            classes: this.classes,
+            subjects: this.subjects,
+            activities: this.activities,
+            schedule: this.schedule,
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations,
+            notifications: this.notifications,
+            reminders: this.reminders,
+            notificationSettings: this.notificationSettings,
+            rssFeeds: this.rssFeeds,
+            newsItems: this.newsItems,
+            teacherProfile: {
+                firstName: localStorage.getItem('teacher-first-name'),
+                lastName: localStorage.getItem('teacher-last-name'),
+                email: localStorage.getItem('teacher-email'),
+                schoolLevel: localStorage.getItem('school-level'),
+                schoolName: localStorage.getItem('school-name'),
+                schoolYear: localStorage.getItem('school-year'),
+                schoolYearStart: localStorage.getItem('school-year-start'),
+                schoolYearEnd: localStorage.getItem('school-year-end')
+            }
+        };
+    }
+
+    /**
+     * Download backup as file
+     */
+    async downloadBackup(backupId, format = 'json') {
+        const backup = this.backups.find(b => b.id === backupId);
+        if (!backup) {
+            this.showTemporaryMessage('Backup non trovato', 'error');
+            return;
+        }
+        
+        if (format === 'zip') {
+            await this.downloadBackupAsZip(backup);
+        } else {
+            this.downloadBackupAsJson(backup);
+        }
+    }
+
+    /**
+     * Download backup as JSON file
+     */
+    downloadBackupAsJson(backup) {
+        const dataStr = JSON.stringify(backup.data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `docente-plus-backup-${new Date(backup.date).toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        
+        this.showTemporaryMessage('Backup scaricato! 📥', 'success');
+    }
+
+    /**
+     * Download backup as ZIP file
+     */
+    async downloadBackupAsZip(backup) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            console.error('JSZip library not available');
+            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
+            return;
+        }
+        
+        try {
+            const zip = new JSZip();
+            
+            // Add main backup data
+            zip.file('backup-data.json', JSON.stringify(backup.data, null, 2));
+            
+            // Add metadata
+            const metadata = {
+                backupId: backup.id,
+                backupName: backup.name,
+                backupDate: backup.date,
+                backupType: backup.type,
+                version: '1.0'
+            };
+            zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+            
+            // Add readme
+            const readme = `# Backup Docente++
+
+Backup creato il: ${new Date(backup.date).toLocaleString('it-IT')}
+Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
+
+## Contenuto del Backup
+
+- backup-data.json: Tutti i dati dell'applicazione
+- metadata.json: Informazioni sul backup
+
+## Come Ripristinare
+
+1. Apri Docente++ nel browser
+2. Vai alla sezione "Backup & Ripristino"
+3. Clicca su "Ripristina da File"
+4. Seleziona questo file ZIP o il file backup-data.json
+5. Conferma il ripristino
+
+**Attenzione**: Il ripristino sovrascriverà tutti i dati attuali.
+`;
+            zip.file('README.txt', readme);
+            
+            // Generate ZIP
+            const content = await zip.generateAsync({ type: 'blob' });
+            
+            // Download
+            const url = URL.createObjectURL(content);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `docente-plus-backup-${new Date(backup.date).toISOString().split('T')[0]}.zip`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            this.showTemporaryMessage('Backup ZIP scaricato! 📦', 'success');
+            
+        } catch (error) {
+            console.error('Error creating ZIP:', error);
+            this.showTemporaryMessage('Errore durante la creazione del file ZIP', 'error');
+        }
+    }
+
+    /**
+     * Show restore backup dialog
+     */
+    showRestoreBackupDialog() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json,.zip';
+        
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (file.name.endsWith('.zip')) {
+                await this.restoreFromZipFile(file);
+            } else {
+                await this.restoreFromJsonFile(file);
+            }
+        };
+        
+        input.click();
+    }
+
+    /**
+     * Restore backup from JSON file
+     */
+    async restoreFromJsonFile(file) {
+        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                await this.restoreBackupData(data);
+                this.showTemporaryMessage('Ripristino completato! 🎉', 'success');
+            } catch (error) {
+                console.error('Error restoring backup:', error);
+                this.showTemporaryMessage('Errore durante il ripristino del backup', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    /**
+     * Restore backup from ZIP file
+     */
+    async restoreFromZipFile(file) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            console.error('JSZip library not available');
+            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
+            return;
+        }
+        
+        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
+            return;
+        }
+        
+        try {
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(file);
+            const backupDataFile = contents.file('backup-data.json');
+            
+            if (!backupDataFile) {
+                throw new Error('File ZIP non valido: backup-data.json non trovato');
+            }
+            
+            const backupDataStr = await backupDataFile.async('string');
+            const data = JSON.parse(backupDataStr);
+            
+            await this.restoreBackupData(data);
+            this.showTemporaryMessage('Ripristino da ZIP completato! 🎉', 'success');
+            
+        } catch (error) {
+            console.error('Error restoring from ZIP:', error);
+            this.showTemporaryMessage('Errore durante il ripristino dal file ZIP', 'error');
+        }
+    }
+
+    /**
+     * Restore backup data
+     */
+    async restoreBackupData(data) {
+        // Restore all data
+        if (data.lessons) this.lessons = data.lessons;
+        if (data.students) this.students = data.students;
+        if (data.classes) this.classes = data.classes;
+        if (data.subjects) {
+            this.subjects = data.subjects;
+            localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
+        }
+        if (data.activities) this.activities = data.activities;
+        if (data.schedule) this.schedule = data.schedule;
+        if (data.evaluationCriteria) this.evaluationCriteria = data.evaluationCriteria;
+        if (data.evaluationGrids) this.evaluationGrids = data.evaluationGrids;
+        if (data.evaluations) this.evaluations = data.evaluations;
+        if (data.notifications) this.notifications = data.notifications;
+        if (data.reminders) this.reminders = data.reminders;
+        if (data.notificationSettings) this.notificationSettings = data.notificationSettings;
+        if (data.rssFeeds) this.rssFeeds = data.rssFeeds;
+        if (data.newsItems) this.newsItems = data.newsItems;
+        
+        // Restore teacher profile
+        if (data.teacherProfile) {
+            const profile = data.teacherProfile;
+            if (profile.firstName) localStorage.setItem('teacher-first-name', profile.firstName);
+            if (profile.lastName) localStorage.setItem('teacher-last-name', profile.lastName);
+            if (profile.email) localStorage.setItem('teacher-email', profile.email);
+            if (profile.schoolLevel) localStorage.setItem('school-level', profile.schoolLevel);
+            if (profile.schoolName) localStorage.setItem('school-name', profile.schoolName);
+            if (profile.schoolYear) localStorage.setItem('school-year', profile.schoolYear);
+            if (profile.schoolYearStart) localStorage.setItem('school-year-start', profile.schoolYearStart);
+            if (profile.schoolYearEnd) localStorage.setItem('school-year-end', profile.schoolYearEnd);
+        }
+        
+        // Save and re-render
+        this.saveData();
+        this.renderLessons();
+        this.renderStudents();
+        this.renderClasses();
+        this.renderActivities();
+        this.renderSchedule();
+        this.renderEvaluations();
+        this.renderNotifications();
+        this.renderFeeds();
+        this.renderNews();
+        this.updateClassSelectors();
+        this.loadSettings();
+        this.renderHome();
+        
+        // Create notification
+        this.createNotification({
+            title: '✅ Ripristino Completato',
+            message: 'I dati sono stati ripristinati con successo dal backup',
+            type: 'system',
+            notificationId: `restore-success-${Date.now()}`
+        });
+    }
+
+    /**
+     * Restore backup from stored backup
+     */
+    async restoreStoredBackup(backupId) {
+        const backup = this.backups.find(b => b.id === backupId);
+        if (!backup) {
+            this.showTemporaryMessage('Backup non trovato', 'error');
+            return;
+        }
+        
+        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
+            return;
+        }
+        
+        try {
+            await this.restoreBackupData(backup.data);
+            this.showTemporaryMessage('Ripristino completato! 🎉', 'success');
+        } catch (error) {
+            console.error('Error restoring backup:', error);
+            this.showTemporaryMessage('Errore durante il ripristino del backup', 'error');
+        }
+    }
+
+    /**
+     * Delete a backup
+     */
+    deleteBackup(backupId) {
+        if (!confirm('Sei sicuro di voler eliminare questo backup?')) {
+            return;
+        }
+        
+        this.backups = this.backups.filter(b => b.id !== backupId);
+        this.saveData();
+        this.renderBackupList();
+        this.showTemporaryMessage('Backup eliminato', 'info');
+    }
+
+    /**
+     * Update backup schedule
+     */
+    updateBackupSchedule() {
+        const frequencySelect = document.getElementById('backup-frequency');
+        if (frequencySelect) {
+            this.backupSettings.frequency = frequencySelect.value;
+            this.saveData();
+            this.updateBackupScheduleInfo();
+            this.showTemporaryMessage('Impostazioni backup aggiornate', 'success');
+        }
+    }
+
+    /**
+     * Update backup schedule info display
+     */
+    updateBackupScheduleInfo() {
+        const infoDiv = document.getElementById('backup-schedule-info');
+        if (!infoDiv) return;
+        
+        let infoText = '';
+        const lastBackup = this.backupSettings.lastBackupDate 
+            ? new Date(this.backupSettings.lastBackupDate).toLocaleString('it-IT')
+            : 'Mai';
+        
+        if (this.backupSettings.frequency === 'never') {
+            infoText = '🔴 Backup automatico disattivato. Ultimo backup: ' + lastBackup;
+        } else {
+            let nextBackupText = '';
+            if (this.backupSettings.lastBackupDate) {
+                const lastDate = new Date(this.backupSettings.lastBackupDate);
+                const now = new Date();
+                let nextDate = new Date(lastDate);
+                
+                switch (this.backupSettings.frequency) {
+                    case 'daily':
+                        nextDate.setDate(nextDate.getDate() + 1);
+                        break;
+                    case 'weekly':
+                        nextDate.setDate(nextDate.getDate() + 7);
+                        break;
+                    case 'monthly':
+                        nextDate.setMonth(nextDate.getMonth() + 1);
+                        break;
+                }
+                
+                if (nextDate <= now) {
+                    nextBackupText = 'Prossimo backup: Al prossimo caricamento dell\'app';
+                } else {
+                    nextBackupText = 'Prossimo backup: ' + nextDate.toLocaleString('it-IT');
+                }
+            } else {
+                nextBackupText = 'Prossimo backup: Al prossimo caricamento dell\'app';
+            }
+            
+            infoText = `🟢 Backup automatico attivo (${this.backupSettings.frequency}). Ultimo backup: ${lastBackup}. ${nextBackupText}`;
+        }
+        
+        infoDiv.innerHTML = infoText;
+    }
+
+    /**
+     * Start backup scheduler
+     */
+    startBackupScheduler() {
+        // Clear existing timer
+        if (this.backupTimer) {
+            clearInterval(this.backupTimer);
+        }
+        
+        // Check for scheduled backup on load
+        this.createScheduledBackup();
+        
+        // Set up periodic check (every hour)
+        this.backupTimer = setInterval(() => {
+            this.createScheduledBackup();
+        }, this.BACKUP_CHECK_INTERVAL);
+    }
+
+    /**
+     * Render backup list
+     */
+    renderBackupList() {
+        const listDiv = document.getElementById('backup-list');
+        if (!listDiv) return;
+        
+        if (this.backups.length === 0) {
+            listDiv.innerHTML = `
+                <div class="backup-empty-state">
+                    <div class="empty-icon">📂</div>
+                    <p>Nessun backup disponibile</p>
+                    <p style="font-size: 14px; margin-top: 10px;">Crea il tuo primo backup usando il pulsante "Crea Backup Ora"</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const backupsHtml = this.backups.map(backup => {
+            const date = new Date(backup.date);
+            const formattedDate = date.toLocaleDateString('it-IT');
+            const formattedTime = date.toLocaleTimeString('it-IT');
+            const sizeInKB = (backup.size / 1024).toFixed(2);
+            const typeIcon = backup.type === 'manual' ? '👤' : '⏰';
+            const typeName = backup.type === 'manual' ? 'Manuale' : 'Automatico';
+            
+            return `
+                <div class="backup-item">
+                    <div class="backup-item-info">
+                        <div class="backup-item-name">${typeIcon} ${backup.name}</div>
+                        <div class="backup-item-meta">
+                            <span>📅 ${formattedDate} ${formattedTime}</span>
+                            <span>💾 ${sizeInKB} KB</span>
+                            <span>🏷️ ${typeName}</span>
+                        </div>
+                    </div>
+                    <div class="backup-item-actions">
+                        <button class="btn-download" onclick="app.downloadBackup('${backup.id}', 'json')" title="Scarica come JSON">
+                            📥 JSON
+                        </button>
+                        <button class="btn-download" onclick="app.downloadBackup('${backup.id}', 'zip')" title="Scarica come ZIP">
+                            📦 ZIP
+                        </button>
+                        <button class="btn-restore" onclick="app.restoreStoredBackup('${backup.id}')" title="Ripristina questo backup">
+                            ♻️ Ripristina
+                        </button>
+                        <button class="btn-delete" onclick="app.deleteBackup('${backup.id}')" title="Elimina questo backup">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        listDiv.innerHTML = backupsHtml;
+    }
+
+    /**
+     * Show temporary message
+     */
+    showTemporaryMessage(message, type = 'info') {
+        // Create a temporary toast message
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${type === 'success' ? '#50c878' : type === 'error' ? '#e74c3c' : '#4a90e2'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: 500;
+            animation: slideInRight 0.3s ease;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
     }
 
     // Notification Management Methods
