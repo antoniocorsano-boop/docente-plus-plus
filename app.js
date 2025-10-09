@@ -68,6 +68,8 @@ class DocentePlusPlus {
             nextBackupDate: null
         };
         this.backupTimer = null;
+        this.MAX_BACKUPS = 10; // Maximum number of backups to keep
+        this.BACKUP_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
         
         this.init();
     }
@@ -4540,9 +4542,9 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             
             this.backups.unshift(backupMetadata);
             
-            // Keep only last 10 backups
-            if (this.backups.length > 10) {
-                this.backups = this.backups.slice(0, 10);
+            // Keep only last MAX_BACKUPS backups
+            if (this.backups.length > this.MAX_BACKUPS) {
+                this.backups = this.backups.slice(0, this.MAX_BACKUPS);
             }
             
             this.backupSettings.lastBackupDate = backupDate;
@@ -4619,8 +4621,8 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
                 
                 this.backups.unshift(backupMetadata);
                 
-                if (this.backups.length > 10) {
-                    this.backups = this.backups.slice(0, 10);
+                if (this.backups.length > this.MAX_BACKUPS) {
+                    this.backups = this.backups.slice(0, this.MAX_BACKUPS);
                 }
                 
                 this.backupSettings.lastBackupDate = backupDate;
@@ -4714,6 +4716,13 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
      * Download backup as ZIP file
      */
     async downloadBackupAsZip(backup) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            console.error('JSZip library not available');
+            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
+            return;
+        }
+        
         try {
             const zip = new JSZip();
             
@@ -4821,6 +4830,13 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
      * Restore backup from ZIP file
      */
     async restoreFromZipFile(file) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            console.error('JSZip library not available');
+            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
+            return;
+        }
+        
         if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
             return;
         }
@@ -5019,7 +5035,7 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         // Set up periodic check (every hour)
         this.backupTimer = setInterval(() => {
             this.createScheduledBackup();
-        }, 60 * 60 * 1000); // 1 hour
+        }, this.BACKUP_CHECK_INTERVAL);
     }
 
     /**
