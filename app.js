@@ -75,6 +75,12 @@ class DocentePlusPlus {
         // Set up event listeners
         this.setupEventListeners();
         
+        // Set initial header style (minimal for dashboard)
+        const header = document.querySelector('header');
+        if (header) {
+            header.classList.add('minimal');
+        }
+        
         // Render initial data
         this.renderDashboard();
         this.renderLessons();
@@ -429,6 +435,16 @@ class DocentePlusPlus {
             content.classList.remove('active');
         });
         document.getElementById(tabName).classList.add('active');
+
+        // Update header style based on active tab
+        const header = document.querySelector('header');
+        if (header) {
+            if (tabName === 'settings') {
+                header.classList.remove('minimal');
+            } else {
+                header.classList.add('minimal');
+            }
+        }
 
         // Refresh notifications when switching to notifications tab
         if (tabName === 'notifications') {
