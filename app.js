@@ -595,7 +595,7 @@ class DocentePlusPlus {
         previewContainer.innerHTML = `
             <div class="tasks-list">
                 ${tasks.map(task => `
-                    <div class="task-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${task.color}; ${task.action ? 'cursor: pointer;' : ''}" ${task.action ? `onclick="app.${task.type}Action()"` : ''}>
+                    <div class="task-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${task.color}; ${task.action ? 'cursor: pointer;' : ''}" ${task.action ? `onclick="app.handleTaskAction('${task.type}')"` : ''}>
                         <div style="flex: 0 0 40px; font-size: 1.5em;">${task.icon}</div>
                         <div style="flex: 1;">
                             <div style="font-weight: 500; color: #2c3e50;">${task.title}</div>
@@ -607,8 +607,26 @@ class DocentePlusPlus {
         `;
     }
     
+    handleTaskAction(taskType) {
+        // Centralized handler for task actions
+        switch(taskType) {
+            case 'evaluation':
+                this.switchTab('evaluations');
+                break;
+            case 'activity':
+                this.switchTab('activities');
+                break;
+            case 'reminder':
+                this.switchTab('notifications');
+                break;
+            default:
+                console.warn('Unknown task type:', taskType);
+        }
+    }
+    
     evaluationAction() {
-        this.switchTab('evaluations');
+        // Legacy method - redirects to centralized handler
+        this.handleTaskAction('evaluation');
     }
     
     async renderAIContextualSuggestions() {
@@ -723,11 +741,18 @@ class DocentePlusPlus {
             const aiText = data.choices[0]?.message?.content || '';
             
             // Parse suggestions (split by newlines, filter empty)
+            // More robust parsing that handles various AI response formats
             const suggestions = aiText
                 .split('\n')
-                .filter(line => line.trim() && !line.match(/^(Suggerimenti|Ecco|Basandoti)/i))
-                .map(line => line.replace(/^[-•*]\s*/, '').trim())
-                .filter(s => s.length > 10);
+                .filter(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return false;
+                    // Skip common AI intro phrases (multilingual support)
+                    if (trimmed.match(/^(suggerimenti|ecco|basandoti|here|suggestions|voici)/i)) return false;
+                    return true;
+                })
+                .map(line => line.replace(/^[-•*]\s*/, '').replace(/^\d+[\.)]\s*/, '').trim())
+                .filter(s => s.length > 10 && s.length < 200); // Reasonable length bounds
             
             if (suggestions.length === 0) {
                 throw new Error('No suggestions generated');
