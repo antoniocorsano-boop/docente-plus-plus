@@ -1084,6 +1084,19 @@
                         <small>ID del modello OpenRouter da utilizzare (default: alibaba/tongyi-deepresearch-30b-a3b)</small>
                     </div>
 
+                    <h3 style="margin-top: 30px;">🤖 Agente IA Floating</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ai-fab-enabled" checked>
+                            Mostra Agente IA Floating
+                        </label>
+                        <small>Attiva/disattiva il pulsante dell'agente IA sempre visibile</small>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary" onclick="app.resetAIFABPosition()">🔄 Ripristina Posizione Agente IA</button>
+                        <small>Riporta l'agente IA alla posizione predefinita (in basso a destra)</small>
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
                 </form>
                 <div style="margin-top: 20px;">
@@ -1095,37 +1108,38 @@
     </div>
 
     <!-- Floating AI Agent Button -->
-    <div id="ai-fab" class="ai-fab" onclick="app.toggleAIAgentModal()" title="Apri Agente IA per analisi news">
+    <div id="ai-fab" class="ai-fab" onclick="app.toggleAIAgentModal()" title="Apri Agente IA Contestuale">
         🤖
     </div>
 
-    <!-- AI Agent Modal for News Analysis -->
+    <!-- AI Agent Modal for Contextual Analysis -->
     <div id="ai-agent-modal" class="modal" style="display: none;">
         <div class="modal-content ai-agent-content">
             <div class="modal-header">
-                <h2>🤖 Agente IA - Analisi Contestuale News</h2>
+                <h2 id="ai-agent-modal-title">🤖 Agente IA - Assistente Contestuale</h2>
                 <button class="close-btn" onclick="app.closeAIAgentModal()">✕</button>
             </div>
             
             <div class="ai-agent-body">
-                <div class="form-group">
+                <div id="ai-agent-context-info" class="ai-context-info">
+                    <p><strong>Sezione corrente:</strong> <span id="ai-current-section">Dashboard</span></p>
+                </div>
+
+                <div class="form-group" id="ai-agent-url-group">
                     <label for="ai-agent-news-url">URL News da Analizzare:</label>
                     <input type="url" id="ai-agent-news-url" placeholder="https://esempio.com/news-articolo" />
                     <small>Inserisci l'URL della news per l'analisi contestuale</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="ai-agent-context">Richiesta Specifica (opzionale):</label>
-                    <textarea id="ai-agent-context" rows="3" placeholder="es. Estrai le date importanti e crea promemoria per le scadenze"></textarea>
-                    <small>Specifica cosa vuoi che l'agente analizzi o faccia</small>
+                    <label for="ai-agent-context">Richiesta per l'Agente IA:</label>
+                    <textarea id="ai-agent-context" rows="4" placeholder="es. Aiutami a creare una programmazione didattica per questa settimana"></textarea>
+                    <small id="ai-agent-context-help">Specifica cosa vuoi che l'agente faccia nella sezione corrente</small>
                 </div>
 
-                <div class="ai-agent-suggestions">
-                    <p><strong>Analisi disponibili:</strong></p>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai tutte le date e scadenze menzionate')">📅 Date e Scadenze</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Identifica documenti e allegati da scaricare')">📎 Documenti</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Estrai soggetti coinvolti e destinatari')">👥 Soggetti</button>
-                    <button class="suggestion-btn" onclick="app.setAIAgentPrompt('Crea un riepilogo e proponi azioni da intraprendere')">📋 Riepilogo e Azioni</button>
+                <div class="ai-agent-suggestions" id="ai-agent-suggestions">
+                    <p><strong>Suggerimenti contestuali:</strong></p>
+                    <div id="ai-suggestions-buttons"></div>
                 </div>
 
                 <div class="ai-agent-results" id="ai-agent-results" style="display: none;">

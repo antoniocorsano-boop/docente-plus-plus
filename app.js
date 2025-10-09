@@ -18,6 +18,9 @@ class DocentePlusPlus {
         this.reminders = [];
         this.activities = [];
         this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
+        this.currentActiveTab = 'dashboard'; // Track current active tab for AI context
+        this.aiFabEnabled = true; // AI FAB visibility setting
+        this.aiFabPosition = null; // AI FAB custom position
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -87,6 +90,9 @@ class DocentePlusPlus {
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
+        
+        // Initialize AI FAB
+        this.initializeAIFAB();
         
         // Initialize notification system
         this.requestNotificationPermission();
@@ -399,6 +405,9 @@ class DocentePlusPlus {
     }
 
     switchTab(tabName) {
+        // Update current active tab for AI context
+        this.currentActiveTab = tabName;
+        
         // Update active button
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
@@ -2954,6 +2963,12 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         // Save subjects
         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
 
+        // Save AI FAB settings
+        const aiFabEnabled = document.getElementById('ai-fab-enabled').checked;
+        localStorage.setItem('ai-fab-enabled', JSON.stringify(aiFabEnabled));
+        this.aiFabEnabled = aiFabEnabled;
+        this.updateAIFABVisibility();
+
         this.renderDashboard();
         alert('Impostazioni salvate con successo!');
     }
@@ -3016,6 +3031,21 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             } catch (e) {
                 console.error('Error loading subjects:', e);
                 this.subjects = [];
+            }
+        }
+
+        // Load AI FAB settings
+        const aiFabEnabledData = localStorage.getItem('ai-fab-enabled');
+        if (aiFabEnabledData !== null) {
+            try {
+                this.aiFabEnabled = JSON.parse(aiFabEnabledData);
+                const aiFabCheckbox = document.getElementById('ai-fab-enabled');
+                if (aiFabCheckbox) {
+                    aiFabCheckbox.checked = this.aiFabEnabled;
+                }
+            } catch (e) {
+                console.error('Error loading AI FAB settings:', e);
+                this.aiFabEnabled = true;
             }
         }
 
@@ -6066,7 +6096,54 @@ Rispondi SOLO in formato JSON con questa struttura:
     toggleAIAgentModal() {
         const modal = document.getElementById('ai-agent-modal');
         if (modal) {
-            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+            const isOpening = modal.style.display === 'none';
+            modal.style.display = isOpening ? 'flex' : 'none';
+            
+            if (isOpening) {
+                // Update modal content based on current context
+                this.updateAIModalContext();
+            }
+        }
+    }
+
+    updateAIModalContext() {
+        const currentTab = this.currentActiveTab;
+        
+        // Update modal title
+        const titleElement = document.getElementById('ai-agent-modal-title');
+        if (titleElement) {
+            titleElement.textContent = this.getContextualTitle(currentTab);
+        }
+
+        // Update current section display
+        const sectionElement = document.getElementById('ai-current-section');
+        if (sectionElement) {
+            sectionElement.textContent = this.getSectionName(currentTab);
+        }
+
+        // Update contextual suggestions
+        const suggestionsContainer = document.getElementById('ai-suggestions-buttons');
+        if (suggestionsContainer) {
+            const suggestions = this.getContextualSuggestions(currentTab);
+            suggestionsContainer.innerHTML = suggestions.map(s => 
+                `<button class="suggestion-btn" onclick="app.setAIAgentPrompt('${s.prompt.replace(/'/g, "\\'")}')">${s.icon} ${s.text}</button>`
+            ).join('');
+        }
+
+        // Show/hide URL input based on section (only show for news)
+        const urlGroup = document.getElementById('ai-agent-url-group');
+        if (urlGroup) {
+            urlGroup.style.display = currentTab === 'news' ? 'block' : 'none';
+        }
+
+        // Update context help text
+        const contextHelp = document.getElementById('ai-agent-context-help');
+        if (contextHelp) {
+            if (currentTab === 'news') {
+                contextHelp.textContent = 'Specifica cosa vuoi che l\'agente analizzi dalla news';
+            } else {
+                contextHelp.textContent = `Specifica cosa vuoi che l'agente faccia per aiutarti in questa sezione`;
+            }
         }
     }
 
@@ -6094,9 +6171,16 @@ Rispondi SOLO in formato JSON con questa struttura:
     async analyzeNewsWithAI() {
         const newsUrl = document.getElementById('ai-agent-news-url').value.trim();
         const context = document.getElementById('ai-agent-context').value.trim();
+        const currentTab = this.currentActiveTab;
 
-        if (!newsUrl) {
+        // For news tab, require URL. For other tabs, just need context
+        if (currentTab === 'news' && !newsUrl) {
             alert('Inserisci l\'URL della news da analizzare');
+            return;
+        }
+
+        if (!context) {
+            alert('Inserisci una richiesta per l\'agente IA');
             return;
         }
 
@@ -6117,11 +6201,14 @@ Rispondi SOLO in formato JSON con questa struttura:
         actionsDiv.style.display = 'none';
 
         try {
-            // Build the AI prompt
-            const prompt = `
+            let prompt = '';
+            
+            if (currentTab === 'news') {
+                // News-specific analysis
+                prompt = `
 Analizza la news disponibile al seguente URL: ${newsUrl}
 
-${context ? `Richiesta specifica: ${context}` : 'Estrai tutte le informazioni rilevanti per un docente.'}
+${context}
 
 Fornisci un'analisi strutturata con:
 1. 📅 DATE E SCADENZE: Identifica tutte le date importanti e scadenze menzionate
@@ -6132,7 +6219,27 @@ Fornisci un'analisi strutturata con:
 Per ogni azione consigliata, specifica il tipo (es. SCADENZA, PROMEMORIA, CIRCOLARE, ATTIVITÀ) e i dettagli necessari.
 
 Rispondi in italiano in modo chiaro e strutturato.
-            `;
+                `;
+            } else {
+                // Contextual analysis for other sections
+                const sectionContext = this.getContextForAI(currentTab);
+                prompt = `
+Sei un assistente IA per un'applicazione di gestione didattica per docenti.
+
+SEZIONE CORRENTE: ${this.getSectionName(currentTab)}
+
+CONTESTO:
+${sectionContext}
+
+RICHIESTA DEL DOCENTE:
+${context}
+
+Fornisci una risposta utile, pratica e specifica per aiutare il docente nella sezione corrente.
+Se possibile, suggerisci azioni concrete che può intraprendere nell'app.
+
+Rispondi in italiano in modo chiaro e strutturato.
+                `;
+            }
 
             const response = await this.callOpenRouterAPI(prompt, apiKey);
 
@@ -6140,13 +6247,30 @@ Rispondi in italiano in modo chiaro e strutturato.
                 resultsContent.innerHTML = response.content.replace(/\n/g, '<br>');
 
                 // Try to extract proposed actions from the response
-                this.extractProposedActions(response.content);
+                if (currentTab === 'news') {
+                    this.extractProposedActions(response.content);
+                }
             }
 
         } catch (error) {
-            console.error('Error analyzing news with AI:', error);
+            console.error('Error analyzing with AI:', error);
             resultsContent.innerHTML = `<div class="error-message">Errore nell'analisi: ${error.message}</div>`;
         }
+    }
+
+    getContextForAI(tab) {
+        // Provide context about current section to the AI
+        const contexts = {
+            'dashboard': 'Il docente è nella dashboard principale dove può vedere una panoramica generale delle attività, lezioni e studenti.',
+            'lessons': `Il docente sta gestendo le lezioni. Attualmente ci sono ${this.lessons.length} lezioni registrate.`,
+            'students': `Il docente sta gestendo gli studenti. Ci sono ${this.students.length} studenti totali nelle sue classi.`,
+            'grades': 'Il docente sta gestendo le valutazioni degli studenti.',
+            'schedule': 'Il docente sta visualizzando e pianificando l\'orario delle lezioni.',
+            'activities': `Il docente sta gestendo le attività didattiche. Ci sono ${this.activities.length} attività programmate.`,
+            'settings': 'Il docente sta configurando le impostazioni dell\'applicazione.'
+        };
+
+        return contexts[tab] || 'Il docente sta usando l\'applicazione di gestione didattica.';
     }
 
     extractProposedActions(aiResponse) {
@@ -6208,6 +6332,230 @@ Rispondi in italiano in modo chiaro e strutturato.
         // - Create a reminder, activity, or notification based on the type
         // - Save to the appropriate data structure
         // - Navigate to the relevant section
+    }
+
+    // ==========================================
+    // AI FAB MANAGEMENT
+    // ==========================================
+
+    initializeAIFAB() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        // Load saved position
+        const savedPosition = localStorage.getItem('ai-fab-position');
+        if (savedPosition) {
+            try {
+                this.aiFabPosition = JSON.parse(savedPosition);
+                fab.style.bottom = this.aiFabPosition.bottom;
+                fab.style.right = this.aiFabPosition.right;
+                fab.style.top = this.aiFabPosition.top || 'auto';
+                fab.style.left = this.aiFabPosition.left || 'auto';
+            } catch (e) {
+                console.error('Error loading AI FAB position:', e);
+            }
+        }
+
+        // Make FAB draggable
+        this.makeAIFABDraggable(fab);
+
+        // Update visibility based on settings
+        this.updateAIFABVisibility();
+    }
+
+    makeAIFABDraggable(fab) {
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        const startDrag = (e) => {
+            isDragging = true;
+            fab.classList.add('dragging');
+
+            // Get initial position
+            const rect = fab.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            // Get mouse/touch position
+            if (e.type === 'touchstart') {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+
+            e.preventDefault();
+        };
+
+        const drag = (e) => {
+            if (!isDragging) return;
+
+            let currentX, currentY;
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            const newLeft = initialLeft + deltaX;
+            const newTop = initialTop + deltaY;
+
+            // Update position
+            fab.style.left = `${newLeft}px`;
+            fab.style.top = `${newTop}px`;
+            fab.style.right = 'auto';
+            fab.style.bottom = 'auto';
+
+            e.preventDefault();
+        };
+
+        const endDrag = (e) => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            fab.classList.remove('dragging');
+
+            // Save position
+            const rect = fab.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Convert to bottom/right for consistency
+            const bottom = `${viewportHeight - rect.bottom}px`;
+            const right = `${viewportWidth - rect.right}px`;
+            const top = `${rect.top}px`;
+            const left = `${rect.left}px`;
+
+            this.aiFabPosition = { bottom, right, top, left };
+            localStorage.setItem('ai-fab-position', JSON.stringify(this.aiFabPosition));
+
+            e.preventDefault();
+        };
+
+        // Mouse events
+        fab.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        fab.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag, { passive: false });
+    }
+
+    updateAIFABVisibility() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        if (this.aiFabEnabled) {
+            fab.classList.remove('hidden');
+        } else {
+            fab.classList.add('hidden');
+        }
+    }
+
+    resetAIFABPosition() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        // Reset to default position
+        fab.style.bottom = '30px';
+        fab.style.right = '30px';
+        fab.style.top = 'auto';
+        fab.style.left = 'auto';
+
+        // Clear saved position
+        this.aiFabPosition = null;
+        localStorage.removeItem('ai-fab-position');
+
+        alert('Posizione dell\'Agente IA ripristinata!');
+    }
+
+    getContextualSuggestions(tab) {
+        const suggestions = {
+            'dashboard': [
+                { icon: '📊', text: 'Genera un riepilogo della settimana', prompt: 'Crea un riepilogo delle attività e lezioni programmate per questa settimana' },
+                { icon: '📋', text: 'Suggerisci priorità', prompt: 'Analizza le mie attività e suggerisci le priorità per oggi' },
+                { icon: '💡', text: 'Consigli didattici', prompt: 'Dammi consigli per migliorare l\'organizzazione della mia didattica' }
+            ],
+            'lessons': [
+                { icon: '📝', text: 'Pianifica lezione', prompt: 'Aiutami a pianificare una lezione coinvolgente' },
+                { icon: '🎯', text: 'Obiettivi didattici', prompt: 'Suggerisci obiettivi didattici per questa lezione' },
+                { icon: '⏱️', text: 'Gestione tempi', prompt: 'Come posso gestire meglio i tempi della lezione?' }
+            ],
+            'students': [
+                { icon: '📈', text: 'Analizza progressi', prompt: 'Analizza i progressi degli studenti e suggerisci interventi' },
+                { icon: '🎓', text: 'Strategie personalizzate', prompt: 'Suggerisci strategie didattiche personalizzate per studenti in difficoltà' },
+                { icon: '📊', text: 'Report classe', prompt: 'Genera un report sulla situazione generale della classe' }
+            ],
+            'grades': [
+                { icon: '📊', text: 'Analizza voti', prompt: 'Analizza la distribuzione dei voti e suggerisci interventi' },
+                { icon: '📉', text: 'Identifica criticità', prompt: 'Identifica gli studenti con criticità nelle valutazioni' },
+                { icon: '📝', text: 'Suggerimenti valutazione', prompt: 'Dammi consigli per una valutazione più equa e formativa' }
+            ],
+            'schedule': [
+                { icon: '📅', text: 'Ottimizza orario', prompt: 'Suggerisci come ottimizzare la distribuzione delle attività' },
+                { icon: '⏰', text: 'Gestione scadenze', prompt: 'Aiutami a gestire le scadenze imminenti' },
+                { icon: '📋', text: 'Pianificazione mensile', prompt: 'Crea una pianificazione didattica per il prossimo mese' }
+            ],
+            'activities': [
+                { icon: '✅', text: 'Priorità attività', prompt: 'Quale attività dovrei completare per prima?' },
+                { icon: '📝', text: 'Nuova attività', prompt: 'Aiutami a creare un\'attività didattica coinvolgente' },
+                { icon: '🎯', text: 'Obiettivi attività', prompt: 'Suggerisci obiettivi per le attività programmate' }
+            ],
+            'news': [
+                { icon: '📅', text: 'Date e Scadenze', prompt: 'Estrai tutte le date e scadenze menzionate' },
+                { icon: '📎', text: 'Documenti', prompt: 'Identifica documenti e allegati da scaricare' },
+                { icon: '👥', text: 'Soggetti', prompt: 'Estrai soggetti coinvolti e destinatari' },
+                { icon: '📋', text: 'Riepilogo e Azioni', prompt: 'Crea un riepilogo e proponi azioni da intraprendere' }
+            ],
+            'settings': [
+                { icon: '⚙️', text: 'Ottimizza configurazione', prompt: 'Suggerisci come ottimizzare le mie impostazioni' },
+                { icon: '🤖', text: 'Guida IA', prompt: 'Spiegami come sfruttare al meglio l\'assistente IA' },
+                { icon: '💡', text: 'Suggerimenti personalizzazione', prompt: 'Come posso personalizzare l\'app per le mie esigenze?' }
+            ]
+        };
+
+        return suggestions[tab] || [
+            { icon: '💬', text: 'Assistenza generale', prompt: 'Come posso aiutarti?' },
+            { icon: '📚', text: 'Guida app', prompt: 'Spiegami le funzionalità dell\'app' }
+        ];
+    }
+
+    getContextualTitle(tab) {
+        const titles = {
+            'dashboard': '🤖 Agente IA - Assistente Dashboard',
+            'lessons': '🤖 Agente IA - Assistente Lezioni',
+            'students': '🤖 Agente IA - Assistente Studenti',
+            'grades': '🤖 Agente IA - Assistente Valutazioni',
+            'schedule': '🤖 Agente IA - Assistente Orario',
+            'activities': '🤖 Agente IA - Assistente Attività',
+            'news': '🤖 Agente IA - Analisi News',
+            'settings': '🤖 Agente IA - Assistente Configurazione'
+        };
+
+        return titles[tab] || '🤖 Agente IA - Assistente Contestuale';
+    }
+
+    getSectionName(tab) {
+        const names = {
+            'dashboard': 'Dashboard',
+            'lessons': 'Lezioni',
+            'students': 'Studenti',
+            'grades': 'Valutazioni',
+            'schedule': 'Orario',
+            'activities': 'Attività',
+            'news': 'News',
+            'settings': 'Impostazioni'
+        };
+
+        return names[tab] || 'Applicazione';
     }
 }
 
