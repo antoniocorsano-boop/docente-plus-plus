@@ -7,7 +7,11 @@ L'Agente IA Floating è un assistente virtuale sempre disponibile che si adatta 
 ## ✨ Caratteristiche Principali
 
 ### 1. **Assistenza Contestuale**
-L'agente IA cambia automaticamente i suoi suggerimenti in base alla sezione attiva:
+L'agente IA cambia automaticamente i suoi suggerimenti in base alla sezione attiva dell'applicazione. **La sezione attiva è determinata dal tab correntemente visualizzato** - quando passi da "Dashboard" a "Lezioni", l'agente rileva il cambio e aggiorna i suggerimenti alla prossima apertura.
+
+**Nota speciale per la sezione News:** La sezione News mantiene funzionalità uniche di analisi URL, permettendo di inserire link esterni per l'analisi approfondita di articoli e comunicazioni.
+
+#### Suggerimenti per Sezione:
 
 - **📊 Dashboard**: Riepilogo settimanale, priorità giornaliere, consigli didattici
 - **📚 Lezioni**: Pianificazione lezioni, obiettivi didattici, gestione tempi
@@ -109,10 +113,12 @@ L'agente rileva automaticamente la sezione attiva tramite:
 - Caricamento suggerimenti specifici per sezione
 
 ### Compatibilità
-- ✅ Desktop (Chrome 90+, Firefox 88+, Safari 14+)
-- ✅ Mobile (iOS 14+, Android 8+)
+- ✅ Desktop (Browser moderni)
+- ✅ Mobile (iOS e Android recenti)
 - ✅ Tablet
 - ✅ Touch e mouse support
+
+**Nota:** L'app richiede un browser con supporto JavaScript moderno e localStorage abilitato.
 
 ### Accessibilità
 - 🎯 Keyboard navigation supportata

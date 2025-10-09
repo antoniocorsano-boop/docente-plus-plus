@@ -213,7 +213,7 @@ Questa roadmap traccia lo sviluppo incrementale di **Docente++** sulla base dei 
 
 ### 2.1 IA Contestuale con Suggerimenti
 **Priorità:** 🟠 Alta  
-**Stato:** ✅ Completato (Parziale - Agente IA Floating Contestuale)  
+**Stato:** 🔄 Parzialmente Completato  
 **Fase:** 2  
 **Complessità:** 🔴 Alta
 
@@ -229,6 +229,8 @@ Questa roadmap traccia lo sviluppo incrementale di **Docente++** sulla base dei 
   - Pulsante draggable e posizionabile
   - Controlli visibilità nelle impostazioni
   - Salvataggio preferenze utente
+
+**Riferimento:** [AI_AGENT_CONTEXTUAL.md](./AI_AGENT_CONTEXTUAL.md)
 
 #### Task Rimanenti
 - [ ] Implementare sistema analisi contesto avanzato:
