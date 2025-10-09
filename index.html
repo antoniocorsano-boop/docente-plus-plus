@@ -275,7 +275,10 @@
 
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
-            <h2>Dashboard</h2>
+            <div class="tab-header">
+                <h2>Dashboard</h2>
+                <button class="help-btn" onclick="app.showContextualHelp('dashboard')" title="Aiuto">?</button>
+            </div>
             <div class="class-selector-container">
                 <label for="active-class-selector">🎯 Classe Attiva:</label>
                 <select id="active-class-selector" onchange="app.setActiveClass(this.value)">
@@ -340,7 +343,10 @@
 
         <!-- Lessons Tab -->
         <div id="lessons" class="tab-content">
-            <h2>Gestione Lezioni</h2>
+            <div class="tab-header">
+                <h2>Gestione Lezioni</h2>
+                <button class="help-btn" onclick="app.showContextualHelp('lessons')" title="Aiuto">?</button>
+            </div>
             <div class="section-actions">
                 <button class="btn btn-primary" onclick="app.showAddLessonForm()">➕ Nuova Lezione</button>
                 <button class="btn btn-secondary" onclick="app.generateLessonWithAI()">🤖 Genera con IA</button>
@@ -521,7 +527,10 @@
 
         <!-- Students Tab -->
         <div id="students" class="tab-content">
-            <h2>Gestione Studenti</h2>
+            <div class="tab-header">
+                <h2>Gestione Studenti</h2>
+                <button class="help-btn" onclick="app.showContextualHelp('students')" title="Aiuto">?</button>
+            </div>
             <div class="section-actions">
                 <button class="btn btn-primary" onclick="app.showAddStudentForm()">➕ Nuovo Studente</button>
                 <button class="btn btn-secondary" onclick="app.showImportStudentsDialog()">📥 Importa da File</button>
@@ -537,6 +546,7 @@
                     <div class="form-group">
                         <label for="student-email">Email:</label>
                         <input type="email" id="student-email">
+                        <small id="student-email-validation" class="validation-message"></small>
                     </div>
                     <div class="form-group">
                         <label for="student-class">Classe:</label>
@@ -566,7 +576,10 @@
 
         <!-- Classes Tab -->
         <div id="classes" class="tab-content">
-            <h2>Gestione Classi</h2>
+            <div class="tab-header">
+                <h2>Gestione Classi</h2>
+                <button class="help-btn" onclick="app.showContextualHelp('classes')" title="Aiuto">?</button>
+            </div>
             <div class="section-actions">
                 <button class="btn btn-primary" onclick="app.showAddClassForm()">➕ Nuova Classe</button>
             </div>
@@ -1184,6 +1197,16 @@
                     <div class="form-group">
                         <button type="button" class="btn btn-secondary" onclick="app.resetAIFABPosition()">🔄 Ripristina Posizione Agente IA</button>
                         <small>Riporta l'agente IA alla posizione predefinita (in basso a destra)</small>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">🎨 Aspetto e Accessibilità</h3>
+                    <div class="form-group">
+                        <label for="app-theme">Tema:</label>
+                        <select id="app-theme" onchange="app.changeTheme(this.value)">
+                            <option value="light">☀️ Chiaro</option>
+                            <option value="dark">🌙 Scuro</option>
+                        </select>
+                        <small>Scegli il tema dell'applicazione</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Salva Impostazioni</button>
