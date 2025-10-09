@@ -596,16 +596,20 @@ class DocentePlusPlus {
         
         container.innerHTML = `
             <div class="todos-list">
-                ${todos.slice(0, 8).map(todo => `
-                    <div class="todo-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="${todo.action}">
-                        <div style="font-size: 1.5em; margin-right: 12px;">${todo.icon}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 500;">${todo.title}</div>
-                            <div style="font-size: 0.85em; color: #666;">${todo.subtitle}</div>
-                        </div>
-                        <div style="color: #4a90e2;">→</div>
-                    </div>
-                `).join('')}
+                ${todos.slice(0, 8).map(todo => this.renderTodoItem(todo)).join('')}
+            </div>
+        `;
+    }
+    
+    renderTodoItem(todo) {
+        return `
+            <div class="todo-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="${todo.action}">
+                <div style="font-size: 1.5em; margin-right: 12px;">${todo.icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">${todo.title}</div>
+                    <div style="font-size: 0.85em; color: #666;">${todo.subtitle}</div>
+                </div>
+                <div style="color: var(--primary-color);">→</div>
             </div>
         `;
     }
@@ -641,9 +645,12 @@ class DocentePlusPlus {
         try {
             const suggestions = await this.generateDashboardSuggestions();
             
+            // Sanitize by creating text nodes and formatting with <br> for line breaks
+            const sanitizedSuggestions = this.sanitizeAISuggestions(suggestions);
+            
             container.innerHTML = `
-                <div class="ai-suggestions-content" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
-                    ${suggestions}
+                <div class="ai-suggestions-content" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    ${sanitizedSuggestions}
                 </div>
             `;
         } catch (error) {
@@ -656,6 +663,28 @@ class DocentePlusPlus {
                 </div>
             `;
         }
+    }
+    
+    sanitizeAISuggestions(suggestions) {
+        if (!suggestions) return '<p style="color: var(--text-secondary); font-style: italic;">Nessun suggerimento disponibile</p>';
+        
+        // Split by double newlines to get paragraphs
+        const paragraphs = suggestions.split('\n\n').filter(p => p.trim());
+        
+        // Create safe HTML with only line breaks
+        return paragraphs
+            .map(p => {
+                // Escape HTML but preserve line breaks
+                const escaped = p
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;')
+                    .replace(/\n/g, '<br>');
+                return `<p style="margin: 10px 0; color: var(--text-primary); line-height: 1.6;">${escaped}</p>`;
+            })
+            .join('');
     }
     
     async generateDashboardSuggestions() {
@@ -719,13 +748,13 @@ Situazione di oggi (${today.toLocaleDateString('it-IT')}):`;
             prompt += `\n\nValutazioni da completare: ${pendingEvaluations}`;
         }
         
-        prompt += `\n\nGenera suggerimenti pratici in formato HTML (usa <p>, <strong>, <em> per formattazione). 
+        prompt += `\n\nGenera suggerimenti pratici in formato testo semplice. 
 Ogni suggerimento deve essere breve (max 2 righe) e azionabile. 
-Usa emoji per rendere i suggerimenti più accattivanti.
-NON usare tag <div> o <ul>, solo <p> con emoji all'inizio.`;
+Usa emoji all'inizio di ogni suggerimento.
+Separa i suggerimenti con doppio a capo.`;
         
         const response = await this.callOpenRouterAPI(prompt, apiKey);
-        return response;
+        return response.content || '';
     }
     
     async refreshAISuggestions() {
