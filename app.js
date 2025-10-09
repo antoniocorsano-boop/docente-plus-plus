@@ -85,7 +85,7 @@ class DocentePlusPlus {
         this.createToastContainer();
         
         // Render initial data
-        this.renderDashboard();
+        this.renderHome();
         this.renderLessons();
         this.renderStudents();
         this.renderClasses();
@@ -298,7 +298,7 @@ class DocentePlusPlus {
 
         // Load settings to reflect changes
         this.loadSettings();
-        this.renderDashboard();
+        this.renderHome();
 
         // Show welcome message
         this.showToast(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`, 'success');
@@ -373,6 +373,19 @@ class DocentePlusPlus {
     // Contextual help system
     showContextualHelp(section) {
         const helpContent = {
+            'home': {
+                title: '🏠 Home',
+                content: `
+                    <h3>Benvenuto nella Home!</h3>
+                    <p>Questa è la tua panoramica generale dell'app. Qui trovi:</p>
+                    <ul>
+                        <li><strong>Orario del giorno:</strong> le lezioni programmate per oggi</li>
+                        <li><strong>Accesso rapido:</strong> pulsanti per le azioni più comuni</li>
+                        <li><strong>Classe attiva:</strong> seleziona la classe su cui stai lavorando</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Seleziona una classe attiva per filtrare i dati visualizzati.</p>
+                `
+            },
             'dashboard': {
                 title: '📊 Dashboard',
                 content: `
@@ -622,14 +635,37 @@ class DocentePlusPlus {
         }
     }
 
-    // Dashboard methods
-    renderDashboard() {
-        document.getElementById('lesson-count').textContent = this.lessons.length;
-        document.getElementById('student-count').textContent = this.students.length;
+    // Home methods
+    renderHome() {
+        // Update welcome message with teacher's name
+        const firstName = localStorage.getItem('teacher-first-name');
+        const welcomeMessage = document.getElementById('home-welcome-message');
+        if (welcomeMessage) {
+            if (firstName) {
+                const currentHour = new Date().getHours();
+                let greeting = 'Buongiorno';
+                if (currentHour >= 12 && currentHour < 18) {
+                    greeting = 'Buon pomeriggio';
+                } else if (currentHour >= 18) {
+                    greeting = 'Buonasera';
+                }
+                welcomeMessage.textContent = `${greeting}, ${firstName}!`;
+            } else {
+                welcomeMessage.textContent = 'Benvenuto in Docente++';
+            }
+        }
+
+        // Update quick access counts
+        const lessonCount = document.getElementById('home-lesson-count');
+        if (lessonCount) lessonCount.textContent = this.lessons.length;
+        
+        const studentCount = document.getElementById('home-student-count');
+        if (studentCount) studentCount.textContent = this.students.length;
         
         // Count in-progress activities
         const inProgressActivities = this.activities.filter(a => a.status === 'in-progress' || a.status === 'planned');
-        document.getElementById('activity-count').textContent = inProgressActivities.length;
+        const activityCount = document.getElementById('home-activity-count');
+        if (activityCount) activityCount.textContent = inProgressActivities.length;
         
         // Count pending evaluations (those without a score or from the last 7 days)
         const now = new Date();
@@ -639,10 +675,21 @@ class DocentePlusPlus {
             const evalDate = new Date(e.date);
             return evalDate >= sevenDaysAgo;
         });
-        document.getElementById('evaluation-count').textContent = pendingEvaluations.length;
+        const evaluationCount = document.getElementById('home-evaluation-count');
+        if (evaluationCount) evaluationCount.textContent = pendingEvaluations.length;
         
+        // Update AI status
         const apiKey = localStorage.getItem('openrouter-api-key');
-        document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
+        const aiReadyElement = document.getElementById('home-ai-ready');
+        if (aiReadyElement) {
+            if (apiKey) {
+                aiReadyElement.textContent = '✓ Pronta';
+                aiReadyElement.style.color = '#28a745';
+            } else {
+                aiReadyElement.textContent = '✗ Non configurata';
+                aiReadyElement.style.color = '#dc3545';
+            }
+        }
         
         // Update active class display
         this.updateClassDisplay();
@@ -650,11 +697,50 @@ class DocentePlusPlus {
         // Render today's schedule preview
         this.renderTodaySchedulePreview();
         
+        // Render notifications preview
+        this.renderHomeNotificationsPreview();
+        
         // Render things to do
         this.renderThingsToDo();
         
         // Render AI suggestions
         this.renderAISuggestions();
+    }
+    
+    renderHomeNotificationsPreview() {
+        const previewContainer = document.getElementById('home-notifications-preview');
+        if (!previewContainer) return;
+
+        // Get upcoming reminders and notifications
+        const now = new Date();
+        const upcomingReminders = this.reminders
+            .filter(r => !r.dismissed && new Date(r.dateTime) > now)
+            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+            .slice(0, 3);
+
+        if (upcomingReminders.length === 0) {
+            previewContainer.innerHTML = '<p class="home-placeholder">Nessuna notifica per oggi</p>';
+            return;
+        }
+
+        previewContainer.innerHTML = `
+            <div class="home-notifications-list">
+                ${upcomingReminders.map(reminder => {
+                    const reminderDate = new Date(reminder.dateTime);
+                    const dateStr = reminderDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+                    const timeStr = reminderDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="home-notification-item">
+                            <span class="notification-icon">🔔</span>
+                            <div class="notification-content">
+                                <strong>${reminder.title}</strong>
+                                <small>${dateStr} alle ${timeStr}</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
     }
     
     renderTodaySchedulePreview() {
@@ -1022,7 +1108,7 @@ Separa i suggerimenti con doppio a capo.`;
         this.lessons.push(lesson);
         this.saveData();
         this.renderLessons();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddLessonForm();
         this.showToast('Lezione salvata con successo', 'success');
     }
@@ -1032,7 +1118,7 @@ Separa i suggerimenti con doppio a capo.`;
             this.lessons = this.lessons.filter(lesson => lesson.id !== id);
             this.saveData();
             this.renderLessons();
-            this.renderDashboard();
+this.renderHome();
             this.showToast('Lezione eliminata', 'info');
         }
     }
@@ -1125,7 +1211,7 @@ ${lessonData.evaluation || 'N/D'}
                         this.lessons.push(lesson);
                         this.saveData();
                         this.renderLessons();
-                        this.renderDashboard();
+                        this.renderHome();
                         this.switchTab('lessons');
                         
                         this.addChatMessage('system', 'Lezione generata con successo!');
@@ -1148,7 +1234,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.lessons.push(lesson);
                     this.saveData();
                     this.renderLessons();
-                    this.renderDashboard();
+                    this.renderHome();
                     this.switchTab('lessons');
                     
                     this.addChatMessage('system', 'Lezione generata con successo!');
@@ -1187,7 +1273,7 @@ ${lessonData.evaluation || 'N/D'}
         this.students.push(student);
         this.saveData();
         this.renderStudents();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddStudentForm();
         this.showToast('Studente salvato con successo', 'success');
     }
@@ -1197,7 +1283,7 @@ ${lessonData.evaluation || 'N/D'}
             this.students = this.students.filter(student => student.id !== id);
             this.saveData();
             this.renderStudents();
-            this.renderDashboard();
+this.renderHome();
             this.showToast('Studente eliminato', 'info');
         }
     }
@@ -1337,7 +1423,7 @@ ${lessonData.evaluation || 'N/D'}
 
         this.saveData();
         this.renderActivities();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddActivityForm();
         this.showToast(editId ? 'Attività aggiornata con successo' : 'Attività creata con successo', 'success');
     }
@@ -1347,7 +1433,7 @@ ${lessonData.evaluation || 'N/D'}
             this.activities = this.activities.filter(activity => activity.id !== id);
             this.saveData();
             this.renderActivities();
-            this.renderDashboard();
+this.renderHome();
             this.showToast('Attività eliminata', 'info');
         }
     }
@@ -1359,7 +1445,7 @@ ${lessonData.evaluation || 'N/D'}
             activity.updatedAt = new Date().toISOString();
             this.saveData();
             this.renderActivities();
-            this.renderDashboard();
+            this.renderHome();
         }
     }
 
@@ -2314,7 +2400,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         this.currentLessonSession = null;
         
         // Refresh dashboard and evaluations
-        this.renderDashboard();
+        this.renderHome();
         this.renderEvaluations();
     }
     
@@ -2565,7 +2651,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             this.saveData();
             this.renderClasses();
             this.updateClassSelectors();
-            this.renderDashboard();
+this.renderHome();
             this.showToast('Classe eliminata', 'info');
         }
     }
@@ -2829,7 +2915,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         this.evaluations.push(evaluation);
         this.saveData();
         this.renderEvaluations();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddEvaluationForm();
     }
 
@@ -2838,7 +2924,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             this.evaluations = this.evaluations.filter(e => e.id !== id);
             this.saveData();
             this.renderEvaluations();
-            this.renderDashboard();
+            this.renderHome();
         }
     }
 
@@ -3432,17 +3518,19 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
 
         // Save AI FAB settings
-        const aiFabEnabled = document.getElementById('ai-fab-enabled').checked;
-        localStorage.setItem('ai-fab-enabled', JSON.stringify(aiFabEnabled));
-        this.aiFabEnabled = aiFabEnabled;
-        this.updateAIFABVisibility();
+        const aiFabEnabled = document.getElementById('ai-fab-enabled');
+        if (aiFabEnabled) {
+            localStorage.setItem('ai-fab-enabled', JSON.stringify(aiFabEnabled.checked));
+            this.aiFabEnabled = aiFabEnabled.checked;
+            this.updateAIFABVisibility();
+        }
 
         // Save theme
         const theme = document.getElementById('app-theme').value;
         localStorage.setItem('app-theme', theme);
         this.changeTheme(theme);
 
-        this.renderDashboard();
+        this.renderHome();
         this.showToast('Impostazioni salvate con successo', 'success');
     }
 
@@ -4568,7 +4656,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
                     this.renderNotifications();
                     this.updateClassSelectors();
                     this.loadSettings();
-                    this.renderDashboard();
+                    this.renderHome();
                     
                     // Create import success notification
                     this.createNotification({
