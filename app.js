@@ -92,6 +92,9 @@ class DocentePlusPlus {
             header.classList.add('minimal');
         }
         
+        // Create toast container
+        this.createToastContainer();
+        
         // Render initial data
         this.renderHome();
         this.renderLessons();
@@ -181,6 +184,14 @@ class DocentePlusPlus {
             studentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.addStudent();
+            });
+        }
+
+        // Email validation for student form
+        const studentEmailInput = document.getElementById('student-email');
+        if (studentEmailInput) {
+            studentEmailInput.addEventListener('input', (e) => {
+                this.validateEmail(e.target.value, 'student-email-validation');
             });
         }
 
@@ -304,7 +315,179 @@ class DocentePlusPlus {
         this.renderHome();
 
         // Show welcome message
-        alert(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`);
+        this.showToast(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`, 'success');
+    }
+
+    // Toast notification system
+    createToastContainer() {
+        if (!document.getElementById('toast-container')) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+    }
+
+    showToast(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icon = {
+            'success': '✓',
+            'error': '✗',
+            'warning': '⚠',
+            'info': 'ℹ'
+        }[type] || 'ℹ';
+        
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove toast after duration
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // Email validation
+    validateEmail(email, validationElementId) {
+        const validationElement = document.getElementById(validationElementId);
+        if (!validationElement) return true;
+
+        if (!email || email.trim() === '') {
+            validationElement.textContent = '';
+            validationElement.className = 'validation-message';
+            return true;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+
+        if (isValid) {
+            validationElement.textContent = '✓ Email valida';
+            validationElement.className = 'validation-message validation-success';
+        } else {
+            validationElement.textContent = '✗ Email non valida';
+            validationElement.className = 'validation-message validation-error';
+        }
+
+        return isValid;
+    }
+
+    // Contextual help system
+    showContextualHelp(section) {
+        const helpContent = {
+            'home': {
+                title: '🏠 Home',
+                content: `
+                    <h3>Benvenuto nella Home!</h3>
+                    <p>Questa è la tua panoramica generale dell'app. Qui trovi:</p>
+                    <ul>
+                        <li><strong>Orario del giorno:</strong> le lezioni programmate per oggi</li>
+                        <li><strong>Accesso rapido:</strong> pulsanti per le azioni più comuni</li>
+                        <li><strong>Classe attiva:</strong> seleziona la classe su cui stai lavorando</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Seleziona una classe attiva per filtrare i dati visualizzati.</p>
+                `
+            },
+            'dashboard': {
+                title: '📊 Dashboard',
+                content: `
+                    <h3>Benvenuto nella Dashboard!</h3>
+                    <p>Questa è la tua panoramica generale dell'app. Qui trovi:</p>
+                    <ul>
+                        <li><strong>Statistiche rapide:</strong> numero di lezioni, studenti, attività e classi</li>
+                        <li><strong>Orario del giorno:</strong> le lezioni programmate per oggi</li>
+                        <li><strong>Cose da fare:</strong> attività in scadenza e da completare</li>
+                        <li><strong>Suggerimenti IA:</strong> consigli personalizzati (se hai configurato l'API key)</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Seleziona una classe attiva per filtrare i dati visualizzati.</p>
+                `
+            },
+            'lessons': {
+                title: '📚 Gestione Lezioni',
+                content: `
+                    <h3>Come gestire le tue lezioni</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Aggiungere lezioni:</strong> clicca "➕ Nuova Lezione" e compila il form</li>
+                        <li><strong>Generare con IA:</strong> usa l'assistente per creare piani didattici</li>
+                        <li><strong>Modificare/Eliminare:</strong> usa i pulsanti nelle card delle lezioni</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Le lezioni generate con IA includono obiettivi, materiali e metodi di valutazione.</p>
+                `
+            },
+            'students': {
+                title: '👥 Gestione Studenti',
+                content: `
+                    <h3>Come gestire gli studenti</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Aggiungere studenti:</strong> uno alla volta o importando da CSV/Excel</li>
+                        <li><strong>Email:</strong> inserisci email valide per comunicazioni (validazione in tempo reale)</li>
+                        <li><strong>Note personalizzate:</strong> aggiungi informazioni su onomastico, compleanno, ecc.</li>
+                        <li><strong>Associare a classi:</strong> assegna ogni studente alla sua classe</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Usa il pulsante "📥 Importa da File" per caricare molti studenti insieme.</p>
+                `
+            },
+            'classes': {
+                title: '🏫 Gestione Classi',
+                content: `
+                    <h3>Come gestire le classi</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Creare classi:</strong> inserisci nome, anno, sezione</li>
+                        <li><strong>Numero studenti:</strong> tieni traccia degli iscritti</li>
+                        <li><strong>Classe attiva:</strong> seleziona la classe su cui stai lavorando</li>
+                        <li><strong>Modifica/Elimina:</strong> gestisci le classi esistenti</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> La classe attiva influenza l'orario, le attività e i suggerimenti IA.</p>
+                `
+            }
+        };
+
+        const help = helpContent[section] || {
+            title: 'Aiuto',
+            content: '<p>Informazioni non disponibili per questa sezione.</p>'
+        };
+
+        // Show help modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h2>${help.title}</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    ${help.content}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Ho capito</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     // Subject management methods
@@ -953,6 +1136,7 @@ Separa i suggerimenti con doppio a capo.`;
         this.renderLessons();
         this.renderHome();
         this.hideAddLessonForm();
+        this.showToast('Lezione salvata con successo', 'success');
     }
 
     deleteLesson(id) {
@@ -960,7 +1144,8 @@ Separa i suggerimenti con doppio a capo.`;
             this.lessons = this.lessons.filter(lesson => lesson.id !== id);
             this.saveData();
             this.renderLessons();
-            this.renderHome();
+this.renderHome();
+            this.showToast('Lezione eliminata', 'info');
         }
     }
 
@@ -1056,6 +1241,7 @@ ${lessonData.evaluation || 'N/D'}
                         this.switchTab('lessons');
                         
                         this.addChatMessage('system', 'Lezione generata con successo!');
+                        this.showToast('Lezione generata con IA con successo', 'success');
                     } else {
                         throw new Error('Invalid JSON response');
                     }
@@ -1078,12 +1264,13 @@ ${lessonData.evaluation || 'N/D'}
                     this.switchTab('lessons');
                     
                     this.addChatMessage('system', 'Lezione generata con successo!');
+                    this.showToast('Lezione generata con IA con successo', 'success');
                 }
             }
         } catch (error) {
             console.error('Error generating lesson:', error);
             this.addChatMessage('system', `Errore nella generazione: ${error.message}`);
-            alert('Errore nella generazione della lezione. Verifica la tua API key.');
+            this.showToast('Errore nella generazione della lezione', 'error');
         }
     }
 
@@ -1114,6 +1301,7 @@ ${lessonData.evaluation || 'N/D'}
         this.renderStudents();
         this.renderHome();
         this.hideAddStudentForm();
+        this.showToast('Studente salvato con successo', 'success');
     }
 
     deleteStudent(id) {
@@ -1121,7 +1309,8 @@ ${lessonData.evaluation || 'N/D'}
             this.students = this.students.filter(student => student.id !== id);
             this.saveData();
             this.renderStudents();
-            this.renderHome();
+this.renderHome();
+            this.showToast('Studente eliminato', 'info');
         }
     }
 
@@ -1262,6 +1451,7 @@ ${lessonData.evaluation || 'N/D'}
         this.renderActivities();
         this.renderHome();
         this.hideAddActivityForm();
+        this.showToast(editId ? 'Attività aggiornata con successo' : 'Attività creata con successo', 'success');
     }
 
     deleteActivity(id) {
@@ -1269,7 +1459,8 @@ ${lessonData.evaluation || 'N/D'}
             this.activities = this.activities.filter(activity => activity.id !== id);
             this.saveData();
             this.renderActivities();
-            this.renderHome();
+this.renderHome();
+            this.showToast('Attività eliminata', 'info');
         }
     }
 
@@ -2451,6 +2642,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         this.renderClasses();
         this.updateClassSelectors();
         this.hideAddClassForm();
+        this.showToast(editId ? 'Classe aggiornata con successo' : 'Classe creata con successo', 'success');
     }
 
     editClass(id) {
@@ -2485,7 +2677,8 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             this.saveData();
             this.renderClasses();
             this.updateClassSelectors();
-            this.renderHome();
+this.renderHome();
+            this.showToast('Classe eliminata', 'info');
         }
     }
 
@@ -3358,8 +3551,13 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             this.updateAIFABVisibility();
         }
 
+        // Save theme
+        const theme = document.getElementById('app-theme').value;
+        localStorage.setItem('app-theme', theme);
+        this.changeTheme(theme);
+
         this.renderHome();
-        alert('Impostazioni salvate con successo!');
+        this.showToast('Impostazioni salvate con successo', 'success');
     }
 
     loadSettings() {
@@ -3438,6 +3636,14 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             }
         }
 
+        // Load theme
+        const theme = localStorage.getItem('app-theme') || 'light';
+        const themeSelect = document.getElementById('app-theme');
+        if (themeSelect) {
+            themeSelect.value = theme;
+        }
+        this.changeTheme(theme);
+
         // Initialize API key status icon
         const statusIcon = document.getElementById('api-key-status');
         if (statusIcon) {
@@ -3445,6 +3651,33 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             statusIcon.className = 'api-key-status';
             statusIcon.title = 'Non verificata';
         }
+    }
+
+    // Theme management
+    changeTheme(theme) {
+        const root = document.documentElement;
+        
+        if (theme === 'dark') {
+            root.style.setProperty('--bg-color', '#1a1a1a');
+            root.style.setProperty('--card-bg', '#2a2a2a');
+            root.style.setProperty('--text-primary', '#e0e0e0');
+            root.style.setProperty('--text-secondary', '#b0b0b0');
+            root.style.setProperty('--border-color', '#404040');
+            root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.4)');
+            root.style.setProperty('--shadow-hover', '0 4px 12px rgba(0, 0, 0, 0.5)');
+            document.body.classList.add('dark-theme');
+        } else {
+            root.style.setProperty('--bg-color', '#f5f7fa');
+            root.style.setProperty('--card-bg', '#ffffff');
+            root.style.setProperty('--text-primary', '#2c3e50');
+            root.style.setProperty('--text-secondary', '#7f8c8d');
+            root.style.setProperty('--border-color', '#e1e8ed');
+            root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.1)');
+            root.style.setProperty('--shadow-hover', '0 4px 12px rgba(0, 0, 0, 0.15)');
+            document.body.classList.remove('dark-theme');
+        }
+
+        localStorage.setItem('app-theme', theme);
     }
 
     async verifyAPIKey() {

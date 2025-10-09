@@ -32,17 +32,17 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 12px;
 }
 
 /* Header */
 header {
     text-align: center;
-    padding: 12px 0;
+    padding: 8px 0;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     box-shadow: var(--shadow);
 }
 
@@ -51,8 +51,8 @@ header.minimal {
     background: transparent;
     border-radius: 0;
     box-shadow: none;
-    padding: 8px 0;
-    margin-bottom: 10px;
+    padding: 6px 0;
+    margin-bottom: 8px;
     text-align: left;
 }
 
@@ -67,13 +67,13 @@ header.minimal .subtitle {
 }
 
 header h1 {
-    font-size: 1.5em;
-    margin-bottom: 3px;
+    font-size: 1.3em;
+    margin-bottom: 2px;
     font-weight: 600;
 }
 
 .subtitle {
-    font-size: 0.85em;
+    font-size: 0.8em;
     opacity: 0.9;
 }
 
@@ -114,21 +114,22 @@ header h1 {
 .nav-container {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
-/* Tabs Navigation */
+/* Tabs Navigation - Icon-only compact design */
 .tabs {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex: 1;
     background: var(--card-bg);
-    padding: 8px;
+    padding: 6px;
     border-radius: 10px;
     box-shadow: var(--shadow);
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
 }
 
 /* Hide menu groups titles on desktop */
@@ -145,32 +146,34 @@ header h1 {
 }
 
 .tab-button {
-    padding: 8px 16px;
+    padding: 10px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    border-radius: 6px;
-    font-size: 0.9em;
-    font-weight: 500;
+    border-radius: 8px;
+    font-size: 1.3em;
     transition: all 0.2s ease;
-    white-space: nowrap;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
 }
 
 .tab-button .menu-icon {
-    font-size: 1.1em;
+    font-size: 1em;
     line-height: 1;
 }
 
+/* Hide text labels in icon-only mode */
 .tab-button .menu-text {
-    line-height: 1;
+    display: none;
 }
 
 .tab-button:hover {
     background: var(--bg-color);
+    transform: scale(1.1);
 }
 
 .tab-button.active {
@@ -279,78 +282,61 @@ header h1 {
     margin-top: 20px;
 }
 
-/* Home Boarding Styles */
-.home-welcome-section {
-    text-align: center;
-    padding: 40px 20px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow);
-}
+/* Home Boarding Styles - Removed for compact UI */
 
-.home-welcome-section h1 {
-    font-size: 2em;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.home-subtitle {
-    font-size: 1.1em;
-    opacity: 0.9;
-}
-
+/* Compact home class selector */
 .home-class-selector {
     background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 30px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
     box-shadow: var(--shadow);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .home-class-selector label {
     font-weight: 600;
+    font-size: 0.9em;
 }
 
+/* Compact home sections */
 .home-section {
     background: var(--card-bg);
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
     box-shadow: var(--shadow);
 }
 
 .home-section h2 {
     color: var(--text-primary);
-    margin-bottom: 20px;
-    font-size: 1.3em;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
 }
 
 .home-quick-access {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .btn-quick-access {
     background: var(--card-bg);
     border: 2px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px 15px;
+    border-radius: 8px;
+    padding: 12px 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
 }
 
 .btn-quick-access:hover {
@@ -362,12 +348,12 @@ header h1 {
 }
 
 .btn-quick-access .quick-icon {
-    font-size: 2em;
+    font-size: 1.8em;
 }
 
 .btn-quick-access .quick-label {
     font-weight: 600;
-    font-size: 0.95em;
+    font-size: 0.85em;
 }
 
 .btn-quick-access .quick-count {
@@ -1836,37 +1822,45 @@ header h1 {
 }
 
 .schedule-info p {
-    margin: 5px 0;
+    margin: 3px 0;
+    font-size: 0.9em;
 }
 
+/* Compact schedule header */
 .schedule-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 12px;
+    padding: 10px;
     background-color: var(--card-bg);
     border-radius: 8px;
     box-shadow: var(--shadow);
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .schedule-header h3 {
     margin: 0;
     color: var(--text-primary);
+    font-size: 1em;
 }
 
 .schedule-view-toggle {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
+/* Modern compact schedule table - mobile-first design */
 .schedule-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     background-color: var(--card-bg);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow);
+    font-size: 0.85em;
 }
 
 .schedule-table thead {
@@ -1876,14 +1870,16 @@ header h1 {
 
 .schedule-table th,
 .schedule-table td {
-    padding: 12px;
+    padding: 8px 6px;
     text-align: center;
-    border: 1px solid var(--border-color);
+    border: none;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .schedule-table th {
     font-weight: 600;
-    font-size: 0.95em;
+    font-size: 0.9em;
+    padding: 10px 6px;
 }
 
 .schedule-hour {
@@ -1891,14 +1887,16 @@ header h1 {
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
+    font-size: 0.85em;
 }
 
 .schedule-slot {
     cursor: pointer;
     transition: background-color 0.2s;
-    min-height: 60px;
+    min-height: 50px;
     vertical-align: middle;
     position: relative;
+    padding: 6px 4px;
 }
 
 .schedule-slot:hover {
@@ -1908,27 +1906,31 @@ header h1 {
 .slot-class {
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 5px;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+    line-height: 1.2;
 }
 
 .slot-empty {
     color: var(--text-secondary);
     font-style: italic;
-    font-size: 0.9em;
+    font-size: 0.85em;
 }
 
 .slot-activity {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 2px 6px;
     border-radius: 4px;
     font-weight: bold;
-    font-size: 0.9em;
-    margin-top: 5px;
+    font-size: 0.75em;
+    margin-top: 3px;
+    line-height: 1.2;
 }
 
 .btn-sm {
     padding: 4px 8px;
-    font-size: 0.85em;
+    font-size: 0.75em;
+    border-radius: 4px;
 }
 
 /* Modal adjustments for schedule */
@@ -2692,16 +2694,16 @@ header h1 {
         display: flex;
     }
     
-    /* Hide main tabs on mobile, show via menu */
+    /* Compact side menu - reduced width and spacing */
     .tabs {
         position: fixed;
         top: 0;
         left: -100%;
-        width: 80%;
-        max-width: 300px;
+        width: 70%;
+        max-width: 240px;
         height: 100vh;
         flex-direction: column;
-        padding: 20px;
+        padding: 12px;
         margin: 0;
         background: var(--card-bg);
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -2715,29 +2717,45 @@ header h1 {
         left: 0;
     }
     
-    /* Show menu group titles on mobile */
+    /* Compact menu group titles */
     .menu-group-title {
         display: flex;
+        padding: 6px 10px;
+        margin-bottom: 3px;
+        font-size: 0.7em;
     }
     
     .menu-group {
         display: block;
-        margin-bottom: 15px;
+        margin-bottom: 8px;
     }
     
     .menu-items {
         display: block;
     }
     
+    /* Compact tab buttons with icons visible */
     .tab-button {
         width: 100%;
         text-align: left;
-        padding: 12px 16px;
-        padding-left: 40px; /* Indent submenu items */
-        margin-bottom: 4px;
+        padding: 8px 12px;
+        padding-left: 28px;
+        margin-bottom: 2px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        font-size: 0.85em;
+        min-height: 36px;
+    }
+    
+    /* Show text labels on mobile menu */
+    .tab-button .menu-text {
+        display: inline;
+        line-height: 1.2;
+    }
+    
+    .tab-button .menu-icon {
+        font-size: 1.1em;
     }
     
     /* Backdrop for mobile menu */
@@ -2821,14 +2839,7 @@ header h1 {
         font-size: 0.9em;
     }
     
-    /* Home page responsive styles */
-    .home-welcome-section h1 {
-        font-size: 1.5em;
-    }
-    
-    .home-subtitle {
-        font-size: 1em;
-    }
+    /* Home page responsive styles - Welcome section removed */
     
     .home-class-selector {
         flex-direction: column;
@@ -2845,6 +2856,41 @@ header h1 {
     
     .home-ai-actions .btn {
         width: 100%;
+    }
+    
+    /* Modern mobile schedule optimizations */
+    .schedule-table {
+        font-size: 0.75em;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .schedule-table th,
+    .schedule-table td {
+        padding: 6px 3px;
+        font-size: 0.9em;
+    }
+    
+    .schedule-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px;
+    }
+    
+    .schedule-header button {
+        width: 100%;
+        margin: 3px 0;
+        font-size: 0.85em;
+    }
+    
+    .slot-class {
+        font-size: 0.85em;
+    }
+    
+    .slot-activity {
+        font-size: 0.7em;
+        padding: 2px 4px;
     }
 }
 
@@ -3147,6 +3193,94 @@ textarea {
     }
 }
 
+/* Toast Notification System */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    border-left: 4px solid;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-icon {
+    font-size: 1.2em;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.95em;
+}
+
+.toast-success {
+    border-left-color: var(--secondary-color);
+}
+
+.toast-success .toast-icon {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.toast-error {
+    border-left-color: var(--danger-color);
+}
+
+.toast-error .toast-icon {
+    background: var(--danger-color);
+    color: white;
+}
+
+.toast-warning {
+    border-left-color: var(--accent-color);
+}
+
+.toast-warning .toast-icon {
+    background: var(--accent-color);
+    color: white;
+}
+
+.toast-info {
+    border-left-color: var(--primary-color);
+}
+
+.toast-info .toast-icon {
+    background: var(--primary-color);
+    color: white;
+}
+
 /* Toast animations */
 @keyframes slideInRight {
     from {
@@ -3167,6 +3301,98 @@ textarea {
     to {
         transform: translateX(400px);
         opacity: 0;
+    }
+}
+
+/* Form Validation Messages */
+.validation-message {
+    display: block;
+    font-size: 0.85em;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.validation-success {
+    color: var(--secondary-color);
+}
+
+.validation-error {
+    color: var(--danger-color);
+}
+
+/* Tab Header with Help Button */
+.tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.tab-header h2 {
+    margin: 0;
+}
+
+.help-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Dark theme adjustments */
+body.dark-theme {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+}
+
+body.dark-theme .help-btn {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+body.dark-theme .toast {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+body.dark-theme .modal-content {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
+        max-width: 100%;
     }
 }
 
