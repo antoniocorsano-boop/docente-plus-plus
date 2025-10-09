@@ -69,16 +69,24 @@ App installabile per un insegnamento basato su IA, evoluzione del progetto docen
 - ✅ **Notifiche e Promemoria** - Sistema completo di notifiche automatiche personalizzabili
 - ✅ **PWA** - Installabile come app su smartphone, tablet e desktop, funziona offline
 - ✅ **Privacy** - Tutti i dati solo in locale, nessun server esterno
+- ✅ **Toast Notifications** - Feedback visivo immediato per tutte le azioni
+- ✅ **Guida Contestuale** - Aiuto "?" in ogni sezione principale
+- ✅ **Validazione Real-time** - Controllo email e campi obbligatori in tempo reale
+- ✅ **Tema Chiaro/Scuro** - Personalizzazione dell'interfaccia
 
 ## 📋 Cose da Fare (To Do)
 
 Funzionalità pianificate per le prossime versioni:
 
+- [ ] **Guida Primo Avvio Interattiva** - Tutorial step-by-step per utenti inesperti
+- [ ] **Tooltip Contestuali** - Suggerimenti inline nei form
+- [ ] **Scorciatoie da Tastiera** - Navigazione rapida da tastiera
+- [ ] **Font Size Personalizzabile** - Dimensioni testo regolabili
+- [ ] **Modalità Alta Leggibilità** - Contrasto elevato e spaziatura ottimizzata
 - [ ] **Importazione Materiali Didattici** - Caricamento e classificazione automatica materiali didattici
 - [ ] **Trascrizione Audio con IA** - Trascrizione automatica registrazioni audio lezioni
 - [ ] **Analisi Predittiva** - Analisi progressi studenti e suggerimenti IA
 - [ ] **Backup cloud opzionale** - Sincronizzazione e ripristino dati tramite Google Drive/Dropbox
-- [ ] **Accessibilità estesa** - Navigazione da tastiera, testo alternativo, modalità contrasto elevato
 - [ ] **Condivisione Programmazioni** - Esportazione e condivisione programmazioni didattiche
 - [ ] **Integrazione Registro Elettronico** - Sincronizzazione con registri elettronici principali
 - [ ] **Statistiche Avanzate** - Dashboard con grafici e analisi dettagliate
@@ -183,6 +191,7 @@ Progetto sviluppato per migliorare la gestione didattica degli insegnanti attrav
 
 ### Funzionalità Specifiche
 
+- **[🎨 Miglioramenti Usabilità](docs/USABILITY_IMPROVEMENTS.md)** - Toast, validazione real-time, help contestuale, tema scuro
 - **[📋 Importazione Attività da PDF](docs/PDF_ACTIVITIES_IMPORT.md)** - Estrazione automatica attività da PDF
 - **[📰 Modulo News RSS/Atom](docs/NEWS_RSS_MODULE.md)** - Aggregazione news con analisi IA
 - **[📂 Importazione Documenti](docs/DOCUMENT_IMPORT_MODULE.md)** - Sistema import documenti didattici
