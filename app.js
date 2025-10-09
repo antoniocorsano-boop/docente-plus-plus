@@ -136,6 +136,16 @@ class DocentePlusPlus {
             });
         });
 
+        // Menu group toggle (for mobile collapsible menu)
+        document.querySelectorAll('.menu-group-title').forEach(title => {
+            title.addEventListener('click', (e) => {
+                const menuGroup = title.closest('.menu-group');
+                if (window.innerWidth <= 768) {
+                    menuGroup.classList.toggle('collapsed');
+                }
+            });
+        });
+
         // Lesson form
         const lessonForm = document.getElementById('lesson-form');
         if (lessonForm) {
