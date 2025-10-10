@@ -1,9 +1,9 @@
 // Service Worker per Docente++
-// Versione: 1.2.0
+// Versione: 2.0.0
 
-const CACHE_NAME = 'docente-plus-plus-v3';
-const STATIC_CACHE = 'docente-static-v3';
-const DYNAMIC_CACHE = 'docente-dynamic-v3';
+const CACHE_NAME = 'docente-plus-plus-v4';
+const STATIC_CACHE = 'docente-static-v4';
+const DYNAMIC_CACHE = 'docente-dynamic-v4';
 
 // File da cachare immediatamente (app shell)
 const STATIC_ASSETS = [
