@@ -124,6 +124,10 @@ class DocentePlusPlus {
         // Initialize backup system
         this.initBackupSystem();
         
+        // Initialize usability features
+        this.initBackToTop();
+        this.initCollapsibleSections();
+        
         console.log('Docente++ initialized successfully');
     }
 
@@ -8099,6 +8103,173 @@ Rispondi in italiano in modo chiaro e strutturato.
         }
         
         this.updateActiveClassBadge();
+    }
+
+    // Usability: Back to Top Button
+    initBackToTop() {
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        if (!backToTopBtn) return;
+
+        // Show/hide button on scroll
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        // Scroll to top on click
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Usability: Collapsible Sections
+    initCollapsibleSections() {
+        document.addEventListener('click', (e) => {
+            const header = e.target.closest('.collapsible-header');
+            if (!header) return;
+
+            const section = header.closest('.collapsible-section');
+            if (!section) return;
+
+            section.classList.toggle('expanded');
+        });
+    }
+
+    // Usability: Search/Filter for tables
+    addSearchFilter(tableId, searchInputId) {
+        const searchInput = document.getElementById(searchInputId);
+        const table = document.getElementById(tableId);
+        
+        if (!searchInput || !table) return;
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = table.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+
+            // Update clear button visibility
+            const searchBox = searchInput.closest('.search-box');
+            if (searchTerm) {
+                searchBox.classList.add('has-value');
+            } else {
+                searchBox.classList.remove('has-value');
+            }
+        });
+
+        // Clear search button
+        const clearBtn = searchInput.nextElementSibling;
+        if (clearBtn && clearBtn.classList.contains('clear-search')) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+            });
+        }
+    }
+
+    // Usability: Auto-focus next field in forms
+    enableAutoFocus(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach((input, index) => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && input.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    const nextInput = inputs[index + 1];
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            });
+        });
+    }
+
+    // Usability: Show inline field validation
+    showFieldValidation(fieldId, message, isValid) {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+
+        // Remove existing validation message
+        const existingMsg = field.parentElement.querySelector('.field-validation');
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+
+        // Add new validation message
+        const validationMsg = document.createElement('div');
+        validationMsg.className = `field-validation ${isValid ? 'valid' : 'invalid'}`;
+        validationMsg.textContent = message;
+        validationMsg.style.cssText = `
+            font-size: 0.85em;
+            margin-top: 4px;
+            color: ${isValid ? 'var(--secondary-color)' : 'var(--danger-color)'};
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        `;
+        
+        const icon = document.createElement('span');
+        icon.className = 'material-icons';
+        icon.style.fontSize = '16px';
+        icon.textContent = isValid ? 'check_circle' : 'error';
+        validationMsg.prepend(icon);
+
+        field.parentElement.appendChild(validationMsg);
+
+        // Update field border
+        field.style.borderColor = isValid ? 'var(--secondary-color)' : 'var(--danger-color)';
+    }
+
+    // Usability: Create progress bar for multi-step modals
+    createProgressBar(steps, currentStep) {
+        const progressHTML = `
+            <div class="modal-progress">
+                <div class="progress-steps">
+                    ${steps.map((step, index) => `
+                        <div class="progress-step ${index < currentStep ? 'completed' : ''} ${index === currentStep ? 'active' : ''}">
+                            <div class="progress-step-circle">${index + 1}</div>
+                            <div class="progress-step-label">${step}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${(currentStep / (steps.length - 1)) * 100}%"></div>
+                </div>
+            </div>
+        `;
+        return progressHTML;
+    }
+
+    // Usability: Update progress bar
+    updateProgressBar(modalElement, currentStep, totalSteps) {
+        const progressBar = modalElement.querySelector('.progress-bar-fill');
+        const steps = modalElement.querySelectorAll('.progress-step');
+        
+        if (progressBar) {
+            progressBar.style.width = `${(currentStep / (totalSteps - 1)) * 100}%`;
+        }
+        
+        if (steps) {
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentStep) {
+                    step.classList.add('completed');
+                } else if (index === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
     }
 }
 

@@ -894,6 +894,196 @@ Questo documento fornisce un piano di test completo per validare tutte le funzio
 
 ---
 
+## 1️⃣6️⃣ Test Usabilità Pagine Lunghe
+
+### Test Case 16.1: Back to Top Button
+**Obiettivo:** Verificare funzionamento pulsante "Torna su"
+
+**Passi:**
+1. Aprire una pagina con molto contenuto (Dashboard con dati)
+2. Scrollare verso il basso oltre 300px
+3. Verificare apparizione pulsante floating in basso a destra
+4. Cliccare sul pulsante
+5. Verificare scroll smooth verso l'alto
+
+**Risultato Atteso:**
+- Pulsante appare solo dopo 300px di scroll
+- Icona freccia verso l'alto visibile
+- Click riporta in cima con animazione smooth
+- Su mobile: pulsante 44x44px, posizionato correttamente
+- Hover effect funziona su desktop
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.2: Sezioni Collapsibili
+**Obiettivo:** Verificare expand/collapse di sezioni
+
+**Passi:**
+1. Identificare sezioni con classe `collapsible-section`
+2. Cliccare sull'header di una sezione collassata
+3. Osservare espansione contenuto
+4. Cliccare nuovamente sull'header
+5. Osservare collasso contenuto
+
+**Risultato Atteso:**
+- Contenuto si espande/collassa con animazione fluida
+- Icona freccia ruota di 180° quando espansa
+- Multipli pannelli funzionano indipendentemente
+- Nessun scatto o jump improvvisi
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.3: Ricerca Istantanea Tabelle
+**Obiettivo:** Verificare filtro real-time su tabelle
+
+**Passi:**
+1. Aprire una tabella con molti elementi (es. Studenti)
+2. Digitare nel campo di ricerca
+3. Osservare filtro istantaneo dei risultati
+4. Cliccare sulla "X" per cancellare
+5. Verificare ripristino di tutti gli elementi
+
+**Risultato Atteso:**
+- Ricerca filtra durante la digitazione
+- Case-insensitive
+- Pulsante "X" appare quando c'è testo
+- Cancellazione ripristina vista completa
+- Nessun lag o ritardo percepibile
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.4: Progress Bar Multi-Step
+**Obiettivo:** Verificare indicatori di progresso
+
+**Passi:**
+1. Aprire una modale multi-step (se implementata)
+2. Verificare visualizzazione step corrente
+3. Procedere al passo successivo
+4. Osservare aggiornamento progress bar
+5. Tornare indietro e verificare aggiornamento
+
+**Risultato Atteso:**
+- Step corrente evidenziato in blu
+- Step completati in verde con check
+- Step futuri in grigio
+- Barra di progresso si aggiorna correttamente
+- Label descrittive visibili
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.5: Validazione Inline Form
+**Obiettivo:** Verificare feedback localizzato nei form
+
+**Passi:**
+1. Aprire form di inserimento (es. Aggiungi Studente)
+2. Inserire dato invalido in un campo con validazione
+3. Osservare feedback immediato sotto il campo
+4. Correggere il dato
+5. Verificare cambio feedback a positivo
+
+**Risultato Atteso:**
+- Messaggio errore appare sotto il campo specifico
+- Icona rossa + testo rosso per errore
+- Icona verde + testo verde per validazione OK
+- Bordo campo cambia colore in base a validità
+- Feedback scompare quando campo diventa valido
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.6: Autofocus Form Navigation
+**Obiettivo:** Verificare navigazione veloce nei form
+
+**Passi:**
+1. Aprire un form con autofocus abilitato
+2. Compilare primo campo e premere Invio
+3. Verificare passaggio automatico al campo successivo
+4. Continuare fino alla fine del form
+5. Testare anche con Tab
+
+**Risultato Atteso:**
+- Invio sposta al campo successivo
+- Focus visibile chiaramente
+- Tab continua a funzionare normalmente
+- Non va al submit prematuramente
+- Funziona su tutti i campi (input, select)
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.7: Sticky Headers Mobile
+**Obiettivo:** Verificare header fissi nelle modali su mobile
+
+**Passi:**
+1. Aprire DevTools, modalità mobile
+2. Aprire una modale con molto contenuto
+3. Scrollare contenuto modale verso il basso
+4. Verificare che header rimanga visibile
+5. Testare su più dimensioni viewport
+
+**Risultato Atteso:**
+- Header rimane in cima durante scroll
+- Mantiene contesto (titolo modale visibile)
+- Nessun overlap con contenuto
+- Pulsante chiudi sempre accessibile
+- Funziona su iPhone, iPad, Android
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.8: Box Sintesi/Abstract
+**Obiettivo:** Verificare box informativi orientamento
+
+**Passi:**
+1. Identificare pagine con box sintesi
+2. Verificare presenza all'inizio della pagina
+3. Leggere contenuto (elenco funzionalità)
+4. Verificare link rapidi (se presenti)
+5. Testare responsive su mobile
+
+**Risultato Atteso:**
+- Box visibile e distinto (gradiente azzurro/viola)
+- Bordo sinistro colorato presente
+- Contenuto chiaro e conciso
+- Link funzionanti (se presenti)
+- Responsive: padding ridotto su mobile
+
+**Stato:** [ ]
+
+---
+
+### Test Case 16.9: Sidebar Navigazione Sticky
+**Obiettivo:** Verificare sidebar fissa per documenti lunghi
+
+**Passi:**
+1. Aprire una pagina con sidebar navigazione
+2. Scrollare contenuto principale
+3. Verificare che sidebar rimanga visibile
+4. Cliccare su link nella sidebar
+5. Verificare scroll automatico alla sezione
+
+**Risultato Atteso:**
+- Sidebar rimane fissa durante scroll
+- Link evidenziato per sezione attiva
+- Click scrolla smooth alla sezione target
+- Su mobile: sidebar diventa menu collapsibile
+- Overflow gestito con scroll interno
+
+**Stato:** [ ]
+
+---
+
 ## ✅ Checklist Pre-Release Beta
 
 Prima di rilasciare versione Beta 1.0, verificare:
@@ -929,6 +1119,12 @@ Prima di rilasciare versione Beta 1.0, verificare:
 - [ ] Messaggi errore chiari
 - [ ] Feedback azioni utente
 - [ ] Performance accettabile
+- [ ] Back to Top funzionante
+- [ ] Sezioni collapsibili operative
+- [ ] Ricerca istantanea funzionante
+- [ ] Progress bar visibili e accurate
+- [ ] Validazione inline chiara
+- [ ] Autofocus form efficace
 
 ---
 
@@ -950,7 +1146,12 @@ Prima di rilasciare versione Beta 1.0, verificare:
 
 ---
 
-**Versione Piano Test:** 1.0  
-**Ultimo Aggiornamento:** 2024-10-07  
+**Versione Piano Test:** 2.0  
+**Ultimo Aggiornamento:** 2025-01-10  
 **Stato:** Pronto per esecuzione  
 **Target Release:** Beta 1.0
+
+**Modifiche v2.0:**
+- Aggiunta sezione Test Usabilità Pagine Lunghe (16.1-16.9)
+- Aggiornati criteri UX pre-release
+- Inclusi test per nuove funzionalità: Back to Top, Collapsible, Search, Progress Bar, Validazione Inline, Autofocus, Sticky Headers, Summary Box, Sidebar Navigation
