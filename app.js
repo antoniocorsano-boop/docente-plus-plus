@@ -2493,9 +2493,9 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         
         container.innerHTML = `
             <div class="schedule-header">
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Precedente</button>
-                <h3>${dayName} ${date.toLocaleDateString('it-IT')}</h3>
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Successivo ▶</button>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Prec.</button>
+                <h3>${dayName} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Succ. ▶</button>
             </div>
             <div class="schedule-view-toggle">
                 <button class="btn btn-primary" onclick="app.toggleScheduleView()">📅 Vista Settimanale</button>
@@ -2519,7 +2519,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
                                 <td class="schedule-hour">${hour}:00 - ${hour + 1}:00</td>
                                 <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
                                     ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">Nessuna classe</div>'}
-                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;">${activityInfo.icon}</div>` : ''}
+                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white;">${activityInfo.icon}</div>` : ''}
                                     ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-left: 10px; font-size: 0.8em;">Avvia</button>` : ''}
                                 </td>
                             </tr>
@@ -2544,13 +2544,14 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
             weekDays.push(date);
         }
 
-        const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+        const dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven'];
+        const dayNamesFull = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
 
         container.innerHTML = `
             <div class="schedule-header">
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Precedente</button>
-                <h3>Settimana dal ${weekDays[0].toLocaleDateString('it-IT')} al ${weekDays[4].toLocaleDateString('it-IT')}</h3>
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Successiva ▶</button>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Prec.</button>
+                <h3>Sett. ${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1} - ${weekDays[4].getDate()}/${weekDays[4].getMonth() + 1}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Succ. ▶</button>
             </div>
             <div class="schedule-view-toggle">
                 <button class="btn btn-primary" onclick="app.toggleScheduleView()">📆 Vista Giornaliera</button>
@@ -2559,7 +2560,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
                 <thead>
                     <tr>
                         <th>Ora</th>
-                        ${dayNames.map((name, i) => `<th>${name}<br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
+                        ${dayNames.map((name, i) => `<th><span class="day-full">${dayNamesFull[i]}</span><span class="day-abbr">${name}</span><br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
@@ -2575,7 +2576,7 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
                                 return `
                                     <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
                                         ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">-</div>'}
-                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-top: 3px;">${activityInfo.icon}</div>` : ''}
+                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white;">${activityInfo.icon}</div>` : ''}
                                         ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-top: 5px; font-size: 0.7em; padding: 2px 6px;">Avvia</button>` : ''}
                                     </td>
                                 `;
