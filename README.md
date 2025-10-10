@@ -6,6 +6,15 @@ App installabile per un insegnamento basato su IA, evoluzione del progetto docen
 
 > **Nota**: Questa è una web app standalone che non richiede installazione di dipendenze. Basta aprire `index.html` in un browser per iniziare!
 
+## 🎨 Design
+
+L'interfaccia utente di Docente++ segue le linee guida **Material Design** di Google:
+- **Material Icons** - Icone vettoriali moderne e accessibili
+- **Roboto Font** - Tipografia ottimizzata per leggibilità
+- **Palette di colori Material** - Blu #1976d2 (primary), Verde #4caf50 (secondary), Grigio #f5f5f5 (background)
+- **Elevazione e ombre** - Box-shadow coerenti per profondità visiva
+- **Border-radius 4px/8px** - Angoli arrotondati secondo lo stile Material
+
 ## 📋 Caratteristiche
 
 - **🎯 Onboarding Guidato** - Configurazione iniziale profilo docente
@@ -147,6 +156,7 @@ docente-plus-plus/
 ## 🔧 Tecnologie Utilizzate
 
 - **HTML5, CSS3, JavaScript (ES6+)** - Frontend moderno e responsive
+- **Material Design** - Sistema di design Google con Material Icons, tipografia Roboto, elevazione con ombre, e palette colori Material
 - **LocalStorage API** - Persistenza dati lato client
 - **OpenRouter API** - Intelligenza artificiale
 - **PWA + Service Worker** - Installabile e funzionante offline
