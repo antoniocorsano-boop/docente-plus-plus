@@ -156,7 +156,7 @@ docente-plus-plus/
 ## 🔧 Tecnologie Utilizzate
 
 - **HTML5, CSS3, JavaScript (ES6+)** - Frontend moderno e responsive
-- **Material Design** - Sistema di design con Material Icons e font Roboto
+- **Material Design** - Sistema di design Google con Material Icons, tipografia Roboto, elevazione con ombre, e palette colori Material
 - **LocalStorage API** - Persistenza dati lato client
 - **OpenRouter API** - Intelligenza artificiale
 - **PWA + Service Worker** - Installabile e funzionante offline
