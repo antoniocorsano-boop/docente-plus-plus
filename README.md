@@ -55,6 +55,23 @@ App installabile per un insegnamento basato su IA, evoluzione del progetto docen
    - Aggiungi studenti e lezioni
    - Usa l'assistente IA per generare contenuti
 
+## 🖼️ Screenshot
+
+*Aggiungi qui degli screenshot rappresentativi dell'interfaccia e delle funzionalità principali.*
+
+## ❓ FAQ
+
+**Dove vengono salvati i miei dati?**  
+Tutti i dati sono salvati localmente sul dispositivo, senza alcun server esterno.
+
+**Posso usare l'app offline?**  
+Sì, la web app è una PWA e funziona anche senza connessione.
+
+**È obbligatorio configurare la API Key?**  
+No, solo le funzionalità avanzate di IA richiedono una API Key.
+
+*Per altre domande consulta la [guida utente](docs/user-guide.md).*
+
 📖 **Per una guida completa**: vedi [Guida Rapida](docs/QUICK_START.md)
 
 ## 📊 Funzionalità Principali
@@ -147,6 +164,7 @@ Docente++ può essere installato come app su smartphone, tablet e desktop!
 L'app installata funziona anche offline! 
 
 📖 **Guida completa**: [Installazione PWA](docs/PWA_INSTALLATION.md) | [Quick Start PWA](docs/PWA_QUICK_START.md)
+
 ## 🔐 Privacy e Sicurezza
 
 - **Dati Locali** - Tutti i dati salvati solo nel browser
@@ -154,19 +172,9 @@ L'app installata funziona anche offline!
 - **Nessun Server** - L'app funziona completamente lato client
 - **HTTPS Consigliato** - Per chiamate API sicure a OpenRouter
 
-## 📝 Licenza
+## 🤝 Contribuire
 
-Questo progetto è rilasciato sotto licenza MIT. Vedi il file LICENSE per i dettagli.
-
-## 🤝 Contributi
-
-I contributi sono benvenuti! Per contribuire:
-
-1. Fai fork del repository
-2. Crea un branch per la tua feature (`git checkout -b feature/NuovaFunzionalità`)
-3. Commit delle modifiche (`git commit -m 'Aggiunge nuova funzionalità'`)
-4. Push al branch (`git push origin feature/NuovaFunzionalità`)
-5. Apri una Pull Request
+Vuoi contribuire? Consulta [CONTRIBUTING.md](CONTRIBUTING.md) per le linee guida e come proporre richieste di modifica o segnalare bug.
 
 ## 🐛 Segnalazione Bug e Feedback
 
@@ -181,59 +189,13 @@ Vogliamo rendere Docente++ sempre migliore! Il tuo feedback è prezioso:
 
 Progetto sviluppato per migliorare la gestione didattica degli insegnanti attraverso l'intelligenza artificiale.
 
-## 📚 Documentazione Aggiuntiva
+## 📚 Documentazione avanzata
 
-### Guide Rapide e Installazione
+- [Guida Utente](docs/user-guide.md)
+- [Guida Sviluppatori](docs/dev-guide.md)
+- [Architettura e API](docs/architecture.md)
+- [Changelog](CHANGELOG.md)
 
-- **[🚀 Quick Start](docs/QUICK_START.md)** - Guida rapida per iniziare in 5 minuti
-- **[📱 Installazione PWA](docs/PWA_INSTALLATION.md)** - Guida completa installazione su smartphone, tablet e desktop
-- **[⚡ PWA Quick Start](docs/PWA_QUICK_START.md)** - Test rapido funzionalità PWA
+## 📄 Licenza
 
-### Funzionalità Specifiche
-
-- **[🎨 Miglioramenti Usabilità](docs/USABILITY_IMPROVEMENTS.md)** - Toast, validazione real-time, help contestuale, tema scuro
-- **[📋 Importazione Attività da PDF](docs/PDF_ACTIVITIES_IMPORT.md)** - Estrazione automatica attività da PDF
-- **[📰 Modulo News RSS/Atom](docs/NEWS_RSS_MODULE.md)** - Aggregazione news con analisi IA
-- **[📂 Importazione Documenti](docs/DOCUMENT_IMPORT_MODULE.md)** - Sistema import documenti didattici
-
-### Architettura e Riferimenti Tecnici
-
-- **[🏗️ Architettura News](docs/NEWS_ARCHITECTURE.md)** - Architettura tecnica modulo News
-- **[📅 Implementazione Orario](docs/SCHEDULE_IMPLEMENTATION.md)** - Dettagli implementazione orario didattico
-- **[🔧 OpenRouter API](docs/OPENROUTER_API_EXAMPLE.md)** - Esempi e guida API OpenRouter
-
-### Report di Implementazione e Test
-
-- **[✅ Riepilogo Implementazione PDF](docs/RIEPILOGO_IMPLEMENTAZIONE.md)** - Report implementazione import PDF
-- **[📊 Test Results](docs/IMPLEMENTATION_TEST_RESULTS.md)** - Risultati test implementazione
-- **[📝 Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Sommario generale implementazioni
-- **[🧪 News Testing Guide](docs/NEWS_TESTING_GUIDE.md)** - Guida test modulo News
-- **[🧪 Piano Test Beta](docs/BETA_TEST_PLAN.md)** - Piano completo test per release Beta 1.0
-- **[📝 Feedback Utente](docs/FEEDBACK_UTENTE.md)** - Raccolta feedback utenti e roadmap miglioramenti
-- **[🗺️ Roadmap Operativa](docs/ROADMAP.md)** - Roadmap incrementale sviluppo per macro-temi
-
-### Documentazione PWA
-
-- **[✅ PWA Verification Summary](docs/PWA_VERIFICATION_SUMMARY.md)** - Riepilogo verifica PWA
-- **[📋 PWA Review Checklist](docs/PWA_REVIEW_CHECKLIST.md)** - Checklist revisione PWA
-- **[🔬 PWA Verification Report](docs/PWA_VERIFICATION_REPORT.md)** - Report tecnico completo
-- **[⚙️ PWA Runtime Testing](docs/PWA_RUNTIME_TESTING.md)** - Procedure test runtime
-- **[📊 PWA Implementation Summary](docs/PWA_IMPLEMENTATION_SUMMARY.md)** - Sommario implementazione PWA
-- **[📝 PWA Verification Overview](docs/PWA_VERIFICATION_OVERVIEW.md)** - Panoramica verifica tecnica
-- **[📄 PWA Test Log](docs/PWA_TEST_LOG.md)** - Log test PWA
-
-### Migrazione e Implementazioni News
-
-- **[🔄 Migration Summary](docs/MIGRATION_SUMMARY.md)** - Sommario migrazioni sistema
-- **[📰 News Implementation Summary](docs/NEWS_IMPLEMENTATION_SUMMARY.md)** - Sommario implementazione News
-
-### Risorse Esterne Utili
-
-- [Documentazione OpenRouter API](https://openrouter.ai/docs)
-- [Guida HTML5](https://developer.mozilla.org/it/docs/Web/HTML)
-- [Guida CSS3](https://developer.mozilla.org/it/docs/Web/CSS)
-- [Guida JavaScript](https://developer.mozilla.org/it/docs/Web/JavaScript)
-
----
-
-**🎯 Docente++** - L'assistente intelligente per la gestione didattica moderna
+Questo progetto è distribuito sotto licenza MIT. Vedi [LICENSE](LICENSE).
