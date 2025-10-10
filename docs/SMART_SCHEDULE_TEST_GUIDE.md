@@ -1,5 +1,16 @@
 # 🧪 Smart Daily Schedule - Test Guide
 
+<div class="summary-box">
+<h3><span class="material-icons">info</span> In questa guida troverai:</h3>
+<ul>
+<li>Test rapidi per verificare Smart Daily Schedule</li>
+<li>Scenari di test passo-passo</li>
+<li>Validazione delle nuove funzionalità di usabilità</li>
+<li>Checklist completa di verifica</li>
+<li>Test per progress bar, sticky headers e validazione inline</li>
+</ul>
+</div>
+
 ## Quick Start Testing
 
 ### Prerequisites
@@ -347,5 +358,156 @@ If you find a bug:
 
 ---
 
-**Last Updated**: October 2025
-**Version**: 1.0
+## 🎨 Test Nuove Funzionalità Usabilità
+
+### Test Progress Bar
+
+**Obiettivo:** Verificare visualizzazione e aggiornamento della progress bar multi-step
+
+**Test:**
+1. Avviare una lezione dal dashboard
+2. Verificare presenza progress bar in cima alla modale
+3. Osservare indicatori step:
+   - Step corrente evidenziato in blu
+   - Step completati in verde
+   - Step futuri in grigio
+4. Procedere tra gli step
+5. Verificare aggiornamento progress bar
+
+**Risultato Atteso:**
+- ✅ Progress bar sempre visibile
+- ✅ Percentuale progresso accurata
+- ✅ Indicatori step colorati correttamente
+- ✅ Animazione smooth tra i passaggi
+
+---
+
+### Test Sticky Header Mobile
+
+**Obiettivo:** Verificare header fisso durante scroll su dispositivi mobili
+
+**Test:**
+1. Aprire DevTools, modalità mobile (iPhone/Android)
+2. Avviare una lezione
+3. Scrollare contenuto modale verso il basso
+4. Verificare che header rimanga visibile in cima
+5. Testare su più dimensioni viewport
+
+**Risultato Atteso:**
+- ✅ Header rimane fisso durante scroll
+- ✅ Titolo e informazioni lezione sempre visibili
+- ✅ Pulsante chiudi sempre accessibile
+- ✅ Nessun overlap con contenuto
+
+---
+
+### Test Validazione Inline
+
+**Obiettivo:** Verificare feedback localizzato nei campi di valutazione
+
+**Test:**
+1. Durante valutazione studente, inserire dati invalidi
+2. Osservare feedback immediato accanto ai campi
+3. Correggere i dati
+4. Verificare cambio feedback a positivo
+
+**Risultato Atteso:**
+- ✅ Messaggio errore appare sotto il campo specifico
+- ✅ Icona rossa + testo rosso per errore
+- ✅ Icona verde + testo verde per validazione OK
+- ✅ Bordo campo cambia colore in base a validità
+
+---
+
+### Test Autofocus Form
+
+**Obiettivo:** Verificare navigazione rapida con tastiera
+
+**Test:**
+1. Aprire form di valutazione studente
+2. Compilare primo campo
+3. Premere Invio
+4. Verificare passaggio automatico al campo successivo
+5. Continuare fino alla fine del form
+
+**Risultato Atteso:**
+- ✅ Invio sposta al campo successivo
+- ✅ Focus visibile chiaramente
+- ✅ Tab continua a funzionare normalmente
+- ✅ Non va al submit prematuramente
+
+---
+
+### Test Collapsible Sections (FAQ)
+
+**Obiettivo:** Verificare sezioni espandibili nella documentazione
+
+**Test:**
+1. Navigare in una pagina con sezioni collapsibili
+2. Cliccare sull'header di una sezione
+3. Osservare espansione contenuto
+4. Cliccare nuovamente sull'header
+5. Osservare collasso contenuto
+
+**Risultato Atteso:**
+- ✅ Contenuto si espande/collassa con animazione fluida
+- ✅ Icona freccia ruota di 180° quando espansa
+- ✅ Multipli pannelli funzionano indipendentemente
+- ✅ Nessun scatto o jump improvvisi
+
+---
+
+### Test Back to Top Button
+
+**Obiettivo:** Verificare pulsante "Torna su" durante scroll
+
+**Test:**
+1. Aprire una pagina lunga (Dashboard con molti dati)
+2. Scrollare verso il basso oltre 300px
+3. Osservare apparizione pulsante floating in basso a destra
+4. Cliccare sul pulsante
+5. Verificare scroll smooth verso l'alto
+
+**Risultato Atteso:**
+- ✅ Pulsante appare solo dopo 300px di scroll
+- ✅ Icona freccia verso l'alto visibile
+- ✅ Click riporta in cima con animazione smooth
+- ✅ Su mobile: pulsante 44x44px minimo
+- ✅ Hover effect funziona su desktop
+
+---
+
+## 📋 Checklist Usabilità Completa
+
+### Progress Bar
+- [ ] Visualizzata in tutte le modali multi-step
+- [ ] Step corrente evidenziato correttamente
+- [ ] Step completati mostrati in verde
+- [ ] Percentuale progresso accurata
+- [ ] Animazioni fluide
+
+### Mobile Optimization
+- [ ] Sticky header funziona su mobile
+- [ ] Touch targets 44x44px minimo
+- [ ] Layout responsive si adatta
+- [ ] Autofocus campi attivo
+- [ ] Scroll smooth su mobile
+
+### Validazione e Feedback
+- [ ] Validazione inline attiva
+- [ ] Messaggi localizzati accanto ai campi
+- [ ] Icone colorate (verde/rosso)
+- [ ] Bordi campo cambiano colore
+- [ ] Toast conferma operazioni
+
+### Navigazione e Ricerca
+- [ ] Back to Top appare dopo scroll
+- [ ] Scroll smooth al click
+- [ ] Sezioni collapsibili funzionano
+- [ ] Ricerca istantanea attiva (se presente)
+- [ ] Sidebar navigazione sticky (se presente)
+
+---
+
+**Last Updated**: January 2025
+**Version**: 2.0 (with Usability Improvements)
