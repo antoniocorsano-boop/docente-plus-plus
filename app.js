@@ -111,6 +111,9 @@ class DocentePlusPlus {
         this.loadActiveClass();
         this.updateClassSelectors();
         
+        // Initialize workspace and active class badge
+        this.initializeWorkspace();
+        
         // Initialize AI FAB
         this.initializeAIFAB();
         
@@ -146,16 +149,26 @@ class DocentePlusPlus {
             });
         }
         
-        // Tab switching
+        // Tab switching - updated to handle submenu items
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', (e) => {
+                // Skip if this is a menu-with-submenu button (it just shows dropdown)
+                if (button.classList.contains('menu-with-submenu')) {
+                    e.stopPropagation();
+                    return;
+                }
+                
                 // Close mobile menu when tab is selected
                 if (menuToggle) {
                     menuToggle.classList.remove('active');
                     mainNav.classList.remove('mobile-open');
                     menuBackdrop.classList.remove('active');
                 }
-                this.switchTab(e.target.dataset.tab);
+                
+                const tabName = button.dataset.tab;
+                if (tabName && tabName !== 'class-selector' && tabName !== 'info-app' && tabName !== 'help') {
+                    this.switchTab(tabName);
+                }
             });
         });
 
@@ -167,6 +180,13 @@ class DocentePlusPlus {
                     menuGroup.classList.toggle('collapsed');
                 }
             });
+        });
+        
+        // Close modals on backdrop click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
         });
 
         // Lesson form
@@ -7841,6 +7861,244 @@ Rispondi in italiano in modo chiaro e strutturato.
         };
 
         return names[tab] || 'Applicazione';
+    }
+
+    // New UI/UX Methods for Redesigned Interface
+
+    // Workspace and Active Class Management
+    initializeWorkspace() {
+        // Check if activeClass feature is enabled in settings
+        const useActiveClass = this.settings.useActiveClass !== false; // Default true
+        
+        if (!useActiveClass || !this.activeClass) {
+            // Set to Workspace mode
+            this.activeClass = 'workspace';
+            this.updateActiveClassBadge();
+        }
+        
+        this.updateActiveClassBadge();
+        this.renderTodayScheduleEnhanced();
+    }
+
+    updateActiveClassBadge() {
+        const badge = document.getElementById('active-class-badge');
+        const badgeText = document.getElementById('active-class-badge-text');
+        const scheduleClassName = document.getElementById('schedule-class-name');
+        
+        if (!badge || !badgeText) return;
+        
+        // Remove all mode classes
+        badge.classList.remove('workspace-mode', 'class-selected');
+        
+        if (this.activeClass === 'workspace' || !this.activeClass) {
+            badgeText.textContent = 'Workspace';
+            badge.classList.add('workspace-mode');
+            if (scheduleClassName) {
+                scheduleClassName.textContent = 'Workspace (tutte le classi)';
+            }
+        } else {
+            const activeClassObj = this.classes.find(c => c.id == this.activeClass || c.name === this.activeClass);
+            const className = activeClassObj ? activeClassObj.name : this.activeClass;
+            badgeText.textContent = className;
+            badge.classList.add('class-selected');
+            if (scheduleClassName) {
+                scheduleClassName.textContent = className;
+            }
+        }
+        
+        // Visual notification of change (brief animation)
+        badge.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            badge.style.transform = 'scale(1)';
+        }, 300);
+        
+        // Update schedule display
+        this.renderTodayScheduleEnhanced();
+    }
+
+    // Show class selector modal
+    showClassSelector() {
+        const modal = document.getElementById('class-selector-modal');
+        const list = document.getElementById('class-selector-list');
+        
+        if (!modal || !list) return;
+        
+        // Build class selector list
+        let html = `
+            <div class="class-selector-item workspace ${this.activeClass === 'workspace' || !this.activeClass ? 'active' : ''}" 
+                 onclick="app.selectClass('workspace')">
+                <div class="class-selector-icon">🏢</div>
+                <div class="class-selector-details">
+                    <div class="class-selector-name">Workspace</div>
+                    <div class="class-selector-meta">Visualizza tutti i dati aggregati</div>
+                </div>
+            </div>
+        `;
+        
+        this.classes.forEach(cls => {
+            const isActive = this.activeClass === cls.id || this.activeClass === cls.name;
+            html += `
+                <div class="class-selector-item ${isActive ? 'active' : ''}" 
+                     onclick="app.selectClass('${cls.id}')">
+                    <div class="class-selector-icon">🎓</div>
+                    <div class="class-selector-details">
+                        <div class="class-selector-name">${cls.name}</div>
+                        <div class="class-selector-meta">
+                            ${cls.year ? `Anno: ${cls.year}° ` : ''}
+                            ${cls.section ? `Sezione: ${cls.section} ` : ''}
+                            ${cls.studentsCount || 0} studenti
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        list.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+
+    closeClassSelector() {
+        const modal = document.getElementById('class-selector-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    selectClass(classId) {
+        if (classId === 'workspace') {
+            this.activeClass = 'workspace';
+        } else {
+            this.activeClass = classId;
+        }
+        
+        localStorage.setItem('active-class', this.activeClass);
+        this.updateActiveClassBadge();
+        this.closeClassSelector();
+        
+        // Show toast notification
+        const className = classId === 'workspace' ? 'Workspace' : 
+            (this.classes.find(c => c.id == classId)?.name || classId);
+        this.showToast(`Classe attiva cambiata: ${className}`, 'success');
+    }
+
+    // Enhanced Today's Schedule Rendering
+    renderTodayScheduleEnhanced() {
+        const container = document.getElementById('today-schedule-enhanced');
+        if (!container) return;
+        
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        
+        // Skip weekends
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📅 Oggi è il weekend! Nessuna lezione programmata.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const hours = [8, 9, 10, 11, 12, 13];
+        let html = '';
+        let hasLessons = false;
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            
+            // Filter by active class if not workspace
+            if (slot && this.activeClass !== 'workspace' && slot.classId) {
+                const slotClassId = slot.classId;
+                if (slotClassId != this.activeClass) {
+                    return; // Skip this slot if not matching active class
+                }
+            }
+            
+            if (slot && slot.classId) {
+                hasLessons = true;
+                const cls = this.classes.find(c => c.id == slot.classId);
+                const activityInfo = this.getActivityTypeIcon(slot.activityType);
+                
+                html += `
+                    <div class="schedule-cell" onclick="app.showScheduleSlotEditor(new Date('${today.toISOString()}'), ${hour})">
+                        <div class="schedule-cell-time">${hour}:00 - ${hour + 1}:00</div>
+                        <div class="schedule-cell-class">${cls ? cls.name : 'Classe'}</div>
+                        <div class="schedule-cell-activity">
+                            <span class="activity-symbol">${activityInfo.icon}</span>
+                            <span class="activity-label">${activityInfo.label}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show empty slot only if workspace mode
+                if (this.activeClass === 'workspace' || !this.activeClass) {
+                    html += `
+                        <div class="schedule-cell empty" onclick="app.showScheduleSlotEditor(new Date('${today.toISOString()}'), ${hour})">
+                            <div class="schedule-cell-time">${hour}:00 - ${hour + 1}:00</div>
+                            <div class="schedule-cell-class">-</div>
+                            <div class="schedule-cell-activity">
+                                <span class="activity-label">Nessuna attività</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        });
+        
+        if (!hasLessons && (this.activeClass === 'workspace' || !this.activeClass)) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📅 Nessuna lezione programmata per oggi.</p>
+                    <p><small>Clicca su una cella vuota per aggiungere un'attività.</small></p>
+                </div>
+            `;
+        } else if (!hasLessons) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📅 Nessuna lezione programmata per questa classe oggi.</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = html;
+        }
+    }
+
+    // App Info Modal
+    showAppInfo() {
+        const modal = document.getElementById('app-info-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    closeAppInfo() {
+        const modal = document.getElementById('app-info-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // Help Modal
+    showHelp() {
+        const modal = document.getElementById('help-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    closeHelp() {
+        const modal = document.getElementById('help-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // Override setActiveClass to use new system
+    setActiveClass(className) {
+        this.selectClass(className || 'workspace');
+    }
+
+    // Override loadActiveClass to initialize workspace
+    loadActiveClass() {
+        const savedClass = localStorage.getItem('active-class');
+        if (savedClass) {
+            this.activeClass = savedClass;
+        } else {
+            this.activeClass = 'workspace';
+        }
+        
+        this.updateActiveClassBadge();
     }
 }
 

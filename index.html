@@ -155,6 +155,12 @@
             <p class="subtitle">Gestione Didattica Potenziata da IA</p>
         </header>
 
+        <!-- Active Class Badge (persistent, always visible) -->
+        <div class="active-class-badge" id="active-class-badge" onclick="app.showClassSelector()">
+            <span class="badge-icon">🎯</span>
+            <span class="badge-text" id="active-class-badge-text">Workspace</span>
+        </div>
+
         <div class="nav-container">
             <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
                 <span></span>
@@ -162,145 +168,122 @@
                 <span></span>
             </button>
             
-            <nav class="tabs" id="main-nav">
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="vista-generale">
-                        <span class="menu-icon">🏠</span>
-                        <span class="menu-text">Vista Generale</span>
-                        <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button active" data-tab="home">
-                            <span class="menu-icon">🏠</span>
-                            <span class="menu-text">Home</span>
-                        </button>
-                    </div>
-                </div>
+            <nav class="tabs" id="main-nav" role="navigation" aria-label="Menu principale">
+                <!-- Sala Prof (Dashboard/Workspace) -->
+                <button class="tab-button active" data-tab="home" title="Sala Prof - Dashboard Workspace" aria-label="Sala Prof">
+                    <span class="menu-icon">🏠</span>
+                    <span class="menu-text">Sala Prof</span>
+                </button>
                 
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="in-classe">
-                        <span class="menu-icon">👨‍🏫</span>
-                        <span class="menu-text">In Classe</span>
-                        <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button" data-tab="lessons">
-                            <span class="menu-icon">📚</span>
-                            <span class="menu-text">Lezioni</span>
-                        </button>
-                        <button class="tab-button" data-tab="schedule">
-                            <span class="menu-icon">📅</span>
-                            <span class="menu-text">Orario</span>
-                        </button>
-                        <button class="tab-button" data-tab="evaluations">
-                            <span class="menu-icon">✅</span>
-                            <span class="menu-text">Valutazioni</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- Classe (Class Selection - opens modal) -->
+                <button class="tab-button" data-tab="class-selector" title="Seleziona Classe Attiva" aria-label="Classe" onclick="app.showClassSelector(); event.stopPropagation();">
+                    <span class="menu-icon">🎓</span>
+                    <span class="menu-text">Classe</span>
+                </button>
                 
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="pianificazione">
-                        <span class="menu-icon">📋</span>
-                        <span class="menu-text">Pianificazione</span>
-                        <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button" data-tab="activities">
-                            <span class="menu-icon">📝</span>
-                            <span class="menu-text">Attività</span>
-                        </button>
-                        <button class="tab-button" data-tab="notifications">
-                            <span class="menu-icon">🔔</span>
-                            <span class="menu-text">Notifiche</span>
-                        </button>
-                        <button class="tab-button" data-tab="news">
-                            <span class="menu-icon">📰</span>
-                            <span class="menu-text">News</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="gestione">
-                        <span class="menu-icon">👥</span>
+                <!-- Gestione (Operational Features) -->
+                <div class="menu-group compact-menu">
+                    <button class="tab-button menu-with-submenu" title="Gestione - Funzionalità operative" aria-label="Gestione" aria-expanded="false">
+                        <span class="menu-icon">⚙️</span>
                         <span class="menu-text">Gestione</span>
                         <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button" data-tab="students">
+                    </button>
+                    <div class="submenu" role="menu">
+                        <button class="tab-button submenu-item" data-tab="students" title="Gestione Studenti" aria-label="Studenti">
                             <span class="menu-icon">👤</span>
                             <span class="menu-text">Studenti</span>
                         </button>
-                        <button class="tab-button" data-tab="classes">
+                        <button class="tab-button submenu-item" data-tab="classes" title="Gestione Classi" aria-label="Classi">
                             <span class="menu-icon">🎓</span>
                             <span class="menu-text">Classi</span>
                         </button>
-                    </div>
-                </div>
-                
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="strumenti-ia">
-                        <span class="menu-icon">🤖</span>
-                        <span class="menu-text">Strumenti IA</span>
-                        <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button" data-tab="ai-assistant">
+                        <button class="tab-button submenu-item" data-tab="lessons" title="Gestione Lezioni" aria-label="Lezioni">
+                            <span class="menu-icon">📚</span>
+                            <span class="menu-text">Lezioni</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="schedule" title="Orario Settimanale" aria-label="Orario">
+                            <span class="menu-icon">📅</span>
+                            <span class="menu-text">Orario</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="evaluations" title="Valutazioni" aria-label="Valutazioni">
+                            <span class="menu-icon">✅</span>
+                            <span class="menu-text">Valutazioni</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="activities" title="Attività Didattiche" aria-label="Attività">
+                            <span class="menu-icon">📝</span>
+                            <span class="menu-text">Attività</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="ai-assistant" title="Assistente IA" aria-label="IA">
                             <span class="menu-icon">💬</span>
                             <span class="menu-text">Assistente IA</span>
                         </button>
-                        <button class="tab-button" data-tab="document-import">
-                            <span class="menu-icon">📄</span>
-                            <span class="menu-text">Importa con IA</span>
+                    </div>
+                </div>
+                
+                <!-- Impostazioni (Settings & Backup) -->
+                <div class="menu-group compact-menu">
+                    <button class="tab-button menu-with-submenu" title="Impostazioni - Configurazione e Backup" aria-label="Impostazioni" aria-expanded="false">
+                        <span class="menu-icon">🔧</span>
+                        <span class="menu-text">Impostazioni</span>
+                        <span class="menu-arrow">▼</span>
+                    </button>
+                    <div class="submenu" role="menu">
+                        <button class="tab-button submenu-item" data-tab="settings" title="Configurazione App" aria-label="Config">
+                            <span class="menu-icon">🔧</span>
+                            <span class="menu-text">Configurazione</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="backup-restore" title="Backup e Ripristino" aria-label="Backup">
+                            <span class="menu-icon">💾</span>
+                            <span class="menu-text">Backup</span>
+                        </button>
+                        <button class="tab-button submenu-item" data-tab="notifications" title="Notifiche e Promemoria" aria-label="Notifiche">
+                            <span class="menu-icon">🔔</span>
+                            <span class="menu-text">Notifiche</span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="menu-group">
-                    <div class="menu-group-title" data-group="sistema">
-                        <span class="menu-icon">⚙️</span>
-                        <span class="menu-text">Sistema</span>
-                        <span class="menu-arrow">▼</span>
-                    </div>
-                    <div class="menu-items">
-                        <button class="tab-button" data-tab="backup-restore">
-                            <span class="menu-icon">💾</span>
-                            <span class="menu-text">Backup & Ripristino</span>
-                        </button>
-                        <button class="tab-button" data-tab="settings">
-                            <span class="menu-icon">🔧</span>
-                            <span class="menu-text">Impostazioni</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- Info App -->
+                <button class="tab-button" data-tab="info-app" title="Informazioni sull'App" aria-label="Info App" onclick="app.showAppInfo(); event.stopPropagation();">
+                    <span class="menu-icon">ℹ️</span>
+                    <span class="menu-text">Info</span>
+                </button>
+                
+                <!-- Guida (Help) -->
+                <button class="tab-button" data-tab="help" title="Guida e Documentazione" aria-label="Guida" onclick="app.showHelp(); event.stopPropagation();">
+                    <span class="menu-icon">❓</span>
+                    <span class="menu-text">Guida</span>
+                </button>
             </nav>
         </div>
         
         <div class="menu-backdrop" id="menu-backdrop"></div>
 
-        <!-- Home Tab -->
+        <!-- Home Tab (Sala Prof) -->
         <div id="home" class="tab-content active">
             <div class="tab-header">
-                <h2>Home</h2>
-                <button class="help-btn" onclick="app.showContextualHelp('home')" title="Aiuto">?</button>
-            </div>
-            <!-- Active Class Selector -->
-            <div class="home-class-selector">
-                <label for="active-class-selector">🎯 Classe Attiva:</label>
-                <select id="active-class-selector" onchange="app.setActiveClass(this.value)">
-                    <option value="">Seleziona una classe</option>
-                </select>
-                <span id="current-class-display" class="current-class-badge">Nessuna classe selezionata</span>
+                <h2>🏠 Sala Prof</h2>
+                <button class="help-btn" onclick="app.showContextualHelp('home')" title="Aiuto" aria-label="Aiuto">?</button>
             </div>
             
-            <!-- Today's Schedule Section -->
-            <div class="home-section">
-                <h2>📅 Orario di Oggi</h2>
-                <div id="today-schedule-preview"></div>
-                <button class="btn btn-primary" onclick="app.goToTodaySchedule()" style="margin-top: 15px;">
-                    📋 Vai all'Orario Completo
-                </button>
+            <!-- Enhanced Today's Schedule Section -->
+            <div class="home-section schedule-section">
+                <div class="section-header-flex">
+                    <h2>📅 Orario di Oggi</h2>
+                    <div class="schedule-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="app.goToTodaySchedule()" title="Vista completa orario" aria-label="Orario completo">
+                            📋 Completo
+                        </button>
+                    </div>
+                </div>
+                <div id="today-schedule-enhanced" class="schedule-today-grid">
+                    <!-- Will be populated by renderTodayScheduleEnhanced() -->
+                </div>
+                <p class="schedule-info-text">
+                    <small>💡 Tocca una cella per modificare l'attività. 
+                    <span id="schedule-filter-info">Mostrando: <strong id="schedule-class-name">Workspace (tutte le classi)</strong></span>
+                    </small>
+                </p>
             </div>
 
             <!-- Quick Access Section -->
@@ -1506,5 +1489,87 @@
             deferredPrompt = null;
         });
     </script>
+    
+    <!-- Class Selector Modal -->
+    <div id="class-selector-modal" class="modal" style="display: none;">
+        <div class="modal-content class-selector-content">
+            <h2>🎓 Seleziona Classe Attiva</h2>
+            <p>Scegli la classe su cui lavorare oppure Workspace per vedere tutti i dati aggregati:</p>
+            
+            <div class="class-selector-list" id="class-selector-list">
+                <!-- Will be populated by app.showClassSelector() -->
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="app.closeClassSelector()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- App Info Modal -->
+    <div id="app-info-modal" class="modal" style="display: none;">
+        <div class="modal-content app-info-content">
+            <h2>ℹ️ Informazioni su Docente++</h2>
+            <div class="app-info-details">
+                <p><strong>Versione:</strong> 2.0.0</p>
+                <p><strong>Ultima Modifica:</strong> Ottobre 2025</p>
+                <p><strong>Descrizione:</strong> Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter</p>
+                <p><strong>Caratteristiche principali:</strong></p>
+                <ul>
+                    <li>Gestione lezioni, studenti e classi</li>
+                    <li>Orario settimanale interattivo</li>
+                    <li>Assistente IA per supporto didattico</li>
+                    <li>Backup e ripristino dati</li>
+                    <li>PWA installabile</li>
+                </ul>
+                <p><strong>Sviluppato da:</strong> antbrogame-a11y</p>
+                <p><strong>Licenza:</strong> Open Source</p>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="app.closeAppInfo()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" style="display: none;">
+        <div class="modal-content help-content">
+            <h2>❓ Guida Rapida</h2>
+            <div class="help-sections">
+                <div class="help-section">
+                    <h3>🏠 Sala Prof</h3>
+                    <p>La dashboard principale con l'orario del giorno e accesso rapido alle funzionalità principali.</p>
+                </div>
+                <div class="help-section">
+                    <h3>🎓 Classe Attiva</h3>
+                    <p>Seleziona la classe su cui lavorare. Scegli "Workspace" per vedere tutti i dati aggregati di tutte le classi.</p>
+                </div>
+                <div class="help-section">
+                    <h3>⚙️ Gestione</h3>
+                    <p>Accedi alle funzionalità operative: studenti, classi, lezioni, orario, valutazioni, attività e assistente IA.</p>
+                </div>
+                <div class="help-section">
+                    <h3>🔧 Impostazioni</h3>
+                    <p>Configura l'app, gestisci backup e notifiche.</p>
+                </div>
+                <div class="help-section">
+                    <h3>📅 Orario di Oggi</h3>
+                    <p>Visualizza l'orario del giorno corrente. Clicca su una cella per modificare l'attività. L'orario si adatta automaticamente alla classe selezionata.</p>
+                </div>
+                <div class="help-section">
+                    <h3>💡 Suggerimenti</h3>
+                    <ul>
+                        <li>Usa i tooltip (passa il mouse sopra le icone) per sapere cosa fanno i pulsanti</li>
+                        <li>Il badge in alto mostra sempre la classe attiva corrente</li>
+                        <li>L'orario è interattivo: tocca le celle per modificare</li>
+                        <li>Workspace mostra i dati aggregati di tutte le classi</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="app.closeHelp()">Chiudi</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
