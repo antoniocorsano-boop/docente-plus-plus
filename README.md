@@ -70,7 +70,7 @@ Sì, la web app è una PWA e funziona anche senza connessione.
 **È obbligatorio configurare la API Key?**  
 No, solo le funzionalità avanzate di IA richiedono una API Key.
 
-*Per altre domande consulta [docs/user-guide.md](docs/user-guide.md).*
+*Per altre domande consulta la [guida utente](docs/user-guide.md).*
 
 📖 **Per una guida completa**: vedi [Guida Rapida](docs/QUICK_START.md)
 

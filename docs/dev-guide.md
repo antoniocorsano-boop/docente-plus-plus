@@ -13,7 +13,7 @@
 ## Estendere le funzionalità
 
 - Segui la struttura modulare (funzioni per classi, studenti, lezioni).
-- Documenta le nuove funzioni e aggiorna la guida utente.
+- Documenta le nuove funzioni e aggiorna la [guida utente](user-guide.md).
 
 ## Testing
 

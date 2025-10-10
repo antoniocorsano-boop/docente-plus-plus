@@ -20,4 +20,4 @@ Questa guida aiuta a utilizzare Docente++ al meglio!
 ## Privacy
 - Tutti i dati rimangono sul dispositivo.
 
-Per domande frequenti consulta la sezione FAQ nel README.
+Per domande frequenti consulta la [sezione FAQ nel README](../README.md#-faq).
