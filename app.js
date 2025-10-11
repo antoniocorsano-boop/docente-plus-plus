@@ -1,23 +1,47 @@
 // Docente++ - Main Application JavaScript
 // Web app for teacher didactics management powered by OpenRouter AI
 
+/**
+ * @class DocentePlusPlus
+ * @classdesc Main application class for Docente++. Handles all logic,
+ * data management, and UI interaction for the teacher didactics management tool.
+ */
 class DocentePlusPlus {
+    /**
+     * Initializes the application, setting up state variables and loading initial data.
+     */
     constructor() {
+        /** @property {Array<Object>} lessons - Array of lesson objects. */
         this.lessons = [];
+        /** @property {Array<Object>} students - Array of student objects. */
         this.students = [];
+        /** @property {Array<Object>} classes - Array of class objects. */
         this.classes = [];
+        /** @property {Array<string>} subjects - Array of subjects taught by the teacher. */
         this.subjects = [];
+        /** @property {Object} settings - General application settings. */
         this.settings = {};
+        /** @property {Array<Object>} chatMessages - Array of AI chat messages. */
         this.chatMessages = [];
+        /** @property {string} activeClass - The name of the currently active class. */
         this.activeClass = '';
+        /** @property {File|null} selectedFile - The file selected for AI assistant upload. */
         this.selectedFile = null;
+        /** @property {Array<Object>} evaluationCriteria - Array of evaluation criteria. */
         this.evaluationCriteria = [];
+        /** @property {Array<Object>} evaluationGrids - Array of evaluation grids (rubrics). */
         this.evaluationGrids = [];
+        /** @property {Array<Object>} evaluations - Array of assigned evaluations. */
         this.evaluations = [];
+        /** @property {Array<Object>} notifications - Array of notification objects. */
         this.notifications = [];
+        /** @property {Array<Object>} reminders - Array of custom reminder objects. */
         this.reminders = [];
+        /** @property {Array<Object>} activities - Array of didactic activity objects. */
         this.activities = [];
+        /** @property {Object} schedule - The teacher's weekly schedule. */
         this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
+        /** @property {Object} notificationSettings - Settings for notifications. */
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -31,26 +55,42 @@ class DocentePlusPlus {
             quietHoursStart: '22:00',
             quietHoursEnd: '07:00'
         };
+        /** @property {string} notificationFilter - The current filter for the notifications view. */
         this.notificationFilter = 'all'; // all, lesson-reminder, activity-reminder, custom-reminder, backup, system
+        /** @property {number|null} notificationCheckInterval - Interval ID for notification checks. */
         this.notificationCheckInterval = null;
+        /** @property {string} scheduleView - The current view mode for the schedule ('weekly' or 'daily'). */
         this.scheduleView = 'weekly'; // weekly or daily
+        /** @property {string|null} currentScheduleDate - The date being viewed in the schedule. */
         this.currentScheduleDate = null; // Will be set to current/next weekday
         
         // Document Import Module
+        /** @property {Array<Object>} importedDocuments - History of imported documents. */
         this.importedDocuments = [];
+        /** @property {Object|null} currentImportData - Data for the document currently being imported. */
         this.currentImportData = null;
+        /** @property {Object|null} documentClassification - AI classification result for a document. */
         this.documentClassification = null;
         
         // Audio Recording Module
+        /** @property {Array<Object>} audioRecordings - Array of audio recording objects. */
         this.audioRecordings = [];
+        /** @property {MediaRecorder|null} mediaRecorder - The MediaRecorder instance for audio recording. */
         this.mediaRecorder = null;
+        /** @property {Array<Blob>} recordingChunks - Chunks of the current audio recording. */
         this.recordingChunks = [];
+        /** @property {number|null} recordingStartTime - Timestamp when the recording started. */
         this.recordingStartTime = null;
+        /** @property {number|null} recordingTimer - Interval ID for the recording timer. */
         this.recordingTimer = null;
         
         this.init();
     }
 
+    /**
+     * Initializes the application by loading data, checking for onboarding,
+     * setting up event listeners, and rendering the initial UI state.
+     */
     init() {
         // Load data from localStorage
         this.loadData();
@@ -84,6 +124,9 @@ class DocentePlusPlus {
         console.log('Docente++ initialized successfully');
     }
 
+    /**
+     * Sets up all the initial event listeners for the application UI.
+     */
     setupEventListeners() {
         // Tab switching
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -182,10 +225,17 @@ class DocentePlusPlus {
     }
 
     // Onboarding methods
+    /**
+     * Checks if the onboarding process has been completed.
+     * @returns {boolean} True if onboarding is complete, false otherwise.
+     */
     isOnboardingComplete() {
         return localStorage.getItem('onboarding-complete') === 'true';
     }
 
+    /**
+     * Displays the onboarding modal to the user.
+     */
     showOnboarding() {
         const modal = document.getElementById('onboarding-modal');
         if (modal) {
@@ -199,6 +249,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Completes the onboarding process by saving the user's initial data.
+     */
     completeOnboarding() {
         // Get all form values
         const firstName = document.getElementById('onboarding-first-name').value;
@@ -234,6 +287,10 @@ class DocentePlusPlus {
     }
 
     // Subject management methods
+    /**
+     * Returns a list of common school subjects.
+     * @returns {Array<string>} A list of common subjects.
+     */
     getCommonSubjects() {
         return [
             'Italiano',
@@ -262,6 +319,13 @@ class DocentePlusPlus {
         ];
     }
 
+    /**
+     * Sets up the event listeners and behavior for a subject input field,
+     * including autocomplete suggestions.
+     * @param {string} inputId - The ID of the subject input element.
+     * @param {string} suggestionsId - The ID of the container for suggestions.
+     * @param {string} displayId - The ID of the container to display selected subjects.
+     */
     setupSubjectInput(inputId, suggestionsId, displayId) {
         const input = document.getElementById(inputId);
         const suggestionsDiv = document.getElementById(suggestionsId);
@@ -327,6 +391,10 @@ class DocentePlusPlus {
         });
     }
 
+    /**
+     * Adds a subject to the teacher's list of subjects.
+     * @param {string} subject - The subject to add.
+     */
     addSubject(subject) {
         const normalizedSubject = subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase();
         if (!this.subjects.includes(normalizedSubject)) {
@@ -334,10 +402,18 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Removes a subject from the teacher's list.
+     * @param {string} subject - The subject to remove.
+     */
     removeSubject(subject) {
         this.subjects = this.subjects.filter(s => s !== subject);
     }
 
+    /**
+     * Renders the list of selected subjects into a specified container.
+     * @param {HTMLElement} displayDiv - The HTML element to render the subjects into.
+     */
     renderSubjects(displayDiv) {
         if (!displayDiv) return;
 
@@ -353,6 +429,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Renders the subjects list in all relevant UI locations.
+     */
     renderAllSubjects() {
         const displayOnboarding = document.getElementById('selected-subjects-display');
         const displaySettings = document.getElementById('selected-subjects-display-settings');
@@ -360,6 +439,10 @@ class DocentePlusPlus {
         this.renderSubjects(displaySettings);
     }
 
+    /**
+     * Switches the active tab in the main UI.
+     * @param {string} tabName - The name of the tab to switch to.
+     */
     switchTab(tabName) {
         // Update active button
         document.querySelectorAll('.tab-button').forEach(btn => {
@@ -380,6 +463,9 @@ class DocentePlusPlus {
     }
 
     // Dashboard methods
+    /**
+     * Renders the main dashboard with key statistics.
+     */
     renderDashboard() {
         document.getElementById('lesson-count').textContent = this.lessons.length;
         document.getElementById('student-count').textContent = this.students.length;
@@ -406,12 +492,19 @@ class DocentePlusPlus {
     }
 
     // Class Management methods
+    /**
+     * Sets the currently active class.
+     * @param {string} className - The name of the class to set as active.
+     */
     setActiveClass(className) {
         this.activeClass = className;
         localStorage.setItem('active-class', className);
         this.updateClassDisplay();
     }
 
+    /**
+     * Loads the active class from localStorage on application startup.
+     */
     loadActiveClass() {
         const savedClass = localStorage.getItem('active-class');
         if (savedClass) {
@@ -424,6 +517,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Updates the UI element that displays the currently active class.
+     */
     updateClassDisplay() {
         const displayElement = document.getElementById('current-class-display');
         if (displayElement) {
@@ -438,15 +534,24 @@ class DocentePlusPlus {
     }
 
     // Lesson management methods
+    /**
+     * Displays the form for adding a new lesson.
+     */
     showAddLessonForm() {
         document.getElementById('add-lesson-form').style.display = 'block';
     }
 
+    /**
+     * Hides the form for adding a new lesson and resets it.
+     */
     hideAddLessonForm() {
         document.getElementById('add-lesson-form').style.display = 'none';
         document.getElementById('lesson-form').reset();
     }
 
+    /**
+     * Adds a new lesson based on the form data.
+     */
     addLesson() {
         const lesson = {
             id: Date.now(),
@@ -465,6 +570,10 @@ class DocentePlusPlus {
         this.hideAddLessonForm();
     }
 
+    /**
+     * Deletes a lesson after user confirmation.
+     * @param {number} id - The ID of the lesson to delete.
+     */
     deleteLesson(id) {
         if (confirm('Sei sicuro di voler eliminare questa lezione?')) {
             this.lessons = this.lessons.filter(lesson => lesson.id !== id);
@@ -474,6 +583,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Renders the list of lessons in the UI.
+     */
     renderLessons() {
         const lessonsList = document.getElementById('lessons-list');
         
@@ -502,6 +614,10 @@ class DocentePlusPlus {
             `).join('');
     }
 
+    /**
+     * Generates a new lesson plan using the OpenRouter AI based on user prompts.
+     * @async
+     */
     async generateLessonWithAI() {
         const apiKey = localStorage.getItem('openrouter-api-key');
         
@@ -598,15 +714,24 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Student management methods
+    /**
+     * Displays the form for adding a new student.
+     */
     showAddStudentForm() {
         document.getElementById('add-student-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the form for adding a new student.
+     */
     hideAddStudentForm() {
         document.getElementById('add-student-form').style.display = 'none';
         document.getElementById('student-form').reset();
     }
 
+    /**
+     * Adds a new student based on the form data.
+     */
     addStudent() {
         const student = {
             id: Date.now(),
@@ -626,6 +751,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddStudentForm();
     }
 
+    /**
+     * Deletes a student after user confirmation.
+     * @param {number} id - The ID of the student to delete.
+     */
     deleteStudent(id) {
         if (confirm('Sei sicuro di voler eliminare questo studente?')) {
             this.students = this.students.filter(student => student.id !== id);
@@ -635,6 +764,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Renders the list of students in the UI.
+     */
     renderStudents() {
         const studentsList = document.getElementById('students-list');
         
@@ -676,6 +808,9 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Activity management methods
+    /**
+     * Displays the form for adding a new activity.
+     */
     showAddActivityForm() {
         document.getElementById('activity-form-title').textContent = 'Nuova Attività';
         document.getElementById('activity-edit-id').value = '';
@@ -683,12 +818,19 @@ ${lessonData.evaluation || 'N/D'}
         this.updateActivityFormSelectors();
     }
 
+    /**
+     * Hides and resets the activity form.
+     */
     hideAddActivityForm() {
         document.getElementById('add-activity-form').style.display = 'none';
         document.getElementById('activity-form').reset();
         document.getElementById('activity-edit-id').value = '';
     }
 
+    /**
+     * Displays the activity form pre-filled with data for editing an existing activity.
+     * @param {number} id - The ID of the activity to edit.
+     */
     showEditActivityForm(id) {
         const activity = this.activities.find(a => a.id === id);
         if (!activity) return;
@@ -715,6 +857,9 @@ ${lessonData.evaluation || 'N/D'}
         document.getElementById('add-activity-form').style.display = 'block';
     }
 
+    /**
+     * Populates the class and student dropdowns in the activity form.
+     */
     updateActivityFormSelectors() {
         const classSelector = document.getElementById('activity-class');
         const studentSelector = document.getElementById('activity-student');
@@ -730,6 +875,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Adds a new activity or saves changes to an existing one.
+     */
     addActivity() {
         const editId = document.getElementById('activity-edit-id').value;
         
@@ -774,6 +922,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddActivityForm();
     }
 
+    /**
+     * Deletes an activity after user confirmation.
+     * @param {number} id - The ID of the activity to delete.
+     */
     deleteActivity(id) {
         if (confirm('Sei sicuro di voler eliminare questa attività?')) {
             this.activities = this.activities.filter(activity => activity.id !== id);
@@ -783,6 +935,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Updates the status of a specific activity.
+     * @param {number} id - The ID of the activity to update.
+     * @param {string} newStatus - The new status to set (e.g., 'in-progress', 'completed').
+     */
     updateActivityStatus(id, newStatus) {
         const activity = this.activities.find(a => a.id === id);
         if (activity) {
@@ -794,11 +951,18 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Sets the filter for the activities list and re-renders it.
+     * @param {string} filterType - The type of filter to apply.
+     */
     filterActivities(filterType) {
         this.activityFilter = filterType;
         this.renderActivities();
     }
 
+    /**
+     * Renders the summary statistics for activities in the UI.
+     */
     renderActivitiesSummary() {
         const totalActivities = this.activities.length;
         const plannedActivities = this.activities.filter(a => a.status === 'planned').length;
@@ -826,6 +990,9 @@ ${lessonData.evaluation || 'N/D'}
         if (overdueEl) overdueEl.textContent = overdueActivities;
     }
 
+    /**
+     * Renders the list of activities in the UI, applying any active filters and sorting.
+     */
     renderActivities() {
         this.renderActivitiesSummary();
         
@@ -948,6 +1115,12 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Schedule Management methods
+    /**
+     * Given a date, returns the next weekday (Monday-Friday).
+     * If the given date is a weekend, it moves to the following Monday.
+     * @param {Date} date - The input date.
+     * @returns {Date} The next weekday.
+     */
     getNextWeekday(date) {
         const day = date.getDay();
         // If Saturday (6) or Sunday (0), move to next Monday
@@ -959,6 +1132,10 @@ ${lessonData.evaluation || 'N/D'}
         return date;
     }
 
+    /**
+     * Gets the current date being viewed in the schedule.
+     * @returns {Date} The current schedule date.
+     */
     getCurrentScheduleDate() {
         if (this.currentScheduleDate) {
             return new Date(this.currentScheduleDate);
@@ -967,17 +1144,34 @@ ${lessonData.evaluation || 'N/D'}
         return this.getNextWeekday(today);
     }
 
+    /**
+     * Sets the current date for the schedule view.
+     * @param {string} dateStr - The date string to set (e.g., 'YYYY-MM-DD').
+     */
     setScheduleDate(dateStr) {
         const date = new Date(dateStr);
         this.currentScheduleDate = this.getNextWeekday(date).toISOString().split('T')[0];
         this.renderSchedule();
     }
 
+    /**
+     * Generates a unique key for a schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @returns {string} The unique key for the schedule slot.
+     */
     getScheduleKey(date, hour) {
         const dateStr = date.toISOString().split('T')[0];
         return `${dateStr}-${hour}`;
     }
 
+    /**
+     * Updates the data for a specific schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @param {string|null} classId - The ID of the class for the slot.
+     * @param {string|null} activityType - The type of activity for the slot.
+     */
     updateScheduleSlot(date, hour, classId, activityType) {
         const key = this.getScheduleKey(date, hour);
         if (!classId && !activityType) {
@@ -992,6 +1186,11 @@ ${lessonData.evaluation || 'N/D'}
         this.renderSchedule();
     }
 
+    /**
+     * Gets the icon and color information for a given activity type.
+     * @param {string} type - The activity type (e.g., 'theory', 'lab').
+     * @returns {Object} An object containing the icon, color, and label.
+     */
     getActivityTypeIcon(type) {
         const icons = {
             'theory': { icon: 'T', color: '#3498db', label: 'Teoria' },
@@ -1001,6 +1200,11 @@ ${lessonData.evaluation || 'N/D'}
         return icons[type] || { icon: '', color: '#95a5a6', label: '' };
     }
 
+    /**
+     * Shows a modal dialog for editing a schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     showScheduleSlotEditor(date, hour) {
         const key = this.getScheduleKey(date, hour);
         const slot = this.schedule[key] || { classId: null, activityType: null };
@@ -1048,6 +1252,11 @@ ${lessonData.evaluation || 'N/D'}
         this.currentScheduleModal = modal;
     }
 
+    /**
+     * Saves the changes made in the schedule slot editor.
+     * @param {string} dateStr - The date string of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     saveScheduleSlot(dateStr, hour) {
         const classId = document.getElementById('slot-class-select').value;
         const activityType = document.getElementById('slot-activity-type-select').value;
@@ -1056,12 +1265,20 @@ ${lessonData.evaluation || 'N/D'}
         this.closeScheduleSlotEditor();
     }
 
+    /**
+     * Clears the data from a schedule slot.
+     * @param {string} dateStr - The date string of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     clearScheduleSlot(dateStr, hour) {
         const date = new Date(dateStr);
         this.updateScheduleSlot(date, hour, null, null);
         this.closeScheduleSlotEditor();
     }
 
+    /**
+     * Closes the schedule slot editor modal.
+     */
     closeScheduleSlotEditor() {
         if (this.currentScheduleModal) {
             this.currentScheduleModal.remove();
@@ -1069,6 +1286,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Launches the activity selection process for a given schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     launchScheduleActivity(date, hour) {
         const key = this.getScheduleKey(date, hour);
         const slot = this.schedule[key];
@@ -1088,6 +1310,13 @@ ${lessonData.evaluation || 'N/D'}
         this.showActivitySelectionModal(slot, date, hour, classActivities);
     }
 
+    /**
+     * Shows a modal for selecting an activity to associate with a schedule slot.
+     * @param {Object} slot - The schedule slot data.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @param {Array<Object>} classActivities - The list of activities for the selected class.
+     */
     showActivitySelectionModal(slot, date, hour, classActivities) {
         const cls = this.classes.find(c => c.id == slot.classId);
         const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
@@ -1139,6 +1368,10 @@ ${lessonData.evaluation || 'N/D'}
         this.currentActivityModal = modal;
     }
 
+    /**
+     * Handles the selection of an activity from the schedule modal.
+     * @param {number} activityId - The ID of the selected activity.
+     */
     selectScheduleActivity(activityId) {
         // Update activity status to in-progress if not already
         const activity = this.activities.find(a => a.id === activityId);
@@ -1156,6 +1389,9 @@ ${lessonData.evaluation || 'N/D'}
         }, 100);
     }
 
+    /**
+     * Closes the activity selection modal.
+     */
     closeActivitySelectionModal() {
         if (this.currentActivityModal) {
             this.currentActivityModal.remove();
@@ -1163,11 +1399,18 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Toggles the schedule view between 'weekly' and 'daily'.
+     */
     toggleScheduleView() {
         this.scheduleView = this.scheduleView === 'weekly' ? 'daily' : 'weekly';
         this.renderSchedule();
     }
 
+    /**
+     * Navigates the schedule view forward or backward in time.
+     * @param {number} direction - The direction to navigate (-1 for back, 1 for forward).
+     */
     navigateSchedule(direction) {
         const currentDate = this.getCurrentScheduleDate();
         
@@ -1185,6 +1428,9 @@ ${lessonData.evaluation || 'N/D'}
         this.renderSchedule();
     }
 
+    /**
+     * Renders the main schedule view based on the current mode (daily or weekly).
+     */
     renderSchedule() {
         const scheduleContainer = document.getElementById('schedule-container');
         if (!scheduleContainer) return;
@@ -1199,6 +1445,12 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Renders the daily schedule view.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Date} date - The date to render.
+     * @param {Array<number>} hours - The array of hours to display.
+     */
     renderDailySchedule(container, date, hours) {
         const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
         
@@ -1241,6 +1493,12 @@ ${lessonData.evaluation || 'N/D'}
         `;
     }
 
+    /**
+     * Renders the weekly schedule view.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Date} startDate - A date within the week to render.
+     * @param {Array<number>} hours - The array of hours to display.
+     */
     renderWeeklySchedule(container, startDate, hours) {
         // Get Monday of the week
         const monday = new Date(startDate);
@@ -1299,18 +1557,27 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Class Management methods
+    /**
+     * Displays the form for adding a new class.
+     */
     showAddClassForm() {
         document.getElementById('add-class-form').style.display = 'block';
         document.getElementById('class-form-title').textContent = 'Nuova Classe';
         document.getElementById('class-edit-id').value = '';
     }
 
+    /**
+     * Hides and resets the class form.
+     */
     hideAddClassForm() {
         document.getElementById('add-class-form').style.display = 'none';
         document.getElementById('class-form').reset();
         document.getElementById('class-edit-id').value = '';
     }
 
+    /**
+     * Saves a new class or updates an existing one based on form data.
+     */
     saveClass() {
         const editId = document.getElementById('class-edit-id').value;
         const className = document.getElementById('class-name').value.trim();
@@ -1355,6 +1622,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddClassForm();
     }
 
+    /**
+     * Pre-fills the class form for editing an existing class.
+     * @param {number} id - The ID of the class to edit.
+     */
     editClass(id) {
         const classToEdit = this.classes.find(c => c.id === id);
         if (!classToEdit) return;
@@ -1371,6 +1642,10 @@ ${lessonData.evaluation || 'N/D'}
         document.getElementById('add-class-form').scrollIntoView({ behavior: 'smooth' });
     }
 
+    /**
+     * Deletes a class after user confirmation.
+     * @param {number} id - The ID of the class to delete.
+     */
     deleteClass(id) {
         const classToDelete = this.classes.find(c => c.id === id);
         if (!classToDelete) return;
@@ -1391,6 +1666,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Renders the list of classes in the UI.
+     */
     renderClasses() {
         const classesList = document.getElementById('classes-list');
         
@@ -1422,6 +1700,9 @@ ${lessonData.evaluation || 'N/D'}
             `).join('');
     }
 
+    /**
+     * Updates all class selector dropdowns in the UI with the current list of classes.
+     */
     updateClassSelectors() {
         const selector = document.getElementById('active-class-selector');
         if (!selector) return;
@@ -1449,15 +1730,24 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Evaluation Management methods
+    /**
+     * Displays the form for adding a new evaluation criterion.
+     */
     showAddCriterionForm() {
         document.getElementById('add-criterion-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the evaluation criterion form.
+     */
     hideAddCriterionForm() {
         document.getElementById('add-criterion-form').style.display = 'none';
         document.getElementById('criterion-form').reset();
     }
 
+    /**
+     * Adds a new evaluation criterion based on form data.
+     */
     addCriterion() {
         const name = document.getElementById('criterion-name').value;
         const description = document.getElementById('criterion-description').value;
@@ -1484,6 +1774,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddCriterionForm();
     }
 
+    /**
+     * Deletes an evaluation criterion after user confirmation.
+     * @param {number} id - The ID of the criterion to delete.
+     */
     deleteCriterion(id) {
         if (confirm('Sei sicuro di voler eliminare questo criterio?')) {
             this.evaluationCriteria = this.evaluationCriteria.filter(c => c.id !== id);
@@ -1492,15 +1786,24 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Displays the form for adding a new evaluation grid (rubric).
+     */
     showAddGridForm() {
         document.getElementById('add-grid-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the evaluation grid form.
+     */
     hideAddGridForm() {
         document.getElementById('add-grid-form').style.display = 'none';
         document.getElementById('grid-form').reset();
     }
 
+    /**
+     * Adds a new evaluation grid (rubric) based on form data.
+     */
     addGrid() {
         const name = document.getElementById('grid-name').value;
         const description = document.getElementById('grid-description').value;
@@ -1531,6 +1834,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddGridForm();
     }
 
+    /**
+     * Deletes an evaluation grid after user confirmation.
+     * @param {number} id - The ID of the grid to delete.
+     */
     deleteGrid(id) {
         if (confirm('Sei sicuro di voler eliminare questa griglia?')) {
             this.evaluationGrids = this.evaluationGrids.filter(g => g.id !== id);
@@ -1539,6 +1846,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Displays the form for adding a new evaluation.
+     */
     showAddEvaluationForm() {
         document.getElementById('add-evaluation-form').style.display = 'block';
         this.updateEvaluationFormSelectors();
@@ -1547,11 +1857,17 @@ ${lessonData.evaluation || 'N/D'}
         document.getElementById('evaluation-date').value = today;
     }
 
+    /**
+     * Hides and resets the evaluation form.
+     */
     hideAddEvaluationForm() {
         document.getElementById('add-evaluation-form').style.display = 'none';
         document.getElementById('evaluation-form').reset();
     }
 
+    /**
+     * Populates the dropdown selectors in the evaluation form.
+     */
     updateEvaluationFormSelectors() {
         // Update student selector
         const studentSelect = document.getElementById('evaluation-student');
@@ -1614,6 +1930,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Adds a new evaluation based on form data.
+     */
     addEvaluation() {
         const studentId = document.getElementById('evaluation-student').value;
         const classId = document.getElementById('evaluation-class').value;
@@ -1654,6 +1973,10 @@ ${lessonData.evaluation || 'N/D'}
         this.hideAddEvaluationForm();
     }
 
+    /**
+     * Deletes an evaluation after user confirmation.
+     * @param {number} id - The ID of the evaluation to delete.
+     */
     deleteEvaluation(id) {
         if (confirm('Sei sicuro di voler eliminare questa valutazione?')) {
             this.evaluations = this.evaluations.filter(e => e.id !== id);
@@ -1663,6 +1986,10 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Renders all content in the "Evaluations" tab, including criteria,
+     * grids, assigned evaluations, and results.
+     */
     renderEvaluations() {
         // Render criteria list
         const criteriaList = document.getElementById('criteria-list');
@@ -1750,6 +2077,9 @@ ${lessonData.evaluation || 'N/D'}
     }
 
 
+    /**
+     * Initializes and populates the filter dropdowns for the evaluation results section.
+     */
     initializeResultsFilters() {
         // Populate filter selectors
         const filterClass = document.getElementById('filter-class');
@@ -1794,10 +2124,16 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Re-renders the evaluation results based on the current filter selections.
+     */
     filterResults() {
         this.renderResults();
     }
 
+    /**
+     * Toggles the evaluation results view between 'by-student' and 'by-class'.
+     */
     toggleResultsView() {
         const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
         const newMode = viewMode === 'by-student' ? 'by-class' : 'by-student';
@@ -1805,6 +2141,10 @@ ${lessonData.evaluation || 'N/D'}
         this.renderResults();
     }
 
+    /**
+     * Renders the evaluation results and statistics section based on current
+     * filters and view mode.
+     */
     renderResults() {
         const resultsDisplay = document.getElementById('results-display');
         if (!resultsDisplay) return;
@@ -1852,6 +2192,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Renders the evaluation results grouped by student.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Array<Object>} evaluations - The filtered list of evaluations to render.
+     */
     renderResultsByStudent(container, evaluations) {
         const studentGroups = {};
         
@@ -1898,6 +2243,11 @@ ${lessonData.evaluation || 'N/D'}
         container.innerHTML = html;
     }
 
+    /**
+     * Renders the evaluation results grouped by class.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Array<Object>} evaluations - The filtered list of evaluations to render.
+     */
     renderResultsByClass(container, evaluations) {
         const classGroups = {};
         
@@ -1955,6 +2305,11 @@ ${lessonData.evaluation || 'N/D'}
         container.innerHTML = html;
     }
 
+    /**
+     * Calculates the average score from a list of evaluations.
+     * @param {Array<Object>} evaluations - A list of evaluation objects.
+     * @returns {number|null} The average score, or null if no scored evaluations are found.
+     */
     calculateAverageScore(evaluations) {
         const scored = evaluations.filter(e => e.score !== null && e.score !== '');
         if (scored.length === 0) return null;
@@ -1962,6 +2317,11 @@ ${lessonData.evaluation || 'N/D'}
         return sum / scored.length;
     }
 
+    /**
+     * Calculates evaluation statistics for each subject.
+     * @param {Array<Object>} evaluations - A list of evaluation objects.
+     * @returns {Object|null} An object with statistics per subject, or null if no data.
+     */
     calculateSubjectStats(evaluations) {
         const stats = {};
         
@@ -1982,6 +2342,10 @@ ${lessonData.evaluation || 'N/D'}
         return Object.keys(stats).length > 0 ? stats : null;
     }
 
+    /**
+     * Generates evaluation criteria for a subject using the AI assistant.
+     * @async
+     */
     async generateCriteriaWithAI() {
         const subject = prompt('Per quale disciplina vuoi generare i criteri di valutazione?');
         if (!subject) return;
@@ -2052,6 +2416,10 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // AI Assistant methods
+    /**
+     * Handles the selection of a file to be sent to the AI assistant.
+     * @param {Event} event - The file input change event.
+     */
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (file) {
@@ -2067,6 +2435,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Clears the currently selected file from the AI assistant input.
+     */
     clearSelectedFile() {
         this.selectedFile = null;
         const fileInput = document.getElementById('ai-file-input');
@@ -2080,12 +2451,21 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Formats a file size in bytes into a human-readable string (B, KB, MB).
+     * @param {number} bytes - The file size in bytes.
+     * @returns {string} The formatted file size.
+     */
     formatFileSize(bytes) {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
+    /**
+     * Sends a message to the OpenRouter AI assistant and displays the response.
+     * @async
+     */
     async sendAIMessage() {
         const input = document.getElementById('ai-input');
         const message = input.value.trim();
@@ -2134,11 +2514,20 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Populates the AI input with a predefined prompt.
+     * @param {string} prompt - The prompt text to use.
+     */
     quickAIPrompt(prompt) {
         document.getElementById('ai-input').value = prompt;
         this.switchTab('ai-assistant');
     }
 
+    /**
+     * Adds a message to the AI chat interface.
+     * @param {string} type - The type of message ('user', 'ai', 'system').
+     * @param {string} content - The content of the message.
+     */
     addChatMessage(type, content) {
         const messagesContainer = document.getElementById('chat-messages');
         
@@ -2152,6 +2541,13 @@ ${lessonData.evaluation || 'N/D'}
         this.chatMessages.push({ type, content, timestamp: new Date().toISOString() });
     }
 
+    /**
+     * Makes an API call to the OpenRouter service.
+     * @param {string} prompt - The user's prompt.
+     * @param {string} apiKey - The OpenRouter API key.
+     * @returns {Promise<Object>} A promise that resolves with the AI's response.
+     * @async
+     */
     async callOpenRouterAPI(prompt, apiKey) {
         const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
         
@@ -2206,6 +2602,9 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Settings methods
+    /**
+     * Saves the application settings from the settings form to localStorage.
+     */
     saveSettings() {
         const apiKey = document.getElementById('openrouter-api-key').value;
         const modelId = document.getElementById('openrouter-model-id').value;
@@ -2256,6 +2655,9 @@ ${lessonData.evaluation || 'N/D'}
         alert('Impostazioni salvate con successo!');
     }
 
+    /**
+     * Loads settings from localStorage and populates the settings form.
+     */
     loadSettings() {
         const apiKey = localStorage.getItem('openrouter-api-key');
         const modelId = localStorage.getItem('openrouter-model-id');
@@ -2326,6 +2728,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Verifies the provided OpenRouter API key by making a test call.
+     * Updates the UI to show the key's status (valid, invalid, or error).
+     * @async
+     */
     async verifyAPIKey() {
         const apiKeyInput = document.getElementById('openrouter-api-key');
         const statusIcon = document.getElementById('api-key-status');
@@ -2387,6 +2794,9 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Data persistence methods
+    /**
+     * Saves all application data to the browser's localStorage.
+     */
     saveData() {
         localStorage.setItem('docente-plus-lessons', JSON.stringify(this.lessons));
         localStorage.setItem('docente-plus-students', JSON.stringify(this.students));
@@ -2401,6 +2811,9 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
     }
 
+    /**
+     * Loads all application data from the browser's localStorage.
+     */
     loadData() {
         const lessonsData = localStorage.getItem('docente-plus-lessons');
         const studentsData = localStorage.getItem('docente-plus-students');
@@ -2529,18 +2942,27 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Initiates the process for exporting all application data.
+     */
     exportData() {
         // Store the export type and show format selection modal
         this.currentExportType = 'data';
         this.showExportModal();
     }
 
+    /**
+     * Initiates the process for exporting only the evaluations data.
+     */
     exportEvaluations() {
         // Store the export type and show format selection modal
         this.currentExportType = 'evaluations';
         this.showExportModal();
     }
 
+    /**
+     * Displays the modal for selecting the export format.
+     */
     showExportModal() {
         const modal = document.getElementById('export-format-modal');
         if (modal) {
@@ -2548,6 +2970,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Closes the export format selection modal.
+     */
     closeExportModal() {
         const modal = document.getElementById('export-format-modal');
         if (modal) {
@@ -2556,6 +2981,10 @@ ${lessonData.evaluation || 'N/D'}
         this.currentExportType = null;
     }
 
+    /**
+     * Executes the export process based on the selected format.
+     * @param {string} format - The selected export format ('json', 'pdf', 'excel').
+     */
     executeExport(format) {
         this.closeExportModal();
         
@@ -2566,6 +2995,10 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Exports all application data in the specified format.
+     * @param {string} format - The format to export to ('json', 'pdf', 'excel').
+     */
     exportDataInFormat(format) {
         const data = {
             lessons: this.lessons,
@@ -2618,6 +3051,10 @@ ${lessonData.evaluation || 'N/D'}
         });
     }
 
+    /**
+     * Exports only the evaluations data in the specified format.
+     * @param {string} format - The format to export to ('json', 'pdf', 'excel').
+     */
     exportEvaluationsInFormat(format) {
         // Calculate statistics for export
         const stats = {
@@ -2688,6 +3125,11 @@ ${lessonData.evaluation || 'N/D'}
         alert(`Valutazioni esportate con successo in formato ${format.toUpperCase()}!`);
     }
 
+    /**
+     * Exports data to a JSON file and triggers a download.
+     * @param {Object} data - The data object to export.
+     * @param {string} filename - The base name for the downloaded file.
+     */
     exportAsJSON(data, filename) {
         const dataStr = JSON.stringify(data, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -2701,6 +3143,10 @@ ${lessonData.evaluation || 'N/D'}
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Exports all application data to a PDF file.
+     * @param {Object} data - The complete application data object.
+     */
     exportDataAsPDF(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -2885,6 +3331,10 @@ ${lessonData.evaluation || 'N/D'}
         doc.save(`docente-plus-export-${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
+    /**
+     * Exports evaluations data to a PDF file.
+     * @param {Object} data - The evaluations data object.
+     */
     exportEvaluationsAsPDF(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -2980,6 +3430,10 @@ ${lessonData.evaluation || 'N/D'}
         doc.save(`valutazioni-export-${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
+    /**
+     * Exports all application data to an Excel (XLSX) file.
+     * @param {Object} data - The complete application data object.
+     */
     exportDataAsExcel(data) {
         const wb = XLSX.utils.book_new();
         
@@ -3143,6 +3597,10 @@ ${lessonData.evaluation || 'N/D'}
         XLSX.writeFile(wb, `docente-plus-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
+    /**
+     * Exports evaluations data to an Excel (XLSX) file.
+     * @param {Object} data - The evaluations data object.
+     */
     exportEvaluationsAsExcel(data) {
         const wb = XLSX.utils.book_new();
         
@@ -3231,6 +3689,9 @@ ${lessonData.evaluation || 'N/D'}
         XLSX.writeFile(wb, `valutazioni-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
+    /**
+     * Initiates the import of application data from a JSON file.
+     */
     importData() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -3328,6 +3789,9 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Notification Management Methods
+    /**
+     * Requests permission from the user to show browser notifications.
+     */
     requestNotificationPermission() {
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission().then(permission => {
@@ -3340,6 +3804,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Starts the periodic check for pending notifications.
+     */
     startNotificationChecks() {
         // Check for notifications every 5 minutes
         this.notificationCheckInterval = setInterval(() => {
@@ -3350,6 +3817,9 @@ ${lessonData.evaluation || 'N/D'}
         this.checkAndSendNotifications();
     }
 
+    /**
+     * Checks for and sends all types of pending notifications (lessons, activities, etc.).
+     */
     checkAndSendNotifications() {
         const now = new Date();
 
@@ -3375,6 +3845,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Checks if a given date falls within the user-defined quiet hours.
+     * @param {Date} date - The date to check.
+     * @returns {boolean} True if the date is within quiet hours, false otherwise.
+     */
     isQuietHours(date) {
         if (!this.notificationSettings.quietHoursEnabled) {
             return false;
@@ -3394,6 +3869,10 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Checks for and creates notifications for upcoming lessons.
+     * @param {Date} now - The current date and time.
+     */
     checkLessonReminders(now) {
         this.lessons.forEach(lesson => {
             const lessonDate = new Date(lesson.date + 'T' + lesson.time);
@@ -3432,6 +3911,10 @@ ${lessonData.evaluation || 'N/D'}
         });
     }
 
+    /**
+     * Checks for and creates notifications for activity deadlines.
+     * @param {Date} now - The current date and time.
+     */
     checkActivityDeadlineReminders(now) {
         this.activities.forEach(activity => {
             // Skip completed activities or those without deadlines
@@ -3494,6 +3977,10 @@ ${lessonData.evaluation || 'N/D'}
         });
     }
 
+    /**
+     * Checks for and creates notifications for custom user-defined reminders.
+     * @param {Date} now - The current date and time.
+     */
     checkCustomReminders(now) {
         this.reminders.forEach(reminder => {
             if (reminder.dismissed || reminder.notified) {
@@ -3517,10 +4004,19 @@ ${lessonData.evaluation || 'N/D'}
         });
     }
 
+    /**
+     * Checks if a notification with a specific ID has already been sent.
+     * @param {string} notificationId - The unique ID of the notification to check.
+     * @returns {boolean} True if the notification has been sent, false otherwise.
+     */
     hasNotificationBeenSent(notificationId) {
         return this.notifications.some(n => n.notificationId === notificationId);
     }
 
+    /**
+     * Checks for and creates notifications for periodic data backups.
+     * @param {Date} now - The current date and time.
+     */
     checkBackupReminders(now) {
         const lastBackup = this.notificationSettings.lastBackupDate;
         const interval = this.notificationSettings.backupReminderInterval;
@@ -3564,6 +4060,14 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Creates and stores a new notification, and optionally sends a browser notification.
+     * @param {Object} data - The data for the notification.
+     * @param {string} data.title - The title of the notification.
+     * @param {string} data.message - The body message of the notification.
+     * @param {string} data.type - The type of notification (e.g., 'system', 'lesson-reminder').
+     * @param {string} data.notificationId - A unique ID for the notification instance.
+     */
     createNotification(data) {
         const notification = {
             id: Date.now(),
@@ -3588,6 +4092,9 @@ ${lessonData.evaluation || 'N/D'}
         this.renderNotifications();
     }
 
+    /**
+     * Adds a new custom reminder based on form data.
+     */
     addReminder() {
         const title = document.getElementById('reminder-title').value;
         const message = document.getElementById('reminder-message').value;
@@ -3621,6 +4128,10 @@ ${lessonData.evaluation || 'N/D'}
         document.getElementById('reminder-time').value = '';
     }
 
+    /**
+     * Deletes a custom reminder after user confirmation.
+     * @param {number} id - The ID of the reminder to delete.
+     */
     deleteReminder(id) {
         if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
             this.reminders = this.reminders.filter(r => r.id !== id);
@@ -3629,6 +4140,10 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Dismisses a custom reminder, preventing it from showing notifications.
+     * @param {number} id - The ID of the reminder to dismiss.
+     */
     dismissReminder(id) {
         const reminder = this.reminders.find(r => r.id === id);
         if (reminder) {
@@ -3638,6 +4153,10 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Marks a single notification as read.
+     * @param {number} id - The ID of the notification to mark as read.
+     */
     markNotificationRead(id) {
         const notification = this.notifications.find(n => n.id === id);
         if (notification) {
@@ -3647,18 +4166,28 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Marks all notifications as read.
+     */
     markAllNotificationsRead() {
         this.notifications.forEach(n => n.read = true);
         this.saveData();
         this.renderNotifications();
     }
 
+    /**
+     * Deletes a single notification.
+     * @param {number} id - The ID of the notification to delete.
+     */
     deleteNotification(id) {
         this.notifications = this.notifications.filter(n => n.id !== id);
         this.saveData();
         this.renderNotifications();
     }
 
+    /**
+     * Deletes all notifications after user confirmation.
+     */
     clearAllNotifications() {
         if (confirm('Sei sicuro di voler eliminare tutte le notifiche?')) {
             this.notifications = [];
@@ -3667,6 +4196,9 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Saves the notification settings from the form to localStorage.
+     */
     saveNotificationSettings() {
         this.notificationSettings.browserNotifications = document.getElementById('notification-browser').checked;
         this.notificationSettings.emailNotifications = document.getElementById('notification-email').checked;
@@ -3688,19 +4220,33 @@ ${lessonData.evaluation || 'N/D'}
         alert('Impostazioni notifiche salvate!');
     }
 
+    /**
+     * Displays the form for adding a new custom reminder.
+     */
     showAddReminderForm() {
         document.getElementById('add-reminder-form').style.display = 'block';
     }
 
+    /**
+     * Hides the form for adding a new custom reminder.
+     */
     hideAddReminderForm() {
         document.getElementById('add-reminder-form').style.display = 'none';
     }
 
+    /**
+     * Sets the filter for the notifications list and re-renders it.
+     * @param {string} filter - The notification type to filter by.
+     */
     filterNotifications(filter) {
         this.notificationFilter = filter;
         this.renderNotifications();
     }
 
+    /**
+     * Calculates statistics about the notifications (total, unread, by type).
+     * @returns {Object} An object containing notification statistics.
+     */
     getNotificationStats() {
         const stats = {
             total: this.notifications.length,
@@ -3717,6 +4263,10 @@ ${lessonData.evaluation || 'N/D'}
         return stats;
     }
 
+    /**
+     * Renders the entire notifications tab, including the list of notifications,
+     * reminders, and settings forms.
+     */
     renderNotifications() {
         // Render notifications list
         const notificationsList = document.getElementById('notifications-list');
@@ -3840,6 +4390,10 @@ ${lessonData.evaluation || 'N/D'}
     // DOCUMENT IMPORT MODULE METHODS
     // ========================================
 
+    /**
+     * Switches to the document import tab and highlights the upload area.
+     * This is typically called when importing students from the students tab.
+     */
     showImportStudentsDialog() {
         this.switchTab('document-import');
         // Optionally show a hint or focus on upload area
@@ -3853,6 +4407,11 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Handles the document upload event, reading the file and initiating classification.
+     * @param {Event} event - The file input change or drop event.
+     * @async
+     */
     async handleDocumentUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -3884,6 +4443,12 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Reads the content of a file and parses it based on its extension.
+     * @param {File} file - The file to read.
+     * @returns {Promise<Object>} A promise that resolves with the parsed file data.
+     * @async
+     */
     async readFileContent(file) {
         const extension = file.name.split('.').pop().toLowerCase();
         
@@ -3947,6 +4512,12 @@ ${lessonData.evaluation || 'N/D'}
         });
     }
 
+    /**
+     * Extracts text content from a PDF file.
+     * @param {ArrayBuffer} arrayBuffer - The PDF file content as an ArrayBuffer.
+     * @returns {Promise<string>} A promise that resolves with the extracted text.
+     * @async
+     */
     async extractTextFromPDF(arrayBuffer) {
         // Configure PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
@@ -3971,6 +4542,12 @@ ${lessonData.evaluation || 'N/D'}
         }
     }
 
+    /**
+     * Classifies the type of an uploaded document using the AI assistant.
+     * @param {File} file - The uploaded file object.
+     * @param {Object} fileData - The parsed content of the file.
+     * @async
+     */
     async classifyDocument(file, fileData) {
         const apiKey = localStorage.getItem('openrouter-api-key');
         
@@ -4062,6 +4639,12 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Displays the AI's classification result for the uploaded document.
+     * @param {File} file - The uploaded file.
+     * @param {Object} classification - The classification result from the AI.
+     * @param {Object} fileData - The parsed data from the file.
+     */
     showClassificationResult(file, classification, fileData) {
         const statusDiv = document.getElementById('document-upload-status');
         const classificationDiv = document.getElementById('document-classification');
@@ -4140,6 +4723,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Shows a manual classification interface when AI classification is not available or fails.
+     * @param {File} [file] - The uploaded file (optional).
+     * @param {Object} [fileData] - The parsed data from the file (optional).
+     */
     showManualClassification(file, fileData) {
         const classificationDiv = document.getElementById('document-classification');
         const resultDiv = document.getElementById('classification-result');
@@ -4171,6 +4759,9 @@ Rispondi SOLO in formato JSON con questa struttura:
         `;
     }
 
+    /**
+     * Processes the import based on the manually selected document type.
+     */
     processManualClassification() {
         const typeSelect = document.getElementById('manual-classification-type');
         const selectedType = typeSelect.value;
@@ -4199,6 +4790,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Initiates the process of importing student data from an uploaded file,
+     * showing a preview before final confirmation.
+     * @async
+     */
     async processStudentsImport() {
         if (!this.currentImportData) {
             alert('Nessun dato da importare');
@@ -4264,6 +4860,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Extracts and maps student data from tabular data (CSV/Excel).
+     * @param {Array<Object>} data - The array of row objects from the file.
+     * @returns {Array<Object>} An array of formatted student objects.
+     */
     extractStudentsFromTabularData(data) {
         // Map common column names to our fields
         const fieldMappings = {
@@ -4317,6 +4918,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }).filter(s => s !== null);
     }
 
+    /**
+     * Extracts student data from a JSON object.
+     * @param {Object|Array} data - The parsed JSON data.
+     * @returns {Array<Object>} An array of formatted student objects.
+     */
     extractStudentsFromJSON(data) {
         // If data is an array, process it
         if (Array.isArray(data)) {
@@ -4331,6 +4937,10 @@ Rispondi SOLO in formato JSON con questa struttura:
         return [];
     }
 
+    /**
+     * Confirms and finalizes the import of student data.
+     * It handles duplicates by merging data and adds new students.
+     */
     confirmImport() {
         if (!this.currentImportData || !this.currentImportData.studentsData) {
             alert('Nessun dato da importare');
@@ -4406,11 +5016,17 @@ Rispondi SOLO in formato JSON con questa struttura:
         this.switchTab('students');
     }
 
+    /**
+     * Placeholder for processing the import of didactic materials.
+     */
     processMaterialsImport() {
         alert('Importazione materiali didattici sarà disponibile in una prossima versione');
         // TODO: Implement materials import
     }
 
+    /**
+     * Initiates the process of importing activities from a file.
+     */
     processActivitiesImport() {
         if (!this.currentImportData) {
             alert('Nessun dato da importare');
@@ -4470,6 +5086,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Extracts a list of activities from the text content of a PDF file.
+     * @param {string} textContent - The text content extracted from the PDF.
+     * @returns {Array<Object>} An array of extracted activity objects.
+     */
     extractActivitiesFromPDF(textContent) {
         const activities = [];
         
@@ -4562,6 +5183,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         return activities;
     }
 
+    /**
+     * Detects the type of a didactic activity based on keywords in a string.
+     * @param {string} text - The text to analyze.
+     * @returns {string} The detected activity type (e.g., 'lesson', 'lab').
+     */
     detectActivityType(text) {
         const lowerText = text.toLowerCase();
         
@@ -4575,6 +5201,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         return 'lesson';  // Default type
     }
 
+    /**
+     * Determines if a line of text likely describes a didactic activity.
+     * @param {string} text - The text to analyze.
+     * @returns {boolean} True if the text seems to be an activity, false otherwise.
+     */
     looksLikeActivity(text) {
         const activityKeywords = [
             'disegno', 'progetto', 'laboratorio', 'costruzione', 'realizzazione',
@@ -4587,6 +5218,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         return activityKeywords.some(keyword => lowerText.includes(keyword));
     }
 
+    /**
+     * Extracts and maps activity data from tabular data (CSV/Excel).
+     * @param {Array<Object>} data - The array of row objects from the file.
+     * @returns {Array<Object>} An array of formatted activity objects.
+     */
     extractActivitiesFromTabularData(data) {
         const activities = [];
         
@@ -4634,6 +5270,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         return activities;
     }
 
+    /**
+     * Extracts activity data from a JSON object.
+     * @param {Object|Array} data - The parsed JSON data.
+     * @returns {Array<Object>} An array of formatted activity objects.
+     */
     extractActivitiesFromJSON(data) {
         const activities = [];
         
@@ -4656,6 +5297,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         return activities;
     }
 
+    /**
+     * Groups a list of activities by their designated class level.
+     * @param {Array<Object>} activities - The list of activities to group.
+     * @returns {Object} An object with activities grouped by class level.
+     */
     groupActivitiesByClass(activities) {
         const grouped = {
             'Prima': [],
@@ -4676,11 +5322,26 @@ Rispondi SOLO in formato JSON con questa struttura:
         return grouped;
     }
 
+    /**
+     * Renders a preview table of activities grouped by class level.
+     * @param {Object} groupedActivities - An object containing activities grouped by class level.
+     * @returns {string} The HTML string for the preview table.
+     */
+    /**
+     * Renders a preview table of activities grouped by class level.
+     * @param {Object} groupedActivities - An object containing activities grouped by class level.
+     * @returns {string} The HTML string for the preview table.
+     */
     renderActivitiesPreviewTable(groupedActivities) {
         let html = '';
-        
+        const classMapping = this.createClassMapping();
+
         for (let [classLevel, activities] of Object.entries(groupedActivities)) {
             if (activities.length === 0) continue;
+
+            const targetClassIds = classMapping[classLevel] || [];
+            const targetClassNames = targetClassIds.map(id => this.classes.find(c => c.id === id)?.name).filter(Boolean);
+            const assignmentText = targetClassNames.length > 0 ? `Assegnate a: ${targetClassNames.join(', ')}` : 'Nessuna classe specifica trovata (verrà importata come attività generale)';
 
             const typeLabels = {
                 'lesson': '📚 Lezione',
@@ -4694,13 +5355,13 @@ Rispondi SOLO in formato JSON con questa struttura:
             html += `
                 <div class="class-activities-group" style="margin-bottom: 20px;">
                     <h4>📘 ${classLevel} Media (${activities.length} attività)</h4>
+                    <p style="font-size: 0.9em; color: var(--text-secondary);">${assignmentText}</p>
                     <div class="preview-table-container">
                         <table class="preview-table">
                             <thead>
                                 <tr>
                                     <th>Titolo</th>
                                     <th>Tipo</th>
-                                    <th>Stato</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -4708,7 +5369,6 @@ Rispondi SOLO in formato JSON con questa struttura:
                                     <tr>
                                         <td>${a.title || 'N/D'}</td>
                                         <td>${typeLabels[a.type] || a.type}</td>
-                                        <td>${a.status === 'planned' ? 'Pianificata' : a.status}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -4721,6 +5381,12 @@ Rispondi SOLO in formato JSON con questa struttura:
         return html;
     }
 
+    /**
+     * Confirms and finalizes the import of activities.
+     */
+    /**
+     * Confirms and finalizes the import of activities.
+     */
     confirmActivitiesImport() {
         if (!this.currentImportData || !this.currentImportData.activitiesData) {
             alert('Nessuna attività da importare');
@@ -4729,29 +5395,52 @@ Rispondi SOLO in formato JSON con questa struttura:
 
         const activitiesData = this.currentImportData.activitiesData;
         const file = this.currentImportData.file;
+        const classMapping = this.createClassMapping();
+        let totalImportedActivities = 0;
 
-        // Import activities without automatic class mapping
-        // Activities are for general grade levels (Prima, Seconda, Terza) not specific sections
         activitiesData.forEach(activityData => {
             const classLevel = activityData.classLevel || 'Generale';
-            const levelLabel = classLevel !== 'Generale' ? ` - ${classLevel} Media` : '';
-            
-            const activity = {
-                id: Date.now() + Math.random(),
-                title: activityData.title,
-                description: activityData.description || `Importata da ${file.name}${levelLabel}`,
-                type: activityData.type,
-                classId: null, // Keep null for general level activities
-                status: activityData.status || 'planned',
-                priority: 'medium',
-                deadline: null,
-                createdAt: new Date().toISOString(),
-                importSource: file.name,
-                importedAt: new Date().toISOString(),
-                classLevel: classLevel // Store the grade level for reference
-            };
+            const targetClassIds = classMapping[classLevel] || [];
 
-            this.activities.push(activity);
+            if (targetClassIds.length > 0) {
+                // Create an activity for each mapped class
+                targetClassIds.forEach(classId => {
+                    const newActivity = {
+                        id: Date.now() + Math.random(),
+                        title: activityData.title,
+                        description: activityData.description || `Importata da ${file.name}`,
+                        type: activityData.type,
+                        classId: classId, // Assign the specific class ID
+                        status: activityData.status || 'planned',
+                        priority: 'medium',
+                        deadline: null,
+                        createdAt: new Date().toISOString(),
+                        importSource: file.name,
+                        importedAt: new Date().toISOString(),
+                        classLevel: classLevel
+                    };
+                    this.activities.push(newActivity);
+                    totalImportedActivities++;
+                });
+            } else {
+                // If no specific class is found (e.g., for "Generale" or no match), create a general activity
+                const newActivity = {
+                    id: Date.now() + Math.random(),
+                    title: activityData.title,
+                    description: activityData.description || `Importata da ${file.name}`,
+                    type: activityData.type,
+                    classId: null,
+                    status: activityData.status || 'planned',
+                    priority: 'medium',
+                    deadline: null,
+                    createdAt: new Date().toISOString(),
+                    importSource: file.name,
+                    importedAt: new Date().toISOString(),
+                    classLevel: classLevel
+                };
+                this.activities.push(newActivity);
+                totalImportedActivities++;
+            }
         });
 
         // Save to localStorage
@@ -4761,7 +5450,7 @@ Rispondi SOLO in formato JSON con questa struttura:
         this.recordImportedDocument({
             fileName: file.name,
             classificationType: 'ATTIVITA',
-            importedCount: activitiesData.length,
+            importedCount: totalImportedActivities,
             timestamp: new Date().toISOString()
         });
 
@@ -4773,7 +5462,7 @@ Rispondi SOLO in formato JSON con questa struttura:
         previewContent.innerHTML = `
             <div class="success-message">
                 ✅ <strong>Importazione completata con successo!</strong>
-                <p>${activitiesData.length} attività sono state importate e sono ora disponibili nella sezione Attività.</p>
+                <p>${totalImportedActivities} attività sono state importate e assegnate alle classi corrispondenti.</p>
             </div>
             <div class="form-actions" style="margin-top: 20px;">
                 <button class="btn btn-primary" onclick="app.switchTab('activities')">
@@ -4786,13 +5475,46 @@ Rispondi SOLO in formato JSON con questa struttura:
         `;
     }
 
+    /**
+     * @deprecated No longer used. Kept for backward compatibility.
+     */
+    /**
+     * @deprecated No longer used. Kept for backward compatibility.
+     */
     createClassMapping(activitiesData) {
-        // NOTE: This function is kept for backward compatibility but is no longer used
-        // Activities are imported at general level (Prima, Seconda, Terza) without
-        // automatic assignment to specific class sections
-        return {};
+        const levelToYear = {
+            'Prima': '1',
+            'Seconda': '2',
+            'Terza': '3'
+        };
+
+        const classMapping = {
+            'Prima': [],
+            'Seconda': [],
+            'Terza': [],
+            'Generale': []
+        };
+
+        // Find all classes for each year
+        this.classes.forEach(cls => {
+            if (cls.year) {
+                const yearStr = String(cls.year);
+                const level = Object.keys(levelToYear).find(key => levelToYear[key] === yearStr);
+                if (level && classMapping[level]) {
+                    classMapping[level].push(cls.id);
+                }
+            }
+        });
+
+        // For "Generale", we can assign to all classes or none, depending on desired behavior.
+        // Here, we'll leave it empty, assuming 'Generale' activities are not auto-assigned.
+
+        return classMapping;
     }
 
+    /**
+     * Cancels the current document import process and resets the UI.
+     */
     cancelImport() {
         // Reset state
         this.currentImportData = null;
@@ -4808,17 +5530,27 @@ Rispondi SOLO in formato JSON con questa struttura:
         if (fileInput) fileInput.value = '';
     }
 
+    /**
+     * Placeholder for a future feature to refine import data with AI.
+     */
     refineWithAI() {
         alert('Funzionalità di affinamento con IA in fase di sviluppo');
         // TODO: Implement AI refinement for import data
     }
 
+    /**
+     * Records information about a completed document import in the history.
+     * @param {Object} documentInfo - Information about the imported document.
+     */
     recordImportedDocument(documentInfo) {
         this.importedDocuments.push(documentInfo);
         localStorage.setItem('imported-documents', JSON.stringify(this.importedDocuments));
         this.renderImportedDocuments();
     }
 
+    /**
+     * Renders the list of historically imported documents.
+     */
     renderImportedDocuments() {
         const listDiv = document.getElementById('imported-documents-list');
         
@@ -4843,6 +5575,10 @@ Rispondi SOLO in formato JSON con questa struttura:
     // AUDIO RECORDING MODULE METHODS
     // ========================================
 
+    /**
+     * Starts recording audio from the user's microphone.
+     * @async
+     */
     async startAudioRecording() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -4886,6 +5622,9 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Stops the current audio recording.
+     */
     stopAudioRecording() {
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
             this.mediaRecorder.stop();
@@ -4909,6 +5648,9 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Saves the completed audio recording blob and associated metadata.
+     */
     saveRecording() {
         const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
         const duration = Date.now() - this.recordingStartTime;
@@ -4938,6 +5680,10 @@ Rispondi SOLO in formato JSON con questa struttura:
         });
     }
 
+    /**
+     * Generates context information for a new audio recording.
+     * @returns {Object} An object containing context like class, date, and time.
+     */
     generateRecordingContext() {
         // Generate context information for the recording
         const context = {

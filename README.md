@@ -98,7 +98,7 @@ L'assistente IA OpenRouter può aiutarti con:
 - **Esportazione PDF e Excel**: Report professionali stampabili e fogli di calcolo per analisi avanzate
 - **📂 Modulo Importazione Documenti con IA**: Sistema avanzato per importare e gestire documenti didattici e anagrafici
   - Caricamento file multipli formati (CSV, XLSX, PDF, TXT, JSON)
-  - **📋 Importazione Attività da PDF**: Estrazione automatica attività didattiche da PDF con suddivisione per livelli classe (Prima, Seconda, Terza Media)
+  - **📋 Importazione Intelligente Attività**: Estrazione automatica di attività didattiche da file PDF, CSV o Excel. Il sistema associa intelligentemente le attività alle classi corrette in base all'anno di corso (es. "Prima Media" viene mappato su tutte le tue classi del 1° anno come 1A, 1B, ecc.).
   - Riconoscimento automatico tipo documento tramite IA
   - Importazione intelligente anagrafica studenti con campi estesi (data nascita, onomastico, note)
   - Gestione duplicati con merge automatico
@@ -508,19 +508,37 @@ docente-plus-plus/
 - **Nessun Server**: L'app funziona completamente lato client
 - **HTTPS Consigliato**: Per chiamate API sicure a OpenRouter
 
+## 👨‍💻 Sviluppo e Documentazione
+
+Il codice sorgente è documentato utilizzando lo standard [JSDoc](https://jsdoc.app/). Questo facilita la comprensione del codice e permette la generazione automatica di una documentazione HTML completa per gli sviluppatori.
+
+### Generare la Documentazione
+Per generare la documentazione del codice:
+1. Assicurati di avere Node.js installato.
+2. Installa JSDoc:
+   ```bash
+   npm install -g jsdoc
+   ```
+3. Esegui JSDoc dalla root del progetto:
+   ```bash
+   jsdoc app.js -d docs/
+   ```
+4. Apri `docs/index.html` nel browser per visualizzare la documentazione completa del codice.
+
 ## 📝 Licenza
 
 Questo progetto è rilasciato sotto licenza MIT. Vedi il file LICENSE per i dettagli.
 
 ## 🤝 Contributi
 
-I contributi sono benvenuti! Per contribuire:
+I contributi sono i benvenuti! Se desideri contribuire al progetto, segui questi passaggi:
 
-1. Fai fork del repository
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit delle modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+1. **Fai un Fork** del repository.
+2. **Crea un Branch** per la tua modifica (`git checkout -b feature/NomeFunzionalita`).
+3. **Sviluppa la tua feature**. Cerca di seguire lo stile di codifica esistente e documenta le nuove funzioni con commenti JSDoc.
+4. **Fai Commit** delle tue modifiche (`git commit -m 'Aggiunta nuova funzionalità X'`).
+5. **Fai Push** al tuo branch (`git push origin feature/NomeFunzionalita`).
+6. **Apri una Pull Request** descrivendo le modifiche apportate.
 
 ## 🐛 Segnalazione Bug
 
