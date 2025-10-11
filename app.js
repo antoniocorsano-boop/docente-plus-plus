@@ -1,26 +1,47 @@
 // Docente++ - Main Application JavaScript
 // Web app for teacher didactics management powered by OpenRouter AI
 
+/**
+ * @class DocentePlusPlus
+ * @classdesc Main application class for Docente++. Handles all logic,
+ * data management, and UI interaction for the teacher didactics management tool.
+ */
 class DocentePlusPlus {
+    /**
+     * Initializes the application, setting up state variables and loading initial data.
+     */
     constructor() {
+        /** @property {Array<Object>} lessons - Array of lesson objects. */
         this.lessons = [];
+        /** @property {Array<Object>} students - Array of student objects. */
         this.students = [];
+        /** @property {Array<Object>} classes - Array of class objects. */
         this.classes = [];
+        /** @property {Array<string>} subjects - Array of subjects taught by the teacher. */
         this.subjects = [];
+        /** @property {Object} settings - General application settings. */
         this.settings = {};
+        /** @property {Array<Object>} chatMessages - Array of AI chat messages. */
         this.chatMessages = [];
+        /** @property {string} activeClass - The name of the currently active class. */
         this.activeClass = '';
+        /** @property {File|null} selectedFile - The file selected for AI assistant upload. */
         this.selectedFile = null;
+        /** @property {Array<Object>} evaluationCriteria - Array of evaluation criteria. */
         this.evaluationCriteria = [];
+        /** @property {Array<Object>} evaluationGrids - Array of evaluation grids (rubrics). */
         this.evaluationGrids = [];
+        /** @property {Array<Object>} evaluations - Array of assigned evaluations. */
         this.evaluations = [];
+        /** @property {Array<Object>} notifications - Array of notification objects. */
         this.notifications = [];
+        /** @property {Array<Object>} reminders - Array of custom reminder objects. */
         this.reminders = [];
+        /** @property {Array<Object>} activities - Array of didactic activity objects. */
         this.activities = [];
+        /** @property {Object} schedule - The teacher's weekly schedule. */
         this.schedule = {}; // { 'YYYY-MM-DD-HH': { classId: null, activityType: null } }
-        this.currentActiveTab = 'dashboard'; // Track current active tab for AI context
-        this.aiFabEnabled = true; // AI FAB visibility setting
-        this.aiFabPosition = null; // AI FAB custom position
+        /** @property {Object} notificationSettings - Settings for notifications. */
         this.notificationSettings = {
             browserNotifications: true,
             emailNotifications: false,
@@ -34,21 +55,33 @@ class DocentePlusPlus {
             quietHoursStart: '22:00',
             quietHoursEnd: '07:00'
         };
+        /** @property {string} notificationFilter - The current filter for the notifications view. */
         this.notificationFilter = 'all'; // all, lesson-reminder, activity-reminder, custom-reminder, backup, system
+        /** @property {number|null} notificationCheckInterval - Interval ID for notification checks. */
         this.notificationCheckInterval = null;
+        /** @property {string} scheduleView - The current view mode for the schedule ('weekly' or 'daily'). */
         this.scheduleView = 'weekly'; // weekly or daily
+        /** @property {string|null} currentScheduleDate - The date being viewed in the schedule. */
         this.currentScheduleDate = null; // Will be set to current/next weekday
         
         // Document Import Module
+        /** @property {Array<Object>} importedDocuments - History of imported documents. */
         this.importedDocuments = [];
+        /** @property {Object|null} currentImportData - Data for the document currently being imported. */
         this.currentImportData = null;
+        /** @property {Object|null} documentClassification - AI classification result for a document. */
         this.documentClassification = null;
         
         // Audio Recording Module
+        /** @property {Array<Object>} audioRecordings - Array of audio recording objects. */
         this.audioRecordings = [];
+        /** @property {MediaRecorder|null} mediaRecorder - The MediaRecorder instance for audio recording. */
         this.mediaRecorder = null;
+        /** @property {Array<Blob>} recordingChunks - Chunks of the current audio recording. */
         this.recordingChunks = [];
+        /** @property {number|null} recordingStartTime - Timestamp when the recording started. */
         this.recordingStartTime = null;
+        /** @property {number|null} recordingTimer - Interval ID for the recording timer. */
         this.recordingTimer = null;
         
         // News and RSS Feeds Module
@@ -74,6 +107,10 @@ class DocentePlusPlus {
         this.init();
     }
 
+    /**
+     * Initializes the application by loading data, checking for onboarding,
+     * setting up event listeners, and rendering the initial UI state.
+     */
     init() {
         // Load data from localStorage
         this.loadData();
@@ -131,6 +168,9 @@ class DocentePlusPlus {
         console.log('Docente++ initialized successfully');
     }
 
+    /**
+     * Sets up all the initial event listeners for the application UI.
+     */
     setupEventListeners() {
         // Hamburger menu toggle
         const menuToggle = document.getElementById('menu-toggle');
@@ -291,10 +331,17 @@ class DocentePlusPlus {
     }
 
     // Onboarding methods
+    /**
+     * Checks if the onboarding process has been completed.
+     * @returns {boolean} True if onboarding is complete, false otherwise.
+     */
     isOnboardingComplete() {
         return localStorage.getItem('onboarding-complete') === 'true';
     }
 
+    /**
+     * Displays the onboarding modal to the user.
+     */
     showOnboarding() {
         const modal = document.getElementById('onboarding-modal');
         if (modal) {
@@ -308,6 +355,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Completes the onboarding process by saving the user's initial data.
+     */
     completeOnboarding() {
         // Get all form values
         const firstName = document.getElementById('onboarding-first-name').value;
@@ -515,6 +565,10 @@ class DocentePlusPlus {
     }
 
     // Subject management methods
+    /**
+     * Returns a list of common school subjects.
+     * @returns {Array<string>} A list of common subjects.
+     */
     getCommonSubjects() {
         return [
             'Italiano',
@@ -543,6 +597,13 @@ class DocentePlusPlus {
         ];
     }
 
+    /**
+     * Sets up the event listeners and behavior for a subject input field,
+     * including autocomplete suggestions.
+     * @param {string} inputId - The ID of the subject input element.
+     * @param {string} suggestionsId - The ID of the container for suggestions.
+     * @param {string} displayId - The ID of the container to display selected subjects.
+     */
     setupSubjectInput(inputId, suggestionsId, displayId) {
         const input = document.getElementById(inputId);
         const suggestionsDiv = document.getElementById(suggestionsId);
@@ -608,6 +669,10 @@ class DocentePlusPlus {
         });
     }
 
+    /**
+     * Adds a subject to the teacher's list of subjects.
+     * @param {string} subject - The subject to add.
+     */
     addSubject(subject) {
         const normalizedSubject = subject.charAt(0).toUpperCase() + subject.slice(1).toLowerCase();
         if (!this.subjects.includes(normalizedSubject)) {
@@ -615,10 +680,18 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Removes a subject from the teacher's list.
+     * @param {string} subject - The subject to remove.
+     */
     removeSubject(subject) {
         this.subjects = this.subjects.filter(s => s !== subject);
     }
 
+    /**
+     * Renders the list of selected subjects into a specified container.
+     * @param {HTMLElement} displayDiv - The HTML element to render the subjects into.
+     */
     renderSubjects(displayDiv) {
         if (!displayDiv) return;
 
@@ -634,6 +707,9 @@ class DocentePlusPlus {
         }
     }
 
+    /**
+     * Renders the subjects list in all relevant UI locations.
+     */
     renderAllSubjects() {
         const displayOnboarding = document.getElementById('selected-subjects-display');
         const displaySettings = document.getElementById('selected-subjects-display-settings');
@@ -641,6 +717,10 @@ class DocentePlusPlus {
         this.renderSubjects(displaySettings);
     }
 
+    /**
+     * Switches the active tab in the main UI.
+     * @param {string} tabName - The name of the tab to switch to.
+     */
     switchTab(tabName) {
         // Update current active tab for AI context
         this.currentActiveTab = tabName;
@@ -685,32 +765,13 @@ class DocentePlusPlus {
         }
     }
 
-    // Home methods
-    renderHome() {
-        // Update welcome message with teacher's name
-        const firstName = localStorage.getItem('teacher-first-name');
-        const welcomeMessage = document.getElementById('home-welcome-message');
-        if (welcomeMessage) {
-            if (firstName) {
-                const currentHour = new Date().getHours();
-                let greeting = 'Buongiorno';
-                if (currentHour >= 12 && currentHour < 18) {
-                    greeting = 'Buon pomeriggio';
-                } else if (currentHour >= 18) {
-                    greeting = 'Buonasera';
-                }
-                welcomeMessage.textContent = `${greeting}, ${firstName}!`;
-            } else {
-                welcomeMessage.textContent = 'Benvenuto in Docente++';
-            }
-        }
-
-        // Update quick access counts
-        const lessonCount = document.getElementById('home-lesson-count');
-        if (lessonCount) lessonCount.textContent = this.lessons.length;
-        
-        const studentCount = document.getElementById('home-student-count');
-        if (studentCount) studentCount.textContent = this.students.length;
+    // Dashboard methods
+    /**
+     * Renders the main dashboard with key statistics.
+     */
+    renderDashboard() {
+        document.getElementById('lesson-count').textContent = this.lessons.length;
+        document.getElementById('student-count').textContent = this.students.length;
         
         // Count in-progress activities
         const inProgressActivities = this.activities.filter(a => a.status === 'in-progress' || a.status === 'planned');
@@ -1103,12 +1164,19 @@ Separa i suggerimenti con doppio a capo.`;
     }
 
     // Class Management methods
+    /**
+     * Sets the currently active class.
+     * @param {string} className - The name of the class to set as active.
+     */
     setActiveClass(className) {
         this.activeClass = className;
         localStorage.setItem('active-class', className);
         this.updateClassDisplay();
     }
 
+    /**
+     * Loads the active class from localStorage on application startup.
+     */
     loadActiveClass() {
         const savedClass = localStorage.getItem('active-class');
         if (savedClass) {
@@ -1121,6 +1189,9 @@ Separa i suggerimenti con doppio a capo.`;
         }
     }
 
+    /**
+     * Updates the UI element that displays the currently active class.
+     */
     updateClassDisplay() {
         const displayElement = document.getElementById('current-class-display');
         if (displayElement) {
@@ -1135,15 +1206,24 @@ Separa i suggerimenti con doppio a capo.`;
     }
 
     // Lesson management methods
+    /**
+     * Displays the form for adding a new lesson.
+     */
     showAddLessonForm() {
         document.getElementById('add-lesson-form').style.display = 'block';
     }
 
+    /**
+     * Hides the form for adding a new lesson and resets it.
+     */
     hideAddLessonForm() {
         document.getElementById('add-lesson-form').style.display = 'none';
         document.getElementById('lesson-form').reset();
     }
 
+    /**
+     * Adds a new lesson based on the form data.
+     */
     addLesson() {
         const lesson = {
             id: Date.now(),
@@ -1163,6 +1243,10 @@ Separa i suggerimenti con doppio a capo.`;
         this.showToast('Lezione salvata con successo', 'success');
     }
 
+    /**
+     * Deletes a lesson after user confirmation.
+     * @param {number} id - The ID of the lesson to delete.
+     */
     deleteLesson(id) {
         if (confirm('Sei sicuro di voler eliminare questa lezione?')) {
             this.lessons = this.lessons.filter(lesson => lesson.id !== id);
@@ -1173,6 +1257,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Renders the list of lessons in the UI.
+     */
     renderLessons() {
         const lessonsList = document.getElementById('lessons-list');
         
@@ -1201,6 +1288,10 @@ this.renderHome();
             `).join('');
     }
 
+    /**
+     * Generates a new lesson plan using the OpenRouter AI based on user prompts.
+     * @async
+     */
     async generateLessonWithAI() {
         const apiKey = localStorage.getItem('openrouter-api-key');
         
@@ -1299,15 +1390,24 @@ ${lessonData.evaluation || 'N/D'}
     }
 
     // Student management methods
+    /**
+     * Displays the form for adding a new student.
+     */
     showAddStudentForm() {
         document.getElementById('add-student-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the form for adding a new student.
+     */
     hideAddStudentForm() {
         document.getElementById('add-student-form').style.display = 'none';
         document.getElementById('student-form').reset();
     }
 
+    /**
+     * Adds a new student based on the form data.
+     */
     addStudent() {
         const student = {
             id: Date.now(),
@@ -1328,6 +1428,10 @@ ${lessonData.evaluation || 'N/D'}
         this.showToast('Studente salvato con successo', 'success');
     }
 
+    /**
+     * Deletes a student after user confirmation.
+     * @param {number} id - The ID of the student to delete.
+     */
     deleteStudent(id) {
         if (confirm('Sei sicuro di voler eliminare questo studente?')) {
             this.students = this.students.filter(student => student.id !== id);
@@ -1338,6 +1442,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Renders the list of students in the UI.
+     */
     renderStudents() {
         const studentsList = document.getElementById('students-list');
         
@@ -1379,6 +1486,9 @@ this.renderHome();
     }
 
     // Activity management methods
+    /**
+     * Displays the form for adding a new activity.
+     */
     showAddActivityForm() {
         document.getElementById('activity-form-title').textContent = 'Nuova Attività';
         document.getElementById('activity-edit-id').value = '';
@@ -1386,12 +1496,19 @@ this.renderHome();
         this.updateActivityFormSelectors();
     }
 
+    /**
+     * Hides and resets the activity form.
+     */
     hideAddActivityForm() {
         document.getElementById('add-activity-form').style.display = 'none';
         document.getElementById('activity-form').reset();
         document.getElementById('activity-edit-id').value = '';
     }
 
+    /**
+     * Displays the activity form pre-filled with data for editing an existing activity.
+     * @param {number} id - The ID of the activity to edit.
+     */
     showEditActivityForm(id) {
         const activity = this.activities.find(a => a.id === id);
         if (!activity) return;
@@ -1418,6 +1535,9 @@ this.renderHome();
         document.getElementById('add-activity-form').style.display = 'block';
     }
 
+    /**
+     * Populates the class and student dropdowns in the activity form.
+     */
     updateActivityFormSelectors() {
         const classSelector = document.getElementById('activity-class');
         const studentSelector = document.getElementById('activity-student');
@@ -1433,6 +1553,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Adds a new activity or saves changes to an existing one.
+     */
     addActivity() {
         const editId = document.getElementById('activity-edit-id').value;
         
@@ -1478,6 +1601,10 @@ this.renderHome();
         this.showToast(editId ? 'Attività aggiornata con successo' : 'Attività creata con successo', 'success');
     }
 
+    /**
+     * Deletes an activity after user confirmation.
+     * @param {number} id - The ID of the activity to delete.
+     */
     deleteActivity(id) {
         if (confirm('Sei sicuro di voler eliminare questa attività?')) {
             this.activities = this.activities.filter(activity => activity.id !== id);
@@ -1488,6 +1615,11 @@ this.renderHome();
         }
     }
 
+    /**
+     * Updates the status of a specific activity.
+     * @param {number} id - The ID of the activity to update.
+     * @param {string} newStatus - The new status to set (e.g., 'in-progress', 'completed').
+     */
     updateActivityStatus(id, newStatus) {
         const activity = this.activities.find(a => a.id === id);
         if (activity) {
@@ -1499,11 +1631,18 @@ this.renderHome();
         }
     }
 
+    /**
+     * Sets the filter for the activities list and re-renders it.
+     * @param {string} filterType - The type of filter to apply.
+     */
     filterActivities(filterType) {
         this.activityFilter = filterType;
         this.renderActivities();
     }
 
+    /**
+     * Renders the summary statistics for activities in the UI.
+     */
     renderActivitiesSummary() {
         const totalActivities = this.activities.length;
         const plannedActivities = this.activities.filter(a => a.status === 'planned').length;
@@ -1531,6 +1670,9 @@ this.renderHome();
         if (overdueEl) overdueEl.textContent = overdueActivities;
     }
 
+    /**
+     * Renders the list of activities in the UI, applying any active filters and sorting.
+     */
     renderActivities() {
         this.renderActivitiesSummary();
         
@@ -1653,6 +1795,12 @@ this.renderHome();
     }
 
     // Schedule Management methods
+    /**
+     * Given a date, returns the next weekday (Monday-Friday).
+     * If the given date is a weekend, it moves to the following Monday.
+     * @param {Date} date - The input date.
+     * @returns {Date} The next weekday.
+     */
     getNextWeekday(date) {
         const day = date.getDay();
         // If Saturday (6) or Sunday (0), move to next Monday
@@ -1664,6 +1812,10 @@ this.renderHome();
         return date;
     }
 
+    /**
+     * Gets the current date being viewed in the schedule.
+     * @returns {Date} The current schedule date.
+     */
     getCurrentScheduleDate() {
         if (this.currentScheduleDate) {
             return new Date(this.currentScheduleDate);
@@ -1672,17 +1824,34 @@ this.renderHome();
         return this.getNextWeekday(today);
     }
 
+    /**
+     * Sets the current date for the schedule view.
+     * @param {string} dateStr - The date string to set (e.g., 'YYYY-MM-DD').
+     */
     setScheduleDate(dateStr) {
         const date = new Date(dateStr);
         this.currentScheduleDate = this.getNextWeekday(date).toISOString().split('T')[0];
         this.renderSchedule();
     }
 
+    /**
+     * Generates a unique key for a schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @returns {string} The unique key for the schedule slot.
+     */
     getScheduleKey(date, hour) {
         const dateStr = date.toISOString().split('T')[0];
         return `${dateStr}-${hour}`;
     }
 
+    /**
+     * Updates the data for a specific schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @param {string|null} classId - The ID of the class for the slot.
+     * @param {string|null} activityType - The type of activity for the slot.
+     */
     updateScheduleSlot(date, hour, classId, activityType) {
         const key = this.getScheduleKey(date, hour);
         if (!classId && !activityType) {
@@ -1698,6 +1867,11 @@ this.renderHome();
         this.renderTodaySchedulePreview(); // Update dashboard preview
     }
 
+    /**
+     * Gets the icon and color information for a given activity type.
+     * @param {string} type - The activity type (e.g., 'theory', 'lab').
+     * @returns {Object} An object containing the icon, color, and label.
+     */
     getActivityTypeIcon(type) {
         const icons = {
             'theory': { icon: 'T', color: '#3498db', label: 'Teoria' },
@@ -1707,6 +1881,11 @@ this.renderHome();
         return icons[type] || { icon: '', color: '#95a5a6', label: '' };
     }
 
+    /**
+     * Shows a modal dialog for editing a schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     showScheduleSlotEditor(date, hour) {
         const key = this.getScheduleKey(date, hour);
         const slot = this.schedule[key] || { classId: null, activityType: null };
@@ -1754,6 +1933,11 @@ this.renderHome();
         this.currentScheduleModal = modal;
     }
 
+    /**
+     * Saves the changes made in the schedule slot editor.
+     * @param {string} dateStr - The date string of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     saveScheduleSlot(dateStr, hour) {
         const classId = document.getElementById('slot-class-select').value;
         const activityType = document.getElementById('slot-activity-type-select').value;
@@ -1762,12 +1946,20 @@ this.renderHome();
         this.closeScheduleSlotEditor();
     }
 
+    /**
+     * Clears the data from a schedule slot.
+     * @param {string} dateStr - The date string of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     clearScheduleSlot(dateStr, hour) {
         const date = new Date(dateStr);
         this.updateScheduleSlot(date, hour, null, null);
         this.closeScheduleSlotEditor();
     }
 
+    /**
+     * Closes the schedule slot editor modal.
+     */
     closeScheduleSlotEditor() {
         if (this.currentScheduleModal) {
             this.currentScheduleModal.remove();
@@ -1775,6 +1967,11 @@ this.renderHome();
         }
     }
 
+    /**
+     * Launches the activity selection process for a given schedule slot.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     */
     launchScheduleActivity(date, hour) {
         const key = this.getScheduleKey(date, hour);
         const slot = this.schedule[key];
@@ -1794,6 +1991,13 @@ this.renderHome();
         this.showActivitySelectionModal(slot, date, hour, classActivities);
     }
 
+    /**
+     * Shows a modal for selecting an activity to associate with a schedule slot.
+     * @param {Object} slot - The schedule slot data.
+     * @param {Date} date - The date of the slot.
+     * @param {number} hour - The hour of the slot.
+     * @param {Array<Object>} classActivities - The list of activities for the selected class.
+     */
     showActivitySelectionModal(slot, date, hour, classActivities) {
         const cls = this.classes.find(c => c.id == slot.classId);
         const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
@@ -1845,6 +2049,10 @@ this.renderHome();
         this.currentActivityModal = modal;
     }
 
+    /**
+     * Handles the selection of an activity from the schedule modal.
+     * @param {number} activityId - The ID of the selected activity.
+     */
     selectScheduleActivity(activityId) {
         // Update activity status to in-progress if not already
         const activity = this.activities.find(a => a.id === activityId);
@@ -1862,19 +2070,30 @@ this.renderHome();
         }, 100);
     }
 
+    /**
+     * Closes the activity selection modal.
+     */
     closeActivitySelectionModal() {
         if (this.currentActivityModal) {
             this.currentActivityModal.remove();
             this.currentActivityModal = null;
         }
     }
-    
-    // Smart Daily Schedule Management Methods
-    
-    startLessonSession(dateStr, hour) {
-        const date = new Date(dateStr);
-        const key = this.getScheduleKey(date, hour);
-        const slot = this.schedule[key];
+
+    /**
+     * Toggles the schedule view between 'weekly' and 'daily'.
+     */
+    toggleScheduleView() {
+        this.scheduleView = this.scheduleView === 'weekly' ? 'daily' : 'weekly';
+        this.renderSchedule();
+    }
+
+    /**
+     * Navigates the schedule view forward or backward in time.
+     * @param {number} direction - The direction to navigate (-1 for back, 1 for forward).
+     */
+    navigateSchedule(direction) {
+        const currentDate = this.getCurrentScheduleDate();
         
         if (!slot || !slot.classId) {
             alert('Seleziona prima una classe per questo slot orario');
@@ -1890,13 +2109,32 @@ this.renderHome();
         // Show step-by-step activity selection modal
         this.showSmartActivitySelectionModal(date, hour, slot, cls);
     }
-    
-    showSmartActivitySelectionModal(date, hour, slot, cls) {
-        const classActivities = this.activities.filter(a => a.classId == slot.classId);
-        const activityTypeInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+
+    /**
+     * Renders the main schedule view based on the current mode (daily or weekly).
+     */
+    renderSchedule() {
+        const scheduleContainer = document.getElementById('schedule-container');
+        if (!scheduleContainer) return;
+
+        const currentDate = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
         
-        const plannedActivities = classActivities.filter(a => a.status === 'planned');
-        const inProgressActivities = classActivities.filter(a => a.status === 'in-progress');
+        if (this.scheduleView === 'daily') {
+            this.renderDailySchedule(scheduleContainer, currentDate, hours);
+        } else {
+            this.renderWeeklySchedule(scheduleContainer, currentDate, hours);
+        }
+    }
+
+    /**
+     * Renders the daily schedule view.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Date} date - The date to render.
+     * @param {Array<number>} hours - The array of hours to display.
+     */
+    renderDailySchedule(container, date, hours) {
+        const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
         
         // Get AI suggestions for activities if API key is available
         const apiKey = localStorage.getItem('openrouter-api-key');
@@ -2039,11 +2277,18 @@ this.renderHome();
         
         const prompt = `Sei un assistente IA per insegnanti. Analizza il contesto e suggerisci quale attività sia più opportuna per questa lezione.
 
-Contesto:
-- Classe: ${cls ? cls.name : 'N/D'}
-- Data: ${date.toLocaleDateString('it-IT')} 
-- Ora: ${hour}:00
-- Giorno della settimana: ${['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()]}
+    /**
+     * Renders the weekly schedule view.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Date} startDate - A date within the week to render.
+     * @param {Array<number>} hours - The array of hours to display.
+     */
+    renderWeeklySchedule(container, startDate, hours) {
+        // Get Monday of the week
+        const monday = new Date(startDate);
+        const day = monday.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // adjust when day is sunday
+        monday.setDate(monday.getDate() + diff);
 
 Attività disponibili:
 ${classActivities.map(a => `- ${a.title} (${a.type}, stato: ${a.status}${a.deadline ? ', scadenza: ' + new Date(a.deadline).toLocaleDateString('it-IT') : ''})`).join('\n')}
@@ -2220,68 +2465,38 @@ Fornisci un suggerimento breve (massimo 2-3 righe) su quale attività svolgere e
             </div>
         `;
     }
-    
-    setStudentGrade(studentId, grade) {
-        if (!this.currentLessonSession) return;
-        
-        let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
-        if (!evaluation) {
-            evaluation = {
-                studentId: studentId,
-                grade: null,
-                behavior: null,
-                observations: '',
-                aiSuggestion: null
-            };
-            this.currentLessonSession.studentEvaluations.push(evaluation);
-        }
-        
-        evaluation.grade = grade;
-        evaluation.observations = document.getElementById(`observations-${studentId}`)?.value || '';
-        this.saveData();
-        
-        // Update UI - refresh the card
-        const card = document.getElementById(`student-eval-${studentId}`);
-        if (card) {
-            const student = this.students.find(s => s.id === studentId);
-            card.outerHTML = this.renderStudentEvaluationCard(student, this.currentLessonSession);
-        }
+
+    // Class Management methods
+    /**
+     * Displays the form for adding a new class.
+     */
+    showAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'block';
+        document.getElementById('class-form-title').textContent = 'Nuova Classe';
+        document.getElementById('class-edit-id').value = '';
     }
-    
-    setStudentBehavior(studentId, behavior) {
-        if (!this.currentLessonSession) return;
-        
-        let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
-        if (!evaluation) {
-            evaluation = {
-                studentId: studentId,
-                grade: null,
-                behavior: null,
-                observations: '',
-                aiSuggestion: null
-            };
-            this.currentLessonSession.studentEvaluations.push(evaluation);
-        }
-        
-        evaluation.behavior = behavior;
-        evaluation.observations = document.getElementById(`observations-${studentId}`)?.value || '';
-        this.saveData();
-        
-        // Update UI - refresh the card
-        const card = document.getElementById(`student-eval-${studentId}`);
-        if (card) {
-            const student = this.students.find(s => s.id === studentId);
-            card.outerHTML = this.renderStudentEvaluationCard(student, this.currentLessonSession);
-        }
+
+    /**
+     * Hides and resets the class form.
+     */
+    hideAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'none';
+        document.getElementById('class-form').reset();
+        document.getElementById('class-edit-id').value = '';
     }
-    
-    async generateEvaluationSuggestion(studentId) {
-        const suggestionsDiv = document.getElementById(`ai-suggestions-${studentId}`);
-        if (!suggestionsDiv) return;
-        
-        const apiKey = localStorage.getItem('openrouter-api-key');
-        if (!apiKey) {
-            alert('Configura la tua API key di OpenRouter nelle impostazioni per usare i suggerimenti IA');
+
+    /**
+     * Saves a new class or updates an existing one based on form data.
+     */
+    saveClass() {
+        const editId = document.getElementById('class-edit-id').value;
+        const className = document.getElementById('class-name').value.trim();
+        const year = document.getElementById('class-year').value;
+        const section = document.getElementById('class-section').value.trim();
+        const studentsCount = document.getElementById('class-students-count').value;
+
+        if (!className) {
+            alert('Il nome della classe è obbligatorio');
             return;
         }
         
@@ -2670,6 +2885,10 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         this.showToast(editId ? 'Classe aggiornata con successo' : 'Classe creata con successo', 'success');
     }
 
+    /**
+     * Pre-fills the class form for editing an existing class.
+     * @param {number} id - The ID of the class to edit.
+     */
     editClass(id) {
         const classToEdit = this.classes.find(c => c.id === id);
         if (!classToEdit) return;
@@ -2686,6 +2905,10 @@ Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
         document.getElementById('add-class-form').scrollIntoView({ behavior: 'smooth' });
     }
 
+    /**
+     * Deletes a class after user confirmation.
+     * @param {number} id - The ID of the class to delete.
+     */
     deleteClass(id) {
         const classToDelete = this.classes.find(c => c.id === id);
         if (!classToDelete) return;
@@ -2707,6 +2930,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Renders the list of classes in the UI.
+     */
     renderClasses() {
         const classesList = document.getElementById('classes-list');
         
@@ -2738,6 +2964,9 @@ this.renderHome();
             `).join('');
     }
 
+    /**
+     * Updates all class selector dropdowns in the UI with the current list of classes.
+     */
     updateClassSelectors() {
         const selector = document.getElementById('active-class-selector');
         if (!selector) return;
@@ -2765,15 +2994,24 @@ this.renderHome();
     }
 
     // Evaluation Management methods
+    /**
+     * Displays the form for adding a new evaluation criterion.
+     */
     showAddCriterionForm() {
         document.getElementById('add-criterion-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the evaluation criterion form.
+     */
     hideAddCriterionForm() {
         document.getElementById('add-criterion-form').style.display = 'none';
         document.getElementById('criterion-form').reset();
     }
 
+    /**
+     * Adds a new evaluation criterion based on form data.
+     */
     addCriterion() {
         const name = document.getElementById('criterion-name').value;
         const description = document.getElementById('criterion-description').value;
@@ -2800,6 +3038,10 @@ this.renderHome();
         this.hideAddCriterionForm();
     }
 
+    /**
+     * Deletes an evaluation criterion after user confirmation.
+     * @param {number} id - The ID of the criterion to delete.
+     */
     deleteCriterion(id) {
         if (confirm('Sei sicuro di voler eliminare questo criterio?')) {
             this.evaluationCriteria = this.evaluationCriteria.filter(c => c.id !== id);
@@ -2808,15 +3050,24 @@ this.renderHome();
         }
     }
 
+    /**
+     * Displays the form for adding a new evaluation grid (rubric).
+     */
     showAddGridForm() {
         document.getElementById('add-grid-form').style.display = 'block';
     }
 
+    /**
+     * Hides and resets the evaluation grid form.
+     */
     hideAddGridForm() {
         document.getElementById('add-grid-form').style.display = 'none';
         document.getElementById('grid-form').reset();
     }
 
+    /**
+     * Adds a new evaluation grid (rubric) based on form data.
+     */
     addGrid() {
         const name = document.getElementById('grid-name').value;
         const description = document.getElementById('grid-description').value;
@@ -2847,6 +3098,10 @@ this.renderHome();
         this.hideAddGridForm();
     }
 
+    /**
+     * Deletes an evaluation grid after user confirmation.
+     * @param {number} id - The ID of the grid to delete.
+     */
     deleteGrid(id) {
         if (confirm('Sei sicuro di voler eliminare questa griglia?')) {
             this.evaluationGrids = this.evaluationGrids.filter(g => g.id !== id);
@@ -2855,6 +3110,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Displays the form for adding a new evaluation.
+     */
     showAddEvaluationForm() {
         document.getElementById('add-evaluation-form').style.display = 'block';
         this.updateEvaluationFormSelectors();
@@ -2863,11 +3121,17 @@ this.renderHome();
         document.getElementById('evaluation-date').value = today;
     }
 
+    /**
+     * Hides and resets the evaluation form.
+     */
     hideAddEvaluationForm() {
         document.getElementById('add-evaluation-form').style.display = 'none';
         document.getElementById('evaluation-form').reset();
     }
 
+    /**
+     * Populates the dropdown selectors in the evaluation form.
+     */
     updateEvaluationFormSelectors() {
         // Update student selector
         const studentSelect = document.getElementById('evaluation-student');
@@ -2930,6 +3194,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Adds a new evaluation based on form data.
+     */
     addEvaluation() {
         const studentId = document.getElementById('evaluation-student').value;
         const classId = document.getElementById('evaluation-class').value;
@@ -2970,6 +3237,10 @@ this.renderHome();
         this.hideAddEvaluationForm();
     }
 
+    /**
+     * Deletes an evaluation after user confirmation.
+     * @param {number} id - The ID of the evaluation to delete.
+     */
     deleteEvaluation(id) {
         if (confirm('Sei sicuro di voler eliminare questa valutazione?')) {
             this.evaluations = this.evaluations.filter(e => e.id !== id);
@@ -2979,6 +3250,10 @@ this.renderHome();
         }
     }
 
+    /**
+     * Renders all content in the "Evaluations" tab, including criteria,
+     * grids, assigned evaluations, and results.
+     */
     renderEvaluations() {
         // Render criteria list
         const criteriaList = document.getElementById('criteria-list');
@@ -3066,6 +3341,9 @@ this.renderHome();
     }
 
 
+    /**
+     * Initializes and populates the filter dropdowns for the evaluation results section.
+     */
     initializeResultsFilters() {
         // Populate filter selectors
         const filterClass = document.getElementById('filter-class');
@@ -3110,10 +3388,16 @@ this.renderHome();
         }
     }
 
+    /**
+     * Re-renders the evaluation results based on the current filter selections.
+     */
     filterResults() {
         this.renderResults();
     }
 
+    /**
+     * Toggles the evaluation results view between 'by-student' and 'by-class'.
+     */
     toggleResultsView() {
         const viewMode = localStorage.getItem('results-view-mode') || 'by-student';
         const newMode = viewMode === 'by-student' ? 'by-class' : 'by-student';
@@ -3121,6 +3405,10 @@ this.renderHome();
         this.renderResults();
     }
 
+    /**
+     * Renders the evaluation results and statistics section based on current
+     * filters and view mode.
+     */
     renderResults() {
         const resultsDisplay = document.getElementById('results-display');
         if (!resultsDisplay) return;
@@ -3168,6 +3456,11 @@ this.renderHome();
         }
     }
 
+    /**
+     * Renders the evaluation results grouped by student.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Array<Object>} evaluations - The filtered list of evaluations to render.
+     */
     renderResultsByStudent(container, evaluations) {
         const studentGroups = {};
         
@@ -3214,6 +3507,11 @@ this.renderHome();
         container.innerHTML = html;
     }
 
+    /**
+     * Renders the evaluation results grouped by class.
+     * @param {HTMLElement} container - The container element to render into.
+     * @param {Array<Object>} evaluations - The filtered list of evaluations to render.
+     */
     renderResultsByClass(container, evaluations) {
         const classGroups = {};
         
@@ -3271,6 +3569,11 @@ this.renderHome();
         container.innerHTML = html;
     }
 
+    /**
+     * Calculates the average score from a list of evaluations.
+     * @param {Array<Object>} evaluations - A list of evaluation objects.
+     * @returns {number|null} The average score, or null if no scored evaluations are found.
+     */
     calculateAverageScore(evaluations) {
         const scored = evaluations.filter(e => e.score !== null && e.score !== '');
         if (scored.length === 0) return null;
@@ -3278,6 +3581,11 @@ this.renderHome();
         return sum / scored.length;
     }
 
+    /**
+     * Calculates evaluation statistics for each subject.
+     * @param {Array<Object>} evaluations - A list of evaluation objects.
+     * @returns {Object|null} An object with statistics per subject, or null if no data.
+     */
     calculateSubjectStats(evaluations) {
         const stats = {};
         
@@ -3298,6 +3606,10 @@ this.renderHome();
         return Object.keys(stats).length > 0 ? stats : null;
     }
 
+    /**
+     * Generates evaluation criteria for a subject using the AI assistant.
+     * @async
+     */
     async generateCriteriaWithAI() {
         const subject = prompt('Per quale disciplina vuoi generare i criteri di valutazione?');
         if (!subject) return;
@@ -3368,6 +3680,10 @@ this.renderHome();
     }
 
     // AI Assistant methods
+    /**
+     * Handles the selection of a file to be sent to the AI assistant.
+     * @param {Event} event - The file input change event.
+     */
     handleFileSelect(event) {
         const file = event.target.files[0];
         if (file) {
@@ -3383,6 +3699,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Clears the currently selected file from the AI assistant input.
+     */
     clearSelectedFile() {
         this.selectedFile = null;
         const fileInput = document.getElementById('ai-file-input');
@@ -3396,12 +3715,21 @@ this.renderHome();
         }
     }
 
+    /**
+     * Formats a file size in bytes into a human-readable string (B, KB, MB).
+     * @param {number} bytes - The file size in bytes.
+     * @returns {string} The formatted file size.
+     */
     formatFileSize(bytes) {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
+    /**
+     * Sends a message to the OpenRouter AI assistant and displays the response.
+     * @async
+     */
     async sendAIMessage() {
         const input = document.getElementById('ai-input');
         const message = input.value.trim();
@@ -3450,11 +3778,20 @@ this.renderHome();
         }
     }
 
+    /**
+     * Populates the AI input with a predefined prompt.
+     * @param {string} prompt - The prompt text to use.
+     */
     quickAIPrompt(prompt) {
         document.getElementById('ai-input').value = prompt;
         this.switchTab('ai-assistant');
     }
 
+    /**
+     * Adds a message to the AI chat interface.
+     * @param {string} type - The type of message ('user', 'ai', 'system').
+     * @param {string} content - The content of the message.
+     */
     addChatMessage(type, content) {
         const messagesContainer = document.getElementById('chat-messages');
         
@@ -3468,6 +3805,13 @@ this.renderHome();
         this.chatMessages.push({ type, content, timestamp: new Date().toISOString() });
     }
 
+    /**
+     * Makes an API call to the OpenRouter service.
+     * @param {string} prompt - The user's prompt.
+     * @param {string} apiKey - The OpenRouter API key.
+     * @returns {Promise<Object>} A promise that resolves with the AI's response.
+     * @async
+     */
     async callOpenRouterAPI(prompt, apiKey) {
         const modelId = localStorage.getItem('openrouter-model-id') || 'alibaba/tongyi-deepresearch-30b-a3b';
         
@@ -3522,6 +3866,9 @@ this.renderHome();
     }
 
     // Settings methods
+    /**
+     * Saves the application settings from the settings form to localStorage.
+     */
     saveSettings() {
         const apiKey = document.getElementById('openrouter-api-key').value;
         const modelId = document.getElementById('openrouter-model-id').value;
@@ -3585,6 +3932,9 @@ this.renderHome();
         this.showToast('Impostazioni salvate con successo', 'success');
     }
 
+    /**
+     * Loads settings from localStorage and populates the settings form.
+     */
     loadSettings() {
         const apiKey = localStorage.getItem('openrouter-api-key');
         const modelId = localStorage.getItem('openrouter-model-id');
@@ -3678,33 +4028,11 @@ this.renderHome();
         }
     }
 
-    // Theme management
-    changeTheme(theme) {
-        const root = document.documentElement;
-        
-        if (theme === 'dark') {
-            root.style.setProperty('--bg-color', '#1a1a1a');
-            root.style.setProperty('--card-bg', '#2a2a2a');
-            root.style.setProperty('--text-primary', '#e0e0e0');
-            root.style.setProperty('--text-secondary', '#b0b0b0');
-            root.style.setProperty('--border-color', '#404040');
-            root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.4)');
-            root.style.setProperty('--shadow-hover', '0 4px 12px rgba(0, 0, 0, 0.5)');
-            document.body.classList.add('dark-theme');
-        } else {
-            root.style.setProperty('--bg-color', '#f5f7fa');
-            root.style.setProperty('--card-bg', '#ffffff');
-            root.style.setProperty('--text-primary', '#2c3e50');
-            root.style.setProperty('--text-secondary', '#7f8c8d');
-            root.style.setProperty('--border-color', '#e1e8ed');
-            root.style.setProperty('--shadow', '0 2px 8px rgba(0, 0, 0, 0.1)');
-            root.style.setProperty('--shadow-hover', '0 4px 12px rgba(0, 0, 0, 0.15)');
-            document.body.classList.remove('dark-theme');
-        }
-
-        localStorage.setItem('app-theme', theme);
-    }
-
+    /**
+     * Verifies the provided OpenRouter API key by making a test call.
+     * Updates the UI to show the key's status (valid, invalid, or error).
+     * @async
+     */
     async verifyAPIKey() {
         const apiKeyInput = document.getElementById('openrouter-api-key');
         const statusIcon = document.getElementById('api-key-status');
@@ -3766,6 +4094,9 @@ this.renderHome();
     }
 
     // Data persistence methods
+    /**
+     * Saves all application data to the browser's localStorage.
+     */
     saveData() {
         localStorage.setItem('docente-plus-lessons', JSON.stringify(this.lessons));
         localStorage.setItem('docente-plus-students', JSON.stringify(this.students));
@@ -3784,6 +4115,9 @@ this.renderHome();
         localStorage.setItem('docente-plus-backup-settings', JSON.stringify(this.backupSettings));
     }
 
+    /**
+     * Loads all application data from the browser's localStorage.
+     */
     loadData() {
         const lessonsData = localStorage.getItem('docente-plus-lessons');
         const studentsData = localStorage.getItem('docente-plus-students');
@@ -3911,62 +4245,27 @@ this.renderHome();
             }
         }
 
-        // Load RSS feeds
-        const rssFeedsData = localStorage.getItem('docente-plus-rss-feeds');
-        if (rssFeedsData) {
-            try {
-                this.rssFeeds = JSON.parse(rssFeedsData);
-            } catch (e) {
-                console.error('Error loading RSS feeds:', e);
-                this.rssFeeds = [];
-            }
-        }
-
-        // Load news items
-        const newsItemsData = localStorage.getItem('docente-plus-news-items');
-        if (newsItemsData) {
-            try {
-                this.newsItems = JSON.parse(newsItemsData);
-            } catch (e) {
-                console.error('Error loading news items:', e);
-                this.newsItems = [];
-            }
-        }
-
-        // Load backups metadata
-        const backupsData = localStorage.getItem('docente-plus-backups');
-        if (backupsData) {
-            try {
-                this.backups = JSON.parse(backupsData);
-            } catch (e) {
-                console.error('Error loading backups:', e);
-                this.backups = [];
-            }
-        }
-
-        // Load backup settings
-        const backupSettingsData = localStorage.getItem('docente-plus-backup-settings');
-        if (backupSettingsData) {
-            try {
-                this.backupSettings = JSON.parse(backupSettingsData);
-            } catch (e) {
-                console.error('Error loading backup settings:', e);
-            }
-        }
-    }
-
+    /**
+     * Initiates the process for exporting all application data.
+     */
     exportData() {
         // Store the export type and show format selection modal
         this.currentExportType = 'data';
         this.showExportModal();
     }
 
+    /**
+     * Initiates the process for exporting only the evaluations data.
+     */
     exportEvaluations() {
         // Store the export type and show format selection modal
         this.currentExportType = 'evaluations';
         this.showExportModal();
     }
 
+    /**
+     * Displays the modal for selecting the export format.
+     */
     showExportModal() {
         const modal = document.getElementById('export-format-modal');
         if (modal) {
@@ -3974,6 +4273,9 @@ this.renderHome();
         }
     }
 
+    /**
+     * Closes the export format selection modal.
+     */
     closeExportModal() {
         const modal = document.getElementById('export-format-modal');
         if (modal) {
@@ -3982,6 +4284,10 @@ this.renderHome();
         this.currentExportType = null;
     }
 
+    /**
+     * Executes the export process based on the selected format.
+     * @param {string} format - The selected export format ('json', 'pdf', 'excel').
+     */
     executeExport(format) {
         this.closeExportModal();
         
@@ -3992,6 +4298,10 @@ this.renderHome();
         }
     }
 
+    /**
+     * Exports all application data in the specified format.
+     * @param {string} format - The format to export to ('json', 'pdf', 'excel').
+     */
     exportDataInFormat(format) {
         const data = {
             lessons: this.lessons,
@@ -4044,6 +4354,10 @@ this.renderHome();
         });
     }
 
+    /**
+     * Exports only the evaluations data in the specified format.
+     * @param {string} format - The format to export to ('json', 'pdf', 'excel').
+     */
     exportEvaluationsInFormat(format) {
         // Calculate statistics for export
         const stats = {
@@ -4114,6 +4428,11 @@ this.renderHome();
         alert(`Valutazioni esportate con successo in formato ${format.toUpperCase()}!`);
     }
 
+    /**
+     * Exports data to a JSON file and triggers a download.
+     * @param {Object} data - The data object to export.
+     * @param {string} filename - The base name for the downloaded file.
+     */
     exportAsJSON(data, filename) {
         const dataStr = JSON.stringify(data, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -4127,6 +4446,10 @@ this.renderHome();
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Exports all application data to a PDF file.
+     * @param {Object} data - The complete application data object.
+     */
     exportDataAsPDF(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -4311,6 +4634,10 @@ this.renderHome();
         doc.save(`docente-plus-export-${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
+    /**
+     * Exports evaluations data to a PDF file.
+     * @param {Object} data - The evaluations data object.
+     */
     exportEvaluationsAsPDF(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -4406,6 +4733,10 @@ this.renderHome();
         doc.save(`valutazioni-export-${new Date().toISOString().split('T')[0]}.pdf`);
     }
 
+    /**
+     * Exports all application data to an Excel (XLSX) file.
+     * @param {Object} data - The complete application data object.
+     */
     exportDataAsExcel(data) {
         const wb = XLSX.utils.book_new();
         
@@ -4569,6 +4900,10 @@ this.renderHome();
         XLSX.writeFile(wb, `docente-plus-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
+    /**
+     * Exports evaluations data to an Excel (XLSX) file.
+     * @param {Object} data - The evaluations data object.
+     */
     exportEvaluationsAsExcel(data) {
         const wb = XLSX.utils.book_new();
         
@@ -4657,6 +4992,9 @@ this.renderHome();
         XLSX.writeFile(wb, `valutazioni-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
+    /**
+     * Initiates the import of application data from a JSON file.
+     */
     importData() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -4753,27 +5091,30 @@ this.renderHome();
         input.click();
     }
 
-    // Backup & Restore Management Methods
-    
+    // Notification Management Methods
     /**
-     * Initialize backup system
+     * Requests permission from the user to show browser notifications.
      */
-    initBackupSystem() {
-        this.loadBackupSettings();
-        this.renderBackupList();
-        this.startBackupScheduler();
+    requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted');
+                } else {
+                    console.log('Notification permission denied');
+                }
+            });
+        }
     }
 
     /**
-     * Load backup settings from localStorage
+     * Starts the periodic check for pending notifications.
      */
-    loadBackupSettings() {
-        const frequencySelect = document.getElementById('backup-frequency');
-        if (frequencySelect && this.backupSettings.frequency) {
-            frequencySelect.value = this.backupSettings.frequency;
-        }
-        this.updateBackupScheduleInfo();
-    }
+    startNotificationChecks() {
+        // Check for notifications every 5 minutes
+        this.notificationCheckInterval = setInterval(() => {
+            this.checkAndSendNotifications();
+        }, 5 * 60 * 1000); // 5 minutes
 
     /**
      * Create a manual backup
@@ -4828,13 +5169,9 @@ this.renderHome();
     }
 
     /**
-     * Create scheduled backup
+     * Checks for and sends all types of pending notifications (lessons, activities, etc.).
      */
-    async createScheduledBackup() {
-        if (this.backupSettings.frequency === 'never') {
-            return;
-        }
-        
+    checkAndSendNotifications() {
         const now = new Date();
         const lastBackup = this.backupSettings.lastBackupDate ? new Date(this.backupSettings.lastBackupDate) : null;
         
@@ -5008,7 +5345,15 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
 - backup-data.json: Tutti i dati dell'applicazione
 - metadata.json: Informazioni sul backup
 
-## Come Ripristinare
+    /**
+     * Checks if a given date falls within the user-defined quiet hours.
+     * @param {Date} date - The date to check.
+     * @returns {boolean} True if the date is within quiet hours, false otherwise.
+     */
+    isQuietHours(date) {
+        if (!this.notificationSettings.quietHoursEnabled) {
+            return false;
+        }
 
 1. Apri Docente++ nel browser
 2. Vai alla sezione "Backup & Ripristino"
@@ -5041,21 +5386,28 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
     }
 
     /**
-     * Show restore backup dialog
+     * Checks for and creates notifications for upcoming lessons.
+     * @param {Date} now - The current date and time.
      */
-    showRestoreBackupDialog() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json,.zip';
-        
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            if (file.name.endsWith('.zip')) {
-                await this.restoreFromZipFile(file);
-            } else {
-                await this.restoreFromJsonFile(file);
+    checkLessonReminders(now) {
+        this.lessons.forEach(lesson => {
+            const lessonDate = new Date(lesson.date + 'T' + lesson.time);
+            const timeDiff = lessonDate - now;
+            const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+            // Check for 24-hour reminder
+            if (this.notificationSettings.remindersBefore24h && 
+                hoursDiff > 23.5 && hoursDiff <= 24.5) {
+                const notificationId = `lesson-24h-${lesson.id}`;
+                if (!this.hasNotificationBeenSent(notificationId)) {
+                    this.createNotification({
+                        title: '📚 Promemoria Lezione (24 ore)',
+                        message: `Domani alle ${lesson.time}: ${lesson.title}`,
+                        type: 'lesson-reminder',
+                        relatedId: lesson.id,
+                        notificationId: notificationId
+                    });
+                }
             }
         };
         
@@ -5085,411 +5437,9 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
     }
 
     /**
-     * Restore backup from ZIP file
+     * Checks for and creates notifications for activity deadlines.
+     * @param {Date} now - The current date and time.
      */
-    async restoreFromZipFile(file) {
-        // Check if JSZip is available
-        if (typeof JSZip === 'undefined') {
-            console.error('JSZip library not available');
-            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
-            return;
-        }
-        
-        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
-            return;
-        }
-        
-        try {
-            const zip = new JSZip();
-            const contents = await zip.loadAsync(file);
-            const backupDataFile = contents.file('backup-data.json');
-            
-            if (!backupDataFile) {
-                throw new Error('File ZIP non valido: backup-data.json non trovato');
-            }
-            
-            const backupDataStr = await backupDataFile.async('string');
-            const data = JSON.parse(backupDataStr);
-            
-            await this.restoreBackupData(data);
-            this.showTemporaryMessage('Ripristino da ZIP completato! 🎉', 'success');
-            
-        } catch (error) {
-            console.error('Error restoring from ZIP:', error);
-            this.showTemporaryMessage('Errore durante il ripristino dal file ZIP', 'error');
-        }
-    }
-
-    /**
-     * Restore backup data
-     */
-    async restoreBackupData(data) {
-        // Restore all data
-        if (data.lessons) this.lessons = data.lessons;
-        if (data.students) this.students = data.students;
-        if (data.classes) this.classes = data.classes;
-        if (data.subjects) {
-            this.subjects = data.subjects;
-            localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
-        }
-        if (data.activities) this.activities = data.activities;
-        if (data.schedule) this.schedule = data.schedule;
-        if (data.evaluationCriteria) this.evaluationCriteria = data.evaluationCriteria;
-        if (data.evaluationGrids) this.evaluationGrids = data.evaluationGrids;
-        if (data.evaluations) this.evaluations = data.evaluations;
-        if (data.notifications) this.notifications = data.notifications;
-        if (data.reminders) this.reminders = data.reminders;
-        if (data.notificationSettings) this.notificationSettings = data.notificationSettings;
-        if (data.rssFeeds) this.rssFeeds = data.rssFeeds;
-        if (data.newsItems) this.newsItems = data.newsItems;
-        
-        // Restore teacher profile
-        if (data.teacherProfile) {
-            const profile = data.teacherProfile;
-            if (profile.firstName) localStorage.setItem('teacher-first-name', profile.firstName);
-            if (profile.lastName) localStorage.setItem('teacher-last-name', profile.lastName);
-            if (profile.email) localStorage.setItem('teacher-email', profile.email);
-            if (profile.schoolLevel) localStorage.setItem('school-level', profile.schoolLevel);
-            if (profile.schoolName) localStorage.setItem('school-name', profile.schoolName);
-            if (profile.schoolYear) localStorage.setItem('school-year', profile.schoolYear);
-            if (profile.schoolYearStart) localStorage.setItem('school-year-start', profile.schoolYearStart);
-            if (profile.schoolYearEnd) localStorage.setItem('school-year-end', profile.schoolYearEnd);
-        }
-        
-        // Save and re-render
-        this.saveData();
-        this.renderLessons();
-        this.renderStudents();
-        this.renderClasses();
-        this.renderActivities();
-        this.renderSchedule();
-        this.renderEvaluations();
-        this.renderNotifications();
-        this.renderFeeds();
-        this.renderNews();
-        this.updateClassSelectors();
-        this.loadSettings();
-        this.renderHome();
-        
-        // Create notification
-        this.createNotification({
-            title: '✅ Ripristino Completato',
-            message: 'I dati sono stati ripristinati con successo dal backup',
-            type: 'system',
-            notificationId: `restore-success-${Date.now()}`
-        });
-    }
-
-    /**
-     * Restore backup from stored backup
-     */
-    async restoreStoredBackup(backupId) {
-        const backup = this.backups.find(b => b.id === backupId);
-        if (!backup) {
-            this.showTemporaryMessage('Backup non trovato', 'error');
-            return;
-        }
-        
-        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
-            return;
-        }
-        
-        try {
-            await this.restoreBackupData(backup.data);
-            this.showTemporaryMessage('Ripristino completato! 🎉', 'success');
-        } catch (error) {
-            console.error('Error restoring backup:', error);
-            this.showTemporaryMessage('Errore durante il ripristino del backup', 'error');
-        }
-    }
-
-    /**
-     * Delete a backup
-     */
-    deleteBackup(backupId) {
-        if (!confirm('Sei sicuro di voler eliminare questo backup?')) {
-            return;
-        }
-        
-        this.backups = this.backups.filter(b => b.id !== backupId);
-        this.saveData();
-        this.renderBackupList();
-        this.showTemporaryMessage('Backup eliminato', 'info');
-    }
-
-    /**
-     * Update backup schedule
-     */
-    updateBackupSchedule() {
-        const frequencySelect = document.getElementById('backup-frequency');
-        if (frequencySelect) {
-            this.backupSettings.frequency = frequencySelect.value;
-            this.saveData();
-            this.updateBackupScheduleInfo();
-            this.showTemporaryMessage('Impostazioni backup aggiornate', 'success');
-        }
-    }
-
-    /**
-     * Update backup schedule info display
-     */
-    updateBackupScheduleInfo() {
-        const infoDiv = document.getElementById('backup-schedule-info');
-        if (!infoDiv) return;
-        
-        let infoText = '';
-        const lastBackup = this.backupSettings.lastBackupDate 
-            ? new Date(this.backupSettings.lastBackupDate).toLocaleString('it-IT')
-            : 'Mai';
-        
-        if (this.backupSettings.frequency === 'never') {
-            infoText = '🔴 Backup automatico disattivato. Ultimo backup: ' + lastBackup;
-        } else {
-            let nextBackupText = '';
-            if (this.backupSettings.lastBackupDate) {
-                const lastDate = new Date(this.backupSettings.lastBackupDate);
-                const now = new Date();
-                let nextDate = new Date(lastDate);
-                
-                switch (this.backupSettings.frequency) {
-                    case 'daily':
-                        nextDate.setDate(nextDate.getDate() + 1);
-                        break;
-                    case 'weekly':
-                        nextDate.setDate(nextDate.getDate() + 7);
-                        break;
-                    case 'monthly':
-                        nextDate.setMonth(nextDate.getMonth() + 1);
-                        break;
-                }
-                
-                if (nextDate <= now) {
-                    nextBackupText = 'Prossimo backup: Al prossimo caricamento dell\'app';
-                } else {
-                    nextBackupText = 'Prossimo backup: ' + nextDate.toLocaleString('it-IT');
-                }
-            } else {
-                nextBackupText = 'Prossimo backup: Al prossimo caricamento dell\'app';
-            }
-            
-            infoText = `🟢 Backup automatico attivo (${this.backupSettings.frequency}). Ultimo backup: ${lastBackup}. ${nextBackupText}`;
-        }
-        
-        infoDiv.innerHTML = infoText;
-    }
-
-    /**
-     * Start backup scheduler
-     */
-    startBackupScheduler() {
-        // Clear existing timer
-        if (this.backupTimer) {
-            clearInterval(this.backupTimer);
-        }
-        
-        // Check for scheduled backup on load
-        this.createScheduledBackup();
-        
-        // Set up periodic check (every hour)
-        this.backupTimer = setInterval(() => {
-            this.createScheduledBackup();
-        }, this.BACKUP_CHECK_INTERVAL);
-    }
-
-    /**
-     * Render backup list
-     */
-    renderBackupList() {
-        const listDiv = document.getElementById('backup-list');
-        if (!listDiv) return;
-        
-        if (this.backups.length === 0) {
-            listDiv.innerHTML = `
-                <div class="backup-empty-state">
-                    <div class="empty-icon">📂</div>
-                    <p>Nessun backup disponibile</p>
-                    <p style="font-size: 14px; margin-top: 10px;">Crea il tuo primo backup usando il pulsante "Crea Backup Ora"</p>
-                </div>
-            `;
-            return;
-        }
-        
-        const backupsHtml = this.backups.map(backup => {
-            const date = new Date(backup.date);
-            const formattedDate = date.toLocaleDateString('it-IT');
-            const formattedTime = date.toLocaleTimeString('it-IT');
-            const sizeInKB = (backup.size / 1024).toFixed(2);
-            const typeIcon = backup.type === 'manual' ? '👤' : '⏰';
-            const typeName = backup.type === 'manual' ? 'Manuale' : 'Automatico';
-            
-            return `
-                <div class="backup-item">
-                    <div class="backup-item-info">
-                        <div class="backup-item-name">${typeIcon} ${backup.name}</div>
-                        <div class="backup-item-meta">
-                            <span>📅 ${formattedDate} ${formattedTime}</span>
-                            <span>💾 ${sizeInKB} KB</span>
-                            <span>🏷️ ${typeName}</span>
-                        </div>
-                    </div>
-                    <div class="backup-item-actions">
-                        <button class="btn-download" onclick="app.downloadBackup('${backup.id}', 'json')" title="Scarica come JSON">
-                            📥 JSON
-                        </button>
-                        <button class="btn-download" onclick="app.downloadBackup('${backup.id}', 'zip')" title="Scarica come ZIP">
-                            📦 ZIP
-                        </button>
-                        <button class="btn-restore" onclick="app.restoreStoredBackup('${backup.id}')" title="Ripristina questo backup">
-                            ♻️ Ripristina
-                        </button>
-                        <button class="btn-delete" onclick="app.deleteBackup('${backup.id}')" title="Elimina questo backup">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        listDiv.innerHTML = backupsHtml;
-    }
-
-    /**
-     * Show temporary message
-     */
-    showTemporaryMessage(message, type = 'info') {
-        // Create a temporary toast message
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: ${type === 'success' ? '#50c878' : type === 'error' ? '#e74c3c' : '#4a90e2'};
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 10000;
-            font-weight: 500;
-            animation: slideInRight 0.3s ease;
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 300);
-        }, 3000);
-    }
-
-    // Notification Management Methods
-    requestNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    console.log('Notification permission granted');
-                } else {
-                    console.log('Notification permission denied');
-                }
-            });
-        }
-    }
-
-    startNotificationChecks() {
-        // Check for notifications every 5 minutes
-        this.notificationCheckInterval = setInterval(() => {
-            this.checkAndSendNotifications();
-        }, 5 * 60 * 1000); // 5 minutes
-
-        // Also check immediately
-        this.checkAndSendNotifications();
-    }
-
-    checkAndSendNotifications() {
-        const now = new Date();
-
-        // Check if we're in quiet hours
-        if (this.isQuietHours(now)) {
-            return;
-        }
-
-        // Check lesson reminders
-        if (this.notificationSettings.lessonReminders) {
-            this.checkLessonReminders(now);
-        }
-
-        // Check activity deadline reminders
-        this.checkActivityDeadlineReminders(now);
-
-        // Check custom reminders
-        this.checkCustomReminders(now);
-
-        // Check backup reminders
-        if (this.notificationSettings.backupReminders) {
-            this.checkBackupReminders(now);
-        }
-    }
-
-    isQuietHours(date) {
-        if (!this.notificationSettings.quietHoursEnabled) {
-            return false;
-        }
-
-        const currentTime = date.getHours() * 60 + date.getMinutes();
-        const [startHour, startMin] = this.notificationSettings.quietHoursStart.split(':').map(Number);
-        const [endHour, endMin] = this.notificationSettings.quietHoursEnd.split(':').map(Number);
-        const startTime = startHour * 60 + startMin;
-        const endTime = endHour * 60 + endMin;
-
-        if (startTime < endTime) {
-            return currentTime >= startTime && currentTime <= endTime;
-        } else {
-            // Quiet hours span midnight
-            return currentTime >= startTime || currentTime <= endTime;
-        }
-    }
-
-    checkLessonReminders(now) {
-        this.lessons.forEach(lesson => {
-            const lessonDate = new Date(lesson.date + 'T' + lesson.time);
-            const timeDiff = lessonDate - now;
-            const hoursDiff = timeDiff / (1000 * 60 * 60);
-
-            // Check for 24-hour reminder
-            if (this.notificationSettings.remindersBefore24h && 
-                hoursDiff > 23.5 && hoursDiff <= 24.5) {
-                const notificationId = `lesson-24h-${lesson.id}`;
-                if (!this.hasNotificationBeenSent(notificationId)) {
-                    this.createNotification({
-                        title: '📚 Promemoria Lezione (24 ore)',
-                        message: `Domani alle ${lesson.time}: ${lesson.title}`,
-                        type: 'lesson-reminder',
-                        relatedId: lesson.id,
-                        notificationId: notificationId
-                    });
-                }
-            }
-
-            // Check for 1-hour reminder
-            if (this.notificationSettings.remindersBefore1h && 
-                hoursDiff > 0.5 && hoursDiff <= 1.5) {
-                const notificationId = `lesson-1h-${lesson.id}`;
-                if (!this.hasNotificationBeenSent(notificationId)) {
-                    this.createNotification({
-                        title: '📚 Promemoria Lezione (1 ora)',
-                        message: `Tra un\'ora: ${lesson.title}`,
-                        type: 'lesson-reminder',
-                        relatedId: lesson.id,
-                        notificationId: notificationId
-                    });
-                }
-            }
-        });
-    }
-
     checkActivityDeadlineReminders(now) {
         this.activities.forEach(activity => {
             // Skip completed activities or those without deadlines
@@ -5552,6 +5502,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         });
     }
 
+    /**
+     * Checks for and creates notifications for custom user-defined reminders.
+     * @param {Date} now - The current date and time.
+     */
     checkCustomReminders(now) {
         this.reminders.forEach(reminder => {
             if (reminder.dismissed || reminder.notified) {
@@ -5575,10 +5529,19 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         });
     }
 
+    /**
+     * Checks if a notification with a specific ID has already been sent.
+     * @param {string} notificationId - The unique ID of the notification to check.
+     * @returns {boolean} True if the notification has been sent, false otherwise.
+     */
     hasNotificationBeenSent(notificationId) {
         return this.notifications.some(n => n.notificationId === notificationId);
     }
 
+    /**
+     * Checks for and creates notifications for periodic data backups.
+     * @param {Date} now - The current date and time.
+     */
     checkBackupReminders(now) {
         const lastBackup = this.notificationSettings.lastBackupDate;
         const interval = this.notificationSettings.backupReminderInterval;
@@ -5622,6 +5585,14 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Creates and stores a new notification, and optionally sends a browser notification.
+     * @param {Object} data - The data for the notification.
+     * @param {string} data.title - The title of the notification.
+     * @param {string} data.message - The body message of the notification.
+     * @param {string} data.type - The type of notification (e.g., 'system', 'lesson-reminder').
+     * @param {string} data.notificationId - A unique ID for the notification instance.
+     */
     createNotification(data) {
         const notification = {
             id: Date.now(),
@@ -5646,6 +5617,9 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         this.renderNotifications();
     }
 
+    /**
+     * Adds a new custom reminder based on form data.
+     */
     addReminder() {
         const title = document.getElementById('reminder-title').value;
         const message = document.getElementById('reminder-message').value;
@@ -5679,6 +5653,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         document.getElementById('reminder-time').value = '';
     }
 
+    /**
+     * Deletes a custom reminder after user confirmation.
+     * @param {number} id - The ID of the reminder to delete.
+     */
     deleteReminder(id) {
         if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
             this.reminders = this.reminders.filter(r => r.id !== id);
@@ -5687,6 +5665,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Dismisses a custom reminder, preventing it from showing notifications.
+     * @param {number} id - The ID of the reminder to dismiss.
+     */
     dismissReminder(id) {
         const reminder = this.reminders.find(r => r.id === id);
         if (reminder) {
@@ -5696,6 +5678,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Marks a single notification as read.
+     * @param {number} id - The ID of the notification to mark as read.
+     */
     markNotificationRead(id) {
         const notification = this.notifications.find(n => n.id === id);
         if (notification) {
@@ -5705,18 +5691,28 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Marks all notifications as read.
+     */
     markAllNotificationsRead() {
         this.notifications.forEach(n => n.read = true);
         this.saveData();
         this.renderNotifications();
     }
 
+    /**
+     * Deletes a single notification.
+     * @param {number} id - The ID of the notification to delete.
+     */
     deleteNotification(id) {
         this.notifications = this.notifications.filter(n => n.id !== id);
         this.saveData();
         this.renderNotifications();
     }
 
+    /**
+     * Deletes all notifications after user confirmation.
+     */
     clearAllNotifications() {
         if (confirm('Sei sicuro di voler eliminare tutte le notifiche?')) {
             this.notifications = [];
@@ -5725,6 +5721,9 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Saves the notification settings from the form to localStorage.
+     */
     saveNotificationSettings() {
         this.notificationSettings.browserNotifications = document.getElementById('notification-browser').checked;
         this.notificationSettings.emailNotifications = document.getElementById('notification-email').checked;
@@ -5746,19 +5745,33 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         alert('Impostazioni notifiche salvate!');
     }
 
+    /**
+     * Displays the form for adding a new custom reminder.
+     */
     showAddReminderForm() {
         document.getElementById('add-reminder-form').style.display = 'block';
     }
 
+    /**
+     * Hides the form for adding a new custom reminder.
+     */
     hideAddReminderForm() {
         document.getElementById('add-reminder-form').style.display = 'none';
     }
 
+    /**
+     * Sets the filter for the notifications list and re-renders it.
+     * @param {string} filter - The notification type to filter by.
+     */
     filterNotifications(filter) {
         this.notificationFilter = filter;
         this.renderNotifications();
     }
 
+    /**
+     * Calculates statistics about the notifications (total, unread, by type).
+     * @returns {Object} An object containing notification statistics.
+     */
     getNotificationStats() {
         const stats = {
             total: this.notifications.length,
@@ -5775,6 +5788,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         return stats;
     }
 
+    /**
+     * Renders the entire notifications tab, including the list of notifications,
+     * reminders, and settings forms.
+     */
     renderNotifications() {
         // Render notifications list
         const notificationsList = document.getElementById('notifications-list');
@@ -5898,6 +5915,10 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
     // DOCUMENT IMPORT MODULE METHODS
     // ========================================
 
+    /**
+     * Switches to the document import tab and highlights the upload area.
+     * This is typically called when importing students from the students tab.
+     */
     showImportStudentsDialog() {
         this.switchTab('document-import');
         // Optionally show a hint or focus on upload area
@@ -5911,6 +5932,11 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Handles the document upload event, reading the file and initiating classification.
+     * @param {Event} event - The file input change or drop event.
+     * @async
+     */
     async handleDocumentUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -5942,6 +5968,12 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Reads the content of a file and parses it based on its extension.
+     * @param {File} file - The file to read.
+     * @returns {Promise<Object>} A promise that resolves with the parsed file data.
+     * @async
+     */
     async readFileContent(file) {
         const extension = file.name.split('.').pop().toLowerCase();
         
@@ -6005,6 +6037,12 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         });
     }
 
+    /**
+     * Extracts text content from a PDF file.
+     * @param {ArrayBuffer} arrayBuffer - The PDF file content as an ArrayBuffer.
+     * @returns {Promise<string>} A promise that resolves with the extracted text.
+     * @async
+     */
     async extractTextFromPDF(arrayBuffer) {
         // Configure PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
@@ -6029,6 +6067,12 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
         }
     }
 
+    /**
+     * Classifies the type of an uploaded document using the AI assistant.
+     * @param {File} file - The uploaded file object.
+     * @param {Object} fileData - The parsed content of the file.
+     * @async
+     */
     async classifyDocument(file, fileData) {
         const apiKey = localStorage.getItem('openrouter-api-key');
         
@@ -6120,6 +6164,12 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Displays the AI's classification result for the uploaded document.
+     * @param {File} file - The uploaded file.
+     * @param {Object} classification - The classification result from the AI.
+     * @param {Object} fileData - The parsed data from the file.
+     */
     showClassificationResult(file, classification, fileData) {
         const statusDiv = document.getElementById('document-upload-status');
         const classificationDiv = document.getElementById('document-classification');
@@ -6198,6 +6248,11 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
+    /**
+     * Shows a manual classification interface when AI classification is not available or fails.
+     * @param {File} [file] - The uploaded file (optional).
+     * @param {Object} [fileData] - The parsed data from the file (optional).
+     */
     showManualClassification(file, fileData) {
         const classificationDiv = document.getElementById('document-classification');
         const resultDiv = document.getElementById('classification-result');
@@ -6219,842 +6274,6 @@ Rispondi SOLO in formato JSON con questa struttura:
             </div>
         `;
         
-        actionsDiv.innerHTML = `
-            <button class="btn btn-primary" onclick="app.processManualClassification()">
-                ✅ Procedi con Importazione
-            </button>
-            <button class="btn btn-secondary" onclick="app.cancelImport()">
-                ❌ Annulla
-            </button>
-        `;
-    }
-
-    processManualClassification() {
-        const typeSelect = document.getElementById('manual-classification-type');
-        const selectedType = typeSelect.value;
-        
-        if (!selectedType) {
-            alert('Seleziona un tipo di documento');
-            return;
-        }
-
-        this.documentClassification = {
-            tipo: selectedType,
-            confidenza: 1.0,
-            descrizione: 'Classificazione manuale',
-            suggerimenti: ''
-        };
-
-        // Process based on type
-        if (selectedType === 'ANAGRAFICA_STUDENTI') {
-            this.processStudentsImport();
-        } else if (selectedType === 'MATERIALI_DIDATTICI') {
-            this.processMaterialsImport();
-        } else if (selectedType === 'ATTIVITA') {
-            this.processActivitiesImport();
-        } else {
-            alert('Tipo di documento non ancora supportato per l\'importazione automatica');
-        }
-    }
-
-    async processStudentsImport() {
-        if (!this.currentImportData) {
-            alert('Nessun dato da importare');
-            return;
-        }
-
-        const { fileData } = this.currentImportData;
-        const previewDiv = document.getElementById('document-preview');
-        const previewContent = document.getElementById('preview-content');
-        
-        // Hide classification, show preview
-        document.getElementById('document-classification').style.display = 'none';
-        previewDiv.style.display = 'block';
-
-        // Extract student data
-        let studentsData = [];
-        
-        if (fileData.type === 'csv' || fileData.type === 'excel') {
-            studentsData = this.extractStudentsFromTabularData(fileData.data);
-        } else if (fileData.type === 'json') {
-            studentsData = this.extractStudentsFromJSON(fileData.data);
-        }
-
-        // Store for confirmation
-        this.currentImportData.studentsData = studentsData;
-
-        // Show preview
-        if (studentsData.length === 0) {
-            previewContent.innerHTML = `
-                <div class="warning-message">
-                    ⚠️ Nessun dato studente trovato nel file.
-                    Verifica che il file contenga colonne come: nome, cognome, email, classe, data_nascita, ecc.
-                </div>
-            `;
-        } else {
-            previewContent.innerHTML = `
-                <p><strong>Trovati ${studentsData.length} studenti da importare</strong></p>
-                <div class="preview-table-container">
-                    <table class="preview-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Classe</th>
-                                <th>Data Nascita</th>
-                                <th>Onomastico</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${studentsData.map(s => `
-                                <tr>
-                                    <td>${s.name || 'N/D'}</td>
-                                    <td>${s.email || 'N/D'}</td>
-                                    <td>${s.class || 'N/D'}</td>
-                                    <td>${s.birthdate || 'N/D'}</td>
-                                    <td>${s.nameday || 'N/D'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-    }
-
-    extractStudentsFromTabularData(data) {
-        // Map common column names to our fields
-        const fieldMappings = {
-            nome: 'name',
-            name: 'name',
-            cognome: 'lastName',
-            lastname: 'lastName',
-            email: 'email',
-            'e-mail': 'email',
-            classe: 'class',
-            class: 'class',
-            data_nascita: 'birthdate',
-            data_di_nascita: 'birthdate',
-            birthdate: 'birthdate',
-            nascita: 'birthdate',
-            onomastico: 'nameday',
-            santo: 'nameday',
-            nameday: 'nameday',
-            note: 'notes',
-            notes: 'notes'
-        };
-
-        return data.map(row => {
-            const student = {
-                name: '',
-                email: '',
-                class: '',
-                birthdate: null,
-                nameday: null,
-                notes: null
-            };
-
-            // Map row fields to student object
-            Object.keys(row).forEach(key => {
-                const normalizedKey = key.toLowerCase().trim();
-                const mappedField = fieldMappings[normalizedKey];
-                
-                if (mappedField) {
-                    student[mappedField] = row[key];
-                }
-            });
-
-            // Combine name and lastName if separate
-            if (student.lastName) {
-                student.name = `${student.name || ''} ${student.lastName}`.trim();
-                delete student.lastName;
-            }
-
-            // Only include if we have at least a name
-            return student.name ? student : null;
-        }).filter(s => s !== null);
-    }
-
-    extractStudentsFromJSON(data) {
-        // If data is an array, process it
-        if (Array.isArray(data)) {
-            return this.extractStudentsFromTabularData(data);
-        }
-        
-        // If data has a students property, use it
-        if (data.students && Array.isArray(data.students)) {
-            return this.extractStudentsFromTabularData(data.students);
-        }
-
-        return [];
-    }
-
-    confirmImport() {
-        if (!this.currentImportData || !this.currentImportData.studentsData) {
-            alert('Nessun dato da importare');
-            return;
-        }
-
-        const studentsData = this.currentImportData.studentsData;
-        let importedCount = 0;
-        let duplicatesCount = 0;
-
-        studentsData.forEach(studentData => {
-            // Check for duplicates
-            const existing = this.students.find(s => 
-                s.name.toLowerCase() === studentData.name.toLowerCase() &&
-                s.email === studentData.email
-            );
-
-            if (existing) {
-                // Update existing student with new data (merge)
-                if (studentData.birthdate && !existing.birthdate) existing.birthdate = studentData.birthdate;
-                if (studentData.nameday && !existing.nameday) existing.nameday = studentData.nameday;
-                if (studentData.class && !existing.class) existing.class = studentData.class;
-                if (studentData.notes) {
-                    existing.notes = existing.notes ? 
-                        `${existing.notes}\n${studentData.notes}` : 
-                        studentData.notes;
-                }
-                duplicatesCount++;
-            } else {
-                // Add new student
-                const student = {
-                    id: Date.now() + importedCount,
-                    name: studentData.name,
-                    email: studentData.email || '',
-                    class: studentData.class || '',
-                    birthdate: studentData.birthdate || null,
-                    nameday: studentData.nameday || null,
-                    notes: studentData.notes || null,
-                    createdAt: new Date().toISOString()
-                };
-                this.students.push(student);
-                importedCount++;
-            }
-        });
-
-        // Save and refresh
-        this.saveData();
-        this.renderStudents();
-        this.updateClassSelectors();
-
-        // Record imported document
-        this.recordImportedDocument({
-            fileName: this.currentImportData.file.name,
-            fileType: this.currentImportData.fileData.type,
-            classificationType: this.documentClassification.tipo,
-            importedCount,
-            duplicatesCount,
-            timestamp: new Date().toISOString()
-        });
-
-        // Create notification
-        this.createNotification({
-            title: '✅ Importazione Completata',
-            message: `Importati ${importedCount} nuovi studenti. ${duplicatesCount} duplicati aggiornati.`,
-            type: 'system',
-            notificationId: `import-${Date.now()}`
-        });
-
-        // Show success and reset
-        alert(`✅ Importazione completata!\n\nNuovi studenti: ${importedCount}\nDuplicati aggiornati: ${duplicatesCount}`);
-        
-        this.cancelImport();
-        this.switchTab('students');
-    }
-
-    processMaterialsImport() {
-        alert('Importazione materiali didattici sarà disponibile in una prossima versione');
-        // TODO: Implement materials import
-    }
-
-    processActivitiesImport() {
-        if (!this.currentImportData) {
-            alert('Nessun dato da importare');
-            return;
-        }
-
-        const { file, fileData } = this.currentImportData;
-        const previewDiv = document.getElementById('document-preview');
-        const previewContent = document.getElementById('preview-content');
-        
-        // Hide classification, show preview
-        document.getElementById('document-classification').style.display = 'none';
-        previewDiv.style.display = 'block';
-
-        let activitiesData = [];
-
-        // Extract activities based on file type
-        if (fileData.type === 'csv' || fileData.type === 'excel') {
-            activitiesData = this.extractActivitiesFromTabularData(fileData.data);
-        } else if (fileData.type === 'json') {
-            activitiesData = this.extractActivitiesFromJSON(fileData.data);
-        } else if (fileData.type === 'pdf' && fileData.data) {
-            // Extract activities from PDF text
-            activitiesData = this.extractActivitiesFromPDF(fileData.data);
-        } else if (fileData.type === 'text' && fileData.data) {
-            // Extract from plain text
-            activitiesData = this.extractActivitiesFromPDF(fileData.data);
-        }
-
-        // Store for confirmation
-        this.currentImportData.activitiesData = activitiesData;
-
-        // Show preview
-        if (activitiesData.length === 0) {
-            previewContent.innerHTML = `
-                <div class="warning-message">
-                    ⚠️ Nessuna attività trovata nel file.
-                    <p>Verifica che il documento contenga informazioni su attività didattiche per i livelli: Prima, Seconda, Terza Media.</p>
-                </div>
-            `;
-        } else {
-            // Group by class level
-            const groupedActivities = this.groupActivitiesByClass(activitiesData);
-            
-            previewContent.innerHTML = `
-                <p><strong>Trovate ${activitiesData.length} attività da importare</strong></p>
-                ${this.renderActivitiesPreviewTable(groupedActivities)}
-                <div class="form-actions" style="margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="app.confirmActivitiesImport()">
-                        ✅ Conferma Importazione
-                    </button>
-                    <button class="btn btn-secondary" onclick="app.cancelImport()">
-                        ❌ Annulla
-                    </button>
-                </div>
-            `;
-        }
-    }
-
-    extractActivitiesFromPDF(textContent) {
-        const activities = [];
-        
-        // Pattern to detect class levels
-        const classPatterns = {
-            'Prima': /\b(?:prima|1[°^ª]|classe prima)\b/gi,
-            'Seconda': /\b(?:seconda|2[°^ª]|classe seconda)\b/gi,
-            'Terza': /\b(?:terza|3[°^ª]|classe terza)\b/gi
-        };
-
-        // Split content by sections (using common delimiters)
-        const sections = textContent.split(/\n\n+|\r\n\r\n+/);
-        
-        let currentClass = null;
-        
-        for (let section of sections) {
-            section = section.trim();
-            if (!section) continue;
-
-            // Detect class level in section
-            for (let [className, pattern] of Object.entries(classPatterns)) {
-                if (pattern.test(section)) {
-                    currentClass = className;
-                    break;
-                }
-            }
-
-            // Extract activities from section
-            // Look for activity indicators like: numbers, bullets, dashes, activity types
-            const activityPatterns = [
-                /(?:^|\n)\s*[-•·]\s*(.+?)(?=\n|$)/gm,  // Bullet points
-                /(?:^|\n)\s*\d+[.)]\s*(.+?)(?=\n|$)/gm,  // Numbered lists
-                /(?:lezione|laboratorio|esercitazione|progetto|verifica|compito):\s*(.+?)(?=\n|$)/gi,  // Activity types
-            ];
-
-            for (let pattern of activityPatterns) {
-                let match;
-                while ((match = pattern.exec(section)) !== null) {
-                    const title = match[1].trim();
-                    if (title && title.length > 10 && title.length < 200) {
-                        // Determine activity type from keywords
-                        const type = this.detectActivityType(title);
-                        
-                        activities.push({
-                            title: title,
-                            type: type,
-                            classLevel: currentClass || 'Generale',
-                            description: '',
-                            status: 'planned',
-                            source: 'PDF Import'
-                        });
-                    }
-                }
-            }
-        }
-
-        // If no activities found with patterns, try a more general approach
-        if (activities.length === 0) {
-            // Split by lines and look for meaningful content
-            const lines = textContent.split(/\n/).filter(line => {
-                const trimmed = line.trim();
-                return trimmed.length > 15 && trimmed.length < 200 && !trimmed.match(/^[0-9\s.]+$/);
-            });
-
-            let currentClass = 'Prima';  // Default starting class
-            
-            for (let line of lines) {
-                // Check for class level markers
-                for (let [className, pattern] of Object.entries(classPatterns)) {
-                    if (pattern.test(line)) {
-                        currentClass = className;
-                        break;
-                    }
-                }
-
-                // If line contains activity-related keywords, consider it an activity
-                if (this.looksLikeActivity(line)) {
-                    activities.push({
-                        title: line.trim(),
-                        type: this.detectActivityType(line),
-                        classLevel: currentClass,
-                        description: '',
-                        status: 'planned',
-                        source: 'PDF Import'
-                    });
-                }
-            }
-        }
-
-        return activities;
-    }
-
-    detectActivityType(text) {
-        const lowerText = text.toLowerCase();
-        
-        if (lowerText.match(/\b(?:lezione|spiegazione|introduzione|teoria)\b/)) return 'lesson';
-        if (lowerText.match(/\b(?:laboratorio|pratica|esperimento)\b/)) return 'lab';
-        if (lowerText.match(/\b(?:esercitazione|esercizi|attività)\b/)) return 'exercise';
-        if (lowerText.match(/\b(?:progetto|elaborato)\b/)) return 'project';
-        if (lowerText.match(/\b(?:compito|compiti|homework)\b/)) return 'homework';
-        if (lowerText.match(/\b(?:verifica|test|esame|valutazione)\b/)) return 'exam';
-        
-        return 'lesson';  // Default type
-    }
-
-    looksLikeActivity(text) {
-        const activityKeywords = [
-            'disegno', 'progetto', 'laboratorio', 'costruzione', 'realizzazione',
-            'studio', 'analisi', 'ricerca', 'presentazione', 'lavoro',
-            'esercitazione', 'compito', 'verifica', 'lezione', 'introduzione',
-            'applicazione', 'sviluppo', 'tecnologia', 'materiali', 'strumenti'
-        ];
-
-        const lowerText = text.toLowerCase();
-        return activityKeywords.some(keyword => lowerText.includes(keyword));
-    }
-
-    extractActivitiesFromTabularData(data) {
-        const activities = [];
-        
-        const fieldMappings = {
-            titolo: 'title',
-            title: 'title',
-            attivita: 'title',
-            attività: 'title',
-            tipo: 'type',
-            type: 'type',
-            classe: 'classLevel',
-            class: 'classLevel',
-            livello: 'classLevel',
-            descrizione: 'description',
-            description: 'description',
-            stato: 'status',
-            status: 'status'
-        };
-
-        data.forEach(row => {
-            const activity = {
-                title: '',
-                type: 'lesson',
-                classLevel: 'Generale',
-                description: '',
-                status: 'planned',
-                source: 'Tabular Import'
-            };
-
-            // Map fields
-            for (let [key, value] of Object.entries(row)) {
-                const normalizedKey = key.toLowerCase().trim();
-                const mappedField = fieldMappings[normalizedKey];
-                
-                if (mappedField && value) {
-                    activity[mappedField] = String(value).trim();
-                }
-            }
-
-            if (activity.title) {
-                activities.push(activity);
-            }
-        });
-
-        return activities;
-    }
-
-    extractActivitiesFromJSON(data) {
-        const activities = [];
-        
-        // Handle different JSON structures
-        let items = Array.isArray(data) ? data : (data.activities || data.attivita || []);
-        
-        items.forEach(item => {
-            if (item.title || item.titolo || item.attivita) {
-                activities.push({
-                    title: item.title || item.titolo || item.attivita || '',
-                    type: item.type || item.tipo || 'lesson',
-                    classLevel: item.classLevel || item.classe || item.livello || 'Generale',
-                    description: item.description || item.descrizione || '',
-                    status: item.status || item.stato || 'planned',
-                    source: 'JSON Import'
-                });
-            }
-        });
-
-        return activities;
-    }
-
-    groupActivitiesByClass(activities) {
-        const grouped = {
-            'Prima': [],
-            'Seconda': [],
-            'Terza': [],
-            'Generale': []
-        };
-
-        activities.forEach(activity => {
-            const classLevel = activity.classLevel || 'Generale';
-            if (grouped[classLevel]) {
-                grouped[classLevel].push(activity);
-            } else {
-                grouped['Generale'].push(activity);
-            }
-        });
-
-        return grouped;
-    }
-
-    renderActivitiesPreviewTable(groupedActivities) {
-        let html = '';
-        
-        for (let [classLevel, activities] of Object.entries(groupedActivities)) {
-            if (activities.length === 0) continue;
-
-            const typeLabels = {
-                'lesson': '📚 Lezione',
-                'exercise': '✏️ Esercitazione',
-                'lab': '🔬 Laboratorio',
-                'project': '📊 Progetto',
-                'homework': '📝 Compiti',
-                'exam': '📄 Verifica'
-            };
-
-            html += `
-                <div class="class-activities-group" style="margin-bottom: 20px;">
-                    <h4>📘 ${classLevel} Media (${activities.length} attività)</h4>
-                    <div class="preview-table-container">
-                        <table class="preview-table">
-                            <thead>
-                                <tr>
-                                    <th>Titolo</th>
-                                    <th>Tipo</th>
-                                    <th>Stato</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${activities.map(a => `
-                                    <tr>
-                                        <td>${a.title || 'N/D'}</td>
-                                        <td>${typeLabels[a.type] || a.type}</td>
-                                        <td>${a.status === 'planned' ? 'Pianificata' : a.status}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        }
-
-        return html;
-    }
-
-    confirmActivitiesImport() {
-        if (!this.currentImportData || !this.currentImportData.activitiesData) {
-            alert('Nessuna attività da importare');
-            return;
-        }
-
-        const activitiesData = this.currentImportData.activitiesData;
-        const file = this.currentImportData.file;
-
-        // This is the corrected implementation.
-        // It correctly assigns the 'classLevel' without creating duplicates.
-        activitiesData.forEach(activityData => {
-            const classLevel = activityData.classLevel || 'Generale';
-            const levelLabel = classLevel !== 'Generale' ? ` - ${classLevel} Media` : '';
-            
-            const activity = {
-                id: Date.now() + Math.random(),
-                title: activityData.title,
-                description: activityData.description || `Importata da ${file.name}${levelLabel}`,
-                type: activityData.type,
-                classId: null, // Keep null, as this is a general activity for a grade level
-                status: activityData.status || 'planned',
-                priority: 'medium',
-                deadline: null,
-                createdAt: new Date().toISOString(),
-                importSource: file.name,
-                importedAt: new Date().toISOString(),
-                classLevel: classLevel // This is the key part of the fix
-            };
-
-            this.activities.push(activity);
-        });
-
-        // Save to localStorage
-        this.saveData();
-
-        // Record import
-        this.recordImportedDocument({
-            fileName: file.name,
-            classificationType: 'ATTIVITA',
-            importedCount: activitiesData.length,
-            timestamp: new Date().toISOString()
-        });
-
-        // Render updated activities
-        this.renderActivities();
-
-        // Show success message
-        const previewContent = document.getElementById('preview-content');
-        previewContent.innerHTML = `
-            <div class="success-message">
-                ✅ <strong>Importazione completata con successo!</strong>
-                <p>${activitiesData.length} attività sono state importate e sono ora disponibili nella sezione Attività.</p>
-            </div>
-            <div class="form-actions" style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="app.switchTab('activities')">
-                    📋 Vai alle Attività
-                </button>
-                <button class="btn btn-secondary" onclick="app.cancelImport()">
-                    🔙 Chiudi
-                </button>
-            </div>
-        `;
-    }
-
-    createClassMapping() {
-        // This function is no longer needed for the corrected fix,
-        // but we'll keep it to avoid breaking other parts of the code if it's called elsewhere.
-        return {};
-    }
-
-    cancelImport() {
-        // Reset state
-        this.currentImportData = null;
-        this.documentClassification = null;
-        
-        // Hide all sections
-        document.getElementById('document-upload-status').style.display = 'none';
-        document.getElementById('document-classification').style.display = 'none';
-        document.getElementById('document-preview').style.display = 'none';
-        
-        // Reset file input
-        const fileInput = document.getElementById('document-file-input');
-        if (fileInput) fileInput.value = '';
-    }
-
-    refineWithAI() {
-        alert('Funzionalità di affinamento con IA in fase di sviluppo');
-        // TODO: Implement AI refinement for import data
-    }
-
-    recordImportedDocument(documentInfo) {
-        this.importedDocuments.push(documentInfo);
-        localStorage.setItem('imported-documents', JSON.stringify(this.importedDocuments));
-        this.renderImportedDocuments();
-    }
-
-    renderImportedDocuments() {
-        const listDiv = document.getElementById('imported-documents-list');
-        
-        if (this.importedDocuments.length === 0) {
-            listDiv.innerHTML = '<p class="empty-state">Nessun documento importato</p>';
-            return;
-        }
-
-        listDiv.innerHTML = this.importedDocuments.map((doc, index) => `
-            <div class="imported-doc-item">
-                <div class="doc-info">
-                    <h4>📄 ${doc.fileName}</h4>
-                    <p><strong>Tipo:</strong> ${doc.classificationType}</p>
-                    <p><strong>Importati:</strong> ${doc.importedCount} elementi</p>
-                    <p><strong>Data:</strong> ${new Date(doc.timestamp).toLocaleString('it-IT')}</p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    // ========================================
-    // AUDIO RECORDING MODULE METHODS
-    // ========================================
-
-    async startAudioRecording() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            this.mediaRecorder = new MediaRecorder(stream);
-            this.recordingChunks = [];
-            
-            this.mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    this.recordingChunks.push(event.data);
-                }
-            };
-            
-            this.mediaRecorder.onstop = () => {
-                this.saveRecording();
-            };
-            
-            this.mediaRecorder.start();
-            this.recordingStartTime = Date.now();
-            
-            // Update UI
-            document.getElementById('start-recording-btn').style.display = 'none';
-            document.getElementById('stop-recording-btn').style.display = 'inline-block';
-            document.getElementById('recording-timer').style.display = 'inline-block';
-            
-            // Start timer
-            this.recordingTimer = setInterval(() => {
-                const elapsed = Date.now() - this.recordingStartTime;
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                document.getElementById('timer-display').textContent = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }, 1000);
-            
-            document.getElementById('recording-status').innerHTML = 
-                '<p class="success-message">🎙️ Registrazione in corso...</p>';
-            
-        } catch (error) {
-            console.error('Error starting recording:', error);
-            alert('Impossibile avviare la registrazione. Verifica i permessi del microfono.');
-        }
-    }
-
-    stopAudioRecording() {
-        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-            this.mediaRecorder.stop();
-            
-            // Stop all tracks
-            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
-            
-            // Clear timer
-            if (this.recordingTimer) {
-                clearInterval(this.recordingTimer);
-                this.recordingTimer = null;
-            }
-            
-            // Update UI
-            document.getElementById('start-recording-btn').style.display = 'inline-block';
-            document.getElementById('stop-recording-btn').style.display = 'none';
-            document.getElementById('recording-timer').style.display = 'none';
-            
-            document.getElementById('recording-status').innerHTML = 
-                '<p class="success-message">✅ Registrazione salvata</p>';
-        }
-    }
-
-    saveRecording() {
-        const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
-        const duration = Date.now() - this.recordingStartTime;
-        
-        // Create recording object
-        const recording = {
-            id: Date.now(),
-            blob: blob,
-            duration: duration,
-            timestamp: new Date().toISOString(),
-            activeClass: this.activeClass || 'N/D',
-            context: this.generateRecordingContext()
-        };
-        
-        // Store in memory (not in localStorage due to size limits)
-        this.audioRecordings.push(recording);
-        
-        // Render recordings list
-        this.renderRecordings();
-        
-        // Create notification
-        this.createNotification({
-            title: '🎙️ Registrazione Salvata',
-            message: `Registrazione di ${Math.floor(duration / 1000)} secondi salvata con successo`,
-            type: 'system',
-            notificationId: `recording-${recording.id}`
-        });
-    }
-
-    generateRecordingContext() {
-        // Generate context information for the recording
-        const context = {
-            class: this.activeClass || null,
-            date: new Date().toLocaleDateString('it-IT'),
-            time: new Date().toLocaleTimeString('it-IT')
-        };
-        
-        // Add current lesson if available
-        const today = new Date().toISOString().split('T')[0];
-        const todayLessons = this.lessons.filter(l => l.date === today);
-        if (todayLessons.length > 0) {
-            context.lesson = todayLessons[0].topic || todayLessons[0].subject;
-        }
-        
-        return context;
-    }
-
-    renderRecordings() {
-        const listDiv = document.getElementById('recordings-list');
-        
-        if (this.audioRecordings.length === 0) {
-            listDiv.innerHTML = '<p class="empty-state">Nessuna registrazione disponibile</p>';
-            return;
-        }
-
-        listDiv.innerHTML = `
-            <h4>Registrazioni (${this.audioRecordings.length})</h4>
-            ${this.audioRecordings.map(rec => {
-                const durationMin = Math.floor(rec.duration / 60000);
-                const durationSec = Math.floor((rec.duration % 60000) / 1000);
-                const url = URL.createObjectURL(rec.blob);
-                
-                return `
-                    <div class="recording-item">
-                        <div class="recording-info">
-                            <p><strong>📅 ${new Date(rec.timestamp).toLocaleString('it-IT')}</strong></p>
-                            <p>Classe: ${rec.context.class || 'N/D'}</p>
-                            ${rec.context.lesson ? `<p>Lezione: ${rec.context.lesson}</p>` : ''}
-                            <p>Durata: ${durationMin}:${String(durationSec).padStart(2, '0')}</p>
-                        </div>
-                        <audio controls src="${url}"></audio>
-                        <div class="recording-actions">
-                            <button class="btn btn-sm btn-secondary" onclick="app.downloadRecording(${rec.id})">
-                                💾 Download
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="app.deleteRecording(${rec.id})">
-                                🗑️ Elimina
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        `;
-    }
-
-    downloadRecording(id) {
-        const recording = this.audioRecordings.find(r => r.id === id);
-        if (!recording) return;
-        
         const url = URL.createObjectURL(recording.blob);
         const a = document.createElement('a');
         a.href = url;
@@ -7063,35 +6282,15 @@ Rispondi SOLO in formato JSON con questa struttura:
         URL.revokeObjectURL(url);
     }
 
-    deleteRecording(id) {
-        if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
-            this.audioRecordings = this.audioRecordings.filter(r => r.id !== id);
-            this.renderRecordings();
-        }
-    }
-
-    // ==========================================
-    // NEWS AND RSS FEEDS MODULE
-    // ==========================================
-
-    showAddFeedForm() {
-        document.getElementById('add-feed-form').style.display = 'block';
-    }
-
-    hideAddFeedForm() {
-        document.getElementById('add-feed-form').style.display = 'none';
-        document.getElementById('feed-name').value = '';
-        document.getElementById('feed-url').value = '';
-        document.getElementById('feed-category').value = 'istituzionale';
-    }
-
-    async addRSSFeed() {
-        const name = document.getElementById('feed-name').value.trim();
-        const url = document.getElementById('feed-url').value.trim();
-        const category = document.getElementById('feed-category').value;
-
-        if (!name || !url) {
-            alert('Inserisci nome e URL del feed');
+    /**
+     * Processes the import based on the manually selected document type.
+     */
+    processManualClassification() {
+        const typeSelect = document.getElementById('manual-classification-type');
+        const selectedType = typeSelect.value;
+        
+        if (!selectedType) {
+            alert('Seleziona un tipo di documento');
             return;
         }
 
@@ -7198,9 +6397,14 @@ Rispondi SOLO in formato JSON con questa struttura:
         }
     }
 
-    async refreshAllFeeds() {
-        if (this.rssFeeds.length === 0) {
-            alert('Nessun feed RSS configurato');
+    /**
+     * Initiates the process of importing student data from an uploaded file,
+     * showing a preview before final confirmation.
+     * @async
+     */
+    async processStudentsImport() {
+        if (!this.currentImportData) {
+            alert('Nessun dato da importare');
             return;
         }
 
@@ -7290,13 +6494,31 @@ Rispondi SOLO in formato JSON con questa struttura:
         }).join('');
     }
 
-    filterNews() {
-        const sourceFilter = document.getElementById('news-filter-source').value;
-        const categoryFilter = document.getElementById('news-filter-category').value;
-        
-        this.newsFilter = {
-            source: sourceFilter,
-            category: categoryFilter
+    /**
+     * Extracts and maps student data from tabular data (CSV/Excel).
+     * @param {Array<Object>} data - The array of row objects from the file.
+     * @returns {Array<Object>} An array of formatted student objects.
+     */
+    extractStudentsFromTabularData(data) {
+        // Map common column names to our fields
+        const fieldMappings = {
+            nome: 'name',
+            name: 'name',
+            cognome: 'lastName',
+            lastname: 'lastName',
+            email: 'email',
+            'e-mail': 'email',
+            classe: 'class',
+            class: 'class',
+            data_nascita: 'birthdate',
+            data_di_nascita: 'birthdate',
+            birthdate: 'birthdate',
+            nascita: 'birthdate',
+            onomastico: 'nameday',
+            santo: 'nameday',
+            nameday: 'nameday',
+            note: 'notes',
+            notes: 'notes'
         };
 
         this.renderNews();
@@ -7384,26 +6606,15 @@ Rispondi SOLO in formato JSON con questa struttura:
         return div.textContent || div.innerText || '';
     }
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML.replace(/"/g, '&quot;');
-    }
-
-    // ==========================================
-    // AI AGENT FOR NEWS ANALYSIS
-    // ==========================================
-
-    toggleAIAgentModal() {
-        const modal = document.getElementById('ai-agent-modal');
-        if (modal) {
-            const isOpening = modal.style.display === 'none';
-            modal.style.display = isOpening ? 'flex' : 'none';
-            
-            if (isOpening) {
-                // Update modal content based on current context
-                this.updateAIModalContext();
-            }
+    /**
+     * Extracts student data from a JSON object.
+     * @param {Object|Array} data - The parsed JSON data.
+     * @returns {Array<Object>} An array of formatted student objects.
+     */
+    extractStudentsFromJSON(data) {
+        // If data is an array, process it
+        if (Array.isArray(data)) {
+            return this.extractStudentsFromTabularData(data);
         }
     }
 
@@ -7416,10 +6627,17 @@ Rispondi SOLO in formato JSON con questa struttura:
             titleElement.textContent = this.getContextualTitle(currentTab);
         }
 
-        // Update current section display
-        const sectionElement = document.getElementById('ai-current-section');
-        if (sectionElement) {
-            sectionElement.textContent = this.getSectionName(currentTab);
+        return [];
+    }
+
+    /**
+     * Confirms and finalizes the import of student data.
+     * It handles duplicates by merging data and adds new students.
+     */
+    confirmImport() {
+        if (!this.currentImportData || !this.currentImportData.studentsData) {
+            alert('Nessun dato da importare');
+            return;
         }
 
         // Update contextual suggestions
@@ -7465,18 +6683,20 @@ Rispondi SOLO in formato JSON con questa struttura:
         document.getElementById('ai-agent-context').value = `Analizza questa news: "${newsTitle}" ed estrai date, scadenze, documenti e soggetti coinvolti.`;
     }
 
-    setAIAgentPrompt(prompt) {
-        document.getElementById('ai-agent-context').value = prompt;
+    /**
+     * Placeholder for processing the import of didactic materials.
+     */
+    processMaterialsImport() {
+        alert('Importazione materiali didattici sarà disponibile in una prossima versione');
+        // TODO: Implement materials import
     }
 
-    async analyzeNewsWithAI() {
-        const newsUrl = document.getElementById('ai-agent-news-url').value.trim();
-        const context = document.getElementById('ai-agent-context').value.trim();
-        const currentTab = this.currentActiveTab;
-
-        // For news tab, require URL. For other tabs, just need context
-        if (currentTab === 'news' && !newsUrl) {
-            alert('Inserisci l\'URL della news da analizzare');
+    /**
+     * Initiates the process of importing activities from a file.
+     */
+    processActivitiesImport() {
+        if (!this.currentImportData) {
+            alert('Nessun dato da importare');
             return;
         }
 
@@ -7509,7 +6729,20 @@ Rispondi SOLO in formato JSON con questa struttura:
                 prompt = `
 Analizza la news disponibile al seguente URL: ${newsUrl}
 
-${context}
+    /**
+     * Extracts a list of activities from the text content of a PDF file.
+     * @param {string} textContent - The text content extracted from the PDF.
+     * @returns {Array<Object>} An array of extracted activity objects.
+     */
+    extractActivitiesFromPDF(textContent) {
+        const activities = [];
+        
+        // Pattern to detect class levels
+        const classPatterns = {
+            'Prima': /\b(?:prima|1[°^ª]|classe prima)\b/gi,
+            'Seconda': /\b(?:seconda|2[°^ª]|classe seconda)\b/gi,
+            'Terza': /\b(?:terza|3[°^ª]|classe terza)\b/gi
+        };
 
 Fornisci un'analisi strutturata con:
 1. 📅 DATE E SCADENZE: Identifica tutte le date importanti e scadenze menzionate
@@ -7601,32 +6834,51 @@ Rispondi in italiano in modo chiaro e strutturato.
             }
         }
 
-        if (actions.length > 0) {
-            actionsDiv.style.display = 'block';
-            proposedActionsDiv.innerHTML = actions.map((action, index) => `
-                <div class="proposed-action-item">
-                    <div class="proposed-action-text">
-                        <span class="proposed-action-type">${action.type}</span>
-                        ${action.text}
-                    </div>
-                    <button class="btn btn-sm btn-primary" onclick="app.createItemFromAction(${index}, '${action.type}')">✅ Crea</button>
-                </div>
-            `).join('');
-        }
+        return activities;
     }
 
-    detectActionType(text) {
-        if (text.match(/SCADENZA|deadline|entro|scade/i)) return 'SCADENZA';
-        if (text.match(/PROMEMORIA|ricorda|reminder/i)) return 'PROMEMORIA';
-        if (text.match(/CIRCOLARE|comunicazione|avviso/i)) return 'CIRCOLARE';
-        if (text.match(/ATTIVITÀ|compito|task/i)) return 'ATTIVITÀ';
-        return 'AZIONE';
+    /**
+     * Detects the type of a didactic activity based on keywords in a string.
+     * @param {string} text - The text to analyze.
+     * @returns {string} The detected activity type (e.g., 'lesson', 'lab').
+     */
+    detectActivityType(text) {
+        const lowerText = text.toLowerCase();
+        
+        if (lowerText.match(/\b(?:lezione|spiegazione|introduzione|teoria)\b/)) return 'lesson';
+        if (lowerText.match(/\b(?:laboratorio|pratica|esperimento)\b/)) return 'lab';
+        if (lowerText.match(/\b(?:esercitazione|esercizi|attività)\b/)) return 'exercise';
+        if (lowerText.match(/\b(?:progetto|elaborato)\b/)) return 'project';
+        if (lowerText.match(/\b(?:compito|compiti|homework)\b/)) return 'homework';
+        if (lowerText.match(/\b(?:verifica|test|esame|valutazione)\b/)) return 'exam';
+        
+        return 'lesson';  // Default type
     }
 
-    createItemFromAction(actionIndex, actionType) {
-        // This would create an actual item based on the action type
-        // For now, we'll show an alert
-        alert(`Funzionalità in sviluppo: Creazione automatica di ${actionType} dall'analisi IA.`);
+    /**
+     * Determines if a line of text likely describes a didactic activity.
+     * @param {string} text - The text to analyze.
+     * @returns {boolean} True if the text seems to be an activity, false otherwise.
+     */
+    looksLikeActivity(text) {
+        const activityKeywords = [
+            'disegno', 'progetto', 'laboratorio', 'costruzione', 'realizzazione',
+            'studio', 'analisi', 'ricerca', 'presentazione', 'lavoro',
+            'esercitazione', 'compito', 'verifica', 'lezione', 'introduzione',
+            'applicazione', 'sviluppo', 'tecnologia', 'materiali', 'strumenti'
+        ];
+
+        const lowerText = text.toLowerCase();
+        return activityKeywords.some(keyword => lowerText.includes(keyword));
+    }
+
+    /**
+     * Extracts and maps activity data from tabular data (CSV/Excel).
+     * @param {Array<Object>} data - The array of row objects from the file.
+     * @returns {Array<Object>} An array of formatted activity objects.
+     */
+    extractActivitiesFromTabularData(data) {
+        const activities = [];
         
         // In a full implementation, this would:
         // - Extract details from the action text
@@ -7666,29 +6918,45 @@ Rispondi in italiano in modo chiaro e strutturato.
         this.updateAIFABVisibility();
     }
 
-    makeAIFABDraggable(fab) {
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
+    /**
+     * Extracts activity data from a JSON object.
+     * @param {Object|Array} data - The parsed JSON data.
+     * @returns {Array<Object>} An array of formatted activity objects.
+     */
+    extractActivitiesFromJSON(data) {
+        const activities = [];
+        
+        // Handle different JSON structures
+        let items = Array.isArray(data) ? data : (data.activities || data.attivita || []);
+        
+        items.forEach(item => {
+            if (item.title || item.titolo || item.attivita) {
+                activities.push({
+                    title: item.title || item.titolo || item.attivita || '',
+                    type: item.type || item.tipo || 'lesson',
+                    classLevel: item.classLevel || item.classe || item.livello || 'Generale',
+                    description: item.description || item.descrizione || '',
+                    status: item.status || item.stato || 'planned',
+                    source: 'JSON Import'
+                });
+            }
+        });
 
         const startDrag = (e) => {
             isDragging = true;
             fab.classList.add('dragging');
 
-            // Get initial position
-            const rect = fab.getBoundingClientRect();
-            initialLeft = rect.left;
-            initialTop = rect.top;
-
-            // Get mouse/touch position
-            if (e.type === 'touchstart') {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            } else {
-                startX = e.clientX;
-                startY = e.clientY;
-            }
-
-            e.preventDefault();
+    /**
+     * Groups a list of activities by their designated class level.
+     * @param {Array<Object>} activities - The list of activities to group.
+     * @returns {Object} An object with activities grouped by class level.
+     */
+    groupActivitiesByClass(activities) {
+        const grouped = {
+            'Prima': [],
+            'Seconda': [],
+            'Terza': [],
+            'Generale': []
         };
 
         const drag = (e) => {
@@ -7706,45 +6974,62 @@ Rispondi in italiano in modo chiaro e strutturato.
             const deltaX = currentX - startX;
             const deltaY = currentY - startY;
 
-            let newLeft = initialLeft + deltaX;
-            let newTop = initialTop + deltaY;
+    /**
+     * Renders a preview table of activities grouped by class level.
+     * @param {Object} groupedActivities - An object containing activities grouped by class level.
+     * @returns {string} The HTML string for the preview table.
+     */
+    /**
+     * Renders a preview table of activities grouped by class level.
+     * @param {Object} groupedActivities - An object containing activities grouped by class level.
+     * @returns {string} The HTML string for the preview table.
+     */
+    renderActivitiesPreviewTable(groupedActivities) {
+        let html = '';
+        const classMapping = this.createClassMapping();
 
-            // Boundary checking to keep FAB within viewport
-            const fabRect = fab.getBoundingClientRect();
-            const fabWidth = fabRect.width;
-            const fabHeight = fabRect.height;
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
+        for (let [classLevel, activities] of Object.entries(groupedActivities)) {
+            if (activities.length === 0) continue;
 
-            // Ensure FAB stays within viewport boundaries
-            newLeft = Math.max(0, Math.min(newLeft, viewportWidth - fabWidth));
-            newTop = Math.max(0, Math.min(newTop, viewportHeight - fabHeight));
+            const targetClassIds = classMapping[classLevel] || [];
+            const targetClassNames = targetClassIds.map(id => this.classes.find(c => c.id === id)?.name).filter(Boolean);
+            const assignmentText = targetClassNames.length > 0 ? `Assegnate a: ${targetClassNames.join(', ')}` : 'Nessuna classe specifica trovata (verrà importata come attività generale)';
 
-            // Update position
-            fab.style.left = `${newLeft}px`;
-            fab.style.top = `${newTop}px`;
-            fab.style.right = 'auto';
-            fab.style.bottom = 'auto';
-
-            e.preventDefault();
-        };
-
-        const endDrag = (e) => {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            fab.classList.remove('dragging');
-
-            // Save position (only left and top for simplicity)
-            const rect = fab.getBoundingClientRect();
-            this.aiFabPosition = {
-                left: `${rect.left}px`,
-                top: `${rect.top}px`
+            const typeLabels = {
+                'lesson': '📚 Lezione',
+                'exercise': '✏️ Esercitazione',
+                'lab': '🔬 Laboratorio',
+                'project': '📊 Progetto',
+                'homework': '📝 Compiti',
+                'exam': '📄 Verifica'
             };
             localStorage.setItem('ai-fab-position', JSON.stringify(this.aiFabPosition));
 
-            e.preventDefault();
-        };
+            html += `
+                <div class="class-activities-group" style="margin-bottom: 20px;">
+                    <h4>📘 ${classLevel} Media (${activities.length} attività)</h4>
+                    <p style="font-size: 0.9em; color: var(--text-secondary);">${assignmentText}</p>
+                    <div class="preview-table-container">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Titolo</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${activities.map(a => `
+                                    <tr>
+                                        <td>${a.title || 'N/D'}</td>
+                                        <td>${typeLabels[a.type] || a.type}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
 
         // Mouse events
         fab.addEventListener('mousedown', startDrag);
@@ -7757,78 +7042,79 @@ Rispondi in italiano in modo chiaro e strutturato.
         document.addEventListener('touchend', endDrag, { passive: false });
     }
 
-    updateAIFABVisibility() {
-        const fab = document.getElementById('ai-fab');
-        if (!fab) return;
-
-        if (this.aiFabEnabled) {
-            fab.classList.remove('hidden');
-        } else {
-            fab.classList.add('hidden');
+    /**
+     * Confirms and finalizes the import of activities.
+     */
+    /**
+     * Confirms and finalizes the import of activities.
+     */
+    confirmActivitiesImport() {
+        if (!this.currentImportData || !this.currentImportData.activitiesData) {
+            alert('Nessuna attività da importare');
+            return;
         }
     }
 
-    resetAIFABPosition() {
-        const fab = document.getElementById('ai-fab');
-        if (!fab) return;
+        const activitiesData = this.currentImportData.activitiesData;
+        const file = this.currentImportData.file;
+        const classMapping = this.createClassMapping();
+        let totalImportedActivities = 0;
 
-        // Reset to default position
-        fab.style.bottom = '30px';
-        fab.style.right = '30px';
-        fab.style.top = 'auto';
-        fab.style.left = 'auto';
+        activitiesData.forEach(activityData => {
+            const classLevel = activityData.classLevel || 'Generale';
+            const targetClassIds = classMapping[classLevel] || [];
 
-        // Clear saved position
-        this.aiFabPosition = null;
-        localStorage.removeItem('ai-fab-position');
+            if (targetClassIds.length > 0) {
+                // Create an activity for each mapped class
+                targetClassIds.forEach(classId => {
+                    const newActivity = {
+                        id: Date.now() + Math.random(),
+                        title: activityData.title,
+                        description: activityData.description || `Importata da ${file.name}`,
+                        type: activityData.type,
+                        classId: classId, // Assign the specific class ID
+                        status: activityData.status || 'planned',
+                        priority: 'medium',
+                        deadline: null,
+                        createdAt: new Date().toISOString(),
+                        importSource: file.name,
+                        importedAt: new Date().toISOString(),
+                        classLevel: classLevel
+                    };
+                    this.activities.push(newActivity);
+                    totalImportedActivities++;
+                });
+            } else {
+                // If no specific class is found (e.g., for "Generale" or no match), create a general activity
+                const newActivity = {
+                    id: Date.now() + Math.random(),
+                    title: activityData.title,
+                    description: activityData.description || `Importata da ${file.name}`,
+                    type: activityData.type,
+                    classId: null,
+                    status: activityData.status || 'planned',
+                    priority: 'medium',
+                    deadline: null,
+                    createdAt: new Date().toISOString(),
+                    importSource: file.name,
+                    importedAt: new Date().toISOString(),
+                    classLevel: classLevel
+                };
+                this.activities.push(newActivity);
+                totalImportedActivities++;
+            }
+        });
 
         alert('Posizione dell\'Agente IA ripristinata!');
     }
 
-    getContextualSuggestions(tab) {
-        const suggestions = {
-            'dashboard': [
-                { icon: '📊', text: 'Genera un riepilogo della settimana', prompt: 'Crea un riepilogo delle attività e lezioni programmate per questa settimana' },
-                { icon: '📋', text: 'Suggerisci priorità', prompt: 'Analizza le mie attività e suggerisci le priorità per oggi' },
-                { icon: '💡', text: 'Consigli didattici', prompt: 'Dammi consigli per migliorare l\'organizzazione della mia didattica' }
-            ],
-            'lessons': [
-                { icon: '📝', text: 'Pianifica lezione', prompt: 'Aiutami a pianificare una lezione coinvolgente' },
-                { icon: '🎯', text: 'Obiettivi didattici', prompt: 'Suggerisci obiettivi didattici per questa lezione' },
-                { icon: '⏱️', text: 'Gestione tempi', prompt: 'Come posso gestire meglio i tempi della lezione?' }
-            ],
-            'students': [
-                { icon: '📈', text: 'Analizza progressi', prompt: 'Analizza i progressi degli studenti e suggerisci interventi' },
-                { icon: '🎓', text: 'Strategie personalizzate', prompt: 'Suggerisci strategie didattiche personalizzate per studenti in difficoltà' },
-                { icon: '📊', text: 'Report classe', prompt: 'Genera un report sulla situazione generale della classe' }
-            ],
-            'grades': [
-                { icon: '📊', text: 'Analizza voti', prompt: 'Analizza la distribuzione dei voti e suggerisci interventi' },
-                { icon: '📉', text: 'Identifica criticità', prompt: 'Identifica gli studenti con criticità nelle valutazioni' },
-                { icon: '📝', text: 'Suggerimenti valutazione', prompt: 'Dammi consigli per una valutazione più equa e formativa' }
-            ],
-            'schedule': [
-                { icon: '📅', text: 'Ottimizza orario', prompt: 'Suggerisci come ottimizzare la distribuzione delle attività' },
-                { icon: '⏰', text: 'Gestione scadenze', prompt: 'Aiutami a gestire le scadenze imminenti' },
-                { icon: '📋', text: 'Pianificazione mensile', prompt: 'Crea una pianificazione didattica per il prossimo mese' }
-            ],
-            'activities': [
-                { icon: '✅', text: 'Priorità attività', prompt: 'Quale attività dovrei completare per prima?' },
-                { icon: '📝', text: 'Nuova attività', prompt: 'Aiutami a creare un\'attività didattica coinvolgente' },
-                { icon: '🎯', text: 'Obiettivi attività', prompt: 'Suggerisci obiettivi per le attività programmate' }
-            ],
-            'news': [
-                { icon: '📅', text: 'Date e Scadenze', prompt: 'Estrai tutte le date e scadenze menzionate' },
-                { icon: '📎', text: 'Documenti', prompt: 'Identifica documenti e allegati da scaricare' },
-                { icon: '👥', text: 'Soggetti', prompt: 'Estrai soggetti coinvolti e destinatari' },
-                { icon: '📋', text: 'Riepilogo e Azioni', prompt: 'Crea un riepilogo e proponi azioni da intraprendere' }
-            ],
-            'settings': [
-                { icon: '⚙️', text: 'Ottimizza configurazione', prompt: 'Suggerisci come ottimizzare le mie impostazioni' },
-                { icon: '🤖', text: 'Guida IA', prompt: 'Spiegami come sfruttare al meglio l\'assistente IA' },
-                { icon: '💡', text: 'Suggerimenti personalizzazione', prompt: 'Come posso personalizzare l\'app per le mie esigenze?' }
-            ]
-        };
+        // Record import
+        this.recordImportedDocument({
+            fileName: file.name,
+            classificationType: 'ATTIVITA',
+            importedCount: totalImportedActivities,
+            timestamp: new Date().toISOString()
+        });
 
         return suggestions[tab] || [
             { icon: '💬', text: 'Assistenza generale', prompt: 'Come posso aiutarti?' },
@@ -7836,105 +7122,20 @@ Rispondi in italiano in modo chiaro e strutturato.
         ];
     }
 
-    getContextualTitle(tab) {
-        const titles = {
-            'dashboard': '🤖 Agente IA - Assistente Dashboard',
-            'lessons': '🤖 Agente IA - Assistente Lezioni',
-            'students': '🤖 Agente IA - Assistente Studenti',
-            'grades': '🤖 Agente IA - Assistente Valutazioni',
-            'schedule': '🤖 Agente IA - Assistente Orario',
-            'activities': '🤖 Agente IA - Assistente Attività',
-            'news': '🤖 Agente IA - Analisi News',
-            'settings': '🤖 Agente IA - Assistente Configurazione'
-        };
-
-        return titles[tab] || '🤖 Agente IA - Assistente Contestuale';
-    }
-
-    getSectionName(tab) {
-        const names = {
-            'dashboard': 'Dashboard',
-            'lessons': 'Lezioni',
-            'students': 'Studenti',
-            'grades': 'Valutazioni',
-            'schedule': 'Orario',
-            'activities': 'Attività',
-            'news': 'News',
-            'settings': 'Impostazioni'
-        };
-
-        return names[tab] || 'Applicazione';
-    }
-
-    // New UI/UX Methods for Redesigned Interface
-
-    // Workspace and Active Class Management
-    initializeWorkspace() {
-        // Check if activeClass feature is enabled in settings
-        const useActiveClass = this.settings.useActiveClass !== false; // Default true
-        
-        if (!useActiveClass || !this.activeClass) {
-            // Set to Workspace mode
-            this.activeClass = 'workspace';
-            this.updateActiveClassBadge();
-        }
-        
-        this.updateActiveClassBadge();
-        this.renderTodayScheduleEnhanced();
-    }
-
-    updateActiveClassBadge() {
-        const badge = document.getElementById('active-class-badge');
-        const badgeText = document.getElementById('active-class-badge-text');
-        const scheduleClassName = document.getElementById('schedule-class-name');
-        
-        if (!badge || !badgeText) return;
-        
-        // Remove all mode classes
-        badge.classList.remove('workspace-mode', 'class-selected');
-        
-        if (this.activeClass === 'workspace' || !this.activeClass) {
-            badgeText.textContent = 'Workspace';
-            badge.classList.add('workspace-mode');
-            if (scheduleClassName) {
-                scheduleClassName.textContent = 'Workspace (tutte le classi)';
-            }
-        } else {
-            const activeClassObj = this.classes.find(c => c.id == this.activeClass || c.name === this.activeClass);
-            const className = activeClassObj ? activeClassObj.name : this.activeClass;
-            badgeText.textContent = className;
-            badge.classList.add('class-selected');
-            if (scheduleClassName) {
-                scheduleClassName.textContent = className;
-            }
-        }
-        
-        // Visual notification of change (brief animation)
-        badge.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            badge.style.transform = 'scale(1)';
-        }, 300);
-        
-        // Update schedule display
-        this.renderTodayScheduleEnhanced();
-    }
-
-    // Show class selector modal
-    showClassSelector() {
-        const modal = document.getElementById('class-selector-modal');
-        const list = document.getElementById('class-selector-list');
-        
-        if (!modal || !list) return;
-        
-        // Build class selector list
-        let html = `
-            <div class="class-selector-item workspace ${this.activeClass === 'workspace' || !this.activeClass ? 'active' : ''}" 
-                 onclick="app.selectClass('workspace')">
-                <div class="class-selector-icon">🏢</div>
-                <div class="class-selector-details">
-                    <div class="class-selector-name">Workspace</div>
-                    <div class="class-selector-meta">Visualizza tutti i dati aggregati</div>
-                </div>
+        // Show success message
+        const previewContent = document.getElementById('preview-content');
+        previewContent.innerHTML = `
+            <div class="success-message">
+                ✅ <strong>Importazione completata con successo!</strong>
+                <p>${totalImportedActivities} attività sono state importate e assegnate alle classi corrispondenti.</p>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="app.switchTab('activities')">
+                    📋 Vai alle Attività
+                </button>
+                <button class="btn btn-secondary" onclick="app.cancelImport()">
+                    🔙 Chiudi
+                </button>
             </div>
         `;
         
@@ -7960,45 +7161,50 @@ Rispondi in italiano in modo chiaro e strutturato.
         modal.style.display = 'flex';
     }
 
-    closeClassSelector() {
-        const modal = document.getElementById('class-selector-modal');
-        if (modal) modal.style.display = 'none';
+    /**
+     * @deprecated No longer used. Kept for backward compatibility.
+     */
+    /**
+     * @deprecated No longer used. Kept for backward compatibility.
+     */
+    createClassMapping(activitiesData) {
+        const levelToYear = {
+            'Prima': '1',
+            'Seconda': '2',
+            'Terza': '3'
+        };
+
+        const classMapping = {
+            'Prima': [],
+            'Seconda': [],
+            'Terza': [],
+            'Generale': []
+        };
+
+        // Find all classes for each year
+        this.classes.forEach(cls => {
+            if (cls.year) {
+                const yearStr = String(cls.year);
+                const level = Object.keys(levelToYear).find(key => levelToYear[key] === yearStr);
+                if (level && classMapping[level]) {
+                    classMapping[level].push(cls.id);
+                }
+            }
+        });
+
+        // For "Generale", we can assign to all classes or none, depending on desired behavior.
+        // Here, we'll leave it empty, assuming 'Generale' activities are not auto-assigned.
+
+        return classMapping;
     }
 
-    selectClass(classId) {
-        if (classId === 'workspace') {
-            this.activeClass = 'workspace';
-        } else {
-            this.activeClass = classId;
-        }
-        
-        localStorage.setItem('active-class', this.activeClass);
-        this.updateActiveClassBadge();
-        this.closeClassSelector();
-        
-        // Show toast notification
-        const className = classId === 'workspace' ? 'Workspace' : 
-            (this.classes.find(c => c.id == classId)?.name || classId);
-        this.showToast(`Classe attiva cambiata: ${className}`, 'success');
-    }
-
-    // Enhanced Today's Schedule Rendering
-    renderTodayScheduleEnhanced() {
-        const container = document.getElementById('today-schedule-enhanced');
-        if (!container) return;
-        
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        
-        // Skip weekends
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>📅 Oggi è il weekend! Nessuna lezione programmata.</p>
-                </div>
-            `;
-            return;
-        }
+    /**
+     * Cancels the current document import process and resets the UI.
+     */
+    cancelImport() {
+        // Reset state
+        this.currentImportData = null;
+        this.documentClassification = null;
         
         const hours = [8, 9, 10, 11, 12, 13];
         let html = '';
@@ -8065,22 +7271,34 @@ Rispondi in italiano in modo chiaro e strutturato.
         }
     }
 
-    // App Info Modal
-    showAppInfo() {
-        const modal = document.getElementById('app-info-modal');
-        if (modal) modal.style.display = 'flex';
+    /**
+     * Placeholder for a future feature to refine import data with AI.
+     */
+    refineWithAI() {
+        alert('Funzionalità di affinamento con IA in fase di sviluppo');
+        // TODO: Implement AI refinement for import data
     }
 
-    closeAppInfo() {
-        const modal = document.getElementById('app-info-modal');
-        if (modal) modal.style.display = 'none';
+    /**
+     * Records information about a completed document import in the history.
+     * @param {Object} documentInfo - Information about the imported document.
+     */
+    recordImportedDocument(documentInfo) {
+        this.importedDocuments.push(documentInfo);
+        localStorage.setItem('imported-documents', JSON.stringify(this.importedDocuments));
+        this.renderImportedDocuments();
     }
 
-    // Help Modal
-    showHelp() {
-        const modal = document.getElementById('help-modal');
-        if (modal) modal.style.display = 'flex';
-    }
+    /**
+     * Renders the list of historically imported documents.
+     */
+    renderImportedDocuments() {
+        const listDiv = document.getElementById('imported-documents-list');
+        
+        if (this.importedDocuments.length === 0) {
+            listDiv.innerHTML = '<p class="empty-state">Nessun documento importato</p>';
+            return;
+        }
 
     closeHelp() {
         const modal = document.getElementById('help-modal');
@@ -8092,29 +7310,69 @@ Rispondi in italiano in modo chiaro e strutturato.
         this.selectClass(className || 'workspace');
     }
 
-    // Override loadActiveClass to initialize workspace
-    loadActiveClass() {
-        const savedClass = localStorage.getItem('active-class');
-        if (savedClass) {
-            this.activeClass = savedClass;
-        } else {
-            this.activeClass = 'workspace';
+    /**
+     * Starts recording audio from the user's microphone.
+     * @async
+     */
+    async startAudioRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.recordingChunks = [];
+            
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.recordingChunks.push(event.data);
+                }
+            };
+            
+            this.mediaRecorder.onstop = () => {
+                this.saveRecording();
+            };
+            
+            this.mediaRecorder.start();
+            this.recordingStartTime = Date.now();
+            
+            // Update UI
+            document.getElementById('start-recording-btn').style.display = 'none';
+            document.getElementById('stop-recording-btn').style.display = 'inline-block';
+            document.getElementById('recording-timer').style.display = 'inline-block';
+            
+            // Start timer
+            this.recordingTimer = setInterval(() => {
+                const elapsed = Date.now() - this.recordingStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('timer-display').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+            
+            document.getElementById('recording-status').innerHTML = 
+                '<p class="success-message">🎙️ Registrazione in corso...</p>';
+            
+        } catch (error) {
+            console.error('Error starting recording:', error);
+            alert('Impossibile avviare la registrazione. Verifica i permessi del microfono.');
         }
         
         this.updateActiveClassBadge();
     }
 
-    // Usability: Back to Top Button
-    initBackToTop() {
-        const backToTopBtn = document.getElementById('backToTopBtn');
-        if (!backToTopBtn) return;
-
-        // Show/hide button on scroll
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
+    /**
+     * Stops the current audio recording.
+     */
+    stopAudioRecording() {
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+            
+            // Stop all tracks
+            this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            // Clear timer
+            if (this.recordingTimer) {
+                clearInterval(this.recordingTimer);
+                this.recordingTimer = null;
             }
         });
 
@@ -8127,23 +7385,49 @@ Rispondi in italiano in modo chiaro e strutturato.
         });
     }
 
-    // Usability: Collapsible Sections
-    initCollapsibleSections() {
-        document.addEventListener('click', (e) => {
-            const header = e.target.closest('.collapsible-header');
-            if (!header) return;
-
-            const section = header.closest('.collapsible-section');
-            if (!section) return;
-
-            section.classList.toggle('expanded');
+    /**
+     * Saves the completed audio recording blob and associated metadata.
+     */
+    saveRecording() {
+        const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+        const duration = Date.now() - this.recordingStartTime;
+        
+        // Create recording object
+        const recording = {
+            id: Date.now(),
+            blob: blob,
+            duration: duration,
+            timestamp: new Date().toISOString(),
+            activeClass: this.activeClass || 'N/D',
+            context: this.generateRecordingContext()
+        };
+        
+        // Store in memory (not in localStorage due to size limits)
+        this.audioRecordings.push(recording);
+        
+        // Render recordings list
+        this.renderRecordings();
+        
+        // Create notification
+        this.createNotification({
+            title: '🎙️ Registrazione Salvata',
+            message: `Registrazione di ${Math.floor(duration / 1000)} secondi salvata con successo`,
+            type: 'system',
+            notificationId: `recording-${recording.id}`
         });
     }
 
-    // Usability: Search/Filter for tables
-    addSearchFilter(tableId, searchInputId) {
-        const searchInput = document.getElementById(searchInputId);
-        const table = document.getElementById(tableId);
+    /**
+     * Generates context information for a new audio recording.
+     * @returns {Object} An object containing context like class, date, and time.
+     */
+    generateRecordingContext() {
+        // Generate context information for the recording
+        const context = {
+            class: this.activeClass || null,
+            date: new Date().toLocaleDateString('it-IT'),
+            time: new Date().toLocaleTimeString('it-IT')
+        };
         
         if (!searchInput || !table) return;
 
