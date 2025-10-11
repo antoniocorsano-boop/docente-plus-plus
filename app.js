@@ -84,6 +84,26 @@ class DocentePlusPlus {
         /** @property {number|null} recordingTimer - Interval ID for the recording timer. */
         this.recordingTimer = null;
         
+        // News and RSS Feeds Module
+        this.rssFeeds = [];
+        this.newsItems = [];
+        this.newsFilter = { source: '', category: '' };
+        
+        // Smart Daily Schedule Module
+        this.lessonSessions = []; // Active lesson sessions with student evaluations
+        this.currentLessonSession = null; // Currently active lesson session
+        
+        // Backup & Restore Module
+        this.backups = []; // Stored backups metadata
+        this.backupSettings = {
+            frequency: 'weekly', // never, daily, weekly, monthly
+            lastBackupDate: null,
+            nextBackupDate: null
+        };
+        this.backupTimer = null;
+        this.MAX_BACKUPS = 10; // Maximum number of backups to keep
+        this.BACKUP_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+        
         this.init();
     }
 
@@ -103,8 +123,17 @@ class DocentePlusPlus {
         // Set up event listeners
         this.setupEventListeners();
         
+        // Set initial header style (minimal for dashboard)
+        const header = document.querySelector('header');
+        if (header) {
+            header.classList.add('minimal');
+        }
+        
+        // Create toast container
+        this.createToastContainer();
+        
         // Render initial data
-        this.renderDashboard();
+        this.renderHome();
         this.renderLessons();
         this.renderStudents();
         this.renderClasses();
@@ -113,13 +142,28 @@ class DocentePlusPlus {
         this.renderSchedule();
         this.renderImportedDocuments();
         this.renderRecordings();
+        this.renderFeeds();
+        this.renderNews();
         this.loadSettings();
         this.loadActiveClass();
         this.updateClassSelectors();
         
+        // Initialize workspace and active class badge
+        this.initializeWorkspace();
+        
+        // Initialize AI FAB
+        this.initializeAIFAB();
+        
         // Initialize notification system
         this.requestNotificationPermission();
         this.startNotificationChecks();
+        
+        // Initialize backup system
+        this.initBackupSystem();
+        
+        // Initialize usability features
+        this.initBackToTop();
+        this.initCollapsibleSections();
         
         console.log('Docente++ initialized successfully');
     }
@@ -128,11 +172,65 @@ class DocentePlusPlus {
      * Sets up all the initial event listeners for the application UI.
      */
     setupEventListeners() {
-        // Tab switching
+        // Hamburger menu toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNav = document.getElementById('main-nav');
+        const menuBackdrop = document.getElementById('menu-backdrop');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                menuToggle.classList.toggle('active');
+                mainNav.classList.toggle('mobile-open');
+                menuBackdrop.classList.toggle('active');
+            });
+        }
+        
+        if (menuBackdrop) {
+            menuBackdrop.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                mainNav.classList.remove('mobile-open');
+                menuBackdrop.classList.remove('active');
+            });
+        }
+        
+        // Tab switching - updated to handle submenu items
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                this.switchTab(e.target.dataset.tab);
+                // Skip if this is a menu-with-submenu button (it just shows dropdown)
+                if (button.classList.contains('menu-with-submenu')) {
+                    e.stopPropagation();
+                    return;
+                }
+                
+                // Close mobile menu when tab is selected
+                if (menuToggle) {
+                    menuToggle.classList.remove('active');
+                    mainNav.classList.remove('mobile-open');
+                    menuBackdrop.classList.remove('active');
+                }
+                
+                const tabName = button.dataset.tab;
+                if (tabName && tabName !== 'class-selector' && tabName !== 'info-app' && tabName !== 'help') {
+                    this.switchTab(tabName);
+                }
             });
+        });
+
+        // Menu group toggle (for mobile collapsible menu)
+        document.querySelectorAll('.menu-group-title').forEach(title => {
+            title.addEventListener('click', (e) => {
+                const menuGroup = title.closest('.menu-group');
+                if (window.innerWidth <= 768) {
+                    menuGroup.classList.toggle('collapsed');
+                }
+            });
+        });
+        
+        // Close modals on backdrop click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
         });
 
         // Lesson form
@@ -150,6 +248,14 @@ class DocentePlusPlus {
             studentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.addStudent();
+            });
+        }
+
+        // Email validation for student form
+        const studentEmailInput = document.getElementById('student-email');
+        if (studentEmailInput) {
+            studentEmailInput.addEventListener('input', (e) => {
+                this.validateEmail(e.target.value, 'student-email-validation');
             });
         }
 
@@ -280,10 +386,182 @@ class DocentePlusPlus {
 
         // Load settings to reflect changes
         this.loadSettings();
-        this.renderDashboard();
+        this.renderHome();
 
         // Show welcome message
-        alert(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`);
+        this.showToast(`Benvenuto/a ${firstName}! Il tuo profilo è stato configurato con successo.`, 'success');
+    }
+
+    // Toast notification system
+    createToastContainer() {
+        if (!document.getElementById('toast-container')) {
+            const container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+    }
+
+    showToast(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icon = {
+            'success': '✓',
+            'error': '✗',
+            'warning': '⚠',
+            'info': 'ℹ'
+        }[type] || 'ℹ';
+        
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-message">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Remove toast after duration
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // Email validation
+    validateEmail(email, validationElementId) {
+        const validationElement = document.getElementById(validationElementId);
+        if (!validationElement) return true;
+
+        if (!email || email.trim() === '') {
+            validationElement.textContent = '';
+            validationElement.className = 'validation-message';
+            return true;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+
+        if (isValid) {
+            validationElement.textContent = '✓ Email valida';
+            validationElement.className = 'validation-message validation-success';
+        } else {
+            validationElement.textContent = '✗ Email non valida';
+            validationElement.className = 'validation-message validation-error';
+        }
+
+        return isValid;
+    }
+
+    // Contextual help system
+    showContextualHelp(section) {
+        const helpContent = {
+            'home': {
+                title: '🏠 Home',
+                content: `
+                    <h3>Benvenuto nella Home!</h3>
+                    <p>Questa è la tua panoramica generale dell'app. Qui trovi:</p>
+                    <ul>
+                        <li><strong>Orario del giorno:</strong> le lezioni programmate per oggi</li>
+                        <li><strong>Accesso rapido:</strong> pulsanti per le azioni più comuni</li>
+                        <li><strong>Classe attiva:</strong> seleziona la classe su cui stai lavorando</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Seleziona una classe attiva per filtrare i dati visualizzati.</p>
+                `
+            },
+            'dashboard': {
+                title: '📊 Dashboard',
+                content: `
+                    <h3>Benvenuto nella Dashboard!</h3>
+                    <p>Questa è la tua panoramica generale dell'app. Qui trovi:</p>
+                    <ul>
+                        <li><strong>Statistiche rapide:</strong> numero di lezioni, studenti, attività e classi</li>
+                        <li><strong>Orario del giorno:</strong> le lezioni programmate per oggi</li>
+                        <li><strong>Cose da fare:</strong> attività in scadenza e da completare</li>
+                        <li><strong>Suggerimenti IA:</strong> consigli personalizzati (se hai configurato l'API key)</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Seleziona una classe attiva per filtrare i dati visualizzati.</p>
+                `
+            },
+            'lessons': {
+                title: '📚 Gestione Lezioni',
+                content: `
+                    <h3>Come gestire le tue lezioni</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Aggiungere lezioni:</strong> clicca "➕ Nuova Lezione" e compila il form</li>
+                        <li><strong>Generare con IA:</strong> usa l'assistente per creare piani didattici</li>
+                        <li><strong>Modificare/Eliminare:</strong> usa i pulsanti nelle card delle lezioni</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Le lezioni generate con IA includono obiettivi, materiali e metodi di valutazione.</p>
+                `
+            },
+            'students': {
+                title: '👥 Gestione Studenti',
+                content: `
+                    <h3>Come gestire gli studenti</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Aggiungere studenti:</strong> uno alla volta o importando da CSV/Excel</li>
+                        <li><strong>Email:</strong> inserisci email valide per comunicazioni (validazione in tempo reale)</li>
+                        <li><strong>Note personalizzate:</strong> aggiungi informazioni su onomastico, compleanno, ecc.</li>
+                        <li><strong>Associare a classi:</strong> assegna ogni studente alla sua classe</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> Usa il pulsante "📥 Importa da File" per caricare molti studenti insieme.</p>
+                `
+            },
+            'classes': {
+                title: '🏫 Gestione Classi',
+                content: `
+                    <h3>Come gestire le classi</h3>
+                    <p>In questa sezione puoi:</p>
+                    <ul>
+                        <li><strong>Creare classi:</strong> inserisci nome, anno, sezione</li>
+                        <li><strong>Numero studenti:</strong> tieni traccia degli iscritti</li>
+                        <li><strong>Classe attiva:</strong> seleziona la classe su cui stai lavorando</li>
+                        <li><strong>Modifica/Elimina:</strong> gestisci le classi esistenti</li>
+                    </ul>
+                    <p><strong>💡 Suggerimento:</strong> La classe attiva influenza l'orario, le attività e i suggerimenti IA.</p>
+                `
+            }
+        };
+
+        const help = helpContent[section] || {
+            title: 'Aiuto',
+            content: '<p>Informazioni non disponibili per questa sezione.</p>'
+        };
+
+        // Show help modal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h2>${help.title}</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    ${help.content}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Ho capito</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     // Subject management methods
@@ -444,21 +722,46 @@ class DocentePlusPlus {
      * @param {string} tabName - The name of the tab to switch to.
      */
     switchTab(tabName) {
+        // Update current active tab for AI context
+        this.currentActiveTab = tabName;
+        
         // Update active button
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        const tabButton = document.querySelector(`[data-tab="${tabName}"]`);
+        if (tabButton) {
+            tabButton.classList.add('active');
+        }
 
         // Update active content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        document.getElementById(tabName).classList.add('active');
+        const tabContent = document.getElementById(tabName);
+        if (tabContent) {
+            tabContent.classList.add('active');
+        }
+
+        // Update header style based on active tab
+        const header = document.querySelector('header');
+        if (header) {
+            if (tabName === 'settings') {
+                header.classList.remove('minimal');
+            } else {
+                header.classList.add('minimal');
+            }
+        }
 
         // Refresh notifications when switching to notifications tab
         if (tabName === 'notifications') {
             this.renderNotifications();
+        }
+        
+        // Initialize backup list when switching to backup-restore tab
+        if (tabName === 'backup-restore') {
+            this.renderBackupList();
+            this.updateBackupScheduleInfo();
         }
     }
 
@@ -472,7 +775,8 @@ class DocentePlusPlus {
         
         // Count in-progress activities
         const inProgressActivities = this.activities.filter(a => a.status === 'in-progress' || a.status === 'planned');
-        document.getElementById('activity-count').textContent = inProgressActivities.length;
+        const activityCount = document.getElementById('home-activity-count');
+        if (activityCount) activityCount.textContent = inProgressActivities.length;
         
         // Count pending evaluations (those without a score or from the last 7 days)
         const now = new Date();
@@ -482,13 +786,381 @@ class DocentePlusPlus {
             const evalDate = new Date(e.date);
             return evalDate >= sevenDaysAgo;
         });
-        document.getElementById('evaluation-count').textContent = pendingEvaluations.length;
+        const evaluationCount = document.getElementById('home-evaluation-count');
+        if (evaluationCount) evaluationCount.textContent = pendingEvaluations.length;
         
+        // Update AI status
         const apiKey = localStorage.getItem('openrouter-api-key');
-        document.getElementById('ai-status').textContent = apiKey ? '✓' : '✗';
+        const aiReadyElement = document.getElementById('home-ai-ready');
+        if (aiReadyElement) {
+            if (apiKey) {
+                aiReadyElement.textContent = '✓ Pronta';
+                aiReadyElement.style.color = '#28a745';
+            } else {
+                aiReadyElement.textContent = '✗ Non configurata';
+                aiReadyElement.style.color = '#dc3545';
+            }
+        }
         
         // Update active class display
         this.updateClassDisplay();
+        
+        // Render today's schedule preview
+        this.renderTodaySchedulePreview();
+        
+        // Render notifications preview
+        this.renderHomeNotificationsPreview();
+        
+        // Render things to do
+        this.renderThingsToDo();
+        
+        // Render AI suggestions
+        this.renderAISuggestions();
+    }
+    
+    renderHomeNotificationsPreview() {
+        const previewContainer = document.getElementById('home-notifications-preview');
+        if (!previewContainer) return;
+
+        // Get upcoming reminders and notifications
+        const now = new Date();
+        const upcomingReminders = this.reminders
+            .filter(r => !r.dismissed && new Date(r.dateTime) > now)
+            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+            .slice(0, 3);
+
+        if (upcomingReminders.length === 0) {
+            previewContainer.innerHTML = '<p class="home-placeholder">Nessuna notifica per oggi</p>';
+            return;
+        }
+
+        previewContainer.innerHTML = `
+            <div class="home-notifications-list">
+                ${upcomingReminders.map(reminder => {
+                    const reminderDate = new Date(reminder.dateTime);
+                    const dateStr = reminderDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+                    const timeStr = reminderDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="home-notification-item">
+                            <span class="notification-icon">🔔</span>
+                            <div class="notification-content">
+                                <strong>${reminder.title}</strong>
+                                <small>${dateStr} alle ${timeStr}</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+    
+    renderTodaySchedulePreview() {
+        const previewContainer = document.getElementById('today-schedule-preview');
+        if (!previewContainer) return;
+        
+        const today = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
+        const todaySlots = [];
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                const cls = this.classes.find(c => c.id == slot.classId);
+                const activityType = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                todaySlots.push({
+                    hour,
+                    class: cls,
+                    activityType,
+                    slot
+                });
+            }
+        });
+        
+        if (todaySlots.length === 0) {
+            previewContainer.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna lezione programmata per oggi</p>';
+            return;
+        }
+        
+        previewContainer.innerHTML = `
+            <div class="today-schedule-list">
+                ${todaySlots.map(({ hour, class: cls, activityType, slot }) => `
+                    <div class="today-schedule-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${activityType ? activityType.color : '#ddd'};">
+                        <div style="flex: 0 0 60px; font-weight: bold; font-size: 1.1em;">${hour}:00</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">${cls ? cls.name : 'N/D'}</div>
+                            ${activityType ? `<div style="font-size: 0.9em; color: #666;">${activityType.label}</div>` : ''}
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="app.startLessonSession('${today.toISOString()}', ${hour})" style="margin-left: 10px;">
+                            ▶ Avvia
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    goToTodaySchedule() {
+        this.scheduleView = 'daily';
+        this.currentScheduleDate = this.getCurrentScheduleDate();
+        this.switchTab('schedule');
+        this.renderSchedule();
+    }
+    
+    renderThingsToDo() {
+        const container = document.getElementById('things-todo-list');
+        if (!container) return;
+        
+        const todos = [];
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        // Add upcoming activities with deadlines
+        const upcomingActivities = this.activities
+            .filter(a => {
+                if (a.status === 'completed') return false;
+                if (!a.dueDate) return false;
+                const dueDate = new Date(a.dueDate);
+                return dueDate <= nextWeek;
+            })
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .slice(0, 5);
+        
+        upcomingActivities.forEach(activity => {
+            const dueDate = new Date(activity.dueDate);
+            const isOverdue = dueDate < now;
+            const isDueToday = dueDate.toDateString() === now.toDateString();
+            const isDueTomorrow = dueDate.toDateString() === tomorrow.toDateString();
+            
+            let dueDateText = dueDate.toLocaleDateString('it-IT');
+            if (isOverdue) dueDateText = `🔴 Scaduta: ${dueDateText}`;
+            else if (isDueToday) dueDateText = `⚠️ Oggi`;
+            else if (isDueTomorrow) dueDateText = `⏰ Domani`;
+            
+            todos.push({
+                type: 'activity',
+                priority: isOverdue ? 3 : isDueToday ? 2 : 1,
+                title: activity.title,
+                subtitle: dueDateText,
+                action: `app.switchTab('activities')`,
+                icon: '📋'
+            });
+        });
+        
+        // Add pending evaluations
+        const pendingEvaluations = this.evaluations
+            .filter(e => !e.score)
+            .slice(0, 3);
+        
+        pendingEvaluations.forEach(evaluation => {
+            const student = this.students.find(s => s.id === evaluation.studentId);
+            todos.push({
+                type: 'evaluation',
+                priority: 1,
+                title: `Valuta: ${student ? student.name : 'Studente'}`,
+                subtitle: `${evaluation.criterion || 'Valutazione'}`,
+                action: `app.switchTab('evaluations')`,
+                icon: '✅'
+            });
+        });
+        
+        // Add custom reminders for today/tomorrow
+        const upcomingReminders = this.reminders
+            .filter(r => {
+                const reminderDate = new Date(r.date);
+                return reminderDate <= tomorrow;
+            })
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 3);
+        
+        upcomingReminders.forEach(reminder => {
+            const reminderDate = new Date(reminder.date);
+            const isDueToday = reminderDate.toDateString() === now.toDateString();
+            
+            todos.push({
+                type: 'reminder',
+                priority: isDueToday ? 2 : 1,
+                title: reminder.title,
+                subtitle: isDueToday ? '⏰ Oggi' : '📅 Domani',
+                action: `app.switchTab('notifications')`,
+                icon: '🔔'
+            });
+        });
+        
+        // Sort by priority
+        todos.sort((a, b) => b.priority - a.priority);
+        
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="color: #999; font-style: italic;">Nessuna cosa da fare in scadenza</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="todos-list">
+                ${todos.slice(0, 8).map(todo => this.renderTodoItem(todo)).join('')}
+            </div>
+        `;
+    }
+    
+    renderTodoItem(todo) {
+        return `
+            <div class="todo-item" style="display: flex; align-items: center; padding: 12px; margin: 8px 0; background: #f8f9fa; border-radius: 8px; cursor: pointer;" onclick="${todo.action}">
+                <div style="font-size: 1.5em; margin-right: 12px;">${todo.icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">${todo.title}</div>
+                    <div style="font-size: 0.85em; color: #666;">${todo.subtitle}</div>
+                </div>
+                <div style="color: var(--primary-color);">→</div>
+            </div>
+        `;
+    }
+    
+    async renderAISuggestions() {
+        const container = document.getElementById('ai-suggestions-content');
+        if (!container) return;
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        if (!apiKey) {
+            container.innerHTML = `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0; color: #856404;">
+                        ⚠️ Configura la tua API key OpenRouter nelle impostazioni per ricevere suggerimenti personalizzati dall'IA.
+                    </p>
+                    <button class="btn btn-sm btn-primary" onclick="app.switchTab('settings')" style="margin-top: 10px;">
+                        Vai alle Impostazioni
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = `
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1976d2;">
+                    🤖 Generazione suggerimenti in corso...
+                </p>
+            </div>
+        `;
+        
+        try {
+            const suggestions = await this.generateDashboardSuggestions();
+            
+            // Sanitize by creating text nodes and formatting with <br> for line breaks
+            const sanitizedSuggestions = this.sanitizeAISuggestions(suggestions);
+            
+            container.innerHTML = `
+                <div class="ai-suggestions-content" style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    ${sanitizedSuggestions}
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error generating AI suggestions:', error);
+            container.innerHTML = `
+                <div style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                    <p style="margin: 0; color: #721c24;">
+                        ❌ Errore nella generazione dei suggerimenti. Riprova più tardi.
+                    </p>
+                </div>
+            `;
+        }
+    }
+    
+    sanitizeAISuggestions(suggestions) {
+        if (!suggestions) return '<p style="color: var(--text-secondary); font-style: italic;">Nessun suggerimento disponibile</p>';
+        
+        // Split by double newlines to get paragraphs
+        const paragraphs = suggestions.split('\n\n').filter(p => p.trim());
+        
+        // Create safe HTML with only line breaks
+        return paragraphs
+            .map(p => {
+                // Escape HTML but preserve line breaks
+                const escaped = p
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;')
+                    .replace(/\n/g, '<br>');
+                return `<p style="margin: 10px 0; color: var(--text-primary); line-height: 1.6;">${escaped}</p>`;
+            })
+            .join('');
+    }
+    
+    async generateDashboardSuggestions() {
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) return '';
+        
+        // Build context about today's situation
+        const today = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+        const todaySlots = [];
+        
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            if (slot && slot.classId) {
+                const cls = this.classes.find(c => c.id == slot.classId);
+                todaySlots.push({
+                    hour,
+                    class: cls ? cls.name : 'N/D',
+                    activityType: slot.activityType
+                });
+            }
+        });
+        
+        const now = new Date();
+        const upcomingActivities = this.activities
+            .filter(a => a.status !== 'completed' && a.dueDate)
+            .filter(a => new Date(a.dueDate) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000))
+            .slice(0, 3);
+        
+        const pendingEvaluations = this.evaluations.filter(e => !e.score).length;
+        
+        const teacherName = localStorage.getItem('teacher-first-name') || 'Docente';
+        
+        let prompt = `Sei un assistente IA per insegnanti. Genera 3-4 suggerimenti brevi e concreti per la giornata dell'insegnante ${teacherName}.
+
+Situazione di oggi (${today.toLocaleDateString('it-IT')}):`;
+        
+        if (todaySlots.length > 0) {
+            prompt += `\n\nLezioni programmate oggi:`;
+            todaySlots.forEach(slot => {
+                prompt += `\n- ${slot.hour}:00 - ${slot.class}`;
+                if (slot.activityType) {
+                    const typeLabel = slot.activityType === 'theory' ? 'Teoria' : 
+                                    slot.activityType === 'drawing' ? 'Disegno' : 'Laboratorio';
+                    prompt += ` (${typeLabel})`;
+                }
+            });
+        } else {
+            prompt += `\n\nNessuna lezione programmata per oggi.`;
+        }
+        
+        if (upcomingActivities.length > 0) {
+            prompt += `\n\nAttività in scadenza:`;
+            upcomingActivities.forEach(a => {
+                prompt += `\n- ${a.title} (scadenza: ${new Date(a.dueDate).toLocaleDateString('it-IT')})`;
+            });
+        }
+        
+        if (pendingEvaluations > 0) {
+            prompt += `\n\nValutazioni da completare: ${pendingEvaluations}`;
+        }
+        
+        prompt += `\n\nGenera suggerimenti pratici in formato testo semplice. 
+Ogni suggerimento deve essere breve (max 2 righe) e azionabile. 
+Usa emoji all'inizio di ogni suggerimento.
+Separa i suggerimenti con doppio a capo.`;
+        
+        const response = await this.callOpenRouterAPI(prompt, apiKey);
+        return response.content || '';
+    }
+    
+    async refreshAISuggestions() {
+        await this.renderAISuggestions();
     }
 
     // Class Management methods
@@ -566,8 +1238,9 @@ class DocentePlusPlus {
         this.lessons.push(lesson);
         this.saveData();
         this.renderLessons();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddLessonForm();
+        this.showToast('Lezione salvata con successo', 'success');
     }
 
     /**
@@ -579,7 +1252,8 @@ class DocentePlusPlus {
             this.lessons = this.lessons.filter(lesson => lesson.id !== id);
             this.saveData();
             this.renderLessons();
-            this.renderDashboard();
+this.renderHome();
+            this.showToast('Lezione eliminata', 'info');
         }
     }
 
@@ -678,10 +1352,11 @@ ${lessonData.evaluation || 'N/D'}
                         this.lessons.push(lesson);
                         this.saveData();
                         this.renderLessons();
-                        this.renderDashboard();
+                        this.renderHome();
                         this.switchTab('lessons');
                         
                         this.addChatMessage('system', 'Lezione generata con successo!');
+                        this.showToast('Lezione generata con IA con successo', 'success');
                     } else {
                         throw new Error('Invalid JSON response');
                     }
@@ -700,16 +1375,17 @@ ${lessonData.evaluation || 'N/D'}
                     this.lessons.push(lesson);
                     this.saveData();
                     this.renderLessons();
-                    this.renderDashboard();
+                    this.renderHome();
                     this.switchTab('lessons');
                     
                     this.addChatMessage('system', 'Lezione generata con successo!');
+                    this.showToast('Lezione generata con IA con successo', 'success');
                 }
             }
         } catch (error) {
             console.error('Error generating lesson:', error);
             this.addChatMessage('system', `Errore nella generazione: ${error.message}`);
-            alert('Errore nella generazione della lezione. Verifica la tua API key.');
+            this.showToast('Errore nella generazione della lezione', 'error');
         }
     }
 
@@ -747,8 +1423,9 @@ ${lessonData.evaluation || 'N/D'}
         this.students.push(student);
         this.saveData();
         this.renderStudents();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddStudentForm();
+        this.showToast('Studente salvato con successo', 'success');
     }
 
     /**
@@ -760,7 +1437,8 @@ ${lessonData.evaluation || 'N/D'}
             this.students = this.students.filter(student => student.id !== id);
             this.saveData();
             this.renderStudents();
-            this.renderDashboard();
+this.renderHome();
+            this.showToast('Studente eliminato', 'info');
         }
     }
 
@@ -918,8 +1596,9 @@ ${lessonData.evaluation || 'N/D'}
 
         this.saveData();
         this.renderActivities();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddActivityForm();
+        this.showToast(editId ? 'Attività aggiornata con successo' : 'Attività creata con successo', 'success');
     }
 
     /**
@@ -931,7 +1610,8 @@ ${lessonData.evaluation || 'N/D'}
             this.activities = this.activities.filter(activity => activity.id !== id);
             this.saveData();
             this.renderActivities();
-            this.renderDashboard();
+this.renderHome();
+            this.showToast('Attività eliminata', 'info');
         }
     }
 
@@ -947,7 +1627,7 @@ ${lessonData.evaluation || 'N/D'}
             activity.updatedAt = new Date().toISOString();
             this.saveData();
             this.renderActivities();
-            this.renderDashboard();
+            this.renderHome();
         }
     }
 
@@ -1184,6 +1864,7 @@ ${lessonData.evaluation || 'N/D'}
         }
         this.saveData();
         this.renderSchedule();
+        this.renderTodaySchedulePreview(); // Update dashboard preview
     }
 
     /**
@@ -1414,18 +2095,19 @@ ${lessonData.evaluation || 'N/D'}
     navigateSchedule(direction) {
         const currentDate = this.getCurrentScheduleDate();
         
-        if (this.scheduleView === 'daily') {
-            // Move by 1 weekday
-            do {
-                currentDate.setDate(currentDate.getDate() + direction);
-            } while (currentDate.getDay() === 0 || currentDate.getDay() === 6);
-        } else {
-            // Move by 1 week
-            currentDate.setDate(currentDate.getDate() + (direction * 7));
+        if (!slot || !slot.classId) {
+            alert('Seleziona prima una classe per questo slot orario');
+            return;
         }
         
-        this.currentScheduleDate = this.getNextWeekday(currentDate).toISOString().split('T')[0];
-        this.renderSchedule();
+        const cls = this.classes.find(c => c.id == slot.classId);
+        if (!cls) {
+            alert('Classe non trovata');
+            return;
+        }
+        
+        // Show step-by-step activity selection modal
+        this.showSmartActivitySelectionModal(date, hour, slot, cls);
     }
 
     /**
@@ -1454,44 +2136,146 @@ ${lessonData.evaluation || 'N/D'}
     renderDailySchedule(container, date, hours) {
         const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
         
-        container.innerHTML = `
-            <div class="schedule-header">
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Precedente</button>
-                <h3>${dayName} ${date.toLocaleDateString('it-IT')}</h3>
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Successivo ▶</button>
+        // Get AI suggestions for activities if API key is available
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content lesson-session-modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <h3>🎓 Avvia Lezione</h3>
+                
+                <div class="lesson-info-section" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <strong style="font-size: 1.1em;">${cls.name}</strong>
+                            <div style="color: #666; font-size: 0.9em;">${new Date(date).toLocaleDateString('it-IT')} - ${hour}:00</div>
+                        </div>
+                        ${activityTypeInfo ? `<span style="background: ${activityTypeInfo.color}; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.9em;">${activityTypeInfo.label}</span>` : ''}
+                    </div>
+                </div>
+                
+                <div class="step-indicator" style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 0 20px;">
+                    <div class="step active" style="text-align: center;">
+                        <div style="width: 40px; height: 40px; background: #4a90e2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold;">1</div>
+                        <div style="font-size: 0.85em;">Seleziona Attività</div>
+                    </div>
+                    <div style="flex: 1; border-top: 2px dashed #ddd; margin-top: 20px;"></div>
+                    <div class="step" style="text-align: center; opacity: 0.5;">
+                        <div style="width: 40px; height: 40px; background: #ddd; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-weight: bold;">2</div>
+                        <div style="font-size: 0.85em;">Valuta Studenti</div>
+                    </div>
+                </div>
+                
+                ${apiKey ? `
+                    <div class="ai-suggestion-section" style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 1.3em;">🤖</span>
+                            <strong>Suggerimenti IA</strong>
+                        </div>
+                        <div id="ai-activity-suggestions" style="font-size: 0.95em; color: #1976d2;">
+                            <em>Caricamento suggerimenti...</em>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="app.generateActivitySuggestions('${date.toISOString()}', ${hour}, ${slot.classId})" style="margin-top: 10px; font-size: 0.85em;">
+                            🔄 Rigenera Suggerimenti
+                        </button>
+                    </div>
+                ` : ''}
+                
+                <div class="activity-selection-section">
+                    <h4 style="margin-bottom: 15px;">Scegli un'attività da svolgere:</h4>
+                    
+                    ${inProgressActivities.length > 0 ? `
+                        <div class="activity-group" style="margin-bottom: 20px;">
+                            <h5 style="color: #ff9800; margin-bottom: 10px;">📝 Attività In Corso</h5>
+                            ${inProgressActivities.map(a => `
+                                <div class="activity-card selectable" onclick="app.selectActivityForSession(${a.id}, '${date.toISOString()}', ${hour})" style="padding: 15px; margin: 10px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <strong style="font-size: 1.05em;">${a.title}</strong>
+                                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">${a.type}</div>
+                                            ${a.deadline ? `<div style="color: #f44336; font-size: 0.85em; margin-top: 3px;">⏰ Scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')}</div>` : ''}
+                                        </div>
+                                        <span style="background: #ff9800; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8em;">In corso</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${plannedActivities.length > 0 ? `
+                        <div class="activity-group" style="margin-bottom: 20px;">
+                            <h5 style="color: #2196f3; margin-bottom: 10px;">📋 Attività Pianificate</h5>
+                            ${plannedActivities.map(a => `
+                                <div class="activity-card selectable" onclick="app.selectActivityForSession(${a.id}, '${date.toISOString()}', ${hour})" style="padding: 15px; margin: 10px 0; background: #fff; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <strong style="font-size: 1.05em;">${a.title}</strong>
+                                            <div style="color: #666; font-size: 0.9em; margin-top: 5px;">${a.type}</div>
+                                            ${a.deadline ? `<div style="color: #f44336; font-size: 0.85em; margin-top: 3px;">⏰ Scadenza: ${new Date(a.deadline).toLocaleDateString('it-IT')}</div>` : ''}
+                                        </div>
+                                        <span style="background: #2196f3; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8em;">Pianificata</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    ${classActivities.length === 0 ? `
+                        <div style="text-align: center; padding: 40px 20px; color: #999;">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📋</div>
+                            <p>Nessuna attività disponibile per questa classe</p>
+                            <button class="btn btn-secondary" onclick="app.closeSmartActivityModal(); app.switchTab('activities');" style="margin-top: 15px;">
+                                ➕ Crea Nuova Attività
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="form-actions" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <button class="btn btn-secondary" onclick="app.closeSmartActivityModal()">Annulla</button>
+                </div>
             </div>
-            <div class="schedule-view-toggle">
-                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📅 Vista Settimanale</button>
-            </div>
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Ora</th>
-                        <th>Classe e Attività</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${hours.map(hour => {
-                        const key = this.getScheduleKey(date, hour);
-                        const slot = this.schedule[key] || {};
-                        const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
-                        const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
-                        
-                        return `
-                            <tr>
-                                <td class="schedule-hour">${hour}:00 - ${hour + 1}:00</td>
-                                <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
-                                    ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">Nessuna classe</div>'}
-                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold;">${activityInfo.icon}</div>` : ''}
-                                    ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-left: 10px; font-size: 0.8em;">Avvia</button>` : ''}
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
         `;
+        
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+        
+        // Load AI suggestions if API key exists
+        if (apiKey) {
+            this.generateActivitySuggestions(date.toISOString(), hour, slot.classId);
+        }
+        
+        // Add hover effect styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .activity-card.selectable:hover {
+                border-color: #4a90e2 !important;
+                box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+                transform: translateY(-2px);
+            }
+        `;
+        document.head.appendChild(style);
     }
+    
+    async generateActivitySuggestions(dateStr, hour, classId) {
+        const suggestionsDiv = document.getElementById('ai-activity-suggestions');
+        if (!suggestionsDiv) return;
+        
+        suggestionsDiv.innerHTML = '<em>Analisi in corso...</em>';
+        
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            suggestionsDiv.innerHTML = '<em style="color: #f44336;">API key non configurata</em>';
+            return;
+        }
+        
+        const cls = this.classes.find(c => c.id == classId);
+        const date = new Date(dateStr);
+        const classActivities = this.activities.filter(a => a.classId == classId);
+        
+        const prompt = `Sei un assistente IA per insegnanti. Analizza il contesto e suggerisci quale attività sia più opportuna per questa lezione.
 
     /**
      * Renders the weekly schedule view.
@@ -1506,53 +2290,179 @@ ${lessonData.evaluation || 'N/D'}
         const diff = day === 0 ? -6 : 1 - day; // adjust when day is sunday
         monday.setDate(monday.getDate() + diff);
 
-        const weekDays = [];
-        for (let i = 0; i < 5; i++) {
-            const date = new Date(monday);
-            date.setDate(monday.getDate() + i);
-            weekDays.push(date);
+Attività disponibili:
+${classActivities.map(a => `- ${a.title} (${a.type}, stato: ${a.status}${a.deadline ? ', scadenza: ' + new Date(a.deadline).toLocaleDateString('it-IT') : ''})`).join('\n')}
+
+Fornisci un suggerimento breve (massimo 2-3 righe) su quale attività svolgere e perché, considerando scadenze, continuità didattica e il giorno della settimana. Se non ci sono attività, suggerisci brevemente cosa fare.`;
+
+        try {
+            const response = await this.callOpenRouterAPI(prompt);
+            suggestionsDiv.innerHTML = response.replace(/\n/g, '<br>');
+        } catch (error) {
+            console.error('Error getting AI suggestions:', error);
+            suggestionsDiv.innerHTML = '<em style="color: #f44336;">Errore nel caricamento dei suggerimenti</em>';
         }
-
-        const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
-
-        container.innerHTML = `
-            <div class="schedule-header">
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Precedente</button>
-                <h3>Settimana dal ${weekDays[0].toLocaleDateString('it-IT')} al ${weekDays[4].toLocaleDateString('it-IT')}</h3>
-                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Successiva ▶</button>
+    }
+    
+    selectActivityForSession(activityId, dateStr, hour) {
+        const activity = this.activities.find(a => a.id === activityId);
+        if (!activity) return;
+        
+        // Update activity status to in-progress if not already
+        if (activity.status !== 'in-progress') {
+            this.updateActivityStatus(activityId, 'in-progress');
+        }
+        
+        const date = new Date(dateStr);
+        const key = this.getScheduleKey(date, hour);
+        const slot = this.schedule[key];
+        const cls = this.classes.find(c => c.id == slot.classId);
+        
+        // Close the activity selection modal
+        this.closeSmartActivityModal();
+        
+        // Create and start the lesson session
+        this.createLessonSession(date, hour, slot, cls, activity);
+    }
+    
+    createLessonSession(date, hour, slot, cls, activity) {
+        const session = {
+            id: Date.now(),
+            date: date.toISOString(),
+            hour: hour,
+            classId: slot.classId,
+            className: cls.name,
+            activityId: activity.id,
+            activityTitle: activity.title,
+            activityType: activity.type,
+            startTime: new Date().toISOString(),
+            endTime: null,
+            studentEvaluations: [],
+            notes: '',
+            status: 'active'
+        };
+        
+        this.currentLessonSession = session;
+        this.lessonSessions.push(session);
+        this.saveData();
+        
+        // Show student evaluation interface
+        this.showStudentEvaluationInterface(session);
+    }
+    
+    showStudentEvaluationInterface(session) {
+        const classStudents = this.students.filter(s => s.class === session.className);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content student-evaluation-modal" style="max-width: 900px; max-height: 95vh; overflow-y: auto;">
+                <div class="lesson-session-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; margin: -20px -20px 20px -20px;">
+                    <h3 style="margin: 0 0 10px 0; color: white;">🎓 Lezione in Corso</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <div style="font-size: 1.1em; font-weight: 500;">${session.className}</div>
+                            <div style="opacity: 0.9; font-size: 0.9em;">${session.activityTitle}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.9em; opacity: 0.9;">${new Date(session.date).toLocaleDateString('it-IT')}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">${session.hour}:00 - ${session.hour + 1}:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="student-evaluation-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">👥 Valutazioni Studenti (${classStudents.length})</h4>
+                        <button class="btn btn-sm btn-secondary" onclick="app.generateAllEvaluationSuggestions()" style="font-size: 0.85em;">
+                            🤖 Suggerimenti IA per Tutti
+                        </button>
+                    </div>
+                    
+                    ${classStudents.length === 0 ? `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <p>Nessuno studente trovato per questa classe</p>
+                            <button class="btn btn-secondary" onclick="app.endLessonSession(); app.switchTab('students');">
+                                ➕ Aggiungi Studenti
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="students-grid" style="display: grid; gap: 15px;">
+                            ${classStudents.map(student => this.renderStudentEvaluationCard(student, session)).join('')}
+                        </div>
+                    `}
+                </div>
+                
+                <div class="lesson-notes-section" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                    <h4>📝 Note Generali della Lezione</h4>
+                    <textarea id="lesson-notes-input" placeholder="Aggiungi note generali sulla lezione (argomenti trattati, materiali utilizzati, osservazioni generali...)" style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical;">${session.notes || ''}</textarea>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; gap: 10px;">
+                    <button class="btn btn-danger" onclick="app.cancelLessonSession()">Annulla Lezione</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="app.saveLessonSessionProgress()">💾 Salva Progresso</button>
+                        <button class="btn btn-primary" onclick="app.endLessonSession()">✅ Termina Lezione</button>
+                    </div>
+                </div>
             </div>
-            <div class="schedule-view-toggle">
-                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📆 Vista Giornaliera</button>
-            </div>
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Ora</th>
-                        ${dayNames.map((name, i) => `<th>${name}<br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${hours.map(hour => `
-                        <tr>
-                            <td class="schedule-hour">${hour}:00</td>
-                            ${weekDays.map(date => {
-                                const key = this.getScheduleKey(date, hour);
-                                const slot = this.schedule[key] || {};
-                                const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
-                                const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
-                                
+        `;
+        
+        document.body.appendChild(modal);
+        this.currentActivityModal = modal;
+    }
+    
+    renderStudentEvaluationCard(student, session) {
+        const existingEval = session.studentEvaluations.find(e => e.studentId === student.id);
+        const studentId = student.id;
+        
+        return `
+            <div class="student-eval-card" id="student-eval-${studentId}" style="background: #f8f9fa; padding: 18px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <strong style="font-size: 1.05em;">${student.name}</strong>
+                    </div>
+                    <button class="btn btn-sm" onclick="app.generateEvaluationSuggestion(${studentId})" style="font-size: 0.75em; padding: 4px 8px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9;">
+                        🤖 IA
+                    </button>
+                </div>
+                
+                <div class="evaluation-inputs" style="display: grid; gap: 12px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Voto</label>
+                        <div style="display: flex; gap: 5px;">
+                            ${[4, 5, 6, 7, 8, 9, 10].map(grade => `
+                                <button class="grade-btn" onclick="app.setStudentGrade(${studentId}, ${grade})" data-grade="${grade}" style="flex: 1; padding: 8px; border: 2px solid ${existingEval && existingEval.grade === grade ? '#4a90e2' : '#ddd'}; background: ${existingEval && existingEval.grade === grade ? '#4a90e2' : 'white'}; color: ${existingEval && existingEval.grade === grade ? 'white' : '#333'}; border-radius: 6px; cursor: pointer; font-weight: ${existingEval && existingEval.grade === grade ? 'bold' : 'normal'}; transition: all 0.2s;">
+                                    ${grade}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Comportamento</label>
+                        <div style="display: flex; gap: 8px;">
+                            ${['😊', '😐', '😟'].map((emoji, idx) => {
+                                const behaviorValues = ['positivo', 'neutro', 'negativo'];
+                                const behaviorValue = behaviorValues[idx];
+                                const isSelected = existingEval && existingEval.behavior === behaviorValue;
                                 return `
-                                    <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
-                                        ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">-</div>'}
-                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white; display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; margin-top: 3px;">${activityInfo.icon}</div>` : ''}
-                                        ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-top: 5px; font-size: 0.7em; padding: 2px 6px;">Avvia</button>` : ''}
-                                    </td>
+                                    <button class="behavior-btn" onclick="app.setStudentBehavior(${studentId}, '${behaviorValue}')" style="flex: 1; padding: 10px; border: 2px solid ${isSelected ? '#4a90e2' : '#ddd'}; background: ${isSelected ? '#e3f2fd' : 'white'}; border-radius: 6px; cursor: pointer; font-size: 1.5em; transition: all 0.2s;">
+                                        ${emoji}
+                                    </button>
                                 `;
                             }).join('')}
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-size: 0.9em; color: #666; margin-bottom: 5px;">Osservazioni</label>
+                        <textarea id="observations-${studentId}" placeholder="Note comportamentali, partecipazione, difficoltà riscontrate..." style="width: 100%; min-height: 60px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 0.9em; resize: vertical;">${existingEval ? existingEval.observations || '' : ''}</textarea>
+                        <div id="ai-suggestions-${studentId}" style="margin-top: 8px; font-size: 0.85em; color: #1976d2; font-style: italic; display: none;"></div>
+                    </div>
+                </div>
+            </div>
         `;
     }
 
@@ -1578,6 +2488,358 @@ ${lessonData.evaluation || 'N/D'}
     /**
      * Saves a new class or updates an existing one based on form data.
      */
+    saveClass() {
+        const editId = document.getElementById('class-edit-id').value;
+        const className = document.getElementById('class-name').value.trim();
+        const year = document.getElementById('class-year').value;
+        const section = document.getElementById('class-section').value.trim();
+        const studentsCount = document.getElementById('class-students-count').value;
+
+        if (!className) {
+            alert('Il nome della classe è obbligatorio');
+            return;
+        }
+        
+        suggestionsDiv.style.display = 'block';
+        suggestionsDiv.innerHTML = '🤖 Generazione suggerimento...';
+        
+        const student = this.students.find(s => s.id === studentId);
+        const session = this.currentLessonSession;
+        
+        const prompt = `Sei un assistente IA per insegnanti. Genera 2-3 brevi suggerimenti di osservazioni in itinere per lo studente durante questa lezione.
+
+Studente: ${student.name}
+Classe: ${session.className}
+Attività: ${session.activityTitle} (${session.activityType})
+Data: ${new Date(session.date).toLocaleDateString('it-IT')}
+
+Genera suggerimenti specifici e costruttivi relativi a: partecipazione, impegno, comprensione, collaborazione. 
+Formato: elenco puntato breve (massimo 3 punti), ogni punto max 10 parole.`;
+
+        try {
+            const response = await this.callOpenRouterAPI(prompt);
+            
+            // Parse the response and create clickable suggestions
+            const suggestions = response.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+            
+            if (suggestions.length > 0) {
+                suggestionsDiv.innerHTML = `
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; margin-top: 5px;">
+                        <div style="font-weight: 500; margin-bottom: 8px; color: #1976d2;">💡 Suggerimenti IA:</div>
+                        ${suggestions.map(s => {
+                            const text = s.replace(/^[-•]\s*/, '').trim();
+                            return `
+                                <div onclick="app.applySuggestion(${studentId}, '${text.replace(/'/g, "\\'")}')" style="padding: 6px 10px; margin: 4px 0; background: white; border-radius: 4px; cursor: pointer; border: 1px solid #90caf9; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='white'">
+                                    ${text}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                suggestionsDiv.innerHTML = response;
+            }
+        } catch (error) {
+            console.error('Error generating suggestion:', error);
+            suggestionsDiv.innerHTML = '❌ Errore nel generare suggerimenti';
+        }
+    }
+    
+    applySuggestion(studentId, suggestion) {
+        const textArea = document.getElementById(`observations-${studentId}`);
+        if (!textArea) return;
+        
+        const currentText = textArea.value.trim();
+        textArea.value = currentText ? `${currentText}\n- ${suggestion}` : `- ${suggestion}`;
+        
+        // Save to session
+        if (this.currentLessonSession) {
+            let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === studentId);
+            if (!evaluation) {
+                evaluation = {
+                    studentId: studentId,
+                    grade: null,
+                    behavior: null,
+                    observations: '',
+                    aiSuggestion: null
+                };
+                this.currentLessonSession.studentEvaluations.push(evaluation);
+            }
+            evaluation.observations = textArea.value;
+            this.saveData();
+        }
+        
+        // Visual feedback
+        textArea.style.background = '#e8f5e9';
+        setTimeout(() => {
+            textArea.style.background = 'white';
+        }, 500);
+    }
+    
+    async generateAllEvaluationSuggestions() {
+        if (!this.currentLessonSession) return;
+        
+        const classStudents = this.students.filter(s => s.class === this.currentLessonSession.className);
+        
+        for (const student of classStudents) {
+            await this.generateEvaluationSuggestion(student.id);
+            // Small delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+    }
+    
+    saveLessonSessionProgress() {
+        if (!this.currentLessonSession) return;
+        
+        // Save notes
+        const notesInput = document.getElementById('lesson-notes-input');
+        if (notesInput) {
+            this.currentLessonSession.notes = notesInput.value;
+        }
+        
+        // Save all student observations
+        const classStudents = this.students.filter(s => s.class === this.currentLessonSession.className);
+        classStudents.forEach(student => {
+            const observationsInput = document.getElementById(`observations-${student.id}`);
+            if (observationsInput) {
+                let evaluation = this.currentLessonSession.studentEvaluations.find(e => e.studentId === student.id);
+                if (!evaluation) {
+                    evaluation = {
+                        studentId: student.id,
+                        grade: null,
+                        behavior: null,
+                        observations: '',
+                        aiSuggestion: null
+                    };
+                    this.currentLessonSession.studentEvaluations.push(evaluation);
+                }
+                evaluation.observations = observationsInput.value;
+            }
+        });
+        
+        this.saveData();
+        
+        // Visual feedback
+        alert('✅ Progresso salvato con successo!');
+    }
+    
+    endLessonSession() {
+        if (!this.currentLessonSession) return;
+        
+        // Save all data
+        this.saveLessonSessionProgress();
+        
+        // Mark session as completed
+        this.currentLessonSession.endTime = new Date().toISOString();
+        this.currentLessonSession.status = 'completed';
+        
+        // Save evaluations to main evaluations array
+        this.currentLessonSession.studentEvaluations.forEach(evalData => {
+            if (evalData.grade || evalData.observations) {
+                const student = this.students.find(s => s.id === evalData.studentId);
+                if (student) {
+                    this.evaluations.push({
+                        id: Date.now() + Math.random(),
+                        studentId: evalData.studentId,
+                        studentName: student.name,
+                        date: this.currentLessonSession.date,
+                        activity: this.currentLessonSession.activityTitle,
+                        score: evalData.grade,
+                        behavior: evalData.behavior,
+                        notes: evalData.observations,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            }
+        });
+        
+        this.saveData();
+        
+        // Close modal
+        this.closeSmartActivityModal();
+        
+        // Show summary
+        const evaluatedCount = this.currentLessonSession.studentEvaluations.filter(e => e.grade || e.observations).length;
+        alert(`✅ Lezione terminata!\n\n${evaluatedCount} studenti valutati\nDati salvati con successo.`);
+        
+        this.currentLessonSession = null;
+        
+        // Refresh dashboard and evaluations
+        this.renderHome();
+        this.renderEvaluations();
+    }
+    
+    cancelLessonSession() {
+        if (!confirm('Sei sicuro di voler annullare questa lezione? I dati non salvati andranno persi.')) {
+            return;
+        }
+        
+        // Remove session from array
+        if (this.currentLessonSession) {
+            this.lessonSessions = this.lessonSessions.filter(s => s.id !== this.currentLessonSession.id);
+            this.currentLessonSession = null;
+            this.saveData();
+        }
+        
+        this.closeSmartActivityModal();
+    }
+    
+    closeSmartActivityModal() {
+        if (this.currentActivityModal) {
+            this.currentActivityModal.remove();
+            this.currentActivityModal = null;
+        }
+    }
+
+    toggleScheduleView() {
+        this.scheduleView = this.scheduleView === 'weekly' ? 'daily' : 'weekly';
+        this.renderSchedule();
+    }
+
+    navigateSchedule(direction) {
+        const currentDate = this.getCurrentScheduleDate();
+        
+        if (this.scheduleView === 'daily') {
+            // Move by 1 weekday
+            do {
+                currentDate.setDate(currentDate.getDate() + direction);
+            } while (currentDate.getDay() === 0 || currentDate.getDay() === 6);
+        } else {
+            // Move by 1 week
+            currentDate.setDate(currentDate.getDate() + (direction * 7));
+        }
+        
+        this.currentScheduleDate = this.getNextWeekday(currentDate).toISOString().split('T')[0];
+        this.renderSchedule();
+    }
+
+    renderSchedule() {
+        const scheduleContainer = document.getElementById('schedule-container');
+        if (!scheduleContainer) return;
+
+        const currentDate = this.getCurrentScheduleDate();
+        const hours = [8, 9, 10, 11, 12, 13];
+        
+        if (this.scheduleView === 'daily') {
+            this.renderDailySchedule(scheduleContainer, currentDate, hours);
+        } else {
+            this.renderWeeklySchedule(scheduleContainer, currentDate, hours);
+        }
+    }
+
+    renderDailySchedule(container, date, hours) {
+        const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
+        
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Giorno Prec.</button>
+                <h3>${dayName} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Giorno Succ. ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📅 Vista Settimanale</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        <th>Classe e Attività</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => {
+                        const key = this.getScheduleKey(date, hour);
+                        const slot = this.schedule[key] || {};
+                        const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                        const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                        
+                        return `
+                            <tr>
+                                <td class="schedule-hour">${hour}:00 - ${hour + 1}:00</td>
+                                <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                    ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">Nessuna classe</div>'}
+                                    ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white;">${activityInfo.icon}</div>` : ''}
+                                    ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-left: 10px; font-size: 0.8em;">Avvia</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    renderWeeklySchedule(container, startDate, hours) {
+        // Get Monday of the week
+        const monday = new Date(startDate);
+        const day = monday.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // adjust when day is sunday
+        monday.setDate(monday.getDate() + diff);
+
+        const weekDays = [];
+        for (let i = 0; i < 5; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            weekDays.push(date);
+        }
+
+        const dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven'];
+        const dayNamesFull = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+
+        container.innerHTML = `
+            <div class="schedule-header">
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(-1)">◀ Settimana Prec.</button>
+                <h3>Sett. ${weekDays[0].getDate()}/${weekDays[0].getMonth() + 1} - ${weekDays[4].getDate()}/${weekDays[4].getMonth() + 1}</h3>
+                <button class="btn btn-secondary" onclick="app.navigateSchedule(1)">Settimana Succ. ▶</button>
+            </div>
+            <div class="schedule-view-toggle">
+                <button class="btn btn-primary" onclick="app.toggleScheduleView()">📆 Vista Giornaliera</button>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Ora</th>
+                        ${dayNames.map((name, i) => `<th><span class="day-full">${dayNamesFull[i]}</span><span class="day-abbr">${name}</span><br><small>${weekDays[i].getDate()}/${weekDays[i].getMonth() + 1}</small></th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${hours.map(hour => `
+                        <tr>
+                            <td class="schedule-hour">${hour}:00</td>
+                            ${weekDays.map(date => {
+                                const key = this.getScheduleKey(date, hour);
+                                const slot = this.schedule[key] || {};
+                                const cls = slot.classId ? this.classes.find(c => c.id == slot.classId) : null;
+                                const activityInfo = slot.activityType ? this.getActivityTypeIcon(slot.activityType) : null;
+                                
+                                return `
+                                    <td class="schedule-slot" onclick="app.showScheduleSlotEditor(new Date('${date.toISOString()}'), ${hour})" title="Clicca per modificare">
+                                        ${cls ? `<div class="slot-class">${cls.name}</div>` : '<div class="slot-empty">-</div>'}
+                                        ${activityInfo ? `<div class="slot-activity" style="background-color: ${activityInfo.color}; color: white;">${activityInfo.icon}</div>` : ''}
+                                        ${cls ? `<button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); app.launchScheduleActivity(new Date('${date.toISOString()}'), ${hour})" style="margin-top: 5px; font-size: 0.7em; padding: 2px 6px;">Avvia</button>` : ''}
+                                    </td>
+                                `;
+                            }).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // Class Management methods
+    showAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'block';
+        document.getElementById('class-form-title').textContent = 'Nuova Classe';
+        document.getElementById('class-edit-id').value = '';
+    }
+
+    hideAddClassForm() {
+        document.getElementById('add-class-form').style.display = 'none';
+        document.getElementById('class-form').reset();
+        document.getElementById('class-edit-id').value = '';
+    }
+
     saveClass() {
         const editId = document.getElementById('class-edit-id').value;
         const className = document.getElementById('class-name').value.trim();
@@ -1620,6 +2882,7 @@ ${lessonData.evaluation || 'N/D'}
         this.renderClasses();
         this.updateClassSelectors();
         this.hideAddClassForm();
+        this.showToast(editId ? 'Classe aggiornata con successo' : 'Classe creata con successo', 'success');
     }
 
     /**
@@ -1662,7 +2925,8 @@ ${lessonData.evaluation || 'N/D'}
             this.saveData();
             this.renderClasses();
             this.updateClassSelectors();
-            this.renderDashboard();
+this.renderHome();
+            this.showToast('Classe eliminata', 'info');
         }
     }
 
@@ -1969,7 +3233,7 @@ ${lessonData.evaluation || 'N/D'}
         this.evaluations.push(evaluation);
         this.saveData();
         this.renderEvaluations();
-        this.renderDashboard();
+        this.renderHome();
         this.hideAddEvaluationForm();
     }
 
@@ -1982,7 +3246,7 @@ ${lessonData.evaluation || 'N/D'}
             this.evaluations = this.evaluations.filter(e => e.id !== id);
             this.saveData();
             this.renderEvaluations();
-            this.renderDashboard();
+            this.renderHome();
         }
     }
 
@@ -2651,8 +3915,21 @@ ${lessonData.evaluation || 'N/D'}
         // Save subjects
         localStorage.setItem('teacher-subjects', JSON.stringify(this.subjects));
 
-        this.renderDashboard();
-        alert('Impostazioni salvate con successo!');
+        // Save AI FAB settings
+        const aiFabEnabled = document.getElementById('ai-fab-enabled');
+        if (aiFabEnabled) {
+            localStorage.setItem('ai-fab-enabled', JSON.stringify(aiFabEnabled.checked));
+            this.aiFabEnabled = aiFabEnabled.checked;
+            this.updateAIFABVisibility();
+        }
+
+        // Save theme
+        const theme = document.getElementById('app-theme').value;
+        localStorage.setItem('app-theme', theme);
+        this.changeTheme(theme);
+
+        this.renderHome();
+        this.showToast('Impostazioni salvate con successo', 'success');
     }
 
     /**
@@ -2718,6 +3995,29 @@ ${lessonData.evaluation || 'N/D'}
                 this.subjects = [];
             }
         }
+
+        // Load AI FAB settings
+        const aiFabEnabledData = localStorage.getItem('ai-fab-enabled');
+        if (aiFabEnabledData !== null) {
+            try {
+                this.aiFabEnabled = JSON.parse(aiFabEnabledData);
+                const aiFabCheckbox = document.getElementById('ai-fab-enabled');
+                if (aiFabCheckbox) {
+                    aiFabCheckbox.checked = this.aiFabEnabled;
+                }
+            } catch (e) {
+                console.error('Error loading AI FAB settings:', e);
+                this.aiFabEnabled = true;
+            }
+        }
+
+        // Load theme
+        const theme = localStorage.getItem('app-theme') || 'light';
+        const themeSelect = document.getElementById('app-theme');
+        if (themeSelect) {
+            themeSelect.value = theme;
+        }
+        this.changeTheme(theme);
 
         // Initialize API key status icon
         const statusIcon = document.getElementById('api-key-status');
@@ -2809,6 +4109,10 @@ ${lessonData.evaluation || 'N/D'}
         localStorage.setItem('docente-plus-notification-settings', JSON.stringify(this.notificationSettings));
         localStorage.setItem('docente-plus-activities', JSON.stringify(this.activities));
         localStorage.setItem('docente-plus-schedule', JSON.stringify(this.schedule));
+        localStorage.setItem('docente-plus-rss-feeds', JSON.stringify(this.rssFeeds));
+        localStorage.setItem('docente-plus-news-items', JSON.stringify(this.newsItems));
+        localStorage.setItem('docente-plus-backups', JSON.stringify(this.backups));
+        localStorage.setItem('docente-plus-backup-settings', JSON.stringify(this.backupSettings));
     }
 
     /**
@@ -2940,7 +4244,6 @@ ${lessonData.evaluation || 'N/D'}
                 this.importedDocuments = [];
             }
         }
-    }
 
     /**
      * Initiates the process for exporting all application data.
@@ -3765,7 +5068,7 @@ ${lessonData.evaluation || 'N/D'}
                     this.renderNotifications();
                     this.updateClassSelectors();
                     this.loadSettings();
-                    this.renderDashboard();
+                    this.renderHome();
                     
                     // Create import success notification
                     this.createNotification({
@@ -3813,8 +5116,56 @@ ${lessonData.evaluation || 'N/D'}
             this.checkAndSendNotifications();
         }, 5 * 60 * 1000); // 5 minutes
 
-        // Also check immediately
-        this.checkAndSendNotifications();
+    /**
+     * Create a manual backup
+     */
+    async createManualBackup() {
+        try {
+            const backupData = this.collectBackupData();
+            const backupId = `backup-${Date.now()}`;
+            const backupDate = new Date().toISOString();
+            
+            // Calculate backup size
+            const backupString = JSON.stringify(backupData);
+            const backupSize = new Blob([backupString]).size;
+            
+            // Store backup metadata
+            const backupMetadata = {
+                id: backupId,
+                name: `Backup Manuale - ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}`,
+                date: backupDate,
+                size: backupSize,
+                type: 'manual',
+                data: backupData
+            };
+            
+            this.backups.unshift(backupMetadata);
+            
+            // Keep only last MAX_BACKUPS backups
+            if (this.backups.length > this.MAX_BACKUPS) {
+                this.backups = this.backups.slice(0, this.MAX_BACKUPS);
+            }
+            
+            this.backupSettings.lastBackupDate = backupDate;
+            this.saveData();
+            this.renderBackupList();
+            this.updateBackupScheduleInfo();
+            
+            // Show success notification
+            this.createNotification({
+                title: '✅ Backup Creato',
+                message: 'Il backup è stato creato con successo',
+                type: 'system',
+                notificationId: `backup-created-${Date.now()}`
+            });
+            
+            // Show visual feedback
+            this.showTemporaryMessage('Backup creato con successo! 💾', 'success');
+            
+        } catch (error) {
+            console.error('Error creating backup:', error);
+            this.showTemporaryMessage('Errore durante la creazione del backup', 'error');
+        }
     }
 
     /**
@@ -3822,28 +5173,177 @@ ${lessonData.evaluation || 'N/D'}
      */
     checkAndSendNotifications() {
         const now = new Date();
-
-        // Check if we're in quiet hours
-        if (this.isQuietHours(now)) {
-            return;
+        const lastBackup = this.backupSettings.lastBackupDate ? new Date(this.backupSettings.lastBackupDate) : null;
+        
+        // Check if backup is needed
+        let shouldBackup = false;
+        
+        if (!lastBackup) {
+            shouldBackup = true;
+        } else {
+            const hoursSinceLastBackup = (now - lastBackup) / (1000 * 60 * 60);
+            
+            switch (this.backupSettings.frequency) {
+                case 'daily':
+                    shouldBackup = hoursSinceLastBackup >= 24;
+                    break;
+                case 'weekly':
+                    shouldBackup = hoursSinceLastBackup >= 168; // 7 days
+                    break;
+                case 'monthly':
+                    shouldBackup = hoursSinceLastBackup >= 720; // 30 days
+                    break;
+            }
         }
-
-        // Check lesson reminders
-        if (this.notificationSettings.lessonReminders) {
-            this.checkLessonReminders(now);
-        }
-
-        // Check activity deadline reminders
-        this.checkActivityDeadlineReminders(now);
-
-        // Check custom reminders
-        this.checkCustomReminders(now);
-
-        // Check backup reminders
-        if (this.notificationSettings.backupReminders) {
-            this.checkBackupReminders(now);
+        
+        if (shouldBackup) {
+            try {
+                const backupData = this.collectBackupData();
+                const backupId = `backup-auto-${Date.now()}`;
+                const backupDate = new Date().toISOString();
+                
+                const backupString = JSON.stringify(backupData);
+                const backupSize = new Blob([backupString]).size;
+                
+                const backupMetadata = {
+                    id: backupId,
+                    name: `Backup Automatico - ${new Date().toLocaleDateString('it-IT')} ${new Date().toLocaleTimeString('it-IT')}`,
+                    date: backupDate,
+                    size: backupSize,
+                    type: 'scheduled',
+                    data: backupData
+                };
+                
+                this.backups.unshift(backupMetadata);
+                
+                if (this.backups.length > this.MAX_BACKUPS) {
+                    this.backups = this.backups.slice(0, this.MAX_BACKUPS);
+                }
+                
+                this.backupSettings.lastBackupDate = backupDate;
+                this.saveData();
+                this.renderBackupList();
+                this.updateBackupScheduleInfo();
+                
+                this.createNotification({
+                    title: '✅ Backup Automatico Completato',
+                    message: 'Il backup programmato è stato creato con successo',
+                    type: 'system',
+                    notificationId: `auto-backup-${Date.now()}`
+                });
+                
+            } catch (error) {
+                console.error('Error creating scheduled backup:', error);
+            }
         }
     }
+
+    /**
+     * Collect all data for backup
+     */
+    collectBackupData() {
+        return {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            lessons: this.lessons,
+            students: this.students,
+            classes: this.classes,
+            subjects: this.subjects,
+            activities: this.activities,
+            schedule: this.schedule,
+            evaluationCriteria: this.evaluationCriteria,
+            evaluationGrids: this.evaluationGrids,
+            evaluations: this.evaluations,
+            notifications: this.notifications,
+            reminders: this.reminders,
+            notificationSettings: this.notificationSettings,
+            rssFeeds: this.rssFeeds,
+            newsItems: this.newsItems,
+            teacherProfile: {
+                firstName: localStorage.getItem('teacher-first-name'),
+                lastName: localStorage.getItem('teacher-last-name'),
+                email: localStorage.getItem('teacher-email'),
+                schoolLevel: localStorage.getItem('school-level'),
+                schoolName: localStorage.getItem('school-name'),
+                schoolYear: localStorage.getItem('school-year'),
+                schoolYearStart: localStorage.getItem('school-year-start'),
+                schoolYearEnd: localStorage.getItem('school-year-end')
+            }
+        };
+    }
+
+    /**
+     * Download backup as file
+     */
+    async downloadBackup(backupId, format = 'json') {
+        const backup = this.backups.find(b => b.id === backupId);
+        if (!backup) {
+            this.showTemporaryMessage('Backup non trovato', 'error');
+            return;
+        }
+        
+        if (format === 'zip') {
+            await this.downloadBackupAsZip(backup);
+        } else {
+            this.downloadBackupAsJson(backup);
+        }
+    }
+
+    /**
+     * Download backup as JSON file
+     */
+    downloadBackupAsJson(backup) {
+        const dataStr = JSON.stringify(backup.data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `docente-plus-backup-${new Date(backup.date).toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        
+        this.showTemporaryMessage('Backup scaricato! 📥', 'success');
+    }
+
+    /**
+     * Download backup as ZIP file
+     */
+    async downloadBackupAsZip(backup) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            console.error('JSZip library not available');
+            this.showTemporaryMessage('Errore: libreria JSZip non disponibile', 'error');
+            return;
+        }
+        
+        try {
+            const zip = new JSZip();
+            
+            // Add main backup data
+            zip.file('backup-data.json', JSON.stringify(backup.data, null, 2));
+            
+            // Add metadata
+            const metadata = {
+                backupId: backup.id,
+                backupName: backup.name,
+                backupDate: backup.date,
+                backupType: backup.type,
+                version: '1.0'
+            };
+            zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+            
+            // Add readme
+            const readme = `# Backup Docente++
+
+Backup creato il: ${new Date(backup.date).toLocaleString('it-IT')}
+Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
+
+## Contenuto del Backup
+
+- backup-data.json: Tutti i dati dell'applicazione
+- metadata.json: Informazioni sul backup
 
     /**
      * Checks if a given date falls within the user-defined quiet hours.
@@ -3855,17 +5355,33 @@ ${lessonData.evaluation || 'N/D'}
             return false;
         }
 
-        const currentTime = date.getHours() * 60 + date.getMinutes();
-        const [startHour, startMin] = this.notificationSettings.quietHoursStart.split(':').map(Number);
-        const [endHour, endMin] = this.notificationSettings.quietHoursEnd.split(':').map(Number);
-        const startTime = startHour * 60 + startMin;
-        const endTime = endHour * 60 + endMin;
+1. Apri Docente++ nel browser
+2. Vai alla sezione "Backup & Ripristino"
+3. Clicca su "Ripristina da File"
+4. Seleziona questo file ZIP o il file backup-data.json
+5. Conferma il ripristino
 
-        if (startTime < endTime) {
-            return currentTime >= startTime && currentTime <= endTime;
-        } else {
-            // Quiet hours span midnight
-            return currentTime >= startTime || currentTime <= endTime;
+**Attenzione**: Il ripristino sovrascriverà tutti i dati attuali.
+`;
+            zip.file('README.txt', readme);
+            
+            // Generate ZIP
+            const content = await zip.generateAsync({ type: 'blob' });
+            
+            // Download
+            const url = URL.createObjectURL(content);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `docente-plus-backup-${new Date(backup.date).toISOString().split('T')[0]}.zip`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            this.showTemporaryMessage('Backup ZIP scaricato! 📦', 'success');
+            
+        } catch (error) {
+            console.error('Error creating ZIP:', error);
+            this.showTemporaryMessage('Errore durante la creazione del file ZIP', 'error');
         }
     }
 
@@ -3893,22 +5409,31 @@ ${lessonData.evaluation || 'N/D'}
                     });
                 }
             }
+        };
+        
+        input.click();
+    }
 
-            // Check for 1-hour reminder
-            if (this.notificationSettings.remindersBefore1h && 
-                hoursDiff > 0.5 && hoursDiff <= 1.5) {
-                const notificationId = `lesson-1h-${lesson.id}`;
-                if (!this.hasNotificationBeenSent(notificationId)) {
-                    this.createNotification({
-                        title: '📚 Promemoria Lezione (1 ora)',
-                        message: `Tra un\'ora: ${lesson.title}`,
-                        type: 'lesson-reminder',
-                        relatedId: lesson.id,
-                        notificationId: notificationId
-                    });
-                }
+    /**
+     * Restore backup from JSON file
+     */
+    async restoreFromJsonFile(file) {
+        if (!confirm('⚠️ ATTENZIONE: Il ripristino sovrascriverà tutti i dati attuali. Continuare?')) {
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                await this.restoreBackupData(data);
+                this.showTemporaryMessage('Ripristino completato! 🎉', 'success');
+            } catch (error) {
+                console.error('Error restoring backup:', error);
+                this.showTemporaryMessage('Errore durante il ripristino del backup', 'error');
             }
-        });
+        };
+        reader.readAsText(file);
     }
 
     /**
@@ -4749,14 +6274,12 @@ Rispondi SOLO in formato JSON con questa struttura:
             </div>
         `;
         
-        actionsDiv.innerHTML = `
-            <button class="btn btn-primary" onclick="app.processManualClassification()">
-                ✅ Procedi con Importazione
-            </button>
-            <button class="btn btn-secondary" onclick="app.cancelImport()">
-                ❌ Annulla
-            </button>
-        `;
+        const url = URL.createObjectURL(recording.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `registrazione-${new Date(recording.timestamp).toISOString()}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     /**
@@ -4771,22 +6294,106 @@ Rispondi SOLO in formato JSON con questa struttura:
             return;
         }
 
-        this.documentClassification = {
-            tipo: selectedType,
-            confidenza: 1.0,
-            descrizione: 'Classificazione manuale',
-            suggerimenti: ''
+        const feed = {
+            id: Date.now().toString(),
+            name: name,
+            url: url,
+            category: category,
+            addedDate: new Date().toISOString(),
+            lastFetched: null,
+            itemCount: 0,
+            active: true
         };
 
-        // Process based on type
-        if (selectedType === 'ANAGRAFICA_STUDENTI') {
-            this.processStudentsImport();
-        } else if (selectedType === 'MATERIALI_DIDATTICI') {
-            this.processMaterialsImport();
-        } else if (selectedType === 'ATTIVITA') {
-            this.processActivitiesImport();
-        } else {
-            alert('Tipo di documento non ancora supportato per l\'importazione automatica');
+        this.rssFeeds.push(feed);
+        this.saveData();
+        this.hideAddFeedForm();
+        this.renderFeeds();
+
+        // Fetch news from this feed immediately
+        await this.fetchFeedNews(feed.id);
+    }
+
+    async fetchFeedNews(feedId) {
+        const feed = this.rssFeeds.find(f => f.id === feedId);
+        if (!feed) return;
+
+        try {
+            // Use a CORS proxy to fetch the RSS feed
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const response = await fetch(corsProxy + encodeURIComponent(feed.url));
+            
+            if (!response.ok) {
+                throw new Error('Errore nel caricamento del feed');
+            }
+
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+            // Check for RSS or Atom format
+            const items = xmlDoc.querySelectorAll('item');
+            const entries = xmlDoc.querySelectorAll('entry');
+
+            let newsArray = [];
+
+            if (items.length > 0) {
+                // RSS format
+                items.forEach(item => {
+                    const newsItem = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        feedId: feedId,
+                        feedName: feed.name,
+                        category: feed.category,
+                        title: item.querySelector('title')?.textContent || 'Senza titolo',
+                        link: item.querySelector('link')?.textContent || '',
+                        description: item.querySelector('description')?.textContent || '',
+                        pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+                        fetchedDate: new Date().toISOString()
+                    };
+                    newsArray.push(newsItem);
+                });
+            } else if (entries.length > 0) {
+                // Atom format
+                entries.forEach(entry => {
+                    const newsItem = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        feedId: feedId,
+                        feedName: feed.name,
+                        category: feed.category,
+                        title: entry.querySelector('title')?.textContent || 'Senza titolo',
+                        link: entry.querySelector('link')?.getAttribute('href') || '',
+                        description: entry.querySelector('summary')?.textContent || entry.querySelector('content')?.textContent || '',
+                        pubDate: entry.querySelector('published')?.textContent || entry.querySelector('updated')?.textContent || new Date().toISOString(),
+                        fetchedDate: new Date().toISOString()
+                    };
+                    newsArray.push(newsItem);
+                });
+            }
+
+            // Add news items that don't already exist
+            newsArray.forEach(newsItem => {
+                const exists = this.newsItems.some(n => n.link === newsItem.link && n.feedId === feedId);
+                if (!exists) {
+                    this.newsItems.unshift(newsItem);
+                }
+            });
+
+            // Update feed metadata
+            feed.lastFetched = new Date().toISOString();
+            feed.itemCount = newsArray.length;
+
+            this.saveData();
+            this.renderFeeds();
+            this.renderNews();
+            this.updateNewsFilters();
+
+            return newsArray.length;
+
+        } catch (error) {
+            console.error('Error fetching feed:', error);
+            alert(`Errore nel caricamento del feed "${feed.name}": ${error.message}`);
+            return 0;
         }
     }
 
@@ -4801,63 +6408,90 @@ Rispondi SOLO in formato JSON con questa struttura:
             return;
         }
 
-        const { fileData } = this.currentImportData;
-        const previewDiv = document.getElementById('document-preview');
-        const previewContent = document.getElementById('preview-content');
-        
-        // Hide classification, show preview
-        document.getElementById('document-classification').style.display = 'none';
-        previewDiv.style.display = 'block';
-
-        // Extract student data
-        let studentsData = [];
-        
-        if (fileData.type === 'csv' || fileData.type === 'excel') {
-            studentsData = this.extractStudentsFromTabularData(fileData.data);
-        } else if (fileData.type === 'json') {
-            studentsData = this.extractStudentsFromJSON(fileData.data);
+        const feedsList = document.getElementById('feeds-list');
+        if (feedsList) {
+            feedsList.innerHTML = '<div class="loading-spinner">🔄 Aggiornamento feed in corso...</div>';
         }
 
-        // Store for confirmation
-        this.currentImportData.studentsData = studentsData;
-
-        // Show preview
-        if (studentsData.length === 0) {
-            previewContent.innerHTML = `
-                <div class="warning-message">
-                    ⚠️ Nessun dato studente trovato nel file.
-                    Verifica che il file contenga colonne come: nome, cognome, email, classe, data_nascita, ecc.
-                </div>
-            `;
-        } else {
-            previewContent.innerHTML = `
-                <p><strong>Trovati ${studentsData.length} studenti da importare</strong></p>
-                <div class="preview-table-container">
-                    <table class="preview-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Classe</th>
-                                <th>Data Nascita</th>
-                                <th>Onomastico</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${studentsData.map(s => `
-                                <tr>
-                                    <td>${s.name || 'N/D'}</td>
-                                    <td>${s.email || 'N/D'}</td>
-                                    <td>${s.class || 'N/D'}</td>
-                                    <td>${s.birthdate || 'N/D'}</td>
-                                    <td>${s.nameday || 'N/D'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+        let totalNews = 0;
+        for (const feed of this.rssFeeds.filter(f => f.active)) {
+            const count = await this.fetchFeedNews(feed.id);
+            totalNews += count;
         }
+
+        alert(`Aggiornamento completato! ${totalNews} nuove news caricate.`);
+    }
+
+    deleteFeed(feedId) {
+        if (!confirm('Sei sicuro di voler eliminare questa fonte RSS?')) {
+            return;
+        }
+
+        // Remove feed
+        this.rssFeeds = this.rssFeeds.filter(f => f.id !== feedId);
+        
+        // Remove associated news
+        this.newsItems = this.newsItems.filter(n => n.feedId !== feedId);
+        
+        this.saveData();
+        this.renderFeeds();
+        this.renderNews();
+        this.updateNewsFilters();
+    }
+
+    toggleFeedActive(feedId) {
+        const feed = this.rssFeeds.find(f => f.id === feedId);
+        if (feed) {
+            feed.active = !feed.active;
+            this.saveData();
+            this.renderFeeds();
+        }
+    }
+
+    renderFeeds() {
+        const feedsList = document.getElementById('feeds-list');
+        if (!feedsList) return;
+
+        if (this.rssFeeds.length === 0) {
+            feedsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📡</div>
+                    <p>Nessuna fonte RSS configurata</p>
+                    <p><small>Aggiungi una fonte RSS per iniziare a ricevere news</small></p>
+                </div>
+            `;
+            return;
+        }
+
+        feedsList.innerHTML = this.rssFeeds.map(feed => {
+            const lastFetched = feed.lastFetched 
+                ? new Date(feed.lastFetched).toLocaleString('it-IT')
+                : 'Mai';
+
+            return `
+                <div class="feed-item">
+                    <div class="feed-item-header">
+                        <div>
+                            <div class="feed-item-title">${feed.name}</div>
+                            <span class="feed-item-category">${feed.category}</span>
+                        </div>
+                        <div>
+                            ${feed.active ? '✅' : '⏸️'}
+                        </div>
+                    </div>
+                    <div class="feed-item-url">${feed.url}</div>
+                    <div class="feed-item-meta">
+                        <span>📊 ${feed.itemCount} news</span>
+                        <span>🕐 Ultimo aggiornamento: ${lastFetched}</span>
+                    </div>
+                    <div class="feed-item-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="app.fetchFeedNews('${feed.id}')">🔄 Aggiorna</button>
+                        <button class="btn btn-sm btn-secondary" onclick="app.toggleFeedActive('${feed.id}')">${feed.active ? '⏸️ Disattiva' : '▶️ Attiva'}</button>
+                        <button class="btn btn-sm btn-danger" onclick="app.deleteFeed('${feed.id}')">🗑️ Elimina</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     /**
@@ -4887,35 +6521,89 @@ Rispondi SOLO in formato JSON con questa struttura:
             notes: 'notes'
         };
 
-        return data.map(row => {
-            const student = {
-                name: '',
-                email: '',
-                class: '',
-                birthdate: null,
-                nameday: null,
-                notes: null
-            };
+        this.renderNews();
+    }
 
-            // Map row fields to student object
-            Object.keys(row).forEach(key => {
-                const normalizedKey = key.toLowerCase().trim();
-                const mappedField = fieldMappings[normalizedKey];
-                
-                if (mappedField) {
-                    student[mappedField] = row[key];
-                }
-            });
+    renderNews() {
+        const newsList = document.getElementById('news-list');
+        if (!newsList) return;
 
-            // Combine name and lastName if separate
-            if (student.lastName) {
-                student.name = `${student.name || ''} ${student.lastName}`.trim();
-                delete student.lastName;
+        let filteredNews = [...this.newsItems];
+
+        // Apply filters
+        if (this.newsFilter.source) {
+            filteredNews = filteredNews.filter(n => n.feedId === this.newsFilter.source);
+        }
+        if (this.newsFilter.category) {
+            filteredNews = filteredNews.filter(n => n.category === this.newsFilter.category);
+        }
+
+        // Sort by date (newest first)
+        filteredNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+        if (filteredNews.length === 0) {
+            newsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📰</div>
+                    <p>Nessuna news disponibile</p>
+                    <p><small>Aggiungi fonti RSS e aggiorna per vedere le news</small></p>
+                </div>
+            `;
+            return;
+        }
+
+        newsList.innerHTML = filteredNews.slice(0, 50).map(news => {
+            const pubDate = new Date(news.pubDate).toLocaleString('it-IT');
+            const description = news.description.length > 300 
+                ? news.description.substring(0, 300) + '...'
+                : news.description;
+
+            return `
+                <div class="news-item">
+                    <div class="news-item-header">
+                        <div>
+                            <div class="news-item-title">
+                                <a href="${news.link}" target="_blank" rel="noopener noreferrer">${news.title}</a>
+                            </div>
+                            <div class="news-item-meta">
+                                <span class="news-item-source">📡 ${news.feedName}</span>
+                                <span>🏷️ ${news.category}</span>
+                                <span>📅 ${pubDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item-description">${this.stripHtml(description)}</div>
+                    <div class="news-item-actions">
+                        <a href="${news.link}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">📖 Leggi</a>
+                        <button class="btn btn-sm btn-secondary" onclick="app.openAIAgentWithNews('${news.link}', '${this.escapeHtml(news.title)}')">🤖 Analizza con IA</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    updateNewsFilters() {
+        const sourceSelect = document.getElementById('news-filter-source');
+        if (!sourceSelect) return;
+
+        // Populate source filter
+        const currentValue = sourceSelect.value;
+        sourceSelect.innerHTML = '<option value="">Tutte le fonti</option>';
+        this.rssFeeds.forEach(feed => {
+            const option = document.createElement('option');
+            option.value = feed.id;
+            option.textContent = feed.name;
+            if (feed.id === currentValue) {
+                option.selected = true;
             }
+            sourceSelect.appendChild(option);
+        });
+    }
 
-            // Only include if we have at least a name
-            return student.name ? student : null;
-        }).filter(s => s !== null);
+    stripHtml(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
     }
 
     /**
@@ -4928,10 +6616,15 @@ Rispondi SOLO in formato JSON con questa struttura:
         if (Array.isArray(data)) {
             return this.extractStudentsFromTabularData(data);
         }
+    }
+
+    updateAIModalContext() {
+        const currentTab = this.currentActiveTab;
         
-        // If data has a students property, use it
-        if (data.students && Array.isArray(data.students)) {
-            return this.extractStudentsFromTabularData(data.students);
+        // Update modal title
+        const titleElement = document.getElementById('ai-agent-modal-title');
+        if (titleElement) {
+            titleElement.textContent = this.getContextualTitle(currentTab);
         }
 
         return [];
@@ -4947,73 +6640,47 @@ Rispondi SOLO in formato JSON con questa struttura:
             return;
         }
 
-        const studentsData = this.currentImportData.studentsData;
-        let importedCount = 0;
-        let duplicatesCount = 0;
+        // Update contextual suggestions
+        const suggestionsContainer = document.getElementById('ai-suggestions-buttons');
+        if (suggestionsContainer) {
+            const suggestions = this.getContextualSuggestions(currentTab);
+            suggestionsContainer.innerHTML = suggestions.map(s => 
+                `<button class="suggestion-btn" onclick="app.setAIAgentPrompt('${s.prompt.replace(/'/g, "\\'")}')">${s.icon} ${s.text}</button>`
+            ).join('');
+        }
 
-        studentsData.forEach(studentData => {
-            // Check for duplicates
-            const existing = this.students.find(s => 
-                s.name.toLowerCase() === studentData.name.toLowerCase() &&
-                s.email === studentData.email
-            );
+        // Show/hide URL input based on section (only show for news)
+        const urlGroup = document.getElementById('ai-agent-url-group');
+        if (urlGroup) {
+            urlGroup.style.display = currentTab === 'news' ? 'block' : 'none';
+        }
 
-            if (existing) {
-                // Update existing student with new data (merge)
-                if (studentData.birthdate && !existing.birthdate) existing.birthdate = studentData.birthdate;
-                if (studentData.nameday && !existing.nameday) existing.nameday = studentData.nameday;
-                if (studentData.class && !existing.class) existing.class = studentData.class;
-                if (studentData.notes) {
-                    existing.notes = existing.notes ? 
-                        `${existing.notes}\n${studentData.notes}` : 
-                        studentData.notes;
-                }
-                duplicatesCount++;
+        // Update context help text
+        const contextHelp = document.getElementById('ai-agent-context-help');
+        if (contextHelp) {
+            if (currentTab === 'news') {
+                contextHelp.textContent = 'Specifica cosa vuoi che l\'agente analizzi dalla news';
             } else {
-                // Add new student
-                const student = {
-                    id: Date.now() + importedCount,
-                    name: studentData.name,
-                    email: studentData.email || '',
-                    class: studentData.class || '',
-                    birthdate: studentData.birthdate || null,
-                    nameday: studentData.nameday || null,
-                    notes: studentData.notes || null,
-                    createdAt: new Date().toISOString()
-                };
-                this.students.push(student);
-                importedCount++;
+                contextHelp.textContent = `Specifica cosa vuoi che l'agente faccia per aiutarti in questa sezione`;
             }
-        });
+        }
+    }
 
-        // Save and refresh
-        this.saveData();
-        this.renderStudents();
-        this.updateClassSelectors();
+    closeAIAgentModal() {
+        const modal = document.getElementById('ai-agent-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Clear form
+        document.getElementById('ai-agent-news-url').value = '';
+        document.getElementById('ai-agent-context').value = '';
+        document.getElementById('ai-agent-results').style.display = 'none';
+    }
 
-        // Record imported document
-        this.recordImportedDocument({
-            fileName: this.currentImportData.file.name,
-            fileType: this.currentImportData.fileData.type,
-            classificationType: this.documentClassification.tipo,
-            importedCount,
-            duplicatesCount,
-            timestamp: new Date().toISOString()
-        });
-
-        // Create notification
-        this.createNotification({
-            title: '✅ Importazione Completata',
-            message: `Importati ${importedCount} nuovi studenti. ${duplicatesCount} duplicati aggiornati.`,
-            type: 'system',
-            notificationId: `import-${Date.now()}`
-        });
-
-        // Show success and reset
-        alert(`✅ Importazione completata!\n\nNuovi studenti: ${importedCount}\nDuplicati aggiornati: ${duplicatesCount}`);
-        
-        this.cancelImport();
-        this.switchTab('students');
+    openAIAgentWithNews(newsUrl, newsTitle) {
+        this.toggleAIAgentModal();
+        document.getElementById('ai-agent-news-url').value = newsUrl;
+        document.getElementById('ai-agent-context').value = `Analizza questa news: "${newsTitle}" ed estrai date, scadenze, documenti e soggetti coinvolti.`;
     }
 
     /**
@@ -5033,58 +6700,34 @@ Rispondi SOLO in formato JSON con questa struttura:
             return;
         }
 
-        const { file, fileData } = this.currentImportData;
-        const previewDiv = document.getElementById('document-preview');
-        const previewContent = document.getElementById('preview-content');
+        if (!context) {
+            alert('Inserisci una richiesta per l\'agente IA');
+            return;
+        }
+
+        const apiKey = localStorage.getItem('openrouter-api-key');
+        if (!apiKey) {
+            alert('Configura la tua API key di OpenRouter nelle impostazioni prima di usare l\'IA');
+            this.switchTab('settings');
+            return;
+        }
+
+        // Show loading state
+        const resultsDiv = document.getElementById('ai-agent-results');
+        const resultsContent = document.getElementById('ai-agent-results-content');
+        const actionsDiv = document.getElementById('ai-agent-actions');
         
-        // Hide classification, show preview
-        document.getElementById('document-classification').style.display = 'none';
-        previewDiv.style.display = 'block';
+        resultsDiv.style.display = 'block';
+        resultsContent.innerHTML = '<div class="loading-spinner">🤖 Analisi in corso...</div>';
+        actionsDiv.style.display = 'none';
 
-        let activitiesData = [];
-
-        // Extract activities based on file type
-        if (fileData.type === 'csv' || fileData.type === 'excel') {
-            activitiesData = this.extractActivitiesFromTabularData(fileData.data);
-        } else if (fileData.type === 'json') {
-            activitiesData = this.extractActivitiesFromJSON(fileData.data);
-        } else if (fileData.type === 'pdf' && fileData.data) {
-            // Extract activities from PDF text
-            activitiesData = this.extractActivitiesFromPDF(fileData.data);
-        } else if (fileData.type === 'text' && fileData.data) {
-            // Extract from plain text
-            activitiesData = this.extractActivitiesFromPDF(fileData.data);
-        }
-
-        // Store for confirmation
-        this.currentImportData.activitiesData = activitiesData;
-
-        // Show preview
-        if (activitiesData.length === 0) {
-            previewContent.innerHTML = `
-                <div class="warning-message">
-                    ⚠️ Nessuna attività trovata nel file.
-                    <p>Verifica che il documento contenga informazioni su attività didattiche per i livelli: Prima, Seconda, Terza Media.</p>
-                </div>
-            `;
-        } else {
-            // Group by class level
-            const groupedActivities = this.groupActivitiesByClass(activitiesData);
+        try {
+            let prompt = '';
             
-            previewContent.innerHTML = `
-                <p><strong>Trovate ${activitiesData.length} attività da importare</strong></p>
-                ${this.renderActivitiesPreviewTable(groupedActivities)}
-                <div class="form-actions" style="margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="app.confirmActivitiesImport()">
-                        ✅ Conferma Importazione
-                    </button>
-                    <button class="btn btn-secondary" onclick="app.cancelImport()">
-                        ❌ Annulla
-                    </button>
-                </div>
-            `;
-        }
-    }
+            if (currentTab === 'news') {
+                // News-specific analysis
+                prompt = `
+Analizza la news disponibile al seguente URL: ${newsUrl}
 
     /**
      * Extracts a list of activities from the text content of a PDF file.
@@ -5101,80 +6744,91 @@ Rispondi SOLO in formato JSON con questa struttura:
             'Terza': /\b(?:terza|3[°^ª]|classe terza)\b/gi
         };
 
-        // Split content by sections (using common delimiters)
-        const sections = textContent.split(/\n\n+|\r\n\r\n+/);
-        
-        let currentClass = null;
-        
-        for (let section of sections) {
-            section = section.trim();
-            if (!section) continue;
+Fornisci un'analisi strutturata con:
+1. 📅 DATE E SCADENZE: Identifica tutte le date importanti e scadenze menzionate
+2. 📎 DOCUMENTI: Elenca eventuali documenti, moduli o allegati menzionati
+3. 👥 SOGGETTI: Identifica destinatari, uffici, responsabili coinvolti
+4. 📋 AZIONI CONSIGLIATE: Proponi azioni concrete che il docente dovrebbe intraprendere
 
-            // Detect class level in section
-            for (let [className, pattern] of Object.entries(classPatterns)) {
-                if (pattern.test(section)) {
-                    currentClass = className;
-                    break;
+Per ogni azione consigliata, specifica il tipo (es. SCADENZA, PROMEMORIA, CIRCOLARE, ATTIVITÀ) e i dettagli necessari.
+
+Rispondi in italiano in modo chiaro e strutturato.
+                `;
+            } else {
+                // Contextual analysis for other sections
+                const sectionContext = this.getContextForAI(currentTab);
+                prompt = `
+Sei un assistente IA per un'applicazione di gestione didattica per docenti.
+
+SEZIONE CORRENTE: ${this.getSectionName(currentTab)}
+
+CONTESTO:
+${sectionContext}
+
+RICHIESTA DEL DOCENTE:
+${context}
+
+Fornisci una risposta utile, pratica e specifica per aiutare il docente nella sezione corrente.
+Se possibile, suggerisci azioni concrete che può intraprendere nell'app.
+
+Rispondi in italiano in modo chiaro e strutturato.
+                `;
+            }
+
+            const response = await this.callOpenRouterAPI(prompt, apiKey);
+
+            if (response && response.content) {
+                resultsContent.innerHTML = response.content.replace(/\n/g, '<br>');
+
+                // Try to extract proposed actions from the response
+                if (currentTab === 'news') {
+                    this.extractProposedActions(response.content);
                 }
             }
 
-            // Extract activities from section
-            // Look for activity indicators like: numbers, bullets, dashes, activity types
-            const activityPatterns = [
-                /(?:^|\n)\s*[-•·]\s*(.+?)(?=\n|$)/gm,  // Bullet points
-                /(?:^|\n)\s*\d+[.)]\s*(.+?)(?=\n|$)/gm,  // Numbered lists
-                /(?:lezione|laboratorio|esercitazione|progetto|verifica|compito):\s*(.+?)(?=\n|$)/gi,  // Activity types
-            ];
-
-            for (let pattern of activityPatterns) {
-                let match;
-                while ((match = pattern.exec(section)) !== null) {
-                    const title = match[1].trim();
-                    if (title && title.length > 10 && title.length < 200) {
-                        // Determine activity type from keywords
-                        const type = this.detectActivityType(title);
-                        
-                        activities.push({
-                            title: title,
-                            type: type,
-                            classLevel: currentClass || 'Generale',
-                            description: '',
-                            status: 'planned',
-                            source: 'PDF Import'
-                        });
-                    }
-                }
-            }
+        } catch (error) {
+            console.error('Error analyzing with AI:', error);
+            resultsContent.innerHTML = `<div class="error-message">Errore nell'analisi: ${error.message}</div>`;
         }
+    }
 
-        // If no activities found with patterns, try a more general approach
-        if (activities.length === 0) {
-            // Split by lines and look for meaningful content
-            const lines = textContent.split(/\n/).filter(line => {
-                const trimmed = line.trim();
-                return trimmed.length > 15 && trimmed.length < 200 && !trimmed.match(/^[0-9\s.]+$/);
-            });
+    getContextForAI(tab) {
+        // Provide context about current section to the AI
+        const contexts = {
+            'dashboard': 'Il docente è nella dashboard principale dove può vedere una panoramica generale delle attività, lezioni e studenti.',
+            'lessons': `Il docente sta gestendo le lezioni. Attualmente ci sono ${this.lessons.length} lezioni registrate.`,
+            'students': `Il docente sta gestendo gli studenti. Ci sono ${this.students.length} studenti totali nelle sue classi.`,
+            'grades': 'Il docente sta gestendo le valutazioni degli studenti.',
+            'schedule': 'Il docente sta visualizzando e pianificando l\'orario delle lezioni.',
+            'activities': `Il docente sta gestendo le attività didattiche. Ci sono ${this.activities.length} attività programmate.`,
+            'settings': 'Il docente sta configurando le impostazioni dell\'applicazione.'
+        };
 
-            let currentClass = 'Prima';  // Default starting class
-            
-            for (let line of lines) {
-                // Check for class level markers
-                for (let [className, pattern] of Object.entries(classPatterns)) {
-                    if (pattern.test(line)) {
-                        currentClass = className;
-                        break;
-                    }
-                }
+        return contexts[tab] || 'Il docente sta usando l\'applicazione di gestione didattica.';
+    }
 
-                // If line contains activity-related keywords, consider it an activity
-                if (this.looksLikeActivity(line)) {
-                    activities.push({
-                        title: line.trim(),
-                        type: this.detectActivityType(line),
-                        classLevel: currentClass,
-                        description: '',
-                        status: 'planned',
-                        source: 'PDF Import'
+    extractProposedActions(aiResponse) {
+        const actionsDiv = document.getElementById('ai-agent-actions');
+        const proposedActionsDiv = document.getElementById('ai-agent-proposed-actions');
+
+        // Simple parsing to extract actions
+        // This is a basic implementation - in a real scenario, you might want structured output from the AI
+        const lines = aiResponse.split('\n');
+        const actions = [];
+
+        let inActionsSection = false;
+        for (const line of lines) {
+            if (line.toLowerCase().includes('azioni consigliate') || line.toLowerCase().includes('azioni proposte')) {
+                inActionsSection = true;
+                continue;
+            }
+
+            if (inActionsSection && line.trim()) {
+                // Look for action indicators
+                if (line.match(/SCADENZA|PROMEMORIA|CIRCOLARE|ATTIVITÀ|TODO/i)) {
+                    actions.push({
+                        text: line.trim(),
+                        type: this.detectActionType(line)
                     });
                 }
             }
@@ -5226,48 +6880,42 @@ Rispondi SOLO in formato JSON con questa struttura:
     extractActivitiesFromTabularData(data) {
         const activities = [];
         
-        const fieldMappings = {
-            titolo: 'title',
-            title: 'title',
-            attivita: 'title',
-            attività: 'title',
-            tipo: 'type',
-            type: 'type',
-            classe: 'classLevel',
-            class: 'classLevel',
-            livello: 'classLevel',
-            descrizione: 'description',
-            description: 'description',
-            stato: 'status',
-            status: 'status'
-        };
+        // In a full implementation, this would:
+        // - Extract details from the action text
+        // - Create a reminder, activity, or notification based on the type
+        // - Save to the appropriate data structure
+        // - Navigate to the relevant section
+    }
 
-        data.forEach(row => {
-            const activity = {
-                title: '',
-                type: 'lesson',
-                classLevel: 'Generale',
-                description: '',
-                status: 'planned',
-                source: 'Tabular Import'
-            };
+    // ==========================================
+    // AI FAB MANAGEMENT
+    // ==========================================
 
-            // Map fields
-            for (let [key, value] of Object.entries(row)) {
-                const normalizedKey = key.toLowerCase().trim();
-                const mappedField = fieldMappings[normalizedKey];
-                
-                if (mappedField && value) {
-                    activity[mappedField] = String(value).trim();
+    initializeAIFAB() {
+        const fab = document.getElementById('ai-fab');
+        if (!fab) return;
+
+        // Load saved position
+        const savedPosition = localStorage.getItem('ai-fab-position');
+        if (savedPosition) {
+            try {
+                this.aiFabPosition = JSON.parse(savedPosition);
+                if (this.aiFabPosition.left && this.aiFabPosition.top) {
+                    fab.style.left = this.aiFabPosition.left;
+                    fab.style.top = this.aiFabPosition.top;
+                    fab.style.right = 'auto';
+                    fab.style.bottom = 'auto';
                 }
+            } catch (e) {
+                console.error('Error loading AI FAB position:', e);
             }
+        }
 
-            if (activity.title) {
-                activities.push(activity);
-            }
-        });
+        // Make FAB draggable
+        this.makeAIFABDraggable(fab);
 
-        return activities;
+        // Update visibility based on settings
+        this.updateAIFABVisibility();
     }
 
     /**
@@ -5294,8 +6942,9 @@ Rispondi SOLO in formato JSON con questa struttura:
             }
         });
 
-        return activities;
-    }
+        const startDrag = (e) => {
+            isDragging = true;
+            fab.classList.add('dragging');
 
     /**
      * Groups a list of activities by their designated class level.
@@ -5310,17 +6959,20 @@ Rispondi SOLO in formato JSON con questa struttura:
             'Generale': []
         };
 
-        activities.forEach(activity => {
-            const classLevel = activity.classLevel || 'Generale';
-            if (grouped[classLevel]) {
-                grouped[classLevel].push(activity);
-            } else {
-                grouped['Generale'].push(activity);
-            }
-        });
+        const drag = (e) => {
+            if (!isDragging) return;
 
-        return grouped;
-    }
+            let currentX, currentY;
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
 
     /**
      * Renders a preview table of activities grouped by class level.
@@ -5351,6 +7003,7 @@ Rispondi SOLO in formato JSON con questa struttura:
                 'homework': '📝 Compiti',
                 'exam': '📄 Verifica'
             };
+            localStorage.setItem('ai-fab-position', JSON.stringify(this.aiFabPosition));
 
             html += `
                 <div class="class-activities-group" style="margin-bottom: 20px;">
@@ -5378,7 +7031,15 @@ Rispondi SOLO in formato JSON con questa struttura:
             `;
         }
 
-        return html;
+        // Mouse events
+        fab.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        fab.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag, { passive: false });
     }
 
     /**
@@ -5392,6 +7053,7 @@ Rispondi SOLO in formato JSON con questa struttura:
             alert('Nessuna attività da importare');
             return;
         }
+    }
 
         const activitiesData = this.currentImportData.activitiesData;
         const file = this.currentImportData.file;
@@ -5443,8 +7105,8 @@ Rispondi SOLO in formato JSON con questa struttura:
             }
         });
 
-        // Save to localStorage
-        this.saveData();
+        alert('Posizione dell\'Agente IA ripristinata!');
+    }
 
         // Record import
         this.recordImportedDocument({
@@ -5454,8 +7116,11 @@ Rispondi SOLO in formato JSON con questa struttura:
             timestamp: new Date().toISOString()
         });
 
-        // Render updated activities
-        this.renderActivities();
+        return suggestions[tab] || [
+            { icon: '💬', text: 'Assistenza generale', prompt: 'Come posso aiutarti?' },
+            { icon: '📚', text: 'Guida app', prompt: 'Spiegami le funzionalità dell\'app' }
+        ];
+    }
 
         // Show success message
         const previewContent = document.getElementById('preview-content');
@@ -5473,6 +7138,27 @@ Rispondi SOLO in formato JSON con questa struttura:
                 </button>
             </div>
         `;
+        
+        this.classes.forEach(cls => {
+            const isActive = this.activeClass === cls.id || this.activeClass === cls.name;
+            html += `
+                <div class="class-selector-item ${isActive ? 'active' : ''}" 
+                     onclick="app.selectClass('${cls.id}')">
+                    <div class="class-selector-icon">🎓</div>
+                    <div class="class-selector-details">
+                        <div class="class-selector-name">${cls.name}</div>
+                        <div class="class-selector-meta">
+                            ${cls.year ? `Anno: ${cls.year}° ` : ''}
+                            ${cls.section ? `Sezione: ${cls.section} ` : ''}
+                            ${cls.studentsCount || 0} studenti
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        list.innerHTML = html;
+        modal.style.display = 'flex';
     }
 
     /**
@@ -5520,14 +7206,69 @@ Rispondi SOLO in formato JSON con questa struttura:
         this.currentImportData = null;
         this.documentClassification = null;
         
-        // Hide all sections
-        document.getElementById('document-upload-status').style.display = 'none';
-        document.getElementById('document-classification').style.display = 'none';
-        document.getElementById('document-preview').style.display = 'none';
+        const hours = [8, 9, 10, 11, 12, 13];
+        let html = '';
+        let hasLessons = false;
         
-        // Reset file input
-        const fileInput = document.getElementById('document-file-input');
-        if (fileInput) fileInput.value = '';
+        hours.forEach(hour => {
+            const key = this.getScheduleKey(today, hour);
+            const slot = this.schedule[key];
+            
+            // Filter by active class if not workspace
+            if (slot && this.activeClass !== 'workspace' && slot.classId) {
+                const slotClassId = slot.classId;
+                if (slotClassId != this.activeClass) {
+                    return; // Skip this slot if not matching active class
+                }
+            }
+            
+            if (slot && slot.classId) {
+                hasLessons = true;
+                const cls = this.classes.find(c => c.id == slot.classId);
+                const activityInfo = this.getActivityTypeIcon(slot.activityType);
+                
+                html += `
+                    <div class="schedule-cell" onclick="app.showScheduleSlotEditor(new Date('${today.toISOString()}'), ${hour})">
+                        <div class="schedule-cell-time">${hour}:00 - ${hour + 1}:00</div>
+                        <div class="schedule-cell-class">${cls ? cls.name : 'Classe'}</div>
+                        <div class="schedule-cell-activity">
+                            <span class="activity-symbol">${activityInfo.icon}</span>
+                            <span class="activity-label">${activityInfo.label}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Show empty slot only if workspace mode
+                if (this.activeClass === 'workspace' || !this.activeClass) {
+                    html += `
+                        <div class="schedule-cell empty" onclick="app.showScheduleSlotEditor(new Date('${today.toISOString()}'), ${hour})">
+                            <div class="schedule-cell-time">${hour}:00 - ${hour + 1}:00</div>
+                            <div class="schedule-cell-class">-</div>
+                            <div class="schedule-cell-activity">
+                                <span class="activity-label">Nessuna attività</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        });
+        
+        if (!hasLessons && (this.activeClass === 'workspace' || !this.activeClass)) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📅 Nessuna lezione programmata per oggi.</p>
+                    <p><small>Clicca su una cella vuota per aggiungere un'attività.</small></p>
+                </div>
+            `;
+        } else if (!hasLessons) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>📅 Nessuna lezione programmata per questa classe oggi.</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = html;
+        }
     }
 
     /**
@@ -5559,21 +7300,15 @@ Rispondi SOLO in formato JSON con questa struttura:
             return;
         }
 
-        listDiv.innerHTML = this.importedDocuments.map((doc, index) => `
-            <div class="imported-doc-item">
-                <div class="doc-info">
-                    <h4>📄 ${doc.fileName}</h4>
-                    <p><strong>Tipo:</strong> ${doc.classificationType}</p>
-                    <p><strong>Importati:</strong> ${doc.importedCount} elementi</p>
-                    <p><strong>Data:</strong> ${new Date(doc.timestamp).toLocaleString('it-IT')}</p>
-                </div>
-            </div>
-        `).join('');
+    closeHelp() {
+        const modal = document.getElementById('help-modal');
+        if (modal) modal.style.display = 'none';
     }
 
-    // ========================================
-    // AUDIO RECORDING MODULE METHODS
-    // ========================================
+    // Override setActiveClass to use new system
+    setActiveClass(className) {
+        this.selectClass(className || 'workspace');
+    }
 
     /**
      * Starts recording audio from the user's microphone.
@@ -5620,6 +7355,8 @@ Rispondi SOLO in formato JSON con questa struttura:
             console.error('Error starting recording:', error);
             alert('Impossibile avviare la registrazione. Verifica i permessi del microfono.');
         }
+        
+        this.updateActiveClassBadge();
     }
 
     /**
@@ -5637,15 +7374,15 @@ Rispondi SOLO in formato JSON con questa struttura:
                 clearInterval(this.recordingTimer);
                 this.recordingTimer = null;
             }
-            
-            // Update UI
-            document.getElementById('start-recording-btn').style.display = 'inline-block';
-            document.getElementById('stop-recording-btn').style.display = 'none';
-            document.getElementById('recording-timer').style.display = 'none';
-            
-            document.getElementById('recording-status').innerHTML = 
-                '<p class="success-message">✅ Registrazione salvata</p>';
-        }
+        });
+
+        // Scroll to top on click
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     }
 
     /**
@@ -5692,70 +7429,129 @@ Rispondi SOLO in formato JSON con questa struttura:
             time: new Date().toLocaleTimeString('it-IT')
         };
         
-        // Add current lesson if available
-        const today = new Date().toISOString().split('T')[0];
-        const todayLessons = this.lessons.filter(l => l.date === today);
-        if (todayLessons.length > 0) {
-            context.lesson = todayLessons[0].topic || todayLessons[0].subject;
+        if (!searchInput || !table) return;
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = table.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+
+            // Update clear button visibility
+            const searchBox = searchInput.closest('.search-box');
+            if (searchTerm) {
+                searchBox.classList.add('has-value');
+            } else {
+                searchBox.classList.remove('has-value');
+            }
+        });
+
+        // Clear search button
+        const clearBtn = searchInput.nextElementSibling;
+        if (clearBtn && clearBtn.classList.contains('clear-search')) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+            });
         }
-        
-        return context;
     }
 
-    renderRecordings() {
-        const listDiv = document.getElementById('recordings-list');
-        
-        if (this.audioRecordings.length === 0) {
-            listDiv.innerHTML = '<p class="empty-state">Nessuna registrazione disponibile</p>';
-            return;
+    // Usability: Auto-focus next field in forms
+    enableAutoFocus(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach((input, index) => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && input.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    const nextInput = inputs[index + 1];
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            });
+        });
+    }
+
+    // Usability: Show inline field validation
+    showFieldValidation(fieldId, message, isValid) {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+
+        // Remove existing validation message
+        const existingMsg = field.parentElement.querySelector('.field-validation');
+        if (existingMsg) {
+            existingMsg.remove();
         }
 
-        listDiv.innerHTML = `
-            <h4>Registrazioni (${this.audioRecordings.length})</h4>
-            ${this.audioRecordings.map(rec => {
-                const durationMin = Math.floor(rec.duration / 60000);
-                const durationSec = Math.floor((rec.duration % 60000) / 1000);
-                const url = URL.createObjectURL(rec.blob);
-                
-                return `
-                    <div class="recording-item">
-                        <div class="recording-info">
-                            <p><strong>📅 ${new Date(rec.timestamp).toLocaleString('it-IT')}</strong></p>
-                            <p>Classe: ${rec.context.class || 'N/D'}</p>
-                            ${rec.context.lesson ? `<p>Lezione: ${rec.context.lesson}</p>` : ''}
-                            <p>Durata: ${durationMin}:${String(durationSec).padStart(2, '0')}</p>
-                        </div>
-                        <audio controls src="${url}"></audio>
-                        <div class="recording-actions">
-                            <button class="btn btn-sm btn-secondary" onclick="app.downloadRecording(${rec.id})">
-                                💾 Download
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="app.deleteRecording(${rec.id})">
-                                🗑️ Elimina
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('')}
+        // Add new validation message
+        const validationMsg = document.createElement('div');
+        validationMsg.className = `field-validation ${isValid ? 'valid' : 'invalid'}`;
+        validationMsg.textContent = message;
+        validationMsg.style.cssText = `
+            font-size: 0.85em;
+            margin-top: 4px;
+            color: ${isValid ? 'var(--secondary-color)' : 'var(--danger-color)'};
+            display: flex;
+            align-items: center;
+            gap: 4px;
         `;
-    }
-
-    downloadRecording(id) {
-        const recording = this.audioRecordings.find(r => r.id === id);
-        if (!recording) return;
         
-        const url = URL.createObjectURL(recording.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `registrazione-${new Date(recording.timestamp).toISOString()}.webm`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const icon = document.createElement('span');
+        icon.className = 'material-icons';
+        icon.style.fontSize = '16px';
+        icon.textContent = isValid ? 'check_circle' : 'error';
+        validationMsg.prepend(icon);
+
+        field.parentElement.appendChild(validationMsg);
+
+        // Update field border
+        field.style.borderColor = isValid ? 'var(--secondary-color)' : 'var(--danger-color)';
     }
 
-    deleteRecording(id) {
-        if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
-            this.audioRecordings = this.audioRecordings.filter(r => r.id !== id);
-            this.renderRecordings();
+    // Usability: Create progress bar for multi-step modals
+    createProgressBar(steps, currentStep) {
+        const progressHTML = `
+            <div class="modal-progress">
+                <div class="progress-steps">
+                    ${steps.map((step, index) => `
+                        <div class="progress-step ${index < currentStep ? 'completed' : ''} ${index === currentStep ? 'active' : ''}">
+                            <div class="progress-step-circle">${index + 1}</div>
+                            <div class="progress-step-label">${step}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: ${(currentStep / (steps.length - 1)) * 100}%"></div>
+                </div>
+            </div>
+        `;
+        return progressHTML;
+    }
+
+    // Usability: Update progress bar
+    updateProgressBar(modalElement, currentStep, totalSteps) {
+        const progressBar = modalElement.querySelector('.progress-bar-fill');
+        const steps = modalElement.querySelectorAll('.progress-step');
+        
+        if (progressBar) {
+            progressBar.style.width = `${(currentStep / (totalSteps - 1)) * 100}%`;
+        }
+        
+        if (steps) {
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < currentStep) {
+                    step.classList.add('completed');
+                } else if (index === currentStep) {
+                    step.classList.add('active');
+                }
+            });
         }
     }
 }

@@ -1,47 +1,39 @@
 # 🎓 Docente++ 
 
-**Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter**
+**Progressive Web App per la gestione della didattica dell'insegnante potenziata da IA OpenRouter**
 
-App per un insegnamento basato su IA, evoluzione del progetto docente-plus con interfaccia web completa.
+App installabile per un insegnamento basato su IA, evoluzione del progetto docente-plus con interfaccia web completa e supporto PWA.
+
+> **Nota**: Questa è una web app standalone che non richiede installazione di dipendenze. Basta aprire `index.html` in un browser per iniziare!
+
+## 🎨 Design
+
+L'interfaccia utente di Docente++ segue le linee guida **Material Design** di Google:
+- **Material Icons** - Icone vettoriali moderne e accessibili
+- **Roboto Font** - Tipografia ottimizzata per leggibilità
+- **Palette di colori Material** - Blu #1976d2 (primary), Verde #4caf50 (secondary), Grigio #f5f5f5 (background)
+- **Elevazione e ombre** - Box-shadow coerenti per profondità visiva
+- **Border-radius 4px/8px** - Angoli arrotondati secondo lo stile Material
 
 ## 📋 Caratteristiche
 
-### Funzionalità Principali
+- **🎯 Onboarding Guidato** - Configurazione iniziale profilo docente
+- **🏫 Gestione Classi** - Crea, modifica ed elimina classi
+- **👥 Gestione Studenti** - Organizza studenti con import da CSV/Excel
+- **📚 Gestione Lezioni** - Crea lezioni manualmente o genera con IA
+- **📅 Orario Didattico** - Orario settimanale interattivo con vista giornaliera/settimanale
+- **📋 Gestione Attività** - Pianifica esercitazioni, laboratori, progetti, compiti e verifiche
+- **✅ Valutazioni** - Sistema completo per criteri, griglie e valutazioni con supporto IA
+- **🔔 Notifiche** - Promemoria automatici per lezioni, scadenze e backup
+- **📰 News RSS/Atom** - Aggregazione news con analisi IA contestuale
+- **🤖 Assistente IA** - Supporto OpenRouter per pianificazione didattica
+- **📂 Import Documenti** - Carica e importa documenti con riconoscimento IA
+- **🎙️ Registrazione Audio** - Registra lezioni con contesto automatico
+- **💾 Import/Export** - Backup completo in JSON, PDF o Excel
+- **📱 PWA** - Installabile su tutti i dispositivi, funziona offline
+- **🔐 Privacy** - Tutti i dati salvati solo localmente, nessun server
 
-- **🎯 Onboarding Guidato**: Configurazione iniziale del profilo docente al primo accesso
-- **👤 Profilo Docente**: Nome, cognome, email e informazioni scolastiche complete
-- **🏫 Gestione Classi**: Crea, modifica ed elimina le tue classi con dettagli completi
-- **📚 Discipline**: Gestione materie insegnate con autocomplete intelligente
-- **📅 Anno Scolastico**: Configurazione anno scolastico con date inizio/fine personalizzabili
-- **📅 Orario Didattico**: Gestione dell'orario settimanale con vista giornaliera e settimanale (lun-ven, 8-14)
-- **Dashboard Intuitiva**: Panoramica rapida di lezioni, studenti e attività con selezione classe attiva
-- **Gestione Lezioni**: Crea, visualizza ed elimina lezioni programmate
-- **📋 Gestione Attività**: Sistema completo per pianificare e monitorare attività didattiche (esercitazioni, laboratori, progetti, compiti)
-- **Gestione Studenti**: Organizza e gestisci i tuoi studenti
-- **✅ Gestione Valutazioni**: Sistema completo per criteri, griglie e valutazioni personalizzate
-- **Assistente IA OpenRouter**: Ottieni aiuto per pianificazione didattica, creazione materiali e idee innovative
-- **Generazione Automatica**: Crea piani di lezione completi con l'IA
-- **Persistenza Dati**: Tutti i dati salvati localmente nel browser
-- **Import/Export**: Backup e ripristino completo di profilo, classi e dati
-
-### Funzionalità IA
-
-L'assistente IA OpenRouter può aiutarti con:
-- 📐 Generazione piani di lezione strutturati
-- ✍️ Creazione di esercizi e attività didattiche
-- 🎯 Suggerimenti per attività interattive
-- 📊 Criteri e griglie di valutazione
-- 💡 Idee innovative per l'insegnamento
-- 🔍 Consigli personalizzati per la didattica
-
-## 🚀 Installazione e Utilizzo
-
-### Requisiti
-
-- Browser web moderno (Chrome, Firefox, Safari, Edge)
-- Chiave API OpenRouter (ottenibile su [https://openrouter.ai](https://openrouter.ai))
-
-### Avvio Rapido
+## 🚀 Avvio Rapido
 
 1. **Clona il repository**:
    ```bash
@@ -61,28 +53,14 @@ L'assistente IA OpenRouter può aiutarti con:
      ```
    - Poi naviga su `http://localhost:8000`
 
-3. **Primo accesso - Onboarding**:
-   - Al primo avvio, compila il form di benvenuto con:
-     - Nome, cognome ed email
-     - Ordine di scuola (Infanzia, Primaria, Secondaria I/II grado)
-     - Discipline insegnate (con autocomplete)
-     - Anno scolastico con date personalizzabili (default: 09/09/2025 - 30/06/2026)
-   - Clicca "Inizia ad Usare Docente++"
-
-4. **Configura le tue classi**:
-   - Vai nella sezione "Classi"
-   - Aggiungi le tue classi con nome, anno, sezione e numero studenti
-   - Modifica o elimina classi quando necessario
-
-5. **Configura l'API Key** (opzionale, per usare l'IA):
+3. **Configura l'API Key** (opzionale, per usare l'IA):
    - Vai nella sezione "Impostazioni"
-   - Inserisci la tua OpenRouter API Key
-   - (Opzionale) Inserisci il Model ID del modello OpenRouter
-   - Clicca "Verifica API Key" per testare la configurazione
+   - Inserisci la tua OpenRouter API Key (ottenibile su [openrouter.ai](https://openrouter.ai))
    - Salva le impostazioni
 
-6. **Inizia ad usare l'app**:
-   - Seleziona la classe attiva dalla Dashboard
+4. **Inizia ad usare l'app**:
+   - Completa l'onboarding iniziale con i tuoi dati
+   - Crea le tue classi
    - Aggiungi studenti e lezioni
    - Usa l'assistente IA per generare contenuti
    - Esporta i tuoi dati per backup
@@ -153,360 +131,55 @@ Le seguenti funzionalità sono pianificate per le prossime versioni:
 
 ## 📖 Guida all'Uso
 
-### 🎓 Onboarding Iniziale
-Al primo accesso, l'app ti guiderà attraverso la configurazione del profilo:
-1. **Dati Personali**: Nome, cognome ed email
-2. **Informazioni Scolastiche**: Ordine di scuola e nome istituto
-3. **Discipline**: Seleziona o inserisci le materie che insegni
-4. **Anno Scolastico**: Scegli l'anno e personalizza le date di inizio/fine
+### Primo Accesso
+Al primo avvio, l'app ti guiderà attraverso l'onboarding con configurazione di profilo, classi, discipline e anno scolastico.
 
-Tutti i dati vengono salvati automaticamente in localStorage.
+### Funzionalità Principali
 
-### 🏫 Gestione Classi
-1. Clicca "Nuova Classe" nella sezione Classi
-2. Inserisci nome classe (es. 3A, 5B)
-3. (Opzionale) Specifica anno di corso, sezione e numero studenti
-4. Le classi create saranno disponibili nel selettore della Dashboard
-5. Modifica o elimina classi in qualsiasi momento
+- **Dashboard** - Panoramica rapida con statistiche di lezioni, studenti e attività
+- **Classi e Studenti** - Gestisci classi e anagrafica studenti, importa da CSV/Excel
+- **Lezioni** - Crea lezioni manualmente o genera con l'IA
+- **Orario Didattico** - Gestisci l'orario settimanale con vista giornaliera e settimanale
+- **Attività** - Pianifica e monitora esercitazioni, laboratori, progetti, compiti e verifiche
+- **Valutazioni** - Sistema completo per criteri, griglie e valutazioni personalizzate
+- **Notifiche** - Promemoria automatici per lezioni, scadenze e backup
+- **News RSS** - Aggrega news da fonti esterne con analisi IA contestuale
+- **Assistente IA** - Chat intelligente per supporto didattico
+- **Import/Export** - Backup completo in JSON, PDF o Excel
 
-### 📊 Dashboard
-Visualizza statistiche rapide su:
-- Numero di lezioni programmate
-- Totale studenti
-- Valutazioni pendenti
-- Stato connessione IA
-- **Classe Attiva**: Seleziona la classe corrente per contestualizzare l'assistente IA
-
-### 📚 Gestione Lezioni
-1. Clicca "Nuova Lezione" per creare manualmente
-2. Oppure "Genera con IA" per una generazione assistita
-3. Compila i campi richiesti
-4. Salva e visualizza nella lista
-
-### 📅 Gestione Orario Didattico
-
-La sezione "Orario" ti permette di gestire il tuo orario settimanale in modo interattivo:
-
-#### Funzionalità Principali
-1. **Vista Settimanale**: Visualizza l'intera settimana dal lunedì al venerdì in una griglia
-2. **Vista Giornaliera**: Visualizza in dettaglio l'orario di un singolo giorno
-3. **Slot Orari**: Configura gli slot dalle 8:00 alle 14:00 (6 ore al giorno)
-4. **Esclusione Weekend**: Sabato e domenica sono automaticamente esclusi
-
-#### Configurazione Orario
-1. **Clicca su una cella** per modificare lo slot orario
-2. **Seleziona la classe** dal menu a tendina
-3. **Scegli il tipo di attività**:
-   - **T** (Teoria) - Badge blu
-   - **D** (Disegno) - Badge arancione
-   - **L** (Laboratorio) - Badge verde
-4. Salva o elimina lo slot
-
-#### Avvio Attività
-1. Clicca il pulsante **"Avvia"** su uno slot configurato
-2. Viene mostrata una finestra con le attività disponibili per la classe:
-   - Attività in corso
-   - Attività pianificate
-   - Attività completate di recente
-3. Seleziona un'attività per gestirla
-
-#### Navigazione
-- **Settimana Precedente/Successiva**: Naviga tra le settimane
-- **Giorno Precedente/Successivo**: Naviga tra i giorni (solo giorni lavorativi)
-- **Toggle Vista**: Passa da vista settimanale a giornaliera e viceversa
-
-> **Nota**: L'orario viene salvato automaticamente e incluso nei backup JSON, PDF ed Excel.
-
-### Gestione Studenti
-
-#### Aggiunta Manuale Studenti
-1. Vai nella sezione "Studenti"
-2. Clicca su "➕ Nuovo Studente"
-3. Compila il form con i dati dello studente:
-   - Nome e Cognome (obbligatorio)
-   - Email
-   - Classe
-   - Data di Nascita (per gestione compleanni e calcolo età)
-   - Onomastico/Santo (es. "San Giovanni - 24 Giugno")
-   - Note aggiuntive
-4. Clicca "Salva"
-
-#### 📥 Importazione Studenti da File
-
-Il modulo di importazione con IA ti permette di caricare elenchi studenti da file CSV o Excel:
-
-1. **Dalla sezione Studenti**:
-   - Clicca "📥 Importa da File"
-   - Verrai portato automaticamente alla sezione "🤖 Importa/gestisci con IA"
-
-2. **Caricamento File**:
-   - Clicca sull'area di upload o trascina il file
-   - Formati supportati: CSV, XLSX, PDF, TXT, JSON
-   - Il file verrà analizzato automaticamente
-
-3. **Classificazione IA** (se hai configurato OpenRouter API Key):
-   - L'IA riconosce automaticamente il tipo di documento
-   - Mostra il livello di confidenza della classificazione
-   - Fornisce suggerimenti per l'importazione
-
-4. **Anteprima e Conferma**:
-   - Visualizza i dati estratti in tabella
-   - Verifica che i campi siano mappati correttamente
-   - Clicca "✅ Conferma Importazione"
-
-5. **Gestione Duplicati**:
-   - Gli studenti esistenti vengono identificati per nome ed email
-   - I dati mancanti vengono integrati automaticamente
-   - Ricevi un riepilogo: nuovi studenti + duplicati aggiornati
-
-#### Formato File CSV/Excel
-
-Il sistema riconosce automaticamente colonne comuni:
-- `nome`, `name` → Nome studente
-- `cognome`, `lastname` → Cognome
-- `email`, `e-mail` → Email
-- `classe`, `class` → Classe
-- `data_nascita`, `birthdate`, `nascita` → Data di nascita
-- `onomastico`, `santo`, `nameday` → Onomastico
-- `note`, `notes` → Note aggiuntive
-
-**Esempio CSV:**
-```csv
-nome,cognome,email,classe,data_nascita,onomastico,note
-Mario,Rossi,mario.rossi@example.com,3A,2005-03-15,San Mario - 19 Gennaio,Studente eccellente
-Laura,Bianchi,laura.bianchi@example.com,3A,2005-07-22,Santa Laura - 19 Ottobre,Partecipazione attiva
-```
-
-#### Visualizzazione Studenti
-- L'elenco mostra tutti i dati dello studente
-- Data di nascita formattata in italiano
-- Onomastico per ricordare le celebrazioni
-- Note sempre visibili per riferimento rapido
-
-### 🎙️ Registrazione Audio Lezioni
-
-Il modulo di registrazione audio ti permette di registrare le lezioni per successive analisi:
-
-1. **Avvia Registrazione**:
-   - Vai nella sezione "🤖 Importa/gestisci con IA"
-   - Scorri fino a "🎙️ Registrazione Audio Lezione"
-   - Clicca "🎙️ Avvia Registrazione"
-   - Autorizza l'accesso al microfono se richiesto
-
-2. **Durante la Registrazione**:
-   - Timer in tempo reale mostra la durata
-   - La registrazione associa automaticamente:
-     - Classe attiva
-     - Data e ora
-     - Lezione corrente (se disponibile)
-
-3. **Ferma e Salva**:
-   - Clicca "⏹️ Ferma Registrazione"
-   - L'audio viene salvato automaticamente
-   - Ricevi una notifica di conferma
-
-4. **Gestione Registrazioni**:
-   - Riproduci le registrazioni direttamente nell'app
-   - Scarica i file audio (formato WebM)
-   - Visualizza contesto (classe, lezione, data)
-   - Elimina le registrazioni non più necessarie
-
-> **Nota**: Le registrazioni audio sono mantenute in memoria durante la sessione. Per conservarle a lungo termine, scaricale sul tuo dispositivo.
-
-### 📂 Gestione Documenti Importati
-
-Nella sezione "🤖 Importa/gestisci con IA" puoi:
-- Visualizzare lo storico dei documenti importati
-- Vedere statistiche di importazione (elementi importati, duplicati)
-- Tenere traccia di data e tipo di ogni importazione
-
-### ✅ Gestione Valutazioni
-
-La nuova sezione "Valutazioni" offre un sistema completo per gestire la valutazione degli studenti:
-
-#### 📋 Criteri di Valutazione
-1. Crea criteri personalizzati (es. "Comprensione del testo narrativo")
-2. Specifica tipo: Conoscenza, Competenza, Abilità o Atteggiamento
-3. Associa una disciplina al criterio
-4. Usa l'IA per generare criteri automaticamente
-
-#### 📊 Griglie di Valutazione (Rubriche)
-1. Crea griglie con livelli di performance predefiniti:
-   - **Eccellente**: 10/10
-   - **Buono**: 8/10
-   - **Sufficiente**: 6/10
-   - **Insufficiente**: 4/10
-2. Personalizza per disciplina e argomento
-3. Usa le griglie per valutazioni standardizzate
-
-#### ✅ Assegnazione Valutazioni
-1. Assegna valutazioni a singoli studenti o classi intere
-2. Scegli un criterio o una griglia di riferimento
-3. Seleziona la disciplina di riferimento
-4. Inserisci voto (opzionale) e note dettagliate
-5. Traccia la data della valutazione
-6. Visualizza tutte le valutazioni assegnate
-
-#### 📈 Risultati e Statistiche
-1. **Visualizzazione per Studente**: Vedi tutte le valutazioni di ogni studente con media calcolata automaticamente
-2. **Visualizzazione Aggregata per Classe**: Analizza i risultati a livello di classe con:
-   - Media generale della classe
-   - Numero totale di valutazioni
-   - Medie per disciplina con dettaglio del numero di valutazioni
-3. **Filtri Avanzati**: Filtra i risultati per classe, disciplina o studente specifico
-4. **Cambio Visualizzazione**: Passa facilmente tra vista studente e vista classe
-
-#### 📥 Esportazione Valutazioni
-- **Formati multipli disponibili**: JSON, PDF e Excel (XLSX)
-- **JSON**: Formato dati strutturato, ideale per backup e importazione
-- **PDF**: Documento formattato pronto per la stampa e condivisione professionale
-- **Excel**: Foglio di calcolo per analisi avanzate e manipolazione dati
-- Include criteri, griglie e valutazioni con dati completi
-- **Statistiche avanzate**: L'export include automaticamente:
-  - Numero totale di valutazioni, studenti e classi
-  - Media generale di tutte le valutazioni
-  - Statistiche per disciplina (conteggio e media)
-  - Statistiche per classe (conteggio e media)
-- **Privacy e Sicurezza**: Footer con nota di riservatezza nei documenti PDF
-- Ideale per reportistica, condivisione con colleghi e analisi dettagliate
-
-### 🔔 Notifiche e Promemoria
-
-Il sistema di notifiche ti aiuta a rimanere organizzato e non perdere scadenze importanti con notifiche automatiche, promemoria personalizzati e un sistema di gestione completo.
-
-#### Tipi di Notifiche
-
-Il sistema supporta diverse categorie di notifiche:
-- **📚 Lezioni**: Promemoria automatici per lezioni programmate
-- **⏰ Promemoria**: Promemoria personalizzati creati manualmente
-- **💾 Backup**: Avvisi per ricordarti di eseguire backup periodici dei dati
-- **⚙️ Sistema**: Notifiche di sistema (import/export completati, aggiornamenti, ecc.)
-
-#### Notifiche Automatiche per Lezioni
-1. **Promemoria 24 ore prima**: Ricevi un avviso il giorno prima della lezione
-2. **Promemoria 1 ora prima**: Avviso finale un'ora prima dell'inizio
-3. Le notifiche vengono inviate automaticamente per tutte le lezioni programmate
-4. Puoi configurare quali promemoria ricevere nelle impostazioni
-
-#### Promemoria Backup Automatici
-1. **Backup Periodici**: Il sistema ti ricorda di eseguire backup regolari dei tuoi dati
-2. **Intervallo Configurabile**: Imposta ogni quanti giorni ricevere il promemoria (default: 7 giorni)
-3. **Tracciamento Automatico**: L'ultimo backup viene tracciato automaticamente
-4. **Notifiche Completamento**: Ricevi conferma quando esporti o importi i dati
-
-#### Promemoria Personalizzati
-1. Vai alla sezione "Notifiche"
-2. Clicca "Nuovo Promemoria"
-3. Inserisci titolo, messaggio, data e ora
-4. Il promemoria apparirà nella lista e ti notificherà al momento opportuno
-5. Puoi archiviare o eliminare promemoria completati
-
-#### Gestione e Filtri Notifiche
-- **Filtri per Categoria**: Visualizza solo le notifiche di una specifica categoria (Tutte, Lezioni, Promemoria, Backup, Sistema)
-- **Contatori in Tempo Reale**: Ogni filtro mostra il numero di notifiche per categoria
-- **Indicatori Visivi**: Ogni tipo di notifica ha un colore distintivo per facile identificazione
-- **Badge Non Lette**: Visualizza il numero di notifiche non ancora lette
-
-#### Storico Notifiche
-- Visualizza tutte le notifiche ricevute (limite 50 più recenti)
-- Distingui tra notifiche lette e non lette con indicatori visivi
-- Segna notifiche come lette individualmente o tutte insieme
-- Elimina singole notifiche o pulisci tutto lo storico
-- Filtra per tipo per trovare rapidamente ciò che cerchi
-
-#### Impostazioni Notifiche
-- **Notifiche Browser**: Abilita/disabilita notifiche popup del browser
-- **Promemoria Lezioni**: Attiva/disattiva i promemoria automatici per le lezioni
-- **Promemoria Backup**: Attiva/disattiva i promemoria periodici per i backup
-- **Intervallo Backup**: Configura ogni quanti giorni ricevere il promemoria (1-365 giorni)
-- **Orari di Silenzio**: Configura orari in cui non ricevere notifiche (es. 22:00-07:00)
-- Personalizza quando ricevere i promemoria (24h, 1h prima)
-
-**Nota**: Per ricevere notifiche browser, devi autorizzare il sito quando richiesto dal browser.
-
-### Assistente IA
-1. Scrivi la tua richiesta nella chat
-2. Usa i suggerimenti rapidi per iniziare
-3. L'IA risponderà con consigli professionali
-4. Usa Ctrl+Enter per inviare rapidamente
-
-### Configurazione Modello IA
-L'applicazione permette di configurare il modello OpenRouter da utilizzare:
-- **Model ID predefinito**: `alibaba/tongyi-deepresearch-30b-a3b` (gratuito)
-- **Modelli personalizzati**: Puoi specificare qualsiasi modello disponibile su OpenRouter
-- **Esempi di modelli**:
-  - `openai/gpt-3.5-turbo` - Modello OpenAI veloce ed economico
-  - `anthropic/claude-2` - Modello Anthropic Claude
-  - `google/palm-2-chat-bison` - Modello Google PaLM
-  - Per la lista completa, visita [OpenRouter Models](https://openrouter.ai/models)
-
-**Nota**: Alcuni modelli potrebbero richiedere crediti sul tuo account OpenRouter.
-
-### Import/Export Dati
-
-#### 📥 Esportazione Dati
-L'applicazione supporta l'esportazione completa dei dati in **tre formati**:
-
-1. **JSON** - Formato dati strutturato
-   - Ideale per backup completi e importazione
-   - Include tutti i dati: lezioni, studenti, classi, valutazioni, notifiche, ecc.
-   - Perfetto per portabilità e ripristino completo
-
-2. **PDF** - Documento formattato
-   - Report professionale pronto per la stampa
-   - Include riepilogo con statistiche principali
-   - Tabelle formattate con classi, studenti e valutazioni
-   - Footer con nota di riservatezza e numerazione pagine
-   - Ideale per condivisione formale e archivio cartaceo
-
-3. **Excel (XLSX)** - Foglio di calcolo
-   - Fogli separati per ogni tipo di dati (Profilo, Classi, Studenti, Lezioni, Valutazioni, Discipline)
-   - Perfetto per analisi avanzate con Excel, Google Sheets, LibreOffice
-   - Facile manipolazione e filtri personalizzati
-   - Compatibile con tutti i software di foglio di calcolo
-
-**Come esportare**:
-- Vai nella sezione "Impostazioni"
-- Clicca su "📥 Esporta Dati"
-- Scegli il formato desiderato (JSON, PDF o Excel)
-- Il file verrà scaricato automaticamente
-
-#### 📤 Importazione Dati
-- **Import**: Ripristina dati da un file JSON precedentemente esportato
-- Tutti i dati vengono ripristinati: lezioni, studenti, classi, valutazioni, notifiche, ecc.
+Per istruzioni dettagliate su ogni funzionalità, consulta la [📚 Documentazione Aggiuntiva](#-documentazione-aggiuntiva) qui sotto.
 
 ## 🏗️ Struttura del Progetto
 
 ```
 docente-plus-plus/
-├── index.html      # Interfaccia principale dell'app
-├── styles.css      # Stili e design dell'applicazione
-├── app.js          # Logica applicativa e integrazione IA
-└── README.md       # Questa documentazione
+├── index.html          # Interfaccia principale dell'app
+├── styles.css          # Stili e design dell'applicazione
+├── app.js              # Logica applicativa e integrazione IA
+├── manifest.json       # Configurazione PWA
+├── sw.js               # Service Worker per funzionamento offline
+├── icons/              # Icone per PWA
+├── docs/               # Documentazione dettagliata
+└── README.md           # Questa documentazione
 ```
 
 ## 🔧 Tecnologie Utilizzate
 
-- **HTML5**: Struttura semantica moderna
-- **CSS3**: Design responsive con variabili CSS e animazioni
-- **JavaScript (ES6+)**: Logica applicativa orientata agli oggetti
-- **LocalStorage API**: Persistenza dati lato client
-- **OpenRouter API**: Intelligenza artificiale per assistenza didattica
-- **Fetch API**: Comunicazione con servizi esterni
+- **HTML5, CSS3, JavaScript (ES6+)** - Frontend moderno e responsive
+- **Material Design** - Sistema di design Google con Material Icons, tipografia Roboto, elevazione con ombre, e palette colori Material
+- **LocalStorage API** - Persistenza dati lato client
+- **OpenRouter API** - Intelligenza artificiale
+- **PWA + Service Worker** - Installabile e funzionante offline
 
-## 🎨 Caratteristiche del Design
+## 📱 Installazione PWA (Progressive Web App)
 
-- **Responsive**: Funziona su desktop, tablet e mobile
-- **Accessibile**: Interfaccia chiara e intuitiva
-- **Moderna**: Design pulito con animazioni fluide
-- **Tema Personalizzabile**: Variabili CSS per facile personalizzazione
+Docente++ può essere installato come app su smartphone, tablet e desktop!
 
-## 🔐 Privacy e Sicurezza
+### Come Installare
 
-- **Dati Locali**: Tutti i dati sono salvati solo nel tuo browser
-- **API Key Sicura**: La chiave API è memorizzata localmente e mai condivisa
-- **Nessun Server**: L'app funziona completamente lato client
-- **HTTPS Consigliato**: Per chiamate API sicure a OpenRouter
+- **📱 Android**: Menu (⋮) → "Installa app"
+- **🍎 iOS**: Condividi → "Aggiungi a Home"
+- **💻 Desktop**: Icona "Installa" (⊕) nella barra degli indirizzi
 
 ## 👨‍💻 Sviluppo e Documentazione
 
@@ -527,9 +200,9 @@ Per generare la documentazione del codice:
 
 ## 📝 Licenza
 
-Questo progetto è rilasciato sotto licenza MIT. Vedi il file LICENSE per i dettagli.
+📖 **Guida completa**: [Installazione PWA](docs/PWA_INSTALLATION.md) | [Quick Start PWA](docs/PWA_QUICK_START.md)
 
-## 🤝 Contributi
+## 🔐 Privacy e Sicurezza
 
 I contributi sono i benvenuti! Se desideri contribuire al progetto, segui questi passaggi:
 
@@ -540,32 +213,28 @@ I contributi sono i benvenuti! Se desideri contribuire al progetto, segui questi
 5. **Fai Push** al tuo branch (`git push origin feature/NomeFunzionalita`).
 6. **Apri una Pull Request** descrivendo le modifiche apportate.
 
-## 🐛 Segnalazione Bug
+Vuoi contribuire? Consulta [CONTRIBUTING.md](CONTRIBUTING.md) per le linee guida e come proporre richieste di modifica o segnalare bug.
 
-Per segnalare bug o richiedere nuove funzionalità, apri una [Issue](https://github.com/antbrogame-a11y/docente-plus-plus/issues) su GitHub.
+## 🐛 Segnalazione Bug e Feedback
+
+Vogliamo rendere Docente++ sempre migliore! Il tuo feedback è prezioso:
+
+- **🐛 Segnala un Bug:** [Apri Bug Report](https://github.com/antbrogame-a11y/docente-plus-plus/issues/new?template=bug_report.md)
+- **💡 Condividi Feedback:** [Invia Suggerimenti](https://github.com/antbrogame-a11y/docente-plus-plus/issues/new?template=feedback.md)
+- **📋 Vedi Feedback Raccolti:** [Documento Feedback Utente](docs/FEEDBACK_UTENTE.md)
+- **🧪 Piano Test Beta:** [Piano Test Completo](docs/BETA_TEST_PLAN.md)
 
 ## 👨‍💻 Autore
 
 Progetto sviluppato per migliorare la gestione didattica degli insegnanti attraverso l'intelligenza artificiale.
 
-## 📚 Risorse Utili
+## 📚 Documentazione avanzata
 
-- [Documentazione OpenRouter API](https://openrouter.ai/docs)
-- [📋 Guida Importazione Attività da PDF](PDF_ACTIVITIES_IMPORT.md) - Documentazione completa della funzionalità
-- [Guida HTML5](https://developer.mozilla.org/it/docs/Web/HTML)
-- [Guida CSS3](https://developer.mozilla.org/it/docs/Web/CSS)
-- [Guida JavaScript](https://developer.mozilla.org/it/docs/Web/JavaScript)
+- [Guida Utente](docs/user-guide.md)
+- [Guida Sviluppatori](docs/dev-guide.md)
+- [Architettura e API](docs/architecture.md)
+- [Changelog](CHANGELOG.md)
 
-## 🔄 Changelog
+## 📄 Licenza
 
-### Versione 1.0.0 (2025)
-- Implementazione iniziale dell'applicazione web
-- Integrazione con OpenRouter AI
-- Gestione lezioni e studenti
-- Dashboard interattiva
-- Sistema di import/export dati
-- Design responsive completo
-
----
-
-**Nota**: Questa è una web app standalone che non richiede installazione di dipendenze. Basta aprire `index.html` in un browser per iniziare!
+Questo progetto è distribuito sotto licenza MIT. Vedi [LICENSE](LICENSE).
