@@ -1,9 +1,9 @@
 // Service Worker per Docente++
 // Versione: 2.0.0
 
-const CACHE_NAME = 'docente-plus-plus-v4';
-const STATIC_CACHE = 'docente-static-v4';
-const DYNAMIC_CACHE = 'docente-dynamic-v4';
+const CACHE_NAME = 'docente-plus-plus-v5';
+const STATIC_CACHE = 'docente-static-v5';
+const DYNAMIC_CACHE = 'docente-dynamic-v5';
 
 // File da cachare immediatamente (app shell)
 const STATIC_ASSETS = [
@@ -13,16 +13,19 @@ const STATIC_ASSETS = [
   '/app.js',
   '/manifest.json',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
-];
-
-// CDN resources da cachare
-const CDN_ASSETS = [
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+  '/icons/icon-512x512.png',
+  // Vendored libraries
+  '/libs/jspdf.umd.min.js',
+  '/libs/jspdf.plugin.autotable.min.js',
+  '/libs/xlsx.full.min.js',
+  '/libs/papaparse.min.js',
+  '/libs/pdf.min.js',
+  '/libs/pdf.worker.min.js',
+  '/libs/rss-parser.min.js',
+  '/libs/jszip.min.js',
+  // Vendored fonts
+  '/fonts/material-icons.css',
+  '/fonts/roboto.css'
 ];
 
 // Installazione del Service Worker
@@ -32,15 +35,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log('[SW] Precaching App Shell');
-      // Cachiamo prima i file statici dell'app
-      return cache.addAll(STATIC_ASSETS).then(() => {
-        // Poi cachiamo le risorse CDN (in modo non-bloccante)
-        return Promise.allSettled(
-          CDN_ASSETS.map(url => 
-            cache.add(url).catch(err => console.log('[SW] Failed to cache:', url, err))
-          )
-        );
-      });
+      return cache.addAll(STATIC_ASSETS);
     })
   );
   
@@ -75,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   
   // Non intercettare le chiamate API esterne (OpenRouter, ecc.)
-  if (url.origin !== location.origin && !isCDNResource(request.url)) {
+  if (url.origin !== location.origin) {
     event.respondWith(fetch(request)); // Lascia passare le richieste API
     return;
   }
@@ -121,11 +116,6 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-
-// Helper per verificare se è una risorsa CDN da cachare
-function isCDNResource(url) {
-  return CDN_ASSETS.some(cdnUrl => url === cdnUrl);
-}
 
 // Gestione messaggi dal client
 self.addEventListener('message', (event) => {

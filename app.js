@@ -8273,4 +8273,6 @@ Rispondi in italiano in modo chiaro e strutturato.
 }
 
 // Initialize the application
-const app = new DocentePlusPlus();
+document.addEventListener('DOMContentLoaded', () => {
+    const app = new DocentePlusPlus();
+});
