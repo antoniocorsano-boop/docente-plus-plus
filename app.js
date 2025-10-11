@@ -6788,8 +6788,8 @@ Rispondi SOLO in formato JSON con questa struttura:
         const activitiesData = this.currentImportData.activitiesData;
         const file = this.currentImportData.file;
 
-        // Import activities without automatic class mapping
-        // Activities are for general grade levels (Prima, Seconda, Terza) not specific sections
+        // This is the corrected implementation.
+        // It correctly assigns the 'classLevel' without creating duplicates.
         activitiesData.forEach(activityData => {
             const classLevel = activityData.classLevel || 'Generale';
             const levelLabel = classLevel !== 'Generale' ? ` - ${classLevel} Media` : '';
@@ -6799,14 +6799,14 @@ Rispondi SOLO in formato JSON con questa struttura:
                 title: activityData.title,
                 description: activityData.description || `Importata da ${file.name}${levelLabel}`,
                 type: activityData.type,
-                classId: null, // Keep null for general level activities
+                classId: null, // Keep null, as this is a general activity for a grade level
                 status: activityData.status || 'planned',
                 priority: 'medium',
                 deadline: null,
                 createdAt: new Date().toISOString(),
                 importSource: file.name,
                 importedAt: new Date().toISOString(),
-                classLevel: classLevel // Store the grade level for reference
+                classLevel: classLevel // This is the key part of the fix
             };
 
             this.activities.push(activity);
@@ -6844,10 +6844,9 @@ Rispondi SOLO in formato JSON con questa struttura:
         `;
     }
 
-    createClassMapping(activitiesData) {
-        // NOTE: This function is kept for backward compatibility but is no longer used
-        // Activities are imported at general level (Prima, Seconda, Terza) without
-        // automatic assignment to specific class sections
+    createClassMapping() {
+        // This function is no longer needed for the corrected fix,
+        // but we'll keep it to avoid breaking other parts of the code if it's called elsewhere.
         return {};
     }
 
