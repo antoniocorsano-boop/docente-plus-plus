@@ -6046,7 +6046,7 @@ Tipo: ${backup.type === 'manual' ? 'Manuale' : 'Automatico'}
     async extractTextFromPDF(arrayBuffer) {
         // Configure PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
         }
 
         try {
@@ -7557,4 +7557,6 @@ Rispondi in italiano in modo chiaro e strutturato.
 }
 
 // Initialize the application
-const app = new DocentePlusPlus();
+document.addEventListener('DOMContentLoaded', () => {
+    const app = new DocentePlusPlus();
+});
