@@ -7558,5 +7558,5 @@ Rispondi in italiano in modo chiaro e strutturato.
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new DocentePlusPlus();
+    window.app = new DocentePlusPlus();
 });
