@@ -1,0 +1,39 @@
+{
+  "hosting": {
+    "public": ".",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "hosting": {
+      "host": "localhost",
+      "port": 9003
+    },
+    "firestore": {
+      "host": "localhost",
+      "port": 9004
+    },
+    "hub": {
+        "host": "localhost",
+        "port": 9001
+    },
+    "ui": {
+        "host": "localhost",
+        "port": 9000
+    },
+    "logging": {
+        "host": "localhost",
+        "port": 9002
+    }
+  }
+}

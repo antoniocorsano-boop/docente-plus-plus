@@ -1,109 +1,256 @@
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:17:03.936Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:17:04.686Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:17:04.693Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:17:04.696Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:28:27.039Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:28:27.047Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-12T19:28:27.050Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:37:44.846Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:37:44.844Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:37:44.854Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:37:44.860Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:41:08.416Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:41:08.426Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:41:08.431Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:52:46.718Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:52:46.731Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:52:46.735Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:52:48.944Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
-[debug] [2025-10-13T01:52:48.947Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:20:48.634Z] ----------------------------------------------------------------------
+[debug] [2025-10-13T19:20:48.636Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/i78h9v2gl6qg2w9646hi06syn3hbv4kj-firebase-tools-14.19.1/lib/node_modules/firebase-tools/lib/bin/firebase.js emulators:start --debug
+[debug] [2025-10-13T19:20:48.636Z] CLI Version:   14.19.1
+[debug] [2025-10-13T19:20:48.636Z] Platform:      linux
+[debug] [2025-10-13T19:20:48.636Z] Node Version:  v20.19.1
+[debug] [2025-10-13T19:20:48.636Z] Time:          Mon Oct 13 2025 19:20:48 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-13T19:20:48.636Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-13T19:20:48.833Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:20:48.834Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:20:48.836Z] >>> [apiv2][query] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 [none]
+[debug] [2025-10-13T19:20:49.536Z] <<< [apiv2][status] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 200
+[debug] [2025-10-13T19:20:49.537Z] <<< [apiv2][body] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 {"workspaceId":"docente-plus-plus-57788509","name":"docente-plus-plus","workspaceRedirectUrl":"firebase-docente-plus-plus-1760286855724.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2025-10-13T18:10:51.719197Z","workspaceTemplate":"WORKSPACE_TEMPLATE_FLUTTER","owner":"SELF","serviceAccountEmail":"msp-3793390569646419709@monospace-per-ws-sa-4.iam.gserviceaccount.com","gitRepoUrl":"https://github.com/antbrogame-a11y/docente-plus-plus","enableNix":true,"ownerEmail":"antonio.corsano@gmail.com","workstationAccessToken":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Nsb3VkLmdvb2dsZS5jb20vd29ya3N0YXRpb25zIiwiYXVkIjoiZmlyZWJhc2UtZG9jZW50ZS1wbHVzLXBsdXMtMTc2MDI4Njg1NTcyNC5jbHVzdGVyLWx1NG11cDQ3ZzVnbTRydHl2aHpwd2JmYWRpLmNsb3Vkd29ya3N0YXRpb25zLmRldiIsImlhdCI6MTc2MDM4MzI0OSwiZXhwIjoxNzYwNDY5NjQ5fQ.wbaW0iyxGxMiC0W1ETEgiHSy_WzKlxeylWwesZWltNR391XuAhyVRHCAz6o_eKi1kzkfEvsjA7O3NhwJXyiOGUSwXV0RnVWZS267nTOPoaPzoU66zIftb5_uJf8Qqosa_4JP2vGpE1vsfQzwisTZPNKAN0TwrRFPOZe3BplS2HKEtWSTEnUpgyqERGzqUsvrvUhjMCVj7fyvDoFkPxEzma_urrrEXhLy7V6di2_zXPVXE61bcWzZkpMTSBWRugc37wftvlVUGk8hohswBzosImpHYkyOULHaHaWI8z3fhbpzOA9bHt9NcTrxlDKq1ORFHvJrxoKkc42XUYGKxpM7AQ","firebaseProjectId":"docente-plus-plus-577885-d9bd1"}
+[debug] [2025-10-13T19:20:49.538Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:20:49.538Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[debug] [2025-10-13T19:20:49.587Z] openjdk version "21.0.7" 2025-04-15
+OpenJDK Runtime Environment (build 21.0.7+6-nixos)
+
+[debug] [2025-10-13T19:20:49.588Z] OpenJDK 64-Bit Server VM (build 21.0.7+6-nixos, mixed mode, sharing)
+
+[debug] [2025-10-13T19:20:49.594Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: firestore, hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: firestore, hosting"}}
+[warn] ⚠  hub: Error when trying to check port 9001 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9001 {"metadata":{"emulator":{"name":"hub"},"message":"Error when trying to check port 9001 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9001"}}
+[warn] ⚠  hub: Port 9001 is not open on localhost (127.0.0.1,::1), could not start emulator hub. {"metadata":{"emulator":{"name":"hub"},"message":"Port 9001 is not open on localhost (127.0.0.1,::1), could not start emulator hub."}}
+[warn] ⚠  hub: To select a different host/port, specify that host/port in a firebase.json config file:
+      {
+        // ...
+        "emulators": {
+          "hub": {
+            "host": "HOST",
+            "port": "PORT"
+          }
+        }
+      } {"metadata":{"emulator":{"name":"hub"},"message":"To select a different host/port, specify that host/port in a firebase.json config file:\n      {\n        // ...\n        \"emulators\": {\n          \"hub\": {\n            \"host\": \"\u001b[33mHOST\u001b[39m\",\n            \"port\": \"\u001b[33mPORT\u001b[39m\"\n          }\n        }\n      }"}}
+[warn] ⚠  ui: Error when trying to check port 9000 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9000 {"metadata":{"emulator":{"name":"ui"},"message":"Error when trying to check port 9000 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9000"}}
+[warn] ⚠  ui: Port 9000 is not open on localhost (127.0.0.1,::1), could not start Emulator UI. {"metadata":{"emulator":{"name":"ui"},"message":"Port 9000 is not open on localhost (127.0.0.1,::1), could not start Emulator UI."}}
+[warn] ⚠  ui: To select a different host/port, specify that host/port in a firebase.json config file:
+      {
+        // ...
+        "emulators": {
+          "ui": {
+            "host": "HOST",
+            "port": "PORT"
+          }
+        }
+      } {"metadata":{"emulator":{"name":"ui"},"message":"To select a different host/port, specify that host/port in a firebase.json config file:\n      {\n        // ...\n        \"emulators\": {\n          \"ui\": {\n            \"host\": \"\u001b[33mHOST\u001b[39m\",\n            \"port\": \"\u001b[33mPORT\u001b[39m\"\n          }\n        }\n      }"}}
+[warn] ⚠  logging: Error when trying to check port 9002 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9002 {"metadata":{"emulator":{"name":"logging"},"message":"Error when trying to check port 9002 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9002"}}
+[warn] ⚠  logging: Port 9002 is not open on localhost (127.0.0.1,::1), could not start Logging Emulator. {"metadata":{"emulator":{"name":"logging"},"message":"Port 9002 is not open on localhost (127.0.0.1,::1), could not start Logging Emulator."}}
+[warn] ⚠  logging: To select a different host/port, specify that host/port in a firebase.json config file:
+      {
+        // ...
+        "emulators": {
+          "logging": {
+            "host": "HOST",
+            "port": "PORT"
+          }
+        }
+      } {"metadata":{"emulator":{"name":"logging"},"message":"To select a different host/port, specify that host/port in a firebase.json config file:\n      {\n        // ...\n        \"emulators\": {\n          \"logging\": {\n            \"host\": \"\u001b[33mHOST\u001b[39m\",\n            \"port\": \"\u001b[33mPORT\u001b[39m\"\n          }\n        }\n      }"}}
+[warn] ⚠  firestore: Error when trying to check port 9004 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9004 {"metadata":{"emulator":{"name":"firestore"},"message":"Error when trying to check port 9004 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9004"}}
+[warn] ⚠  firestore: Port 9004 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"firestore"},"message":"Port 9004 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  firestore: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"firestore"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \u001b[33m\"host\": \"<ip address>\"\u001b[39m instead of hostname in firebase.json"}}
+[warn] ⚠  hosting: Error when trying to check port 9003 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9003 {"metadata":{"emulator":{"name":"hosting"},"message":"Error when trying to check port 9003 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9003"}}
+[warn] ⚠  hosting: Port 9003 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"hosting"},"message":"Port 9003 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  hosting: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"hosting"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \u001b[33m\"host\": \"<ip address>\"\u001b[39m instead of hostname in firebase.json"}}
+[warn] ⚠  firestore.websocket: Error when trying to check port 9152 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9152 {"metadata":{"emulator":{"name":"firestore"},"message":"Error when trying to check port 9152 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9152"}}
+[warn] ⚠  firestore: Port 9150 is available on 127.0.0.1 but not ::1. This may cause issues with some clients. {"metadata":{"emulator":{"name":"firestore"},"message":"Port 9150 is available on 127.0.0.1 but not ::1. This may cause issues with some clients."}}
+[warn] ⚠  firestore: If you encounter connectivity issues, consider switching to a different port or explicitly specifying "host": "<ip address>" instead of hostname in firebase.json {"metadata":{"emulator":{"name":"firestore"},"message":"If you encounter connectivity issues, consider switching to a different port or explicitly specifying \u001b[33m\"host\": \"<ip address>\"\u001b[39m instead of hostname in firebase.json"}}
+[debug] [2025-10-13T19:20:49.605Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] i  emulators: Shutting down emulators. {"metadata":{"emulator":{"name":"hub"},"message":"Shutting down emulators."}}
+[debug] [2025-10-13T19:20:49.608Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[error] 
+[error] Error: Could not start emulator hub, port taken.
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:51.346Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.346Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.347Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.347Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.347Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.348Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.348Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.348Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.348Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.348Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.349Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.349Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.350Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [none]
+[debug] [2025-10-13T19:21:51.350Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.370Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.370Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.371Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.371Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.372Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.372Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.373Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.373Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.374Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [none]
+[debug] [2025-10-13T19:21:51.374Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.397Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:21:51.398Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [none]
+[debug] [2025-10-13T19:21:51.398Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.399Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.399Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.400Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.400Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.401Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.401Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.402Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-13T19:21:51.402Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.403Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [none]
+[debug] [2025-10-13T19:21:51.403Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:21:51.677Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-13T19:21:51.677Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:51.707Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-13T19:21:51.707Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.016Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com 403
+[debug] [2025-10-13T19:21:52.016Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [omitted]
+[debug] [2025-10-13T19:21:52.020Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com 403
+[debug] [2025-10-13T19:21:52.020Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [omitted]
+[debug] [2025-10-13T19:21:52.098Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-13T19:21:52.098Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.101Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-13T19:21:52.101Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.103Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-13T19:21:52.104Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.155Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-13T19:21:52.155Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.161Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-13T19:21:52.161Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.177Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-13T19:21:52.178Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-10-13T19:21:52.299Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ 200
+[debug] [2025-10-13T19:21:52.299Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [omitted]
+[debug] [2025-10-13T19:21:52.360Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ 200
+[debug] [2025-10-13T19:21:52.360Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:52.362Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:21:52.363Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:52.371Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:21:52.371Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:52.373Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:21:52.373Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:21:58.396Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:21:58.396Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[debug] [2025-10-13T19:21:58.397Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:21:58.397Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:24:05.759Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.760Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.760Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.760Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.761Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.762Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.762Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.763Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [none]
+[debug] [2025-10-13T19:24:05.763Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.784Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.784Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.786Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.786Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.788Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.788Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.789Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.789Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.790Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [none]
+[debug] [2025-10-13T19:24:05.791Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:24:05.823Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.823Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.823Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.823Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] Checked if tokens are valid: true, expires at: 1760385906658
+[debug] [2025-10-13T19:24:05.824Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [none]
+[debug] [2025-10-13T19:24:05.824Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.825Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.825Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.826Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.826Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.827Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.827Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.828Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-10-13T19:24:05.828Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:05.829Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [none]
+[debug] [2025-10-13T19:24:05.829Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com x-goog-quota-user=projects/docente-plus-plus-577885-d9bd1
+[debug] [2025-10-13T19:24:06.442Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com 403
+[debug] [2025-10-13T19:24:06.442Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [omitted]
+[debug] [2025-10-13T19:24:06.454Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com 403
+[debug] [2025-10-13T19:24:06.454Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseio.com [omitted]
+[debug] [2025-10-13T19:24:06.517Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ 200
+[debug] [2025-10-13T19:24:06.517Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [omitted]
+[debug] [2025-10-13T19:24:06.525Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-13T19:24:06.526Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.528Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-13T19:24:06.529Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.530Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com 200
+[debug] [2025-10-13T19:24:06.531Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasecrashlytics.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.535Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-13T19:24:06.535Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.538Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-13T19:24:06.539Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.539Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-10-13T19:24:06.539Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.543Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-10-13T19:24:06.543Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.546Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com 200
+[debug] [2025-10-13T19:24:06.546Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-10-13T19:24:06.766Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ 200
+[debug] [2025-10-13T19:24:06.766Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/docente-plus-plus-577885-d9bd1/services/ [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:24:06.768Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:24:06.769Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:24:06.775Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:24:06.775Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-10-13T19:24:06.777Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-13T19:24:06.778Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
