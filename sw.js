@@ -1,9 +1,8 @@
 // Service Worker per Docente++
-// Versione: 2.0.0
+// Versione: 3.0.0 (Forced Update)
 
-const CACHE_NAME = 'docente-plus-plus-v5';
-const STATIC_CACHE = 'docente-static-v5';
-const DYNAMIC_CACHE = 'docente-dynamic-v5';
+const STATIC_CACHE = 'docente-static-v6';
+const DYNAMIC_CACHE = 'docente-dynamic-v6';
 
 // File da cachare immediatamente (app shell)
 const STATIC_ASSETS = [
@@ -30,11 +29,11 @@ const STATIC_ASSETS = [
 
 // Installazione del Service Worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker...', event);
+  console.log('[SW] Installing Service Worker v6...', event);
   
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[SW] Precaching App Shell');
+      console.log('[SW] Precaching App Shell v6');
       return cache.addAll(STATIC_ASSETS);
     })
   );
@@ -45,7 +44,7 @@ self.addEventListener('install', (event) => {
 
 // Attivazione del Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...', event);
+  console.log('[SW] Activating Service Worker v6...', event);
   
   event.waitUntil(
     caches.keys().then((keyList) => {
@@ -79,7 +78,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(request).then((response) => {
       if (response) {
         // Trovato in cache, ritorna la risposta cached
-        console.log('[SW] Serving from cache:', request.url);
+        // console.log('[SW] Serving from cache:', request.url); // Commentato per ridurre il rumore
         return response;
       }
       
@@ -149,4 +148,4 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-console.log('[SW] Service Worker loaded');
+console.log('[SW] Service Worker v6 loaded');
