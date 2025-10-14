@@ -785,3 +785,4 @@ class DocentePlusPlus {
             if (!e.score) return true;
             const evalDate = new Date(e.date);
             return eval
+            const app = new DocentePlusPlus();
