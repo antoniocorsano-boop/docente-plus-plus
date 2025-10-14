@@ -16,24 +16,24 @@
   },
   "emulators": {
     "hosting": {
-      "host": "localhost",
-      "port": 9003
+      "host": "127.0.0.1",
+      "port": 9013
     },
     "firestore": {
-      "host": "localhost",
-      "port": 9004
+      "host": "127.0.0.1",
+      "port": 9014
     },
     "hub": {
-        "host": "localhost",
-        "port": 9001
+        "host": "127.0.0.1",
+        "port": 9011
     },
     "ui": {
-        "host": "localhost",
-        "port": 9000
+        "host": "127.0.0.1",
+        "port": 9010
     },
     "logging": {
-        "host": "localhost",
-        "port": 9002
+        "host": "127.0.0.1",
+        "port": 9012
     }
   }
 }
