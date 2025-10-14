@@ -1,52 +1,37 @@
 # 🎓 Docente++
 
-**Progressive Web App per la gestione della didattica dell'insegnante**
+**Stato del Progetto: v1.0.0 - Stabile**
 
-**Docente++** è un'applicazione web completa progettata per assistere gli insegnanti nella gestione delle loro attività didattiche quotidiane. L'obiettivo è di semplificare le attività amministrative, la pianificazione delle lezioni e la valutazione degli studenti attraverso un'unica interfaccia intuitiva, potenziata da un assistente basato su intelligenza artificiale.
+**Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
-## 🎯 Obiettivi Strategici
+**Docente++** è un'applicazione web moderna progettata per diventare il braccio destro digitale di ogni insegnante. Semplifica la gestione delle classi, la pianificazione delle lezioni, la valutazione degli studenti e molto altro, tutto in un'unica interfaccia intuitiva e reattiva. Grazie all'assistente IA integrato, l'app non solo organizza, ma suggerisce e supporta attivamente il processo didattico.
 
-Il progetto segue una roadmap operativa per migliorare continuamente l'applicazione, con i seguenti obiettivi:
+## ✨ Funzionalità Principali
 
-1.  **Stabilità e Qualità**: Consolidare le funzionalità esistenti.
-2.  **Esperienza Utente**: Migliorare l'interfaccia per renderla più intuitiva.
-3.  **Intelligenza Artificiale**: Integrare l'IA per un'assistenza contestuale.
-4.  **Automazione**: Semplificare i flussi di lavoro.
-5.  **Affidabilità**: Garantire test approfonditi e monitoraggio.
+La versione 1.0.0 include un set completo di strumenti per la gestione quotidiana:
 
-## 📝 Feedback e Miglioramenti
+- **✅ Onboarding Guidato**: Inizia in pochi secondi configurando il tuo profilo, la scuola e le materie che insegni.
+- **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
+- **🗓️ Pianificazione Lezioni e Orario**: Organizza le tue lezioni con dettagli su argomenti, obiettivi e materiali. Le lezioni appaiono automaticamente in un orario settimanale e giornaliero interattivo.
+- **✍️ Creazione di Attività e Valutazioni**: Assegna compiti, verifiche o progetti alle classi. Registra i voti e i giudizi per ogni studente, costruendo uno storico delle performance.
+- **📊 Dashboard Dinamica**: Una schermata principale che ti offre una panoramica immediata delle prossime scadenze e delle ultime valutazioni inserite.
+- **🤖 Assistente IA (Simulato)**: Un assistente virtuale sempre a disposizione. Chiedigli di creare una bozza di lezione, suggerire idee per un'attività o aiutarti a trovare informazioni.
+- **📄 Importazione da Documenti (Simulato)**: Carica un file (es. un PDF o un documento Word) e lascia che l'IA ne estragga i punti salienti per creare automaticamente una bozza di lezione.
+- **💾 Salvataggio Locale**: Tutti i tuoi dati sono al sicuro nel tuo browser. Nessuna registrazione richiesta, puoi iniziare a lavorare immediatamente.
+- **📱 Design Reattivo**: Utilizza Docente++ su computer, tablet o smartphone senza perdere funzionalità.
 
-Sulla base del feedback degli utenti, sono state identificate le seguenti aree di miglioramento:
+## 🚀 Come Iniziare
 
-### Organizzazione e Navigazione
+Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirlo localmente con un semplice server web.
 
-*   **Problema**: Sensazione di disordine e mancanza di una guida chiara.
-*   **Soluzione in corso**: Raggruppamento delle funzionalità per casi d'uso (es. "In Classe", "Pianificazione") per migliorare l'organizzazione.
-
-### Coerenza tra Pagine
-
-*   **Problema**: Mancanza di coerenza visiva e layout non uniforme tra le sezioni.
-*   **Soluzione pianificata**: Standardizzazione dei layout e dei componenti UI.
-
-## 🚀 Iniziare
-
-Per iniziare a utilizzare Docente++, segui questi passaggi:
-
-1.  **Clone il repository**: 
+1.  **Apri `index.html`**: Il modo più semplice per iniziare è aprire il file `index.html` direttamente nel tuo browser.
+    
+2.  **Usa un Server Locale (Consigliato)**: Per un'esperienza più stabile, specialmente se intendi modificare il codice, avvia un semplice server web nella cartella del progetto. Se hai Python installato, puoi usare questo comando:
     ```bash
-    git clone <URL_DEL_REPOSITORY>
+    python -m http.server
     ```
-2.  **Installa le dipendenze**:
-    ```bash
-    npm install
-    ```
-3.  **Avvia l'applicazione**:
-    ```bash
-    npm start
-    ```
+    Successivamente, apri il browser all'indirizzo `http://localhost:8000`.
 
-## 🛠️ Debug e Sviluppo
+## 🛠️ Contribuire
 
-Per il debug e lo sviluppo, utilizziamo [Firebase](https://firebase.google.com/). Assicurati di avere un file `firebase.json` configurato correttamente nel tuo progetto.
-
-Il debug del prodondo può essere eseguito utilizzando gli strumenti di sviluppo del browser e i log forniti da Firebase.
+Questo progetto è in continua evoluzione. Se vuoi contribuire, consulta il file `CONTRIBUTING.md` per le linee guida e il `CHANGELOG.md` per vedere su cosa stiamo lavorando.

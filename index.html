@@ -8,8 +8,7 @@
     <title>Docente++ - Gestione Didattica con IA</title>
     
     <!-- PWA Manifest -->
-    <!-- <link rel="manifest" href="manifest.json"> -->
-
+    <link rel="manifest" href="manifest.json">
     
     <!-- Icons for iOS & PWA -->
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
@@ -472,3 +471,120 @@
                     <option value="lesson">Lezioni</option>
                     <option value="exercise">Esercitazioni</option>
                     <option value="lab">Laboratori</option>
+                </select>
+            </div>
+            
+            <div id="add-activity-form" class="form-container" style="display: none;">
+                <h3>Nuova Attività</h3>
+                <form id="activity-form">
+                    <input type="hidden" id="activity-id">
+                    <div class="form-group">
+                        <label for="activity-title">Titolo *</label>
+                        <input type="text" id="activity-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-type">Tipo *</label>
+                        <select id="activity-type" required>
+                            <option value="lesson">Lezione</option>
+                            <option value="exercise">Esercitazione</option>
+                            <option value="homework">Compiti</option>
+                            <option value="lab">Laboratorio</option>
+                            <option value="project">Progetto</option>
+                            <option value="exam">Verifica</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-status">Stato *</label>
+                        <select id="activity-status" required>
+                            <option value="planned">Pianificata</option>
+                            <option value="in-progress">In corso</option>
+                            <option value="completed">Completata</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="activity-date">Data *</label>
+                            <input type="date" id="activity-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="activity-class">Classe *</label>
+                            <select id="activity-class" required></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-description">Descrizione</label>
+                        <textarea id="activity-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salva Attività</button>
+                        <button type="button" class="btn btn-secondary" onclick="app.hideAddActivityForm()">Annulla</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="activities-list"></div>
+        </div>
+
+        <!-- AI Assistant Tab -->
+        <div id="ai-assistant" class="tab-content">
+            <h2><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">smart_toy</span>Assistente IA</h2>
+            <div class="ai-container">
+                <div class="ai-chat">
+                    <div class="chat-messages" id="ai-chat-messages"></div>
+                    <div class="chat-input-container">
+                        <textarea id="ai-chat-input" placeholder="Chiedi qualcosa all'assistente..." rows="2"></textarea>
+                        <button id="ai-chat-send" class="btn btn-primary"><span class="material-icons">send</span></button>
+                    </div>
+                </div>
+                <div class="ai-tools">
+                    <h3>Strumenti IA</h3>
+                    <div class="tool-card" onclick="app.showLessonGenerator()">
+                        <span class="material-icons">auto_awesome</span>
+                        <h4>Generatore di Lezioni</h4>
+                        <p>Crea una lezione completa da un semplice input.</p>
+                    </div>
+                    <div class="tool-card" onclick="app.showActivityGenerator()">
+                        <span class="material-icons">checklist</span>
+                        <h4>Generatore di Attività</h4>
+                        <p>Crea una lista di attività basate su un argomento.</p>
+                    </div>
+                    <div class="tool-card" onclick="app.showEvaluationGenerator()">
+                        <span class="material-icons">grading</span>
+                        <h4>Supporto alla Valutazione</h4>
+                        <p>Ottieni aiuto per creare griglie di valutazione.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Document Import Tab -->
+        <div id="document-import" class="tab-content">
+            <h2><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">description</span>Importa da Documenti</h2>
+            <p>Carica file PDF (es. libri di testo) per estrarre attività o creare nuove lezioni con l'aiuto dell'IA.</p>
+            <div class="import-container">
+                <input type="file" id="pdf-upload" accept=".pdf" style="display: none;">
+                <button class="btn btn-primary" onclick="document.getElementById('pdf-upload').click();">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">upload_file</span>Seleziona PDF
+                </button>
+                <div id="pdf-upload-feedback" style="margin-top: 15px;"></div>
+                
+                <div id="pdf-import-options" style="display: none; margin-top: 20px;">
+                    <h3>Elabora il documento</h3>
+                    <p>Scegli cosa vuoi fare con il testo estratto dal PDF:</p>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="app.processPdfForLessons()">
+                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">menu_book</span>Crea Lezioni
+                        </button>
+                        <button class="btn btn-secondary" onclick="app.processPdfForActivities()">
+                            <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">checklist</span>Estrai Attività
+                        </button>
+                    </div>
+                    <div id="pdf-processing-output" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="app.js" defer></script>
+</body>
+</html>
