@@ -13869,3 +13869,147 @@ INFO: Connected to new websocket client
     at Console._write (/nix/store/i78h9v2gl6qg2w9646hi06syn3hbv4kj-firebase-tools-14.19.1/lib/node_modules/firebase-tools/node_modules/winston-transport/index.js:103:17)
     at doWrite (/nix/store/i78h9v2gl6qg2w9646hi06syn3hbv4kj-firebase-tools-14.19.1/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:428:64)
 [error] 
+[debug] [2025-10-14T14:01:40.117Z] ----------------------------------------------------------------------
+[debug] [2025-10-14T14:01:40.119Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/i78h9v2gl6qg2w9646hi06syn3hbv4kj-firebase-tools-14.19.1/lib/node_modules/firebase-tools/lib/bin/firebase.js emulators:start
+[debug] [2025-10-14T14:01:40.120Z] CLI Version:   14.19.1
+[debug] [2025-10-14T14:01:40.120Z] Platform:      linux
+[debug] [2025-10-14T14:01:40.120Z] Node Version:  v20.19.1
+[debug] [2025-10-14T14:01:40.120Z] Time:          Tue Oct 14 2025 14:01:40 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-10-14T14:01:40.120Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-10-14T14:01:40.348Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:40.349Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:40.352Z] >>> [apiv2][query] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 [none]
+[debug] [2025-10-14T14:01:41.075Z] <<< [apiv2][status] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 200
+[debug] [2025-10-14T14:01:41.075Z] <<< [apiv2][body] GET https://monospace-pa.googleapis.com/v1/workspaces/docente-plus-plus-57788509 {"workspaceId":"docente-plus-plus-57788509","name":"docente-plus-plus","workspaceRedirectUrl":"firebase-docente-plus-plus-1760286855724.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2025-10-14T13:56:27.683231Z","workspaceTemplate":"WORKSPACE_TEMPLATE_FLUTTER","owner":"SELF","serviceAccountEmail":"msp-3793390569646419709@monospace-per-ws-sa-4.iam.gserviceaccount.com","gitRepoUrl":"https://github.com/antbrogame-a11y/docente-plus-plus","enableNix":true,"ownerEmail":"antonio.corsano@gmail.com","workstationAccessToken":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Nsb3VkLmdvb2dsZS5jb20vd29ya3N0YXRpb25zIiwiYXVkIjoiZmlyZWJhc2UtZG9jZW50ZS1wbHVzLXBsdXMtMTc2MDI4Njg1NTcyNC5jbHVzdGVyLWx1NG11cDQ3ZzVnbTRydHl2aHpwd2JmYWRpLmNsb3Vkd29ya3N0YXRpb25zLmRldiIsImlhdCI6MTc2MDQ1MDUwMCwiZXhwIjoxNzYwNTM2OTAwfQ.bmgjMe4iZdfNZON2iPGzwfSkJqDTB-Ev-Y8270yU1TINhN48Xh8vzV4952BpZu6C76v2XXah2ZTxxq4LMp3mlWVIvgD5S33FO8pPlEHMQBNkfdjSAIeduKcc9F2b-f0fOxT35W86u_zfB4Av5uK1C61N5zjDwRKtPZaKFua4PmpFd7GSB1s_B_7fuIZ7lsxkfRx1RjBRzMvC5CykH5zjM54s7b8gaI59Dxw8DRjw4guYFX2sc5W1ksWiShhB9_c-PHJrpEDViUFfOQNtf9Dg4d4Wp_a7SKDxqyb1ZIWP72RWGv6S_JYxwczpwxrX6R97ZQ78KLFOL8Oj5wAQxldbMA","firebaseProjectId":"docente-plus-plus-577885-d9bd1"}
+[debug] [2025-10-14T14:01:41.076Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-10-14T14:01:41.076Z] > authorizing via signed-in user (antonio.corsano@gmail.com)
+[debug] [2025-10-14T14:01:41.137Z] openjdk version "21.0.7" 2025-04-15
+OpenJDK Runtime Environment (build 21.0.7+6-nixos)
+
+[debug] [2025-10-14T14:01:41.138Z] OpenJDK 64-Bit Server VM (build 21.0.7+6-nixos, mixed mode, sharing)
+
+[debug] [2025-10-14T14:01:41.146Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: firestore, hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: firestore, hosting"}}
+[debug] [2025-10-14T14:01:41.151Z] assigned listening specs for emulators {"user":{"hub":[{"address":"0.0.0.0","family":"IPv4","port":9011}],"ui":[{"address":"0.0.0.0","family":"IPv4","port":9010}],"logging":[{"address":"0.0.0.0","family":"IPv4","port":9012}],"firestore":[{"address":"0.0.0.0","family":"IPv4","port":9014}],"firestore.websocket":[{"address":"0.0.0.0","family":"IPv4","port":9150}],"hosting":[{"address":"0.0.0.0","family":"IPv4","port":9013}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-10-14T14:01:41.155Z] Emulator locator file path: /tmp/hub-docente-plus-plus-577885-d9bd1.json
+[warn] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project docente-plus-plus-577885-d9bd1. This may result in unexpected behavior. 
+[debug] [2025-10-14T14:01:41.155Z] [hub] writing locator at /tmp/hub-docente-plus-plus-577885-d9bd1.json
+[debug] [2025-10-14T14:01:41.162Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-10-14T14:01:41.162Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-10-14T14:01:41.163Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/nix/store/aim0jw1v9i4cna8525r39mzx9ck28aq7-emulators/cloud-firestore-emulator-v1.19.8.jar","--host","0.0.0.0","--port",9014,"--websocket_port",9150,"--project_id","docente-plus-plus-577885-d9bd1","--rules","/home/user/docente-plus-plus/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":9014} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/nix/store/aim0jw1v9i4cna8525r39mzx9ck28aq7-emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"0.0.0.0\",\"--port\",9014,\"--websocket_port\",9150,\"--project_id\",\"docente-plus-plus-577885-d9bd1\",\"--rules\",\"/home/user/docente-plus-plus/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9014}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to firestore-debug.log"}}
+[debug] [2025-10-14T14:01:42.344Z] Oct 14, 2025 2:01:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://0.0.0.0:9150
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Oct 14, 2025 2:01:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://0.0.0.0:9150\n"}}
+[debug] [2025-10-14T14:01:42.371Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
+[debug] [2025-10-14T14:01:42.372Z] 0.0.0.0:9014
+If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=0.0.0.0:9014
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=0.0.0.0:9014
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"0.0.0.0:9014\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=0.0.0.0:9014\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=0.0.0.0:9014\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
+[info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2025-10-14T14:01:42.377Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:42.377Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:42.377Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/sites 
+[debug] [2025-10-14T14:01:43.166Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/sites 200
+[debug] [2025-10-14T14:01:43.167Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/sites {"sites":[{"name":"projects/docente-plus-plus-577885-d9bd1/sites/docente-plus-plus-577885-d9bd1","defaultUrl":"https://docente-plus-plus-577885-d9bd1.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2025-10-14T14:01:43.167Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:43.167Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:43.167Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/webApps/-/config [none]
+[debug] [2025-10-14T14:01:43.735Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/webApps/-/config 200
+[debug] [2025-10-14T14:01:43.735Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1/webApps/-/config {"projectId":"docente-plus-plus-577885-d9bd1","appId":"1:840602960075:web:b4769d8d625ad7600f9b4e","storageBucket":"docente-plus-plus-577885-d9bd1.firebasestorage.app","apiKey":"AIzaSyDLlynKUWbWO1LMIZwVwaOZC0YE01RWzhI","authDomain":"docente-plus-plus-577885-d9bd1.firebaseapp.com","messagingSenderId":"840602960075","projectNumber":"840602960075","version":"2"}
+[debug] [2025-10-14T14:01:43.741Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:43.741Z] Checked if tokens are valid: true, expires at: 1760453049188
+[debug] [2025-10-14T14:01:43.742Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1 [none]
+[debug] [2025-10-14T14:01:43.923Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1 200
+[debug] [2025-10-14T14:01:43.923Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/docente-plus-plus-577885-d9bd1 {"projectId":"docente-plus-plus-577885-d9bd1","projectNumber":"840602960075","displayName":"Firebase app","name":"projects/docente-plus-plus-577885-d9bd1","resources":{"hostingSite":"docente-plus-plus-577885-d9bd1"},"state":"ACTIVE","etag":"1_e48f7116-9453-4458-82be-a735a32c19c1"}
+[info] ✔  hosting[docente-plus-plus-577885-d9bd1]: Local server: http://0.0.0.0:9013 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: http://0.0.0.0:9013"}}
+[debug] [2025-10-14T14:01:43.941Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:9010/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬──────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port    │ View in Emulator UI             │
+├───────────┼──────────────┼─────────────────────────────────┤
+│ Firestore │ 0.0.0.0:9014 │ http://127.0.0.1:9010/firestore │
+├───────────┼──────────────┼─────────────────────────────────┤
+│ Hosting   │ 0.0.0.0:9013 │ n/a                             │
+└───────────┴──────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 9011
+  Other reserved ports: 9012, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2025-10-14T14:01:45.042Z] Oct 14, 2025 2:01:45 PM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+io.netty.handler.codec.http2.Http2Exception: Unexpected HTTP/1.x request: GET / 
+	at io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:315)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Oct 14, 2025 2:01:45 PM io.grpc.netty.NettyServerTransport notifyTerminated\nINFO: Transport failed\nio.netty.handler.codec.http2.Http2Exception: Unexpected HTTP/1.x request: GET / \n\tat io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:315)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)\n\tat io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)\n\tat io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)\n\tat io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)\n\tat io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)\n\tat io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)\n\tat io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)\n\tat io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)\n\tat io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n\n"}}
+[debug] [2025-10-14T14:01:45.056Z] Oct 14, 2025 2:01:45 PM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+io.netty.handler.codec.http2.Http2Exception: HTTP/2 client preface string missing or corrupt. Hex dump for received bytes: 16030105a8010005a40303016581926617a8e5713fe1c706
+	at io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:319)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Oct 14, 2025 2:01:45 PM io.grpc.netty.NettyServerTransport notifyTerminated\nINFO: Transport failed\nio.netty.handler.codec.http2.Http2Exception: HTTP/2 client preface string missing or corrupt. Hex dump for received bytes: 16030105a8010005a40303016581926617a8e5713fe1c706\n\tat io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:319)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)\n\tat io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)\n\tat io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)\n\tat io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)\n\tat io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)\n\tat io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)\n\tat io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)\n\tat io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)\n\tat io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n\n"}}
+[debug] [2025-10-14T14:01:45.156Z] Oct 14, 2025 2:01:45 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Oct 14, 2025 2:01:45 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[info] i  hosting: 127.0.0.1 - - [14/Oct/2025:14:04:44 +0000] "GET / HTTP/1.1" 200 - "https://firebase-docente-plus-plus-1760286855724.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [14/Oct/2025:14:04:44 +0000] \"GET / HTTP/1.1\" 200 - \"https://firebase-docente-plus-plus-1760286855724.cluster-lu4mup47g5gm4rtyvhzpwbfadi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [14/Oct/2025:14:04:55 +0000] "GET /libs/jspdf.umd.min.js.map HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [14/Oct/2025:14:04:55 +0000] \"GET /libs/jspdf.umd.min.js.map HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36\""}}
