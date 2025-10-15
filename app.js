@@ -20,6 +20,10 @@ import {
     resetFABPosition, 
     toggleFABVisibility 
 } from './js/ai-agent.js';
+import { importPipeline } from './js/import-pipeline.js';
+import { smartPlanner } from './js/planner.js';
+import { notificationSystem } from './js/notifications.js';
+import { dashboard } from './js/dashboard.js';
 
 class DocentePlusPlus {
     constructor() {
@@ -58,7 +62,10 @@ class DocentePlusPlus {
             // Initialize AI Agent FAB
             initAIAgentFAB();
             
-            console.log("Docente++ v1.1.0 (Refactored) initialized.");
+            // Initialize notification system
+            notificationSystem.startAutoCheck();
+            
+            console.log("Docente++ v1.2.0 (Intelligent Base) initialized.");
         } catch (error) {
             console.error("Error during init:", error);
             // Try to recover by showing a minimal UI
@@ -85,18 +92,24 @@ class DocentePlusPlus {
         this.renderSchedule();
         this.renderAiAssistant();
         this.renderDocumentImport();
+        this.renderNotifications();
     }
 
     renderHome() {
-        document.getElementById('home-lesson-count').textContent = state.lessons.length;
+        // Update stats with filters
+        const filteredLessons = dashboard.applyFilters(state.lessons, 'lessons');
+        const filteredActivities = dashboard.applyFilters(state.activities, 'activities');
+        
+        document.getElementById('home-lesson-count').textContent = filteredLessons.length;
         document.getElementById('home-student-count').textContent = state.students.length;
-        document.getElementById('home-activity-count').textContent = state.activities.length;
+        document.getElementById('home-activity-count').textContent = filteredActivities.length;
         document.getElementById('home-evaluation-count').textContent = state.evaluations.length;
 
-        document.getElementById('today-schedule-enhanced').innerHTML = `<p class="home-placeholder">Nessuna lezione programmata per oggi.</p>`;
+        // Render today's schedule with smart planner integration
+        this.renderTodaySchedule();
 
         const todoContainer = document.getElementById('things-todo-list');
-        const upcomingActivities = state.activities.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
+        const upcomingActivities = filteredActivities.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
         if (upcomingActivities.length > 0) {
             todoContainer.innerHTML = upcomingActivities.map(a => `<div class="todo-item">- Valutare <strong>${a.title}</strong></div>`).join('');
         } else {
@@ -110,6 +123,57 @@ class DocentePlusPlus {
 
         document.getElementById('home-ai-ready').textContent = "Pronta";
         document.getElementById('home-ai-ready').style.color = 'green';
+    }
+
+    renderTodaySchedule() {
+        const container = document.getElementById('today-schedule-enhanced');
+        if (!container) return;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayStr = today.toISOString().split('T')[0];
+
+        // Get today's slots from schedule
+        const todaySlots = Object.entries(state.schedule)
+            .filter(([key, slot]) => key.startsWith(todayStr))
+            .map(([key, slot]) => {
+                const hour = key.split('-')[3];
+                return {
+                    time: `${hour}:00`,
+                    slot: slot,
+                    key: key
+                };
+            })
+            .sort((a, b) => a.time.localeCompare(b.time));
+
+        if (todaySlots.length === 0) {
+            container.innerHTML = '<p class="home-placeholder">Nessuna lezione programmata per oggi.</p>';
+            return;
+        }
+
+        let html = '<div class="today-schedule-list">';
+        todaySlots.forEach(({ time, slot, key }) => {
+            const classObj = state.classes.find(c => c.id === slot.classId);
+            const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
+            
+            html += `
+                <div class="schedule-item">
+                    <div class="schedule-time">${time}</div>
+                    <div class="schedule-info">
+                        <strong>${classObj ? classObj.name : 'N/A'}</strong>
+                        <span class="activity-badge" style="background-color: ${activityTypeInfo.color}">
+                            ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                        </span>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="window.app.launchScheduleActivity('${key}')">
+                        ▶ Avvia
+                    </button>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        container.innerHTML = html;
     }
 
     renderLessons() {
@@ -506,6 +570,20 @@ class DocentePlusPlus {
         this.currentEditingSlot = scheduleKey;
         const slot = state.schedule[scheduleKey] || {};
         
+        // Validate slot with smart planner
+        const validation = smartPlanner.validateSlot(dateISO, time);
+        if (!validation.valid) {
+            showToast(validation.errors.join('. '), 'error');
+            return;
+        }
+
+        // Check daily limit
+        const dailyCheck = smartPlanner.checkDailyLimit(dateISO);
+        if (dailyCheck.exceeded && !slot.classId) {
+            showToast(`Limite giornaliero raggiunto (${dailyCheck.limit} ore/giorno). Impossibile aggiungere nuovi slot.`, 'warning');
+            return;
+        }
+        
         // Create and show modal
         const modal = document.createElement('div');
         modal.id = 'schedule-slot-modal';
@@ -519,6 +597,9 @@ class DocentePlusPlus {
             <div class="modal-content">
                 <h2>Modifica Slot Orario</h2>
                 <p><strong>${dayName} ${date.toLocaleDateString()} - ${time}</strong></p>
+                ${dailyCheck.remaining < 2 && !slot.classId ? `
+                    <div class="warning-message">⚠️ Solo ${dailyCheck.remaining} slot rimanenti per oggi</div>
+                ` : ''}
                 <form id="schedule-slot-form">
                     <div class="form-group">
                         <label for="slot-class">Classe</label>
@@ -917,6 +998,14 @@ class DocentePlusPlus {
     renderDocumentImport() { 
         // Document import functionality handled by file input
     }
+    
+    renderNotifications() {
+        const container = document.getElementById('notifications-content');
+        if (!container) return;
+        
+        container.innerHTML = notificationSystem.generateNotificationHTML();
+    }
+    
     renderSettings() { 
         const nameElement = document.getElementById('settings-teacher-name');
         const yearElement = document.getElementById('settings-school-year');
