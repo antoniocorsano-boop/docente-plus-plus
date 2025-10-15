@@ -1,7 +1,7 @@
 
 // app.js
 
-import { loadData, saveData, isOnboardingComplete, state } from './js/data.js';
+import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { renderChatMessages } from './js/ai.js';
@@ -15,15 +15,27 @@ class DocentePlusPlus {
     }
 
     init() {
-        loadData();
-        if (!isOnboardingComplete()) {
-            showOnboarding();
-        } else {
-            this.initializeAppUI();
+        try {
+            const dataLoaded = loadData();
+            if (!dataLoaded) {
+                showToast('Dati corrotti rilevati. App ripristinata ai valori predefiniti.', 'warning', 5000);
+            }
+            
+            if (!isOnboardingComplete()) {
+                showOnboarding();
+            } else {
+                this.initializeAppUI();
+            }
+            setupEventListeners();
+            createToastContainer();
+            console.log("Docente++ v1.1.0 (Refactored) initialized.");
+        } catch (error) {
+            console.error("Error during init:", error);
+            // Try to recover by showing a minimal UI
+            createToastContainer();
+            showToast('Errore durante l\'inizializzazione. Alcune funzionalità potrebbero non essere disponibili.', 'error', 5000);
+            setupEventListeners();
         }
-        setupEventListeners();
-        createToastContainer();
-        console.log("Docente++ v1.1.0 (Refactored) initialized.");
     }
 
     initializeAppUI() {
@@ -106,12 +118,33 @@ class DocentePlusPlus {
     renderEvaluations() { /* ... */ }
     renderSchedule() { /* ... */ }
     renderAiAssistant() { renderChatMessages(); }
-    renderDocumentImport() { /* ... */ }
-    renderSettings() { /* ... */ }
-    renderBackupRestore() { /* ... */ }
-    renderNotifications() { /* ... */ }
-    renderInfoApp() { /* ... */ }
-    renderHelp() { /* ... */ }
+    renderDocumentImport() { 
+        // Document import functionality handled by file input
+    }
+    renderSettings() { 
+        const nameElement = document.getElementById('settings-teacher-name');
+        const yearElement = document.getElementById('settings-school-year');
+        if (nameElement) {
+            nameElement.textContent = state.settings.teacherName && state.settings.teacherLastName 
+                ? `${state.settings.teacherName} ${state.settings.teacherLastName}`
+                : state.settings.teacherName || 'Non configurato';
+        }
+        if (yearElement) {
+            yearElement.textContent = state.settings.schoolYear || 'Non configurato';
+        }
+    }
+    renderBackupRestore() { 
+        // Backup/restore functionality
+    }
+    renderNotifications() { 
+        // Notifications - future feature
+    }
+    renderInfoApp() { 
+        // App info - future feature
+    }
+    renderHelp() { 
+        // Help content already in HTML
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

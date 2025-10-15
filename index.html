@@ -40,9 +40,216 @@
 <body>
     <!-- Onboarding Modal -->
     <div id="onboarding-modal" class="modal" style="display: none;">
-        <!-- ... (rest of the file remains unchanged) ... -->
+        <div class="modal-content">
+            <h2>Benvenuto in Docente++</h2>
+            <p>Configura il tuo profilo per iniziare</p>
+            <form id="onboarding-form">
+                <div class="form-group">
+                    <label for="onboarding-first-name">Nome *</label>
+                    <input type="text" id="onboarding-first-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-last-name">Cognome</label>
+                    <input type="text" id="onboarding-last-name">
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-school-year">Anno Scolastico</label>
+                    <input type="text" id="onboarding-school-year" placeholder="2024/2025">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Inizia ad Usare Docente++</button>
+                    <button type="button" id="onboarding-skip" class="btn btn-secondary">Salta per Ora</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <!-- ... (rest of the HTML unchanged) ... -->
+
+    <!-- Main Header -->
+    <header>
+        <div class="header-content">
+            <button id="menu-toggle" class="menu-toggle">☰</button>
+            <h1>Docente++</h1>
+            <div id="active-class-badge">
+                <span id="active-class-badge-text">Workspace</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu Backdrop for Mobile -->
+    <div id="menu-backdrop" class="menu-backdrop"></div>
+
+    <!-- Main Navigation -->
+    <nav id="main-nav">
+        <button class="tab-button" data-tab="home">🏠 Dashboard</button>
+        <button class="tab-button" data-tab="lessons">📚 Lezioni</button>
+        <button class="tab-button" data-tab="students">👥 Studenti</button>
+        <button class="tab-button" data-tab="classes">🏫 Classi</button>
+        <button class="tab-button" data-tab="activities">✍️ Attività</button>
+        <button class="tab-button" data-tab="evaluations">📊 Valutazioni</button>
+        <button class="tab-button" data-tab="schedule">🗓️ Orario</button>
+        <button class="tab-button" data-tab="aiAssistant">🤖 Assistente IA</button>
+        <button class="tab-button" data-tab="documentImport">📄 Importa Documenti</button>
+        
+        <div class="menu-group">
+            <button class="menu-with-submenu">⚙️ Altro</button>
+            <div class="submenu">
+                <button class="submenu-item tab-button" data-tab="settings">⚙️ Impostazioni</button>
+                <button class="submenu-item tab-button" data-tab="backupRestore">💾 Backup/Ripristino</button>
+                <button class="submenu-item tab-button" data-tab="help">❓ Aiuto</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Home Tab -->
+        <div id="home" class="tab-content">
+            <h2>Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Lezioni</h3>
+                    <p id="home-lesson-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Studenti</h3>
+                    <p id="home-student-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Attività</h3>
+                    <p id="home-activity-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Valutazioni</h3>
+                    <p id="home-evaluation-count">0</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-section">
+                <h3>Orario di Oggi</h3>
+                <div id="today-schedule-enhanced"></div>
+            </div>
+            
+            <div class="dashboard-section">
+                <h3>Cose da Fare</h3>
+                <div id="things-todo-list"></div>
+            </div>
+            
+            <div class="dashboard-section">
+                <h3>Suggerimenti IA</h3>
+                <div id="ai-suggestions-content"></div>
+                <div>Stato IA: <span id="home-ai-ready">Non configurata</span></div>
+            </div>
+        </div>
+
+        <!-- Lessons Tab -->
+        <div id="lessons" class="tab-content">
+            <h2>Gestione Lezioni</h2>
+            <div id="lessons-list"></div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <h2>Gestione Studenti</h2>
+            <div id="students-list"></div>
+        </div>
+
+        <!-- Classes Tab -->
+        <div id="classes" class="tab-content">
+            <h2>Gestione Classi</h2>
+            <div id="classes-list"></div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <h2>Gestione Attività</h2>
+            <div id="activities-list"></div>
+        </div>
+
+        <!-- Evaluations Tab -->
+        <div id="evaluations" class="tab-content">
+            <h2>Gestione Valutazioni</h2>
+            <div id="evaluations-list"></div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <h2>Orario Settimanale</h2>
+            <div id="schedule-view"></div>
+        </div>
+
+        <!-- AI Assistant Tab -->
+        <div id="aiAssistant" class="tab-content">
+            <h2>Assistente IA</h2>
+            <div id="ai-chat-container">
+                <div id="ai-chat-messages"></div>
+                <div class="ai-chat-input-area">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedimi qualcosa...">
+                    <button id="ai-chat-send">Invia</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Import Tab -->
+        <div id="documentImport" class="tab-content">
+            <h2>Importa Documenti</h2>
+            <div class="import-area">
+                <input type="file" id="pdf-upload" accept=".pdf,.txt,.csv,.xlsx,.json">
+                <label for="pdf-upload">Carica un documento</label>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <h2>Impostazioni</h2>
+            <div class="settings-section">
+                <h3>Profilo Docente</h3>
+                <p>Nome: <span id="settings-teacher-name">-</span></p>
+                <p>Anno Scolastico: <span id="settings-school-year">-</span></p>
+            </div>
+            <div class="settings-section">
+                <h3>Risoluzione Problemi</h3>
+                <button id="clear-all-data-btn" class="btn btn-danger">Cancella Tutti i Dati</button>
+                <p class="help-text">⚠️ Questa azione cancellerà tutti i tuoi dati salvati e ripristinerà l'app.</p>
+            </div>
+        </div>
+
+        <!-- Backup/Restore Tab -->
+        <div id="backupRestore" class="tab-content">
+            <h2>Backup e Ripristino</h2>
+            <div class="backup-section">
+                <button class="btn btn-primary">Esporta Backup</button>
+                <button class="btn btn-secondary">Importa Backup</button>
+            </div>
+        </div>
+
+        <!-- Help Tab -->
+        <div id="help" class="tab-content">
+            <h2>Aiuto</h2>
+            <div class="help-section">
+                <h3>Guide Rapide</h3>
+                <ul>
+                    <li>Come creare una nuova classe</li>
+                    <li>Come aggiungere studenti</li>
+                    <li>Come pianificare lezioni</li>
+                    <li>Come utilizzare l'assistente IA</li>
+                </ul>
+                
+                <h3>Risoluzione Problemi</h3>
+                <p>Se l'app non funziona correttamente:</p>
+                <ol>
+                    <li>Prova a ricaricare la pagina (F5)</li>
+                    <li>Controlla la console del browser per errori</li>
+                    <li>Se i dati sono corrotti, vai in Impostazioni e usa "Cancella Tutti i Dati"</li>
+                    <li>Assicurati che il localStorage del browser sia abilitato</li>
+                </ol>
+                
+                <h3>Informazioni</h3>
+                <p>Docente++ v1.1.0 (Refactored)</p>
+                <p>App web per la gestione della didattica</p>
+            </div>
+        </div>
+    </main>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -65,7 +65,19 @@ export function updateActiveClassBadge() {
 }
 
 export function showOnboarding() {
-    document.getElementById('onboarding-modal').style.display = 'flex';
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error('Onboarding modal not found. Skipping onboarding.');
+        // If modal doesn't exist, skip onboarding to not block the app
+        import('./data.js').then(({ skipOnboarding }) => {
+            skipOnboarding();
+            if (window.app && typeof window.app.initializeAppUI === 'function') {
+                window.app.initializeAppUI();
+            }
+        });
+    }
 }
 
 export function hideOnboarding() {
