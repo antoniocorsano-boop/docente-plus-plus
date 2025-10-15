@@ -55,7 +55,11 @@ export function initAppBarScrollBehavior() {
 /**
  * Initialize workspace button functionality
  * Replaces the old active-class-badge
+ * 
+ * TEMPORANEAMENTE DISABILITATO - La funzionalità Workspace non è attualmente utilizzata
+ * Per ripristinare: decommentare questa funzione e la chiamata in initAppBar()
  */
+/* 
 export function initWorkspaceButton() {
     const workspaceBtn = document.getElementById('workspace-btn');
     if (!workspaceBtn) {
@@ -69,11 +73,12 @@ export function initWorkspaceButton() {
         console.log('Workspace button clicked - implement selector');
     });
 }
+*/
 
 /**
  * Initialize all AppBar functionality
  */
 export function initAppBar() {
     initAppBarScrollBehavior();
-    initWorkspaceButton();
+    // initWorkspaceButton(); // TEMPORANEAMENTE DISABILITATO - Workspace non utilizzato
 }

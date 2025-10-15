@@ -4071,6 +4071,7 @@ textarea {
     border-color: var(--md-primary);
 }
 
+/* WORKSPACE TEMPORANEAMENTE DISABILITATO - Questa classe è per il selettore workspace futuro */
 .class-selector-item.workspace {
     background: var(--md-secondary);
     color: white;
