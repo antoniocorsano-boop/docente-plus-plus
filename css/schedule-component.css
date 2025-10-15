@@ -1,12 +1,11 @@
-/* Schedule Component Styles - Responsive & Professional */
-/* Import theme variables first */
-@import 'schedule-theme.css';
+/* Schedule Component Styles - Material Design 3 Expressive */
+/* Consistent with app's design system */
 
 /* Main Schedule Wrapper */
 .schedule-wrapper {
     width: 100%;
     overflow-x: auto;
-    background: var(--schedule-bg);
+    background: var(--schedule-surface);
     border-radius: var(--schedule-radius-lg);
     box-shadow: var(--schedule-shadow-md);
     padding: var(--schedule-spacing-lg);
@@ -19,25 +18,26 @@
     border-collapse: separate;
     border-spacing: 0;
     font-family: var(--schedule-font-family);
-    background: var(--schedule-bg);
+    background: var(--schedule-surface);
 }
 
-/* Table Headers */
+/* Table Headers - Material Design 3 style */
 .schedule-header {
-    background: var(--schedule-primary);
-    color: var(--schedule-text-on-primary);
+    background: var(--schedule-primary-container);
+    color: var(--schedule-text-primary);
     padding: var(--schedule-spacing-md) var(--schedule-spacing-sm);
     text-align: center;
     font-weight: var(--schedule-font-weight-semibold);
     font-size: var(--schedule-font-size-base);
-    border: 1px solid var(--schedule-primary-dark);
+    border: 1px solid var(--schedule-divider);
     position: sticky;
     top: 0;
     z-index: var(--schedule-z-header);
 }
 
 .schedule-header--time {
-    background: var(--schedule-primary-dark);
+    background: var(--schedule-primary);
+    color: var(--schedule-on-primary);
     min-width: 80px;
 }
 
@@ -61,13 +61,13 @@
 
 /* Time Cells */
 .schedule-time-cell {
-    background: var(--schedule-time-bg);
-    color: var(--schedule-time-text);
+    background: var(--schedule-surface-container);
+    color: var(--schedule-text-primary);
     padding: var(--schedule-spacing-md) var(--schedule-spacing-sm);
     text-align: center;
     font-weight: var(--schedule-font-weight-semibold);
     font-size: var(--schedule-font-size-base);
-    border: 1px solid var(--schedule-border);
+    border: 1px solid var(--schedule-divider);
     vertical-align: middle;
 }
 
@@ -76,44 +76,44 @@
     white-space: nowrap;
 }
 
-/* Schedule Cells */
+/* Schedule Cells - Material Design 3 */
 .schedule-cell {
-    background: var(--schedule-cell-bg);
-    border: 2px solid var(--schedule-border);
+    background: var(--schedule-surface-container-low);
+    border: 2px solid var(--schedule-divider);
     padding: var(--schedule-spacing-md);
     cursor: pointer;
-    transition: all var(--schedule-transition-normal);
+    transition: all var(--schedule-transition-duration) var(--schedule-transition-timing);
     vertical-align: top;
     min-height: 80px;
     position: relative;
 }
 
 .schedule-cell:hover {
-    background: var(--schedule-cell-hover);
-    border-color: var(--schedule-border-hover);
+    background: var(--schedule-surface-container-high);
+    border-color: var(--schedule-primary);
     box-shadow: var(--schedule-shadow-hover);
     transform: translateY(-2px);
 }
 
 .schedule-cell:focus {
-    outline: 3px solid var(--schedule-accent);
+    outline: 2px solid var(--schedule-primary);
     outline-offset: 2px;
 }
 
 .schedule-cell--empty {
-    background: var(--schedule-cell-empty);
+    background: var(--schedule-surface-variant);
     border-style: dashed;
     opacity: 0.7;
 }
 
 .schedule-cell--empty:hover {
     opacity: 1;
-    background: var(--schedule-cell-hover);
+    background: var(--schedule-surface-container);
 }
 
 .schedule-cell--filled:active {
-    background: var(--schedule-cell-active);
-    border-color: var(--schedule-border-active);
+    background: var(--schedule-primary-container);
+    border-color: var(--schedule-primary);
 }
 
 /* Cell Content */
@@ -128,7 +128,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--schedule-text-muted);
+    color: var(--schedule-text-secondary);
     text-align: center;
 }
 
@@ -164,7 +164,7 @@
 
 .schedule-cell__add-icon {
     font-size: 2rem;
-    color: var(--schedule-accent);
+    color: var(--schedule-primary);
     margin-bottom: var(--schedule-spacing-xs);
 }
 
@@ -173,21 +173,21 @@
     font-weight: var(--schedule-font-weight-medium);
 }
 
-/* Modal Styles */
+/* Modal Styles - Material Design 3 */
 .schedule-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--md-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: var(--schedule-z-modal);
     padding: var(--schedule-spacing-lg);
     backdrop-filter: blur(4px);
-    animation: scheduleModalFadeIn var(--schedule-transition-normal);
+    animation: scheduleModalFadeIn var(--schedule-transition-duration) var(--schedule-transition-timing);
 }
 
 @keyframes scheduleModalFadeIn {
@@ -200,14 +200,14 @@
 }
 
 .schedule-modal {
-    background: var(--schedule-bg);
+    background: var(--schedule-surface);
     border-radius: var(--schedule-radius-lg);
     box-shadow: var(--schedule-shadow-lg);
     max-width: 600px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    animation: scheduleModalSlideUp var(--schedule-transition-normal);
+    animation: scheduleModalSlideUp var(--schedule-transition-duration) var(--schedule-transition-timing);
 }
 
 @keyframes scheduleModalSlideUp {
@@ -226,13 +226,13 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--schedule-spacing-lg);
-    border-bottom: 1px solid var(--schedule-border);
-    background: linear-gradient(135deg, var(--schedule-primary) 0%, var(--schedule-accent) 100%);
+    border-bottom: 1px solid var(--schedule-divider);
+    background: var(--schedule-primary-container);
     border-radius: var(--schedule-radius-lg) var(--schedule-radius-lg) 0 0;
 }
 
 .schedule-modal__title {
-    color: var(--schedule-text-on-primary);
+    color: var(--schedule-text-primary);
     font-size: var(--schedule-font-size-xl);
     font-weight: var(--schedule-font-weight-semibold);
     display: flex;
@@ -243,23 +243,30 @@
 
 .schedule-modal__title .material-symbols-outlined {
     font-size: 1.5em;
+    color: var(--schedule-primary);
 }
 
 .schedule-modal__close {
     background: transparent;
     border: none;
-    color: var(--schedule-text-on-primary);
+    color: var(--schedule-text-primary);
     cursor: pointer;
     padding: var(--schedule-spacing-xs);
     border-radius: var(--schedule-radius-sm);
-    transition: background var(--schedule-transition-fast);
+    transition: background var(--schedule-transition-duration) var(--schedule-transition-timing);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .schedule-modal__close:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(103, 80, 164, 0.08);
+}
+
+body.dark-theme .schedule-modal__close:hover {
+    background: rgba(208, 188, 255, 0.08);
 }
 
 .schedule-modal__close .material-symbols-outlined {
@@ -275,8 +282,8 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--schedule-spacing-lg);
-    border-top: 1px solid var(--schedule-border);
-    background: var(--schedule-cell-bg);
+    border-top: 1px solid var(--schedule-divider);
+    background: var(--schedule-surface-container-low);
 }
 
 .schedule-modal__actions {
@@ -284,7 +291,7 @@
     gap: var(--schedule-spacing-sm);
 }
 
-/* Form Styles */
+/* Form Styles - Material Design 3 */
 .schedule-form-group {
     margin-bottom: var(--schedule-spacing-lg);
 }
@@ -310,19 +317,19 @@
     font-family: var(--schedule-font-family);
     font-size: var(--schedule-font-size-base);
     color: var(--schedule-text-primary);
-    background: var(--schedule-bg);
-    border: 2px solid var(--schedule-border);
-    border-radius: var(--schedule-radius-md);
-    transition: all var(--schedule-transition-fast);
+    background: var(--schedule-surface);
+    border: 1px solid var(--schedule-border);
+    border-radius: var(--schedule-radius-sm);
+    transition: all var(--schedule-transition-duration) var(--schedule-transition-timing);
 }
 
 .schedule-form-control:focus {
     outline: none;
     border-color: var(--schedule-primary);
-    box-shadow: 0 0 0 3px var(--schedule-accent-light);
+    box-shadow: 0 0 0 3px var(--schedule-primary-container);
 }
 
-/* Activity Type Selector */
+/* Activity Type Selector - Material Design 3 */
 .schedule-activity-types {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -346,21 +353,21 @@
     align-items: center;
     gap: var(--schedule-spacing-xs);
     padding: var(--schedule-spacing-md);
-    border: 2px solid var(--schedule-border);
+    border: 2px solid var(--schedule-divider);
     border-radius: var(--schedule-radius-md);
-    background: var(--schedule-cell-bg);
-    transition: all var(--schedule-transition-fast);
+    background: var(--schedule-surface-container-low);
+    transition: all var(--schedule-transition-duration) var(--schedule-transition-timing);
 }
 
 .schedule-activity-type:hover .schedule-activity-type__content {
-    border-color: var(--schedule-border-hover);
-    background: var(--schedule-cell-hover);
+    border-color: var(--schedule-primary);
+    background: var(--schedule-surface-container);
 }
 
 .schedule-activity-type input:checked + .schedule-activity-type__content {
-    border-color: var(--activity-color);
-    background: var(--schedule-accent-light);
-    box-shadow: 0 0 0 3px var(--schedule-accent-light);
+    border-color: var(--schedule-primary);
+    background: var(--schedule-primary-container);
+    box-shadow: var(--schedule-shadow-sm);
 }
 
 .schedule-activity-type__content .material-symbols-outlined {
@@ -376,54 +383,83 @@
     text-align: center;
 }
 
-/* Buttons */
+/* Buttons - Material Design 3 (using app button styles) */
 .schedule-btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--schedule-radius-lg);
+    cursor: pointer;
+    font-size: var(--schedule-font-size-sm);
+    font-weight: var(--schedule-font-weight-medium);
+    letter-spacing: 0.0071428571em;
+    text-transform: none;
+    transition: all var(--schedule-transition-duration) var(--schedule-transition-timing);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: var(--schedule-spacing-xs);
-    padding: var(--schedule-spacing-md) var(--schedule-spacing-lg);
-    font-family: var(--schedule-font-family);
-    font-size: var(--schedule-font-size-base);
-    font-weight: var(--schedule-font-weight-medium);
-    border: none;
-    border-radius: var(--schedule-radius-md);
-    cursor: pointer;
-    transition: all var(--schedule-transition-fast);
-    text-decoration: none;
-    white-space: nowrap;
+    min-height: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* State layer effect */
+.schedule-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--schedule-transition-duration) var(--schedule-transition-timing);
+}
+
+.schedule-btn:hover::before {
+    opacity: 0.08;
+}
+
+.schedule-btn:active::before {
+    opacity: 0.12;
 }
 
 .schedule-btn .material-symbols-outlined {
-    font-size: 1.2em;
+    font-size: 18px;
 }
 
 .schedule-btn--primary {
     background: var(--schedule-primary);
-    color: var(--schedule-text-on-primary);
+    color: var(--schedule-on-primary);
+    box-shadow: var(--schedule-shadow-sm);
 }
 
 .schedule-btn--primary:hover {
-    background: var(--schedule-primary-dark);
     box-shadow: var(--schedule-shadow-md);
 }
 
 .schedule-btn--secondary {
-    background: var(--schedule-border);
-    color: var(--schedule-text-primary);
+    background: transparent;
+    color: var(--schedule-primary);
+    border: 1px solid var(--schedule-border);
 }
 
 .schedule-btn--secondary:hover {
-    background: var(--schedule-text-secondary);
-    color: var(--schedule-bg);
+    background: rgba(103, 80, 164, 0.08);
+}
+
+body.dark-theme .schedule-btn--secondary:hover {
+    background: rgba(208, 188, 255, 0.08);
 }
 
 .schedule-btn--danger {
-    background: #D32F2F;
-    color: white;
+    background: var(--md-error);
+    color: var(--md-on-error);
+    box-shadow: var(--schedule-shadow-sm);
 }
 
 .schedule-btn--danger:hover {
-    background: #B71C1C;
+    box-shadow: var(--schedule-shadow-md);
 }
 
 /* Responsive Styles */

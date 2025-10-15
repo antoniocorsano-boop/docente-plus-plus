@@ -17,8 +17,8 @@
     
     <style>
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #EADDFF 0%, #D0BCFF 100%);
             padding: 20px;
             margin: 0;
             min-height: 100vh;
@@ -33,21 +33,21 @@
             background: white;
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             margin-bottom: 30px;
             text-align: center;
         }
         
         .demo-header h1 {
             margin: 0 0 10px 0;
-            color: #0277BD;
+            color: #6750A4;
             font-size: 2.5rem;
             font-weight: 700;
         }
         
         .demo-header p {
             margin: 0;
-            color: #757575;
+            color: #49454F;
             font-size: 1.125rem;
         }
         
@@ -55,7 +55,7 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
             margin-bottom: 20px;
             display: flex;
             gap: 12px;
@@ -68,41 +68,42 @@
             align-items: center;
             gap: 8px;
             padding: 12px 20px;
-            background: #0277BD;
+            background: #6750A4;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 16px;
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
         
         .demo-controls button:hover {
-            background: #01579B;
+            background: #4F378B;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(2, 119, 189, 0.3);
         }
         
         .demo-controls button.secondary {
-            background: #757575;
+            background: #625B71;
         }
         
         .demo-controls button.secondary:hover {
-            background: #616161;
+            background: #4A4458;
         }
         
         .demo-stats {
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
             margin-top: 20px;
         }
         
         .demo-stats h3 {
             margin: 0 0 15px 0;
-            color: #0277BD;
+            color: #6750A4;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -116,21 +117,21 @@
         
         .stat-item {
             padding: 15px;
-            background: #E1F5FE;
+            background: #EADDFF;
             border-radius: 8px;
-            border-left: 4px solid #0277BD;
+            border-left: 4px solid #6750A4;
         }
         
         .stat-label {
             font-size: 0.875rem;
-            color: #616161;
+            color: #49454F;
             margin-bottom: 5px;
         }
         
         .stat-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0277BD;
+            color: #6750A4;
         }
         
         /* Dark theme toggle */
@@ -146,21 +147,21 @@
         
         body.dark-theme .demo-header h1,
         body.dark-theme .demo-stats h3 {
-            color: #42A5F5;
+            color: #D0BCFF;
         }
         
         body.dark-theme .demo-header p,
         body.dark-theme .stat-label {
-            color: #B0BEC5;
+            color: #CCC2DC;
         }
         
         body.dark-theme .stat-item {
-            background: #1A237E;
-            border-left-color: #42A5F5;
+            background: #4F378B;
+            border-left-color: #D0BCFF;
         }
         
         body.dark-theme .stat-value {
-            color: #4FC3F7;
+            color: #EADDFF;
         }
         
         @media (max-width: 768px) {

@@ -18,32 +18,32 @@ const ACTIVITY_TYPES = {
     theory: {
         label: 'Teoria/Lezione',
         icon: 'menu_book',
-        color: 'var(--schedule-activity-theory)'
+        color: '#6750A4'  // Primary purple
     },
     practice: {
         label: 'Disegno/Pratica',
         icon: 'draw',
-        color: 'var(--schedule-activity-practice)'
+        color: '#7D5260'  // Tertiary rose
     },
     lab: {
         label: 'Laboratorio',
         icon: 'science',
-        color: 'var(--schedule-activity-lab)'
+        color: '#006A6A'  // Teal
     },
     test: {
         label: 'Verifica',
         icon: 'quiz',
-        color: 'var(--schedule-activity-test)'
+        color: '#984061'  // Deep rose
     },
     group: {
         label: 'Lavoro di Gruppo',
         icon: 'groups',
-        color: 'var(--schedule-activity-group)'
+        color: '#6750A4'  // Primary purple
     },
     other: {
         label: 'Altro',
         icon: 'more_horiz',
-        color: 'var(--schedule-activity-other)'
+        color: '#625B71'  // Secondary gray
     }
 };
 
