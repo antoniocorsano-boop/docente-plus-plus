@@ -509,16 +509,15 @@ header .header-content {
     margin: 0 auto;
     padding: 8px 16px;
     min-height: 56px;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
 }
 
 header h1 {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    grid-column: 2;
+    justify-self: center;
     font-size: 1.25rem;
     font-weight: 500;
     margin: 0;
@@ -527,10 +526,10 @@ header h1 {
 }
 
 header .header-actions {
+    grid-column: 3;
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto;
 }
 
 /* Header Icon Buttons */
@@ -590,44 +589,6 @@ header.minimal h1 {
 
 /* Removed old active-class-badge styles - now using icon button */
 
-/* Active Class Badge - Material Design */
-.active-class-badge {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: var(--md-primary);
-    color: var(--md-text-on-primary);
-    padding: 8px 20px;
-    border-radius: var(--md-radius-extra-large);
-    box-shadow: var(--md-elevation-3);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    z-index: 9000;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all var(--md-transition-duration) var(--md-transition-timing);
-    letter-spacing: 0.0071428571em;
-}
-
-.active-class-badge:hover {
-    box-shadow: var(--md-elevation-4);
-    transform: translateY(-2px);
-}
-
-.active-class-badge .badge-icon {
-    font-size: 1.25rem;
-}
-
-.active-class-badge.workspace-mode {
-    background: var(--md-secondary);
-}
-
-.active-class-badge.class-selected {
-    background: var(--md-accent);
-}
-}
 
 /* Navigation Container - Material Design 3 */
 nav {
@@ -4666,15 +4627,6 @@ body.dark-theme textarea {
     .toast {
         min-width: auto;
         max-width: 100%;
-    }
-    
-    /* Active class badge on mobile */
-    .active-class-badge {
-        top: auto;
-        bottom: 10px;
-        right: 10px;
-        font-size: 0.8em;
-        padding: 6px 12px;
     }
     
     /* Schedule grid responsive */
