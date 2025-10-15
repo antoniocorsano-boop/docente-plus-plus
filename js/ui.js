@@ -59,13 +59,18 @@ export function switchTab(tabName) {
 }
 
 export function updateActiveClassBadge() {
-    const badge = document.getElementById('active-class-badge-text');
-    if (!badge) return;
+    // Update workspace button title with active class
+    const workspaceBtn = document.getElementById('workspace-btn');
+    if (!workspaceBtn) return;
+    
     if (state.activeClass) {
         const cls = state.classes.find(c => c.id === state.activeClass);
-        badge.textContent = cls ? cls.name : 'Workspace';
+        const title = cls ? `Classe: ${cls.name}` : 'Workspace';
+        workspaceBtn.setAttribute('title', title);
+        workspaceBtn.setAttribute('aria-label', title);
     } else {
-        badge.textContent = 'Workspace';
+        workspaceBtn.setAttribute('title', 'Workspace');
+        workspaceBtn.setAttribute('aria-label', 'Seleziona workspace');
     }
 }
 

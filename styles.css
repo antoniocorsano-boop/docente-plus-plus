@@ -475,6 +475,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-top: 56px; /* Account for fixed header */
 }
 
 .container {
@@ -484,35 +485,59 @@ body {
 }
 
 /* Header - Material Design */
+/* AppBar - Compact and Responsive Design */
 header {
     background: var(--md-primary);
     color: var(--md-text-on-primary);
     box-shadow: var(--md-elevation-2);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
-    transition: box-shadow var(--md-transition-duration) var(--md-transition-timing);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: transform var(--md-transition-duration) var(--md-transition-timing),
+                box-shadow var(--md-transition-duration) var(--md-transition-timing);
+}
+
+/* Hide header when scrolling down */
+header.header-hidden {
+    transform: translateY(-100%);
 }
 
 header .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 16px;
-    display: flex;
+    padding: 8px 16px;
+    min-height: 56px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
 }
 
-header .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+header h1 {
+    grid-column: 2;
+    justify-self: center;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.0125em;
+    pointer-events: none;
 }
 
-.icon-btn {
+header .header-actions {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Header Icon Buttons */
+header .icon-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border: none;
     background: transparent;
     color: var(--md-text-on-primary);
@@ -522,12 +547,27 @@ header .header-actions {
     justify-content: center;
     cursor: pointer;
     transition: background-color var(--md-transition-duration) var(--md-transition-timing);
+    position: relative;
 }
 
-.icon-btn:hover {
+header .icon-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+header .icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+header .icon-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+
+/* Menu toggle button - always visible */
+.menu-toggle {
+    display: flex !important;
+}
+
+/* Minimal header variant (not used in new design) */
 header.minimal .icon-btn {
     color: var(--md-text-primary);
 }
@@ -545,115 +585,10 @@ header.minimal {
 
 header.minimal h1 {
     color: var(--md-text-primary);
-    font-size: 1.5rem;
-    font-weight: 500;
-    margin: 0;
 }
 
-header h1 {
-    font-size: 1.75rem;
-    font-weight: 500;
-    margin: 0;
-    letter-spacing: 0.0125em;
-}
+/* Removed old active-class-badge styles - now using icon button */
 
-.subtitle {
-    font-size: 0.875rem;
-    opacity: 0.9;
-    margin-top: 4px;
-}
-
-#active-class-badge {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 8px 16px;
-    border-radius: var(--md-radius-large);
-    font-size: 0.875rem;
-    font-weight: 500;
-    box-shadow: var(--md-elevation-1);
-}
-
-header.minimal #active-class-badge {
-    background: var(--md-surface-variant);
-    color: var(--md-text-primary);
-}
-
-/* Hamburger Menu - Material Design */
-.menu-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 12px;
-    border-radius: var(--md-radius-medium);
-    transition: background-color var(--md-transition-duration) var(--md-transition-timing);
-}
-
-.menu-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-.menu-toggle span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--md-text-primary);
-    border-radius: 2px;
-    transition: all var(--md-transition-duration) var(--md-transition-timing);
-}
-
-.menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.menu-toggle.active span:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* Active Class Badge - Material Design */
-.active-class-badge {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: var(--md-primary);
-    color: var(--md-text-on-primary);
-    padding: 8px 20px;
-    border-radius: var(--md-radius-extra-large);
-    box-shadow: var(--md-elevation-3);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    z-index: 9000;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all var(--md-transition-duration) var(--md-transition-timing);
-    letter-spacing: 0.0071428571em;
-}
-
-.active-class-badge:hover {
-    box-shadow: var(--md-elevation-4);
-    transform: translateY(-2px);
-}
-
-.active-class-badge .badge-icon {
-    font-size: 1.25rem;
-}
-
-.active-class-badge.workspace-mode {
-    background: var(--md-secondary);
-}
-
-.active-class-badge.class-selected {
-    background: var(--md-accent);
-}
-}
 
 /* Navigation Container - Material Design 3 */
 nav {
@@ -3329,9 +3264,9 @@ nav::-webkit-scrollbar-thumb {
 
 /* Mobile optimizations for lesson session */
 @media (max-width: 768px) {
-    /* Show hamburger menu on mobile */
-    .menu-toggle {
-        display: flex;
+    /* Adjust header title for mobile */
+    header h1 {
+        font-size: 1.125rem;
     }
     
     /* Compact side menu - reduced width and spacing */
@@ -4692,15 +4627,6 @@ body.dark-theme textarea {
     .toast {
         min-width: auto;
         max-width: 100%;
-    }
-    
-    /* Active class badge on mobile */
-    .active-class-badge {
-        top: auto;
-        bottom: 10px;
-        right: 10px;
-        font-size: 0.8em;
-        padding: 6px 12px;
     }
     
     /* Schedule grid responsive */
