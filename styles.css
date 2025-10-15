@@ -1956,9 +1956,14 @@ main {
 }
 
 .notification-item.unread {
-    background: #e3f2fd;
-    border-left-color: var(--md-secondary);
+    background: var(--md-primary-container);
+    border-left-color: var(--md-primary);
     font-weight: 500;
+}
+
+body.dark-theme .notification-item.unread {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
 }
 
 .notification-item.read {
@@ -2758,11 +2763,21 @@ main {
 }
 
 .warning-message {
-    color: #856404;
-    padding: 10px;
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 5px;
+    color: var(--md-on-surface);
+    padding: var(--spacing-md);
+    background: var(--md-surface-container-high);
+    border: 1px solid var(--md-warning);
+    border-left: 4px solid var(--md-warning);
+    border-radius: var(--md-radius-medium);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Dark theme override for warning messages */
+body.dark-theme .warning-message {
+    background: rgba(255, 152, 0, 0.15);
+    border-color: var(--md-warning);
+    color: var(--md-on-surface);
 }
 
 .btn-sm {
@@ -2920,15 +2935,15 @@ main {
     width: 60px;
     height: 60px;
     background: linear-gradient(135deg, var(--md-primary), var(--md-secondary));
-    color: white;
+    color: var(--md-on-primary);
+    border: none;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    cursor: move;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--md-elevation-3);
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
     z-index: 999;
     user-select: none;
     -webkit-user-select: none;
@@ -2936,9 +2951,14 @@ main {
     touch-action: none;
 }
 
+.ai-fab .material-symbols-outlined {
+    font-size: 32px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
 .ai-fab:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--md-elevation-4);
 }
 
 .ai-fab:active {
@@ -2953,6 +2973,20 @@ main {
 
 .ai-fab.hidden {
     display: none !important;
+}
+
+/* Responsive FAB positioning */
+@media (max-width: 768px) {
+    .ai-fab {
+        width: 56px;
+        height: 56px;
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .ai-fab .material-symbols-outlined {
+        font-size: 28px;
+    }
 }
 
 /* AI Agent Modal */
@@ -3866,13 +3900,18 @@ textarea {
 }
 
 .toast-info {
-    background: #e3f2fd;
-    color: #1565c0;
+    background: var(--md-info);
+    color: var(--md-surface);
 }
 
 .toast-info .toast-icon {
-    background: var(--md-info);
-    color: white;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+body.dark-theme .toast-info {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
 }
 
 /* Toast animations */
@@ -6079,4 +6118,160 @@ select {
 
 .notification-center-content::-webkit-scrollbar-thumb:hover {
     background: var(--md-primary);
+}
+
+/* ===== Settings Sections, Banners, and Help Text Improvements ===== */
+
+/* Settings Section Containers */
+.settings-section {
+    background: var(--md-surface-container-low);
+    border: 1px solid var(--md-divider);
+    border-radius: var(--md-radius-large);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--md-elevation-1);
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.settings-section:hover {
+    box-shadow: var(--md-elevation-2);
+}
+
+.settings-section h3 {
+    color: var(--md-on-surface);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-md);
+    letter-spacing: var(--letter-spacing-headline);
+}
+
+/* Help Text - with proper contrast for both themes */
+.help-text {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: var(--line-height-relaxed);
+    margin-top: var(--spacing-sm);
+}
+
+/* Info/Note Banners - Light Theme */
+p.help-text[style*="background: #e3f2fd"],
+p.help-text[style*="background:#e3f2fd"] {
+    background: var(--md-info) !important;
+    color: var(--md-surface) !important;
+    padding: var(--spacing-md);
+    border-radius: var(--md-radius-medium);
+    border-left: 4px solid var(--md-primary);
+}
+
+/* Dark theme override for info banners */
+body.dark-theme p.help-text[style*="background: #e3f2fd"],
+body.dark-theme p.help-text[style*="background:#e3f2fd"] {
+    background: var(--md-primary-container) !important;
+    color: var(--md-on-primary-container) !important;
+    border-left-color: var(--md-primary);
+}
+
+/* Warning/Note Banners - Light Theme */
+p.help-text[style*="background: #fff3cd"],
+p.help-text[style*="background:#fff3cd"] {
+    background: var(--md-warning) !important;
+    color: var(--md-surface) !important;
+    padding: var(--spacing-md);
+    border-radius: var(--md-radius-medium);
+    border-left: 4px solid #f57c00;
+}
+
+/* Dark theme override for warning banners */
+body.dark-theme p.help-text[style*="background: #fff3cd"],
+body.dark-theme p.help-text[style*="background:#fff3cd"] {
+    background: rgba(255, 152, 0, 0.2) !important;
+    color: var(--md-on-surface) !important;
+    border-left-color: var(--md-warning);
+}
+
+/* Generic banner/note styling */
+.banner, .note, .info-box {
+    padding: var(--spacing-md);
+    border-radius: var(--md-radius-medium);
+    margin: var(--spacing-md) 0;
+    border-left: 4px solid currentColor;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+.banner.info, .note.info, .info-box {
+    background: var(--md-surface-container-high);
+    color: var(--md-on-surface);
+    border-left-color: var(--md-primary);
+}
+
+.banner.warning, .note.warning {
+    background: var(--md-surface-container-high);
+    color: var(--md-on-surface);
+    border-left-color: var(--md-warning);
+}
+
+.banner.error, .note.error {
+    background: var(--md-surface-container-high);
+    color: var(--md-on-surface);
+    border-left-color: var(--md-error);
+}
+
+.banner.success, .note.success {
+    background: var(--md-surface-container-high);
+    color: var(--md-on-surface);
+    border-left-color: var(--md-success);
+}
+
+/* Dark theme specific adjustments for banners */
+body.dark-theme .banner.info,
+body.dark-theme .note.info,
+body.dark-theme .info-box {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+body.dark-theme .banner.warning,
+body.dark-theme .note.warning {
+    background: rgba(255, 152, 0, 0.15);
+    color: var(--md-on-surface);
+}
+
+body.dark-theme .banner.error,
+body.dark-theme .note.error {
+    background: var(--md-error-container);
+    color: var(--md-on-error-container);
+}
+
+body.dark-theme .banner.success,
+body.dark-theme .note.success {
+    background: rgba(76, 175, 80, 0.15);
+    color: var(--md-on-surface);
+}
+
+/* TODO Section specific styling */
+.settings-section ul.help-text {
+    margin-left: var(--spacing-md);
+    padding-left: var(--spacing-md);
+}
+
+.settings-section ul.help-text li {
+    margin-bottom: var(--spacing-sm);
+    color: var(--md-on-surface-variant);
+}
+
+/* Ensure strong tags in help text are readable */
+.help-text strong,
+.banner strong,
+.note strong,
+.info-box strong {
+    color: var(--md-on-surface);
+    font-weight: var(--font-weight-semibold);
+}
+
+body.dark-theme .help-text strong,
+body.dark-theme .banner strong,
+body.dark-theme .note strong,
+body.dark-theme .info-box strong {
+    color: var(--md-on-surface);
 }
