@@ -55,6 +55,13 @@ export function switchTab(tabName) {
     }
 }
 
+/**
+ * Update the workspace button title based on active class
+ * 
+ * TEMPORANEAMENTE DISABILITATO - La funzionalità Workspace non è attualmente utilizzata
+ * Per ripristinare: decommentare questa funzione e aggiornare le chiamate in app.js
+ */
+/*
 export function updateActiveClassBadge() {
     // Update workspace button title with active class
     const workspaceBtn = document.getElementById('workspace-btn');
@@ -69,6 +76,12 @@ export function updateActiveClassBadge() {
         workspaceBtn.setAttribute('title', 'Workspace');
         workspaceBtn.setAttribute('aria-label', 'Seleziona workspace');
     }
+}
+*/
+
+// Placeholder function to maintain compatibility with existing code
+export function updateActiveClassBadge() {
+    // Workspace functionality temporarily disabled - no action needed
 }
 
 export function showOnboarding() {

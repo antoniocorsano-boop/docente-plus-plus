@@ -2,6 +2,11 @@
 
 Tutte le modifiche significative di Docente++ saranno documentate in questo file.
 
+## [Non Rilasciato]
+
+### Modificato
+- **Workspace Button**: Rimosso temporaneamente il pulsante Workspace dall'AppBar (header) poiché la funzionalità non è attualmente utilizzata. Il codice è stato mantenuto e commentato per un facile ripristino futuro. Vedi `docs/WORKSPACE_RESTORATION.md` per istruzioni di ripristino.
+
 ## [1.1.0] - In Sviluppo
 
 - Integrazione sezione FAQ e Screenshot nel README
