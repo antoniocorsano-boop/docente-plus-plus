@@ -27,20 +27,17 @@ export function showToast(message, type = 'info', duration = 3000) {
 export function switchTab(tabName) {
     if (!tabName) return;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
 
     const content = document.getElementById(tabName);
     if (content) content.classList.add('active');
 
-    const button = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+    const button = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
     if (button) {
         button.classList.add('active');
-        const parentGroup = button.closest('.menu-group');
-        if (parentGroup) {
-            parentGroup.querySelector('.menu-with-submenu').classList.add('active');
-        }
     }
 
+    // Close mobile menu if open
     if (window.innerWidth < 768 && document.getElementById('main-nav').classList.contains('mobile-open')) {
         document.getElementById('menu-toggle').click();
     }
