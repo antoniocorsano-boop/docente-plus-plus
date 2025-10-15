@@ -16,6 +16,18 @@ export class NotificationSystem {
         this.reminders = [];
         this.institutionalCommitments = [];
         
+        // User preferences for notifications
+        this.preferences = {
+            enableInApp: true,
+            enablePush: false,
+            enableEmail: false,
+            notifyDeadlines: true,
+            notifyScheduleChanges: true,
+            notifyNewDocuments: true,
+            notifySmartSuggestions: true,
+            notifyInstitutional: true
+        };
+        
         // Initialize from localStorage
         this.loadNotifications();
         
@@ -31,6 +43,12 @@ export class NotificationSystem {
             this.notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
             this.reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
             this.institutionalCommitments = JSON.parse(localStorage.getItem('institutionalCommitments') || '[]');
+            
+            // Load user preferences
+            const savedPreferences = localStorage.getItem('notificationPreferences');
+            if (savedPreferences) {
+                this.preferences = { ...this.preferences, ...JSON.parse(savedPreferences) };
+            }
         } catch (error) {
             console.error('Error loading notifications:', error);
             this.notifications = [];
@@ -47,6 +65,7 @@ export class NotificationSystem {
             localStorage.setItem('notifications', JSON.stringify(this.notifications));
             localStorage.setItem('reminders', JSON.stringify(this.reminders));
             localStorage.setItem('institutionalCommitments', JSON.stringify(this.institutionalCommitments));
+            localStorage.setItem('notificationPreferences', JSON.stringify(this.preferences));
         } catch (error) {
             console.error('Error saving notifications:', error);
         }
@@ -332,18 +351,58 @@ export class NotificationSystem {
             createdAt: new Date().toISOString(),
             read: false,
             dismissed: false,
+            completed: false,
+            snoozedUntil: null,
             actions: notificationData.actions || [],
             ...notificationData
         };
 
         this.notifications.push(notification);
         
-        // Show toast for high/critical priority
-        if (['high', 'critical'].includes(notification.priority)) {
-            showToast(notification.message, 'warning', 5000);
+        // Check if notification should be shown based on preferences
+        const shouldShow = this.shouldShowNotification(notification);
+        
+        if (shouldShow && this.preferences.enableInApp) {
+            // Show toast for high/critical priority
+            if (['high', 'critical'].includes(notification.priority)) {
+                showToast(notification.message, 'warning', 5000);
+            }
         }
 
+        // Send push notification if enabled
+        if (shouldShow && this.preferences.enablePush) {
+            this.sendPushNotification(notification);
+        }
+
+        // Send email if enabled
+        if (shouldShow && this.preferences.enableEmail) {
+            this.sendEmailNotification(notification);
+        }
+
+        this.saveNotifications();
+        this.updateUI();
+
         return notification;
+    }
+
+    /**
+     * Check if notification should be shown based on preferences
+     */
+    shouldShowNotification(notification) {
+        switch (notification.type) {
+            case 'activity_deadline':
+                return this.preferences.notifyDeadlines;
+            case 'schedule_change':
+                return this.preferences.notifyScheduleChanges;
+            case 'new_document':
+                return this.preferences.notifyNewDocuments;
+            case 'smart_suggestion':
+                return this.preferences.notifySmartSuggestions;
+            case 'institutional':
+                return this.preferences.notifyInstitutional;
+            default:
+                return true; // Show other notification types by default
+        }
     }
 
     /**
@@ -378,7 +437,18 @@ export class NotificationSystem {
         if (notification) {
             notification.read = true;
             this.saveNotifications();
+            this.updateUI();
         }
+    }
+
+    /**
+     * Mark all notifications as read
+     */
+    markAllAsRead() {
+        this.notifications.forEach(n => n.read = true);
+        this.saveNotifications();
+        this.updateUI();
+        showToast('Tutte le notifiche segnate come lette', 'success');
     }
 
     /**
@@ -389,6 +459,140 @@ export class NotificationSystem {
         if (notification) {
             notification.dismissed = true;
             this.saveNotifications();
+            this.updateUI();
+        }
+    }
+
+    /**
+     * Snooze notification (remind in X minutes)
+     */
+    snoozeNotification(notificationId, minutes = 30) {
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) {
+            notification.snoozedUntil = new Date(Date.now() + minutes * 60000).toISOString();
+            notification.read = true;
+            this.saveNotifications();
+            this.updateUI();
+            showToast(`Notifica rimandata di ${minutes} minuti`, 'info');
+        }
+    }
+
+    /**
+     * Mark notification as completed
+     */
+    markAsCompleted(notificationId) {
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) {
+            notification.completed = true;
+            notification.read = true;
+            this.saveNotifications();
+            this.updateUI();
+            showToast('Notifica completata', 'success');
+        }
+    }
+
+    /**
+     * Update user preferences
+     */
+    updatePreferences(newPreferences) {
+        this.preferences = { ...this.preferences, ...newPreferences };
+        this.saveNotifications();
+        showToast('Preferenze notifiche aggiornate', 'success');
+        
+        // Request push permission if enabled
+        if (this.preferences.enablePush && 'Notification' in window) {
+            this.requestPushPermission();
+        }
+    }
+
+    /**
+     * Request push notification permission
+     */
+    async requestPushPermission() {
+        if (!('Notification' in window)) {
+            console.log('Push notifications not supported');
+            return false;
+        }
+
+        if (Notification.permission === 'granted') {
+            return true;
+        }
+
+        if (Notification.permission !== 'denied') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showToast('Notifiche push abilitate', 'success');
+                return true;
+            }
+        }
+
+        showToast('Notifiche push non disponibili', 'warning');
+        return false;
+    }
+
+    /**
+     * Send push notification
+     */
+    async sendPushNotification(notification) {
+        if (!this.preferences.enablePush) return;
+        if (Notification.permission !== 'granted') return;
+
+        try {
+            new Notification(notification.title, {
+                body: notification.message,
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/icon-192x192.png',
+                tag: notification.id,
+                requireInteraction: notification.priority === 'critical'
+            });
+        } catch (error) {
+            console.error('Error sending push notification:', error);
+        }
+    }
+
+    /**
+     * Send email notification (mock)
+     */
+    async sendEmailNotification(notification) {
+        if (!this.preferences.enableEmail) return;
+
+        // Mock email sending - in production this would call an API
+        console.log('📧 Mock Email Sent:', {
+            to: state.settings.teacherEmail || 'teacher@example.com',
+            subject: notification.title,
+            body: notification.message,
+            timestamp: new Date().toISOString()
+        });
+
+        // Store in email log
+        const emailLog = JSON.parse(localStorage.getItem('emailNotificationLog') || '[]');
+        emailLog.push({
+            id: `email_${Date.now()}`,
+            notificationId: notification.id,
+            timestamp: new Date().toISOString(),
+            subject: notification.title,
+            body: notification.message,
+            status: 'sent'
+        });
+        localStorage.setItem('emailNotificationLog', JSON.stringify(emailLog.slice(-100))); // Keep last 100
+    }
+
+    /**
+     * Update UI (notification center badge, etc.)
+     */
+    updateUI() {
+        // Update notification badge
+        const badge = document.getElementById('notification-badge');
+        const unreadCount = this.getUnreadCount();
+        if (badge) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+        }
+
+        // Update notification center if open
+        const centerContent = document.getElementById('notification-center-content');
+        if (centerContent && centerContent.parentElement.classList.contains('open')) {
+            this.renderNotificationCenter();
         }
     }
 
@@ -476,13 +680,195 @@ export class NotificationSystem {
             case 'prepare_docs':
                 showToast('Promemoria impostato per preparazione documentazione', 'info');
                 break;
+
+            case 'mark_read':
+                this.markAsRead(notificationId);
+                break;
+
+            case 'mark_completed':
+                this.markAsCompleted(notificationId);
+                break;
+
+            case 'snooze':
+                this.snoozeNotification(notificationId, action.minutes || 30);
+                break;
+
+            case 'dismiss':
+                this.dismissNotification(notificationId);
+                break;
                 
             default:
                 console.log('Unknown action:', action);
         }
 
-        // Mark as read after action
-        this.markAsRead(notificationId);
+        // Mark as read after action (unless it's a snooze)
+        if (action.action !== 'snooze') {
+            this.markAsRead(notificationId);
+        }
+    }
+
+    /**
+     * Notify about new document
+     */
+    notifyNewDocument(documentTitle, documentType) {
+        if (!this.preferences.notifyNewDocuments) return;
+
+        this.createNotification({
+            title: '📄 Nuovo Documento',
+            message: `È stato aggiunto un nuovo documento: ${documentTitle}`,
+            type: 'new_document',
+            priority: 'low',
+            documentTitle,
+            documentType,
+            actions: [
+                { label: 'Visualizza', action: 'view_document' },
+                { label: 'Segna come letto', action: 'mark_read' }
+            ]
+        });
+    }
+
+    /**
+     * Notify about schedule change
+     */
+    notifyScheduleChange(changeDetails) {
+        if (!this.preferences.notifyScheduleChanges) return;
+
+        this.createNotification({
+            title: '📅 Cambio Orario',
+            message: changeDetails,
+            type: 'schedule_change',
+            priority: 'high',
+            actions: [
+                { label: 'Visualizza Orario', action: 'view_schedule' },
+                { label: 'Segna come letto', action: 'mark_read' }
+            ]
+        });
+    }
+
+    /**
+     * Notify about smart suggestion
+     */
+    notifySmartSuggestion(suggestion) {
+        if (!this.preferences.notifySmartSuggestions) return;
+
+        this.createNotification({
+            title: '💡 Suggerimento Smart',
+            message: suggestion.message,
+            type: 'smart_suggestion',
+            priority: 'low',
+            suggestion,
+            actions: [
+                { label: 'Visualizza', action: 'view_suggestion' },
+                { label: 'Ignora', action: 'dismiss' }
+            ]
+        });
+    }
+
+    /**
+     * Get notifications with filters
+     */
+    getFilteredNotifications(filter = 'all') {
+        let notifications = this.notifications.filter(n => !n.dismissed);
+
+        // Filter out snoozed notifications
+        const now = new Date();
+        notifications = notifications.filter(n => {
+            if (!n.snoozedUntil) return true;
+            return new Date(n.snoozedUntil) <= now;
+        });
+
+        switch (filter) {
+            case 'unread':
+                return notifications.filter(n => !n.read);
+            case 'completed':
+                return notifications.filter(n => n.completed);
+            case 'important':
+                return notifications.filter(n => ['high', 'critical'].includes(n.priority));
+            default:
+                return notifications;
+        }
+    }
+
+    /**
+     * Render notification center UI
+     */
+    renderNotificationCenter() {
+        const container = document.getElementById('notification-center-content');
+        if (!container) return;
+
+        const filter = container.dataset.filter || 'all';
+        const notifications = this.getFilteredNotifications(filter);
+
+        if (notifications.length === 0) {
+            container.innerHTML = `
+                <div class="notification-center-empty">
+                    <span class="material-symbols-outlined">notifications_off</span>
+                    <p>Nessuna notifica</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Sort notifications by priority and date
+        const sortedNotifications = notifications.sort((a, b) => {
+            const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+            const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+            if (priorityDiff !== 0) return priorityDiff;
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        let html = '<div class="notification-center-list">';
+        
+        sortedNotifications.forEach(notification => {
+            const iconMap = {
+                'day_after': 'event_note',
+                'institutional': 'school',
+                'activity_deadline': 'alarm',
+                'new_document': 'description',
+                'schedule_change': 'schedule',
+                'smart_suggestion': 'lightbulb',
+                'reminder': 'notifications'
+            };
+            const icon = iconMap[notification.type] || 'notifications';
+            const readClass = notification.read ? 'read' : 'unread';
+            const completedClass = notification.completed ? 'completed' : '';
+            const priorityClass = `priority-${notification.priority}`;
+
+            html += `
+                <div class="notification-item ${readClass} ${completedClass} ${priorityClass}" 
+                     data-id="${notification.id}"
+                     onclick="window.notificationSystem.markAsRead('${notification.id}')">
+                    <div class="notification-icon">
+                        <span class="material-symbols-outlined">${icon}</span>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <h4 class="notification-title">${notification.title}</h4>
+                            <span class="notification-time">${this.formatTime(notification.createdAt)}</span>
+                        </div>
+                        <p class="notification-message">${notification.message}</p>
+                        ${notification.actions && notification.actions.length > 0 ? `
+                            <div class="notification-actions">
+                                ${notification.actions.map(action => `
+                                    <button class="btn-notification-action" 
+                                            onclick="event.stopPropagation(); window.notificationSystem.handleAction('${notification.id}', ${JSON.stringify(action).replace(/"/g, '&quot;')})">
+                                        ${action.label}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <button class="btn-dismiss" 
+                            onclick="event.stopPropagation(); window.notificationSystem.dismissNotification('${notification.id}')"
+                            title="Rimuovi notifica">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     /**

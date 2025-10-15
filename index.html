@@ -91,6 +91,10 @@
             <button id="menu-toggle" class="menu-toggle">☰</button>
             <h1>Docente++</h1>
             <div class="header-actions">
+                <button id="notification-bell-btn" class="icon-btn" title="Centro Notifiche" aria-label="Apri centro notifiche">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+                </button>
                 <button id="theme-picker-btn" class="icon-btn" title="Cambia tema">
                     <span class="material-symbols-outlined">palette</span>
                 </button>
@@ -100,6 +104,33 @@
             </div>
         </div>
     </header>
+
+    <!-- Notification Center Dropdown -->
+    <div id="notification-center" class="notification-center" style="display: none;">
+        <div class="notification-center-header">
+            <h3>Notifiche</h3>
+            <div class="notification-center-actions">
+                <button id="notification-filter-btn" class="icon-btn-sm" title="Filtri">
+                    <span class="material-symbols-outlined">filter_list</span>
+                </button>
+                <button id="notification-mark-all-read-btn" class="icon-btn-sm" title="Segna tutte come lette">
+                    <span class="material-symbols-outlined">done_all</span>
+                </button>
+                <button id="notification-settings-btn" class="icon-btn-sm" title="Impostazioni notifiche">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+        </div>
+        <div id="notification-filter-tabs" class="notification-filter-tabs" style="display: none;">
+            <button class="notification-filter-tab active" data-filter="all">Tutte</button>
+            <button class="notification-filter-tab" data-filter="unread">Non lette</button>
+            <button class="notification-filter-tab" data-filter="important">Importanti</button>
+            <button class="notification-filter-tab" data-filter="completed">Completate</button>
+        </div>
+        <div id="notification-center-content" class="notification-center-content" data-filter="all">
+            <!-- Notifications will be rendered here -->
+        </div>
+    </div>
 
     <!-- Menu Backdrop for Mobile -->
     <div id="menu-backdrop" class="menu-backdrop"></div>
@@ -467,6 +498,63 @@
                     Ripristina Posizione Agente IA
                 </button>
                 <p class="help-text">Riporta il pulsante floating alla posizione predefinita (in basso a destra).</p>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-section">
+                <h3>🔔 Impostazioni Notifiche</h3>
+                <form id="notification-settings-form">
+                    <div class="form-group">
+                        <label><strong>Modalità di Notifica</strong></label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-enable-inapp" checked>
+                                Notifiche In-App (toast/popup)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-enable-push">
+                                Notifiche Push (browser)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-enable-email">
+                                Notifiche Email (simulato)
+                            </label>
+                        </div>
+                        <p class="help-text">Scegli come ricevere le notifiche dall'applicazione</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label><strong>Tipi di Notifiche</strong></label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-deadlines" checked>
+                                ⏰ Scadenze imminenti
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-schedule-changes" checked>
+                                📅 Cambi orario
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-new-documents" checked>
+                                📄 Nuovi documenti
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-smart-suggestions" checked>
+                                💡 Suggerimenti smart
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-institutional" checked>
+                                🏫 Impegni istituzionali
+                            </label>
+                        </div>
+                        <p class="help-text">Seleziona quali tipi di eventi devono generare notifiche</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Preferenze Notifiche
+                    </button>
+                </form>
             </div>
             
             <!-- Advanced Settings TODO -->
