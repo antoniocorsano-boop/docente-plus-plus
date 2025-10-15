@@ -45,6 +45,11 @@ export function switchTab(tabName) {
         document.getElementById('menu-toggle').click();
     }
 
+    // Track current active tab for AI Agent context
+    if (window.app) {
+        window.app.currentActiveTab = tabName;
+    }
+
     const renderFunction = `render${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
     if (typeof window.app[renderFunction] === 'function') {
         window.app[renderFunction]();

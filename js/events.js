@@ -94,4 +94,18 @@ export function setupEventListeners() {
             }
         }
     });
+
+    // AI FAB Settings Controls
+    document.getElementById('ai-fab-enabled-checkbox')?.addEventListener('change', (e) => {
+        if (window.app) {
+            window.app.toggleAIFAB(e.target.checked);
+            showToast(e.target.checked ? 'Agente IA attivato' : 'Agente IA disattivato', 'success');
+        }
+    });
+
+    document.getElementById('reset-ai-fab-position-btn')?.addEventListener('click', () => {
+        if (window.app) {
+            window.app.resetAIFABPosition();
+        }
+    });
 }

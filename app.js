@@ -13,6 +13,13 @@ import {
     createEvaluation, editEvaluation, deleteEvaluation,
     exportStudentsCSV, importStudentsCSV
 } from './js/crud.js';
+import { 
+    initAIAgentFAB, 
+    openAIAgentModal, 
+    closeAIAgentModal, 
+    resetFABPosition, 
+    toggleFABVisibility 
+} from './js/ai-agent.js';
 
 class DocentePlusPlus {
     constructor() {
@@ -20,6 +27,7 @@ class DocentePlusPlus {
             'Italiano', 'Storia', 'Geografia', 'Matematica', 'Scienze',
             'Inglese', 'Arte e Immagine', 'Musica', 'Educazione Fisica'
         ];
+        this.currentActiveTab = 'home'; // Track current active tab for AI context
     }
 
     init() {
@@ -40,6 +48,10 @@ class DocentePlusPlus {
             setupEventListeners();
             setupThemePicker();
             createToastContainer();
+            
+            // Initialize AI Agent FAB
+            initAIAgentFAB();
+            
             console.log("Docente++ v1.1.0 (Refactored) initialized.");
         } catch (error) {
             console.error("Error during init:", error);
@@ -274,6 +286,13 @@ class DocentePlusPlus {
         if (yearElement) {
             yearElement.textContent = state.settings.schoolYear || 'Non configurato';
         }
+
+        // Load AI FAB settings
+        const fabCheckbox = document.getElementById('ai-fab-enabled-checkbox');
+        if (fabCheckbox) {
+            const fabEnabled = localStorage.getItem('ai-fab-enabled');
+            fabCheckbox.checked = fabEnabled !== 'false'; // Default to true if not set
+        }
     }
     renderBackupRestore() { 
         // Backup/restore functionality
@@ -440,6 +459,23 @@ class DocentePlusPlus {
                 select.appendChild(option);
             });
         }
+    }
+
+    // AI Agent FAB methods
+    openAIAgentModal() {
+        openAIAgentModal();
+    }
+
+    closeAIAgentModal() {
+        closeAIAgentModal();
+    }
+
+    resetAIFABPosition() {
+        resetFABPosition();
+    }
+
+    toggleAIFAB(enabled) {
+        toggleFABVisibility(enabled);
     }
 }
 
