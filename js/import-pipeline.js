@@ -162,11 +162,21 @@ export class ImportPipeline {
     async readText(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
+                let text = e.target.result;
+                
+                // For .docx files, we'd need a library like mammoth.js
+                // For now, treat .doc/.docx as plain text (user should save as .txt or .pdf)
+                if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
+                    text = `[Documento Word: ${file.name}]\n\n` + 
+                           `Per una migliore estrazione, salva il documento come PDF o TXT.\n\n` +
+                           `Contenuto estratto (limitato):\n${text.substring(0, 1000)}`;
+                }
+                
                 resolve({
                     type: 'text',
                     name: file.name,
-                    text: e.target.result
+                    text: text
                 });
             };
             reader.onerror = reject;
@@ -284,48 +294,230 @@ export class ImportPipeline {
      * Extract activities from document
      */
     async extractActivitiesData(content) {
-        // TODO(AI): Enhanced extraction with AI
+        // Enhanced extraction with better pattern matching
         const activities = [];
         
         // Simple pattern matching for common activity structures
         const text = this.getTextContent(content);
-        const activityTypes = ['verifica', 'compito', 'laboratorio', 'progetto', 'esercitazione', 'lezione'];
         
-        // This is a simplified extraction - real implementation would use AI
-        activityTypes.forEach(type => {
-            if (text.includes(type)) {
-                activities.push({
-                    title: `${type.charAt(0).toUpperCase() + type.slice(1)} da documento`,
-                    type: this.mapActivityType(type),
-                    date: new Date().toISOString().split('T')[0],
-                    description: `Estratto da: ${content.name || 'documento'}`,
-                    status: 'planned',
-                    classId: null, // To be assigned by user
-                    needsReview: true
-                });
+        // Extract structured data if it's from CSV/Excel
+        if (content.type === 'csv' || content.type === 'excel') {
+            return this.extractActivitiesFromTabular(content);
+        }
+        
+        // Text-based extraction
+        const activityPatterns = [
+            // Match "- Lezione: title" or "• Lezione: title"
+            /[-•]\s*(Lezione|Compito|Verifica|Laboratorio|Progetto|Esercitazione):\s*(.+?)(?:\n|$)/gi,
+            // Match numbered lists "1. title"
+            /\d+\.\s*([^:\n]+?)(?:\s*-\s*(.+?))?(?:\n|$)/gi
+        ];
+        
+        activityPatterns.forEach(pattern => {
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+                const type = match[1] ? this.mapActivityTypeFromItalian(match[1]) : 'lesson';
+                const title = match[2] || match[1];
+                
+                if (title && title.length > 5 && title.length < 200) {
+                    activities.push({
+                        type: 'lezione',
+                        title: title.trim(),
+                        date: new Date().toISOString().split('T')[0],
+                        startTime: '09:00',
+                        endTime: '10:00',
+                        notes: `Estratto da: ${content.name || 'documento'}`,
+                        source: 'document_import',
+                        needsReview: true
+                    });
+                }
             }
         });
+
+        // Try to extract dates if present
+        this.enrichActivitiesWithDates(activities, text);
 
         return {
             type: 'activities',
             items: activities,
             message: activities.length > 0 
-                ? `${activities.length} attività estratte. Richiede revisione.`
+                ? `${activities.length} attività estratte. Rivedi e modifica prima dell'importazione.`
                 : '⚠️ Nessuna attività riconosciuta. Considera importazione manuale.',
             needsReview: true
         };
     }
 
-    mapActivityType(keyword) {
-        const mapping = {
-            'verifica': 'test',
-            'compito': 'homework',
-            'laboratorio': 'lab',
-            'progetto': 'project',
-            'esercitazione': 'exercise',
-            'lezione': 'lesson'
+    /**
+     * Extract activities from tabular data (CSV/Excel)
+     */
+    extractActivitiesFromTabular(content) {
+        const activities = [];
+        const data = content.data;
+        
+        if (!data || data.length === 0) return { type: 'activities', items: [], message: 'Nessun dato trovato', needsReview: true };
+        
+        // Determine if first row is header
+        const hasHeader = this.detectHeader(data);
+        const rows = hasHeader ? (Array.isArray(data[0]) ? data.slice(1) : data) : data;
+        
+        rows.forEach((row, index) => {
+            if (!row || (Array.isArray(row) && row.filter(cell => cell).length === 0)) return;
+            
+            const activity = {
+                type: 'lezione',
+                title: this.extractFieldFromRow(row, ['titolo', 'title', 'attività', 'nome']) || `Attività ${index + 1}`,
+                date: this.extractFieldFromRow(row, ['data', 'date', 'giorno']) || new Date().toISOString().split('T')[0],
+                startTime: this.extractFieldFromRow(row, ['ora inizio', 'inizio', 'start', 'ora']) || '09:00',
+                endTime: this.extractFieldFromRow(row, ['ora fine', 'fine', 'end']) || '10:00',
+                notes: this.extractFieldFromRow(row, ['note', 'notes', 'descrizione', 'description']) || '',
+                source: 'document_import',
+                needsReview: true
+            };
+            
+            // Try to detect activity type from title or dedicated column
+            const typeField = this.extractFieldFromRow(row, ['tipo', 'type', 'categoria']);
+            if (typeField) {
+                activity.type = this.mapActivityTypeFromItalian(typeField);
+            } else {
+                activity.type = this.detectActivityTypeFromTitle(activity.title);
+            }
+            
+            activities.push(activity);
+        });
+        
+        return {
+            type: 'activities',
+            items: activities,
+            message: `${activities.length} attività estratte da tabella. Rivedi i dati.`,
+            needsReview: true
         };
-        return mapping[keyword] || 'other';
+    }
+
+    /**
+     * Detect if first row is a header
+     */
+    detectHeader(data) {
+        if (!data || data.length === 0) return false;
+        
+        const firstRow = data[0];
+        if (!firstRow) return false;
+        
+        // Check if it's an object (parsed CSV with header) or array
+        if (typeof firstRow === 'object' && !Array.isArray(firstRow)) {
+            return true; // Already parsed with headers
+        }
+        
+        // For arrays, check if first row looks like headers
+        if (Array.isArray(firstRow)) {
+            const headerKeywords = ['titolo', 'data', 'ora', 'tipo', 'nome', 'title', 'date', 'time', 'type', 'name'];
+            const matches = firstRow.filter(cell => {
+                if (!cell || typeof cell !== 'string') return false;
+                return headerKeywords.some(keyword => cell.toLowerCase().includes(keyword));
+            });
+            return matches.length >= 2;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Extract field from row (supports both object and array format)
+     */
+    extractFieldFromRow(row, fieldNames) {
+        if (typeof row === 'object' && !Array.isArray(row)) {
+            // Object format - search by key
+            for (const fieldName of fieldNames) {
+                const keys = Object.keys(row);
+                const matchingKey = keys.find(key => key.toLowerCase().includes(fieldName.toLowerCase()));
+                if (matchingKey && row[matchingKey]) {
+                    return String(row[matchingKey]).trim();
+                }
+            }
+        } else if (Array.isArray(row)) {
+            // Array format - return first non-empty cell (simplified)
+            // In real implementation, we'd need column mapping
+            return row.find(cell => cell && String(cell).trim()) || '';
+        }
+        return '';
+    }
+
+    /**
+     * Map Italian activity type to internal format
+     */
+    mapActivityTypeFromItalian(italianType) {
+        const mapping = {
+            'lezione': 'lezione',
+            'compito': 'compito',
+            'verifica': 'verifica',
+            'test': 'verifica',
+            'laboratorio': 'laboratorio',
+            'progetto': 'progetto',
+            'esercitazione': 'esercitazione',
+            'evento': 'evento',
+            'riunione': 'riunione',
+            'gita': 'gita'
+        };
+        const normalized = italianType.toLowerCase().trim();
+        return mapping[normalized] || 'lezione';
+    }
+
+    /**
+     * Detect activity type from title
+     */
+    detectActivityTypeFromTitle(title) {
+        const lowerTitle = title.toLowerCase();
+        
+        if (lowerTitle.match(/\b(verifica|test|esame|valutazione)\b/)) return 'verifica';
+        if (lowerTitle.match(/\b(compito|compiti|homework)\b/)) return 'compito';
+        if (lowerTitle.match(/\b(laboratorio|lab|pratica|esperimento)\b/)) return 'laboratorio';
+        if (lowerTitle.match(/\b(progetto|elaborato)\b/)) return 'progetto';
+        if (lowerTitle.match(/\b(esercitazione|esercizi)\b/)) return 'esercitazione';
+        if (lowerTitle.match(/\b(riunione|meeting|incontro)\b/)) return 'riunione';
+        if (lowerTitle.match(/\b(gita|uscita|visita)\b/)) return 'gita';
+        
+        return 'lezione';
+    }
+
+    /**
+     * Try to extract and associate dates with activities
+     */
+    enrichActivitiesWithDates(activities, text) {
+        // Look for date patterns in the text
+        const datePatterns = [
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/g,  // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/g     // YYYY-MM-DD
+        ];
+        
+        const dates = [];
+        datePatterns.forEach(pattern => {
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+                try {
+                    // Parse date
+                    let dateStr;
+                    if (match[1].length === 4) {
+                        // YYYY-MM-DD format
+                        dateStr = `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+                    } else {
+                        // DD/MM/YYYY format - convert to YYYY-MM-DD
+                        const year = match[3].length === 2 ? `20${match[3]}` : match[3];
+                        dateStr = `${year}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+                    }
+                    dates.push(dateStr);
+                } catch (e) {
+                    // Invalid date, skip
+                }
+            }
+        });
+        
+        // Assign dates to activities if we found any
+        if (dates.length > 0) {
+            activities.forEach((activity, index) => {
+                if (index < dates.length) {
+                    activity.date = dates[index];
+                }
+            });
+        }
     }
 
     /**
@@ -441,7 +633,7 @@ export class ImportPipeline {
     }
 
     /**
-     * Generate preview UI for extracted data
+     * Generate preview UI for extracted data with editable fields
      */
     generatePreviewHTML(importData) {
         if (!importData || !importData.extractedData) {
@@ -462,9 +654,12 @@ export class ImportPipeline {
                 <div class="import-preview-message ${extractedData.needsReview ? 'warning' : 'success'}">
                     ${extractedData.message}
                 </div>
+                <div class="import-preview-instructions">
+                    <p><strong>💡 Istruzioni:</strong> Puoi modificare, aggiungere o rimuovere dati prima dell'importazione. Usa i pulsanti di azione su ogni elemento.</p>
+                </div>
         `;
 
-        // Type-specific preview
+        // Type-specific preview with editing capabilities
         if (extractedData.type === 'students' && extractedData.items.length > 0) {
             html += this.generateStudentsPreview(extractedData.items);
         } else if (extractedData.type === 'activities' && extractedData.items.length > 0) {
@@ -480,12 +675,14 @@ export class ImportPipeline {
         html += `
                 <div class="import-preview-actions">
                     <button class="btn btn-primary" onclick="window.importPipeline.confirmImport()">
-                        ✅ Conferma e Importa
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Conferma e Importa
                     </button>
                     <button class="btn btn-secondary" onclick="window.importPipeline.cancelImport()">
-                        ❌ Annulla
+                        <span class="material-symbols-outlined">cancel</span>
+                        Annulla
                     </button>
-                    ${extractedData.needsReview ? '<button class="btn btn-accent" onclick="window.importPipeline.refineWithAI()">🤖 Affina con IA</button>' : ''}
+                    ${extractedData.needsReview ? '<button class="btn btn-accent" onclick="window.importPipeline.refineWithAI()"><span class="material-symbols-outlined">psychology</span> Affina con IA</button>' : ''}
                 </div>
             </div>
         `;
@@ -494,43 +691,90 @@ export class ImportPipeline {
     }
 
     generateStudentsPreview(students) {
-        let html = '<div class="preview-table-wrapper"><table class="preview-table"><thead><tr>';
-        html += '<th>Nome</th><th>Email</th><th>Classe</th><th>Data Nascita</th><th>Note</th>';
-        html += '</tr></thead><tbody>';
+        let html = '<div class="preview-table-wrapper">';
+        html += '<div class="preview-table-header"><h4>Anteprima Studenti</h4>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="window.importPipeline.addNewStudent()"><span class="material-symbols-outlined">person_add</span> Aggiungi Studente</button></div>';
+        html += '<table class="preview-table editable-table"><thead><tr>';
+        html += '<th>Nome</th><th>Email</th><th>Classe</th><th>Data Nascita</th><th>Note</th><th>Azioni</th>';
+        html += '</tr></thead><tbody id="students-preview-tbody">';
         
-        students.slice(0, 10).forEach(student => {
-            html += `<tr>
-                <td>${student.name || 'N/A'}</td>
-                <td>${student.email || 'N/A'}</td>
-                <td>${student.class || 'N/A'}</td>
-                <td>${student.birthdate || 'N/A'}</td>
-                <td>${student.notes || '-'}</td>
+        students.forEach((student, index) => {
+            html += `<tr data-index="${index}">
+                <td><input type="text" class="editable-field" value="${student.name || ''}" data-field="name" data-index="${index}"></td>
+                <td><input type="email" class="editable-field" value="${student.email || ''}" data-field="email" data-index="${index}"></td>
+                <td><input type="text" class="editable-field" value="${student.class || ''}" data-field="class" data-index="${index}"></td>
+                <td><input type="date" class="editable-field" value="${student.birthdate || ''}" data-field="birthdate" data-index="${index}"></td>
+                <td><input type="text" class="editable-field" value="${student.notes || ''}" data-field="notes" data-index="${index}"></td>
+                <td>
+                    <button class="btn-icon btn-danger" onclick="window.importPipeline.removeItem('students', ${index})" title="Rimuovi">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </td>
             </tr>`;
         });
         
         html += '</tbody></table>';
-        
-        if (students.length > 10) {
-            html += `<p class="table-note">Mostrati primi 10 di ${students.length} studenti</p>`;
-        }
-        
+        html += `<p class="table-note">Totale: ${students.length} studenti</p>`;
         html += '</div>';
         return html;
     }
 
     generateActivitiesPreview(activities) {
         let html = '<div class="preview-list">';
+        html += '<div class="preview-list-header"><h4>Anteprima Attività</h4>';
+        html += '<button class="btn btn-sm btn-secondary" onclick="window.importPipeline.addNewActivity()"><span class="material-symbols-outlined">add_task</span> Aggiungi Attività</button></div>';
+        html += '<div id="activities-preview-list">';
         
-        activities.forEach(activity => {
+        activities.forEach((activity, index) => {
+            const typeOptions = ['lesson', 'homework', 'test', 'lab', 'project', 'exercise', 'other'];
+            const typeLabels = {
+                'lesson': 'Lezione',
+                'homework': 'Compito',
+                'test': 'Verifica',
+                'lab': 'Laboratorio',
+                'project': 'Progetto',
+                'exercise': 'Esercitazione',
+                'other': 'Altro'
+            };
+            
             html += `
-                <div class="preview-item">
-                    <h4>${activity.title}</h4>
-                    <p><strong>Tipo:</strong> ${activity.type} | <strong>Data:</strong> ${activity.date}</p>
-                    <p>${activity.description}</p>
+                <div class="preview-item editable-item" data-index="${index}">
+                    <div class="preview-item-header">
+                        <input type="text" class="editable-field field-title" value="${activity.title || ''}" data-field="title" data-index="${index}" placeholder="Titolo attività">
+                        <button class="btn-icon btn-danger" onclick="window.importPipeline.removeItem('activities', ${index})" title="Rimuovi">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                    <div class="preview-item-fields">
+                        <div class="field-group">
+                            <label>Tipo:</label>
+                            <select class="editable-field" data-field="type" data-index="${index}">
+                                ${typeOptions.map(opt => `<option value="${opt}" ${activity.type === opt ? 'selected' : ''}>${typeLabels[opt]}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Data:</label>
+                            <input type="date" class="editable-field" value="${activity.date || ''}" data-field="date" data-index="${index}">
+                        </div>
+                        <div class="field-group">
+                            <label>Ora Inizio:</label>
+                            <input type="time" class="editable-field" value="${activity.startTime || ''}" data-field="startTime" data-index="${index}">
+                        </div>
+                        <div class="field-group">
+                            <label>Ora Fine:</label>
+                            <input type="time" class="editable-field" value="${activity.endTime || ''}" data-field="endTime" data-index="${index}">
+                        </div>
+                    </div>
+                    <div class="field-group field-full">
+                        <label>Descrizione:</label>
+                        <textarea class="editable-field" data-field="description" data-index="${index}" rows="2">${activity.description || ''}</textarea>
+                    </div>
                 </div>
             `;
         });
         
+        html += '</div>';
+        html += `<p class="table-note">Totale: ${activities.length} attività</p>`;
         html += '</div>';
         return html;
     }
@@ -577,14 +821,14 @@ export class ImportPipeline {
         try {
             if (extractedData.type === 'students') {
                 imported = await this.importStudents(extractedData.items);
-                showToast(`${imported} studenti importati con successo!`, 'success');
+                showToast(`${imported} studenti importati con successo! Vai alla sezione Studenti per vederli.`, 'success', 5000);
             } else if (extractedData.type === 'activities') {
                 imported = await this.importActivities(extractedData.items);
-                showToast(`${imported} attività importate con successo!`, 'success');
+                showToast(`${imported} attività importate nell'agenda con successo! Vai alla sezione Agenda per vederle.`, 'success', 5000);
             } else if (extractedData.type === 'schedule') {
-                showToast('Importazione orario richiede configurazione manuale', 'info');
+                showToast('Importazione orario richiede configurazione manuale nella sezione Orario', 'info', 5000);
             } else if (extractedData.type === 'curriculum') {
-                showToast('Importazione curriculum richiede integrazione IA', 'info');
+                showToast('Importazione curriculum richiede integrazione IA avanzata', 'info', 5000);
             }
 
             // Record import in history
@@ -592,6 +836,18 @@ export class ImportPipeline {
 
             // Clear current import
             this.currentImport = null;
+            
+            // Clear preview UI
+            const previewContainer = document.getElementById('import-preview-container');
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div class="import-success-message">
+                        <span class="material-symbols-outlined" style="font-size: 64px; color: #27ae60;">check_circle</span>
+                        <h3>Importazione completata!</h3>
+                        <p>I dati sono stati importati correttamente. Naviga nelle sezioni appropriate per visualizzarli.</p>
+                    </div>
+                `;
+            }
             
             // Refresh UI
             if (window.app) {
@@ -633,15 +889,22 @@ export class ImportPipeline {
     async importActivities(activities) {
         let count = 0;
         activities.forEach(activity => {
-            state.activities.push({
-                id: `activity_${Date.now()}_${count}`,
+            // Import as event in agenda (compatible with the new event structure)
+            const event = {
+                id: `event_${Date.now()}_${count}`,
                 title: activity.title,
-                type: activity.type,
-                date: activity.date,
-                description: activity.description,
-                status: activity.status,
-                classId: activity.classId
-            });
+                type: activity.type || 'lezione',
+                startDate: activity.date,
+                startTime: activity.startTime || '09:00',
+                endDate: activity.date,
+                endTime: activity.endTime || '10:00',
+                note: activity.notes || activity.description || '',
+                classId: activity.classId || null,
+                linkedToOrario: false,
+                source: activity.source || 'document_import'
+            };
+            
+            state.events.push(event);
             count++;
         });
 
@@ -675,6 +938,87 @@ export class ImportPipeline {
     async refineWithAI() {
         // TODO(AI): Integrate AI refinement
         showToast('Affinamento IA in arrivo! Per ora, rivedi manualmente i dati.', 'info');
+    }
+
+    /**
+     * Add new student to preview
+     */
+    addNewStudent() {
+        if (!this.currentImport || !this.currentImport.extractedData) return;
+        
+        const newStudent = {
+            name: '',
+            email: '',
+            class: '',
+            birthdate: '',
+            notes: '',
+            needsReview: true
+        };
+        
+        this.currentImport.extractedData.items.push(newStudent);
+        this.updatePreview();
+        showToast('Nuovo studente aggiunto. Compila i campi.', 'info');
+    }
+
+    /**
+     * Add new activity to preview
+     */
+    addNewActivity() {
+        if (!this.currentImport || !this.currentImport.extractedData) return;
+        
+        const newActivity = {
+            title: '',
+            type: 'lesson',
+            date: new Date().toISOString().split('T')[0],
+            startTime: '09:00',
+            endTime: '10:00',
+            description: '',
+            needsReview: true
+        };
+        
+        this.currentImport.extractedData.items.push(newActivity);
+        this.updatePreview();
+        showToast('Nuova attività aggiunta. Compila i campi.', 'info');
+    }
+
+    /**
+     * Remove item from preview
+     */
+    removeItem(type, index) {
+        if (!this.currentImport || !this.currentImport.extractedData) return;
+        
+        this.currentImport.extractedData.items.splice(index, 1);
+        this.updatePreview();
+        showToast('Elemento rimosso', 'info');
+    }
+
+    /**
+     * Update preview UI with current data
+     */
+    updatePreview() {
+        const previewContainer = document.getElementById('import-preview-container');
+        if (previewContainer) {
+            previewContainer.innerHTML = this.generatePreviewHTML(this.currentImport);
+            this.attachFieldListeners();
+        }
+    }
+
+    /**
+     * Attach event listeners to editable fields
+     */
+    attachFieldListeners() {
+        const editableFields = document.querySelectorAll('.editable-field');
+        editableFields.forEach(field => {
+            field.addEventListener('change', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                const fieldName = e.target.dataset.field;
+                const value = e.target.value;
+                
+                if (this.currentImport && this.currentImport.extractedData.items[index]) {
+                    this.currentImport.extractedData.items[index][fieldName] = value;
+                }
+            });
+        });
     }
 }
 
