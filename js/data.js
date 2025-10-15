@@ -9,6 +9,7 @@ export const state = {
     activities: [],
     evaluations: [],
     schedule: {},
+    events: [], // Agenda events
     chatMessages: [],
     activeClass: null,
 };
@@ -60,6 +61,7 @@ export function loadData() {
         state.activities = safeJSONParse(localStorage.getItem('activities'), []);
         state.evaluations = safeJSONParse(localStorage.getItem('evaluations'), []);
         state.schedule = safeJSONParse(localStorage.getItem('schedule'), {});
+        state.events = safeJSONParse(localStorage.getItem('events'), []);
         state.chatMessages = safeJSONParse(localStorage.getItem('chatMessages'), []);
         state.activeClass = localStorage.getItem('activeClass') || null;
         
@@ -87,6 +89,7 @@ export function saveData() {
         localStorage.setItem('activities', JSON.stringify(state.activities));
         localStorage.setItem('evaluations', JSON.stringify(state.evaluations));
         localStorage.setItem('schedule', JSON.stringify(state.schedule));
+        localStorage.setItem('events', JSON.stringify(state.events));
         localStorage.setItem('chatMessages', JSON.stringify(state.chatMessages));
         localStorage.setItem('activeClass', state.activeClass);
         return true;
