@@ -24,6 +24,17 @@ import { importPipeline } from './js/import-pipeline.js';
 import { smartPlanner } from './js/planner.js';
 import { notificationSystem } from './js/notifications.js';
 import { dashboard } from './js/dashboard.js';
+import {
+    getEventsInRange,
+    getEventsForDate,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    getEventById,
+    getEventTypeInfo,
+    generateSmartSuggestions,
+    createEventFromScheduleSlot
+} from './js/agenda.js';
 
 class DocentePlusPlus {
     constructor() {
@@ -37,6 +48,11 @@ class DocentePlusPlus {
         this.scheduleView = 'weekly'; // 'weekly' or 'daily'
         this.currentScheduleDate = null; // Will be set to current/next weekday
         this.currentEditingSlot = null; // Track the slot being edited
+        
+        // Agenda management properties
+        this.agendaView = 'weekly'; // 'weekly' or 'daily'
+        this.currentAgendaDate = null; // Current date for agenda view
+        this.currentEditingEvent = null; // Track the event being edited
     }
     
     // Generate time slots based on settings
@@ -116,6 +132,7 @@ class DocentePlusPlus {
         this.renderActivities();
         this.renderEvaluations();
         this.renderSchedule();
+        this.renderAgenda();
         this.renderAiAssistant();
         this.renderDocumentImport();
         this.renderNotifications();
@@ -1033,6 +1050,352 @@ class DocentePlusPlus {
             document.body.style.overflow = '';
         }
     }
+    
+    // ============================================
+    // Agenda View Methods
+    // ============================================
+    
+    renderAgenda() {
+        // Initialize current agenda date if not set
+        if (!this.currentAgendaDate) {
+            this.currentAgendaDate = new Date();
+        }
+        
+        // Render smart suggestions
+        this.renderAgendaSuggestions();
+        
+        // Update view toggle buttons
+        this.updateAgendaViewToggle();
+        
+        // Render appropriate view
+        if (this.agendaView === 'weekly') {
+            this.renderWeeklyAgenda();
+        } else {
+            this.renderDailyAgenda();
+        }
+    }
+    
+    renderAgendaSuggestions() {
+        const container = document.getElementById('agenda-suggestions-list');
+        if (!container) return;
+        
+        const suggestions = generateSmartSuggestions();
+        
+        if (suggestions.length === 0) {
+            container.innerHTML = '<div class="agenda-suggestion-item">✅ Tutto sotto controllo! Nessun suggerimento al momento.</div>';
+            return;
+        }
+        
+        container.innerHTML = suggestions.map(suggestion => `
+            <div class="agenda-suggestion-item priority-${suggestion.priority}" onclick="window.app.handleSuggestionClick('${suggestion.action}')">
+                <span class="agenda-suggestion-icon">${suggestion.icon}</span>
+                <span class="agenda-suggestion-message">${suggestion.message}</span>
+            </div>
+        `).join('');
+    }
+    
+    handleSuggestionClick(action) {
+        if (action === 'viewAgenda') {
+            // Already on agenda, just scroll to events
+            document.getElementById('agenda-view')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (action === 'addEvent') {
+            this.newEvent();
+        }
+    }
+    
+    updateAgendaViewToggle() {
+        const dailyBtn = document.getElementById('agenda-view-daily');
+        const weeklyBtn = document.getElementById('agenda-view-weekly');
+        
+        if (dailyBtn && weeklyBtn) {
+            dailyBtn.classList.toggle('active', this.agendaView === 'daily');
+            weeklyBtn.classList.toggle('active', this.agendaView === 'weekly');
+        }
+    }
+    
+    renderDailyAgenda() {
+        const container = document.getElementById('agenda-view');
+        if (!container) return;
+        
+        const date = new Date(this.currentAgendaDate);
+        const events = getEventsForDate(date);
+        
+        let html = `
+            <div class="agenda-date-header">
+                <h3>${this.getDayName(date)}</h3>
+                <p>${date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            </div>
+            <div class="agenda-daily-view">
+        `;
+        
+        if (events.length === 0) {
+            html += `
+                <div class="agenda-no-events">
+                    <div class="agenda-no-events-icon">📅</div>
+                    <p>Nessun evento programmato per questa giornata</p>
+                    <button class="btn btn-primary" onclick="window.app.newEvent()">
+                        <span class="material-symbols-outlined">add</span>
+                        Aggiungi Evento
+                    </button>
+                </div>
+            `;
+        } else {
+            events.forEach(event => {
+                const typeInfo = getEventTypeInfo(event.type);
+                const classObj = event.classId ? state.classes.find(c => c.id === event.classId) : null;
+                const startDate = new Date(event.start);
+                const endDate = new Date(event.end);
+                
+                html += `
+                    <div class="agenda-event-card" onclick="window.app.viewEvent('${event.id}')" style="border-left-color: ${typeInfo.color}">
+                        <div class="agenda-event-time">
+                            <span class="agenda-event-time-start">${startDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span class="agenda-event-time-end">${endDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div class="agenda-event-content">
+                            <h4 class="agenda-event-title">${event.title}</h4>
+                            <div class="agenda-event-meta">
+                                <span class="agenda-event-type-badge" style="background-color: ${typeInfo.color}">
+                                    ${typeInfo.icon} ${typeInfo.label}
+                                </span>
+                                ${classObj ? `<span class="agenda-event-class-badge">🏫 ${classObj.name}</span>` : ''}
+                                ${event.linkedToOrario ? '<span class="agenda-event-class-badge">🔗 Collegato all\'orario</span>' : ''}
+                            </div>
+                            ${event.note ? `<p class="agenda-event-note">${event.note}</p>` : ''}
+                            <div class="agenda-event-actions">
+                                <button class="btn btn-xs btn-secondary" onclick="event.stopPropagation(); window.app.editEvent('${event.id}')">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Modifica
+                                </button>
+                                <button class="btn btn-xs btn-danger" onclick="event.stopPropagation(); window.app.deleteEventConfirm('${event.id}')">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    Elimina
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    renderWeeklyAgenda() {
+        const container = document.getElementById('agenda-view');
+        if (!container) return;
+        
+        const weekStart = this.getWeekStart(this.currentAgendaDate);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        const events = getEventsInRange(weekStart, weekEnd);
+        
+        let html = `
+            <div class="agenda-date-header">
+                <h3>Settimana</h3>
+                <p>${weekStart.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })} - ${weekEnd.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            </div>
+            <div class="agenda-weekly-view">
+        `;
+        
+        // Create 7 day columns
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(weekStart);
+            day.setDate(weekStart.getDate() + i);
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            day.setHours(0, 0, 0, 0);
+            const isToday = day.getTime() === today.getTime();
+            
+            const dayEvents = events.filter(event => {
+                const eventDate = new Date(event.start);
+                eventDate.setHours(0, 0, 0, 0);
+                return eventDate.getTime() === day.getTime();
+            });
+            
+            html += `
+                <div class="agenda-weekly-day ${isToday ? 'is-today' : ''}">
+                    <div class="agenda-weekly-day-header">
+                        ${this.getDayName(day)}
+                        <span class="agenda-weekly-day-date">${day.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>
+                    </div>
+                    <div class="agenda-weekly-events">
+            `;
+            
+            if (dayEvents.length === 0) {
+                html += '<p style="color: var(--md-text-secondary); font-size: var(--font-size-sm); text-align: center; padding: var(--spacing-md);">Nessun evento</p>';
+            } else {
+                dayEvents.forEach(event => {
+                    const typeInfo = getEventTypeInfo(event.type);
+                    const startDate = new Date(event.start);
+                    
+                    html += `
+                        <div class="agenda-weekly-event" onclick="window.app.viewEvent('${event.id}')" style="border-left-color: ${typeInfo.color}">
+                            <div class="agenda-weekly-event-time">${startDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div class="agenda-weekly-event-title">${event.title}</div>
+                            <div class="agenda-weekly-event-type">${typeInfo.icon} ${typeInfo.label}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div></div>';
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    toggleAgendaView(view) {
+        this.agendaView = view;
+        this.renderAgenda();
+    }
+    
+    navigateAgenda(direction) {
+        if (direction === 'today') {
+            this.currentAgendaDate = new Date();
+        } else if (direction === 'prev') {
+            if (this.agendaView === 'weekly') {
+                this.currentAgendaDate.setDate(this.currentAgendaDate.getDate() - 7);
+            } else {
+                this.currentAgendaDate.setDate(this.currentAgendaDate.getDate() - 1);
+            }
+        } else if (direction === 'next') {
+            if (this.agendaView === 'weekly') {
+                this.currentAgendaDate.setDate(this.currentAgendaDate.getDate() + 7);
+            } else {
+                this.currentAgendaDate.setDate(this.currentAgendaDate.getDate() + 1);
+            }
+        }
+        this.renderAgenda();
+    }
+    
+    // Event CRUD Methods
+    newEvent() {
+        document.getElementById('event-modal-form').reset();
+        this.populateClassDropdowns();
+        
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('event-modal-start-date').value = today;
+        document.getElementById('event-modal-end-date').value = today;
+        
+        this.currentEditingEvent = null;
+        
+        document.getElementById('event-modal-form').onsubmit = (e) => {
+            e.preventDefault();
+            this.saveEvent();
+        };
+        
+        showModal('event-modal');
+    }
+    
+    editEvent(eventId) {
+        const event = getEventById(eventId);
+        if (!event) {
+            showToast('Evento non trovato', 'error');
+            return;
+        }
+        
+        this.currentEditingEvent = eventId;
+        this.populateClassDropdowns();
+        
+        // Populate form fields
+        document.getElementById('event-modal-title').value = event.title;
+        document.getElementById('event-modal-type').value = event.type;
+        
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+        
+        document.getElementById('event-modal-start-date').value = startDate.toISOString().split('T')[0];
+        document.getElementById('event-modal-start-time').value = startDate.toTimeString().substring(0, 5);
+        document.getElementById('event-modal-end-date').value = endDate.toISOString().split('T')[0];
+        document.getElementById('event-modal-end-time').value = endDate.toTimeString().substring(0, 5);
+        
+        if (event.classId) {
+            document.getElementById('event-modal-classId').value = event.classId;
+        }
+        
+        document.getElementById('event-modal-note').value = event.note || '';
+        document.getElementById('event-modal-linkedToOrario').checked = event.linkedToOrario || false;
+        
+        document.getElementById('event-modal-form').onsubmit = (e) => {
+            e.preventDefault();
+            this.saveEvent();
+        };
+        
+        showModal('event-modal');
+    }
+    
+    saveEvent() {
+        const title = document.getElementById('event-modal-title').value.trim();
+        const type = document.getElementById('event-modal-type').value;
+        const startDate = document.getElementById('event-modal-start-date').value;
+        const startTime = document.getElementById('event-modal-start-time').value;
+        const endDate = document.getElementById('event-modal-end-date').value || startDate;
+        const endTime = document.getElementById('event-modal-end-time').value;
+        const classId = document.getElementById('event-modal-classId').value || null;
+        const note = document.getElementById('event-modal-note').value.trim();
+        const linkedToOrario = document.getElementById('event-modal-linkedToOrario').checked;
+        
+        if (!title || !type || !startDate || !startTime) {
+            showToast('Compila tutti i campi obbligatori', 'error');
+            return;
+        }
+        
+        const start = new Date(`${startDate}T${startTime}`).toISOString();
+        const end = new Date(`${endDate}T${endTime}`).toISOString();
+        
+        const eventData = {
+            title,
+            type,
+            start,
+            end,
+            classId,
+            note,
+            linkedToOrario
+        };
+        
+        if (this.currentEditingEvent) {
+            // Update existing event
+            updateEvent(this.currentEditingEvent, eventData);
+            showToast('Evento aggiornato!', 'success');
+        } else {
+            // Create new event
+            createEvent(eventData);
+            showToast('Evento creato!', 'success');
+        }
+        
+        hideModal('event-modal');
+        this.renderAgenda();
+        this.renderHome(); // Update suggestions on home
+    }
+    
+    viewEvent(eventId) {
+        this.editEvent(eventId);
+    }
+    
+    deleteEventConfirm(eventId) {
+        const event = getEventById(eventId);
+        if (!event) {
+            showToast('Evento non trovato', 'error');
+            return;
+        }
+        
+        if (confirm(`Sei sicuro di voler eliminare "${event.title}"?`)) {
+            if (deleteEvent(eventId)) {
+                showToast('Evento eliminato', 'success');
+                this.renderAgenda();
+                this.renderHome(); // Update suggestions on home
+            } else {
+                showToast('Errore durante l\'eliminazione', 'error');
+            }
+        }
+    }
+    
     renderAiAssistant() { renderChatMessages(); }
     renderDocumentImport() { 
         // Document import functionality handled by file input

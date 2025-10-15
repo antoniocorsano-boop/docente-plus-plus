@@ -134,6 +134,10 @@
             <span class="material-symbols-outlined">calendar_month</span>
             <span class="tab-label">Orario</span>
         </button>
+        <button class="tab-button" data-tab="agenda">
+            <span class="material-symbols-outlined">event</span>
+            <span class="tab-label">Agenda</span>
+        </button>
         <button class="tab-button" data-tab="aiAssistant">
             <span class="material-symbols-outlined">psychology</span>
             <span class="tab-label">Assistente IA</span>
@@ -271,6 +275,54 @@
         <div id="schedule" class="tab-content">
             <h2>Orario Settimanale</h2>
             <div id="schedule-view"></div>
+        </div>
+
+        <!-- Agenda Tab -->
+        <div id="agenda" class="tab-content">
+            <h2>Agenda</h2>
+            <div class="agenda-header">
+                <button class="btn btn-primary" onclick="window.app.newEvent()">
+                    <span class="material-symbols-outlined">add</span>
+                    Nuovo Evento
+                </button>
+            </div>
+            
+            <!-- Smart Suggestions -->
+            <div id="agenda-suggestions" class="agenda-suggestions-container">
+                <h3>💡 Suggerimenti Smart</h3>
+                <div id="agenda-suggestions-list"></div>
+            </div>
+            
+            <!-- View Controls -->
+            <div class="agenda-controls">
+                <div class="agenda-nav">
+                    <button class="btn btn-sm btn-secondary" onclick="window.app.navigateAgenda('prev')">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                        Indietro
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="window.app.navigateAgenda('today')">
+                        <span class="material-symbols-outlined">today</span>
+                        Oggi
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="window.app.navigateAgenda('next')">
+                        Avanti
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+                <div class="agenda-view-toggle">
+                    <button class="btn btn-sm" id="agenda-view-daily" onclick="window.app.toggleAgendaView('daily')">
+                        <span class="material-symbols-outlined">view_day</span>
+                        Giorno
+                    </button>
+                    <button class="btn btn-sm" id="agenda-view-weekly" onclick="window.app.toggleAgendaView('weekly')">
+                        <span class="material-symbols-outlined">view_week</span>
+                        Settimana
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Agenda View -->
+            <div id="agenda-view"></div>
         </div>
 
         <!-- AI Assistant Tab -->
@@ -669,6 +721,72 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Salva</button>
                     <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('evaluation-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Evento</h2>
+            <form id="event-modal-form">
+                <div class="form-group">
+                    <label for="event-modal-title">Titolo *</label>
+                    <input type="text" id="event-modal-title" name="title" required placeholder="Es: Lezione di Matematica">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-type">Tipo *</label>
+                    <select id="event-modal-type" name="type" required>
+                        <option value="">-- Seleziona Tipo --</option>
+                        <option value="lezione">📚 Lezione</option>
+                        <option value="compito">📝 Compito</option>
+                        <option value="verifica">✏️ Verifica</option>
+                        <option value="progetto">📊 Progetto</option>
+                        <option value="evento">📅 Evento</option>
+                        <option value="riunione">👥 Riunione</option>
+                        <option value="laboratorio">🔬 Laboratorio</option>
+                        <option value="gita">🚌 Gita</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-start-date">Data Inizio *</label>
+                    <input type="date" id="event-modal-start-date" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-start-time">Ora Inizio *</label>
+                    <input type="time" id="event-modal-start-time" name="startTime" required value="09:00">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-end-date">Data Fine</label>
+                    <input type="date" id="event-modal-end-date" name="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-end-time">Ora Fine</label>
+                    <input type="time" id="event-modal-end-time" name="endTime" value="10:00">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-classId">Classe</label>
+                    <select id="event-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-note">Note</label>
+                    <textarea id="event-modal-note" name="note" rows="4" placeholder="Aggiungi dettagli, materiali, preparazione..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="event-modal-linkedToOrario" name="linkedToOrario">
+                        Collegato all'orario
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('event-modal')">Annulla</button>
                 </div>
             </form>
         </div>
