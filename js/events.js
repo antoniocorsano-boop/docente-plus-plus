@@ -12,21 +12,11 @@ export function setupEventListeners() {
         document.getElementById('menu-backdrop').classList.toggle('active');
     });
     document.getElementById('menu-backdrop')?.addEventListener('click', () => document.getElementById('menu-toggle').click());
-    document.querySelectorAll('.tab-button[data-tab]').forEach(button => {
-        if (!button.closest('.menu-group')) {
-            button.addEventListener('click', () => {
-                if(button.dataset.tab !== 'class-selector'){
-                    switchTab(button.dataset.tab)
-                }
-            });
-        }
-    });
-    document.querySelectorAll('.submenu-item[data-tab]').forEach(button => {
-        button.addEventListener('click', () => switchTab(button.dataset.tab));
-    });
-    document.querySelectorAll('.menu-with-submenu').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.currentTarget.parentElement.classList.toggle('open');
+    
+    // Handle nav-item clicks
+    document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
+        button.addEventListener('click', () => {
+            switchTab(button.dataset.tab);
         });
     });
 

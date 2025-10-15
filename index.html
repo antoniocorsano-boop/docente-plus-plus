@@ -145,70 +145,54 @@
     <!-- Menu Backdrop for Mobile -->
     <div id="menu-backdrop" class="menu-backdrop"></div>
 
-    <!-- Main Navigation -->
-    <nav id="main-nav">
-        <button class="tab-button" data-tab="home">
-            <span class="material-symbols-outlined">home</span>
-            <span class="tab-label">Dashboard</span>
-        </button>
-        <button class="tab-button" data-tab="lessons">
-            <span class="material-symbols-outlined">menu_book</span>
-            <span class="tab-label">Lezioni</span>
-        </button>
-        <button class="tab-button" data-tab="students">
-            <span class="material-symbols-outlined">group</span>
-            <span class="tab-label">Studenti</span>
-        </button>
-        <button class="tab-button" data-tab="classes">
-            <span class="material-symbols-outlined">school</span>
-            <span class="tab-label">Classi</span>
-        </button>
-        <button class="tab-button" data-tab="activities">
-            <span class="material-symbols-outlined">assignment</span>
-            <span class="tab-label">Attività</span>
-        </button>
-        <button class="tab-button" data-tab="evaluations">
-            <span class="material-symbols-outlined">bar_chart</span>
-            <span class="tab-label">Valutazioni</span>
-        </button>
-        <button class="tab-button" data-tab="schedule">
-            <span class="material-symbols-outlined">calendar_month</span>
-            <span class="tab-label">Orario</span>
-        </button>
-        <button class="tab-button" data-tab="agenda">
-            <span class="material-symbols-outlined">event</span>
-            <span class="tab-label">Agenda</span>
-        </button>
-        <button class="tab-button" data-tab="aiAssistant">
-            <span class="material-symbols-outlined">psychology</span>
-            <span class="tab-label">Assistente IA</span>
-        </button>
-        <button class="tab-button" data-tab="documentImport">
-            <span class="material-symbols-outlined">upload_file</span>
-            <span class="tab-label">Importa Documenti</span>
-        </button>
-        
-        <div class="menu-group">
-            <button class="menu-with-submenu">
-                <span class="material-symbols-outlined">more_horiz</span>
-                <span class="tab-label">Altro</span>
+    <!-- Sidebar Navigation -->
+    <aside id="main-nav" class="sidebar">
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-tab="lessons">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span class="nav-label">Lezioni</span>
             </button>
-            <div class="submenu">
-                <button class="submenu-item tab-button" data-tab="settings">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span class="tab-label">Impostazioni</span>
-                </button>
-                <button class="submenu-item tab-button" data-tab="backupRestore">
-                    <span class="material-symbols-outlined">backup</span>
-                    <span class="tab-label">Backup/Ripristino</span>
-                </button>
-                <button class="submenu-item tab-button" data-tab="help">
-                    <span class="material-symbols-outlined">help</span>
-                    <span class="tab-label">Aiuto</span>
-                </button>
-            </div>
-        </div>
-    </nav>
+            <button class="nav-item" data-tab="students">
+                <span class="material-symbols-outlined">group</span>
+                <span class="nav-label">Studenti</span>
+            </button>
+            <button class="nav-item" data-tab="classes">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-label">Classi</span>
+            </button>
+            <button class="nav-item" data-tab="activities">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-label">Attività</span>
+            </button>
+            <button class="nav-item" data-tab="evaluations">
+                <span class="material-symbols-outlined">assessment</span>
+                <span class="nav-label">Valutazioni</span>
+            </button>
+            <button class="nav-item" data-tab="schedule">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span class="nav-label">Orario</span>
+            </button>
+            <button class="nav-item" data-tab="agenda">
+                <span class="material-symbols-outlined">event</span>
+                <span class="nav-label">Agenda</span>
+            </button>
+            <button class="nav-item" data-tab="aiAssistant">
+                <span class="material-symbols-outlined">psychology</span>
+                <span class="nav-label">Assistente IA</span>
+            </button>
+            <button class="nav-item" data-tab="documentImport">
+                <span class="material-symbols-outlined">upload_file</span>
+                <span class="nav-label">Importa Documenti</span>
+            </button>
+            
+            <div class="nav-divider"></div>
+            
+            <button class="nav-item" data-tab="settings">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="nav-label">Impostazioni</span>
+            </button>
+        </nav>
+    </aside>
 
     <!-- Main Content Area -->
     <main>
