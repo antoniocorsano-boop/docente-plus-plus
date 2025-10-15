@@ -196,19 +196,8 @@ export const scheduleConfig = {
  * @returns {Object} Empty schedule data object
  */
 export function generateEmptySchedule() {
-    const schedule = {};
-    const days = scheduleConfig.workingDays;
-    const hours = scheduleConfig.hoursPerDay;
-    
-    for (let dayIdx = 0; dayIdx < days.length; dayIdx++) {
-        for (let hour = 0; hour < hours; hour++) {
-            const time = `${String(scheduleConfig.startHour + hour).padStart(2, '0')}:${String(scheduleConfig.startMinute).padStart(2, '0')}`;
-            const key = `${days[dayIdx]}-${time}`;
-            schedule[key] = null;
-        }
-    }
-    
-    return schedule;
+    // Return an empty object - the component will handle missing slots as empty
+    return {};
 }
 
 /**
@@ -264,22 +253,26 @@ export function getScheduleForDay(scheduleData, dayName) {
  * @returns {Object} Statistics about the schedule
  */
 export function getScheduleStats(scheduleData) {
-    let totalSlots = 0;
+    // Calculate total possible slots from configuration
+    const totalSlots = scheduleConfig.workingDays.length * scheduleConfig.hoursPerDay;
     let occupiedSlots = 0;
     const classCounts = {};
     const activityTypeCounts = {};
     
+    // Count only non-null entries as occupied
     for (const [key, value] of Object.entries(scheduleData)) {
-        totalSlots++;
-        
-        if (value !== null) {
+        if (value !== null && value !== undefined) {
             occupiedSlots++;
             
             // Count by class
-            classCounts[value.classId] = (classCounts[value.classId] || 0) + 1;
+            if (value.classId) {
+                classCounts[value.classId] = (classCounts[value.classId] || 0) + 1;
+            }
             
             // Count by activity type
-            activityTypeCounts[value.activityType] = (activityTypeCounts[value.activityType] || 0) + 1;
+            if (value.activityType) {
+                activityTypeCounts[value.activityType] = (activityTypeCounts[value.activityType] || 0) + 1;
+            }
         }
     }
     
@@ -287,7 +280,7 @@ export function getScheduleStats(scheduleData) {
         totalSlots,
         occupiedSlots,
         emptySlots: totalSlots - occupiedSlots,
-        occupancyRate: (occupiedSlots / totalSlots * 100).toFixed(1) + '%',
+        occupancyRate: totalSlots > 0 ? (occupiedSlots / totalSlots * 100).toFixed(1) + '%' : '0%',
         classCounts,
         activityTypeCounts
     };
