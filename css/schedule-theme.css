@@ -1,0 +1,127 @@
+/* Schedule Component Theme Variables */
+/* Professional blue/cyan/white palette for schedule table */
+
+:root {
+    /* Schedule-specific color palette - Blue/Cyan/White theme */
+    --schedule-primary: #0277BD;           /* Deep blue */
+    --schedule-primary-light: #4FC3F7;     /* Light cyan */
+    --schedule-primary-dark: #01579B;      /* Dark blue */
+    --schedule-accent: #00BCD4;            /* Cyan accent */
+    --schedule-accent-light: #B2EBF2;      /* Light cyan background */
+    
+    /* Background colors */
+    --schedule-bg: #FFFFFF;                /* White background */
+    --schedule-cell-bg: #FAFAFA;           /* Light gray cell */
+    --schedule-cell-hover: #E1F5FE;        /* Light blue hover */
+    --schedule-cell-active: #B3E5FC;       /* Active cell */
+    --schedule-cell-empty: #F5F5F5;        /* Empty cell */
+    
+    /* Border colors */
+    --schedule-border: #E0E0E0;            /* Light gray border */
+    --schedule-border-hover: #4FC3F7;      /* Cyan hover border */
+    --schedule-border-active: #0277BD;     /* Blue active border */
+    
+    /* Text colors */
+    --schedule-text-primary: #212121;      /* Dark gray primary text */
+    --schedule-text-secondary: #757575;    /* Gray secondary text */
+    --schedule-text-muted: #9E9E9E;        /* Light gray muted text */
+    --schedule-text-on-primary: #FFFFFF;   /* White text on primary */
+    
+    /* Time slot colors */
+    --schedule-time-bg: #F5F5F5;           /* Time column background */
+    --schedule-time-text: #424242;         /* Time text color */
+    
+    /* Activity type colors (blue/cyan variations) */
+    --schedule-activity-theory: #1976D2;       /* Blue */
+    --schedule-activity-practice: #0097A7;     /* Cyan */
+    --schedule-activity-lab: #00796B;          /* Teal */
+    --schedule-activity-test: #5E35B1;         /* Purple */
+    --schedule-activity-group: #43A047;        /* Green */
+    --schedule-activity-other: #757575;        /* Gray */
+    
+    /* Spacing */
+    --schedule-spacing-xs: 4px;
+    --schedule-spacing-sm: 8px;
+    --schedule-spacing-md: 12px;
+    --schedule-spacing-lg: 16px;
+    --schedule-spacing-xl: 24px;
+    
+    /* Border radius */
+    --schedule-radius-sm: 4px;
+    --schedule-radius-md: 8px;
+    --schedule-radius-lg: 12px;
+    
+    /* Shadows */
+    --schedule-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --schedule-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.15);
+    --schedule-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.2);
+    --schedule-shadow-hover: 0 4px 16px rgba(2, 119, 189, 0.2);
+    
+    /* Transitions */
+    --schedule-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --schedule-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --schedule-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Typography */
+    --schedule-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --schedule-font-size-xs: 0.75rem;      /* 12px */
+    --schedule-font-size-sm: 0.875rem;     /* 14px */
+    --schedule-font-size-base: 1rem;       /* 16px */
+    --schedule-font-size-lg: 1.125rem;     /* 18px */
+    --schedule-font-size-xl: 1.25rem;      /* 20px */
+    
+    --schedule-font-weight-normal: 400;
+    --schedule-font-weight-medium: 500;
+    --schedule-font-weight-semibold: 600;
+    --schedule-font-weight-bold: 700;
+    
+    /* Z-index layers */
+    --schedule-z-cell: 1;
+    --schedule-z-header: 10;
+    --schedule-z-modal: 100;
+    
+    /* Responsive breakpoints (for reference) */
+    --schedule-breakpoint-mobile: 640px;
+    --schedule-breakpoint-tablet: 768px;
+    --schedule-breakpoint-desktop: 1024px;
+}
+
+/* Dark theme overrides for schedule */
+.dark-theme {
+    --schedule-primary: #42A5F5;           /* Lighter blue for dark mode */
+    --schedule-primary-light: #4FC3F7;     /* Light cyan */
+    --schedule-primary-dark: #1976D2;      /* Medium blue */
+    --schedule-accent: #26C6DA;            /* Bright cyan */
+    --schedule-accent-light: #006064;      /* Dark cyan background */
+    
+    --schedule-bg: #1E1E1E;                /* Dark background */
+    --schedule-cell-bg: #2A2A2A;           /* Dark gray cell */
+    --schedule-cell-hover: #1A237E;        /* Dark blue hover */
+    --schedule-cell-active: #0D47A1;       /* Deep blue active */
+    --schedule-cell-empty: #252525;        /* Empty cell */
+    
+    --schedule-border: #424242;            /* Dark border */
+    --schedule-border-hover: #42A5F5;      /* Blue hover border */
+    --schedule-border-active: #4FC3F7;     /* Cyan active border */
+    
+    --schedule-text-primary: #FFFFFF;      /* White primary text */
+    --schedule-text-secondary: #B0BEC5;    /* Light gray secondary */
+    --schedule-text-muted: #757575;        /* Gray muted text */
+    --schedule-text-on-primary: #000000;   /* Black text on primary */
+    
+    --schedule-time-bg: #2A2A2A;           /* Dark time column */
+    --schedule-time-text: #E0E0E0;         /* Light time text */
+    
+    --schedule-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --schedule-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+    --schedule-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --schedule-shadow-hover: 0 4px 16px rgba(66, 165, 245, 0.3);
+}
+
+/* Schedule configuration constants (6 hours, 08:00-14:00) */
+:root {
+    --schedule-hours-per-day: 6;
+    --schedule-start-hour: 8;
+    --schedule-hour-duration: 60; /* minutes */
+    --schedule-working-days: 5; /* Monday to Friday */
+}
