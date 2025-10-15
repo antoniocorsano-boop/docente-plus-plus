@@ -103,22 +103,61 @@
 
     <!-- Main Navigation -->
     <nav id="main-nav">
-        <button class="tab-button" data-tab="home">🏠 Dashboard</button>
-        <button class="tab-button" data-tab="lessons">📚 Lezioni</button>
-        <button class="tab-button" data-tab="students">👥 Studenti</button>
-        <button class="tab-button" data-tab="classes">🏫 Classi</button>
-        <button class="tab-button" data-tab="activities">✍️ Attività</button>
-        <button class="tab-button" data-tab="evaluations">📊 Valutazioni</button>
-        <button class="tab-button" data-tab="schedule">🗓️ Orario</button>
-        <button class="tab-button" data-tab="aiAssistant">🤖 Assistente IA</button>
-        <button class="tab-button" data-tab="documentImport">📄 Importa Documenti</button>
+        <button class="tab-button" data-tab="home">
+            <span class="material-symbols-outlined">home</span>
+            <span class="tab-label">Dashboard</span>
+        </button>
+        <button class="tab-button" data-tab="lessons">
+            <span class="material-symbols-outlined">menu_book</span>
+            <span class="tab-label">Lezioni</span>
+        </button>
+        <button class="tab-button" data-tab="students">
+            <span class="material-symbols-outlined">group</span>
+            <span class="tab-label">Studenti</span>
+        </button>
+        <button class="tab-button" data-tab="classes">
+            <span class="material-symbols-outlined">school</span>
+            <span class="tab-label">Classi</span>
+        </button>
+        <button class="tab-button" data-tab="activities">
+            <span class="material-symbols-outlined">assignment</span>
+            <span class="tab-label">Attività</span>
+        </button>
+        <button class="tab-button" data-tab="evaluations">
+            <span class="material-symbols-outlined">bar_chart</span>
+            <span class="tab-label">Valutazioni</span>
+        </button>
+        <button class="tab-button" data-tab="schedule">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span class="tab-label">Orario</span>
+        </button>
+        <button class="tab-button" data-tab="aiAssistant">
+            <span class="material-symbols-outlined">psychology</span>
+            <span class="tab-label">Assistente IA</span>
+        </button>
+        <button class="tab-button" data-tab="documentImport">
+            <span class="material-symbols-outlined">upload_file</span>
+            <span class="tab-label">Importa Documenti</span>
+        </button>
         
         <div class="menu-group">
-            <button class="menu-with-submenu">⚙️ Altro</button>
+            <button class="menu-with-submenu">
+                <span class="material-symbols-outlined">more_horiz</span>
+                <span class="tab-label">Altro</span>
+            </button>
             <div class="submenu">
-                <button class="submenu-item tab-button" data-tab="settings">⚙️ Impostazioni</button>
-                <button class="submenu-item tab-button" data-tab="backupRestore">💾 Backup/Ripristino</button>
-                <button class="submenu-item tab-button" data-tab="help">❓ Aiuto</button>
+                <button class="submenu-item tab-button" data-tab="settings">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="tab-label">Impostazioni</span>
+                </button>
+                <button class="submenu-item tab-button" data-tab="backupRestore">
+                    <span class="material-symbols-outlined">backup</span>
+                    <span class="tab-label">Backup/Ripristino</span>
+                </button>
+                <button class="submenu-item tab-button" data-tab="help">
+                    <span class="material-symbols-outlined">help</span>
+                    <span class="tab-label">Aiuto</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -167,7 +206,10 @@
         <!-- Lessons Tab -->
         <div id="lessons" class="tab-content">
             <h2>Gestione Lezioni</h2>
-            <button class="btn btn-primary" onclick="window.app.newLesson()">➕ Nuova Lezione</button>
+            <button class="btn btn-primary" onclick="window.app.newLesson()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Lezione
+            </button>
             <div id="lessons-list"></div>
         </div>
 
@@ -175,10 +217,17 @@
         <div id="students" class="tab-content">
             <h2>Gestione Studenti</h2>
             <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="window.app.newStudent()">➕ Nuovo Studente</button>
-                <button class="btn btn-secondary" onclick="window.app.exportStudentsCSV()">📥 Esporta CSV</button>
+                <button class="btn btn-primary" onclick="window.app.newStudent()">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Nuovo Studente
+                </button>
+                <button class="btn btn-secondary" onclick="window.app.exportStudentsCSV()">
+                    <span class="material-symbols-outlined">download</span>
+                    Esporta CSV
+                </button>
                 <label class="btn btn-secondary" style="cursor: pointer;">
-                    📤 Importa CSV
+                    <span class="material-symbols-outlined">upload</span>
+                    Importa CSV
                     <input type="file" id="import-csv-input" accept=".csv" style="display:none;" onchange="window.app.importStudentsCSV(this.files[0])">
                 </label>
             </div>
@@ -188,21 +237,30 @@
         <!-- Classes Tab -->
         <div id="classes" class="tab-content">
             <h2>Gestione Classi</h2>
-            <button class="btn btn-primary" onclick="window.app.newClass()">➕ Nuova Classe</button>
+            <button class="btn btn-primary" onclick="window.app.newClass()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Classe
+            </button>
             <div id="classes-list"></div>
         </div>
 
         <!-- Activities Tab -->
         <div id="activities" class="tab-content">
             <h2>Gestione Attività</h2>
-            <button class="btn btn-primary" onclick="window.app.newActivity()">➕ Nuova Attività</button>
+            <button class="btn btn-primary" onclick="window.app.newActivity()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Attività
+            </button>
             <div id="activities-list"></div>
         </div>
 
         <!-- Evaluations Tab -->
         <div id="evaluations" class="tab-content">
             <h2>Gestione Valutazioni</h2>
-            <button class="btn btn-primary" onclick="window.app.newEvaluation()">➕ Nuova Valutazione</button>
+            <button class="btn btn-primary" onclick="window.app.newEvaluation()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Valutazione
+            </button>
             <div id="evaluations-list"></div>
         </div>
 

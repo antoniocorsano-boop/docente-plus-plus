@@ -337,13 +337,14 @@ header.minimal #active-class-badge {
 }
 }
 
-/* Navigation Container - Material Design */
+/* Navigation Container - Material Design 3 */
 nav {
-    background: var(--md-card-bg);
+    background: var(--md-surface-container);
     box-shadow: var(--md-elevation-1);
-    border-radius: var(--md-radius-medium);
+    border-radius: var(--md-radius-large);
     padding: 8px;
-    margin: 16px 0;
+    margin: 16px auto;
+    max-width: 1200px;
     display: flex;
     gap: 4px;
     overflow-x: auto;
@@ -355,43 +356,76 @@ nav::-webkit-scrollbar {
 }
 
 nav::-webkit-scrollbar-thumb {
-    background: var(--md-border);
+    background: var(--md-on-surface-variant);
     border-radius: 2px;
 }
 
-/* Tab Buttons - Material Design */
+/* Tab Buttons - Material Design 3 Navigation Tabs */
 .tab-button {
     padding: 12px 16px;
     border: none;
     background: transparent;
-    color: var(--md-text-secondary);
+    color: var(--md-on-surface-variant);
     cursor: pointer;
-    border-radius: var(--md-radius-medium);
+    border-radius: var(--md-radius-large);
     font-size: 0.875rem;
     font-weight: 500;
     transition: all var(--md-transition-duration) var(--md-transition-timing);
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-width: 48px;
-    min-height: 48px;
+    gap: 4px;
+    min-width: 80px;
+    min-height: 64px;
     flex-shrink: 0;
     position: relative;
     text-transform: none;
-    letter-spacing: 0.0892857143em;
+    letter-spacing: 0.0071428571em;
     white-space: nowrap;
 }
 
+.tab-button .material-symbols-outlined {
+    font-size: 24px;
+    color: var(--md-on-surface-variant);
+    transition: color var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.tab-button .tab-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
 .tab-button:hover {
-    background: rgba(25, 118, 210, 0.08);
-    color: var(--md-primary);
+    background: rgba(103, 80, 164, 0.08);
+    color: var(--md-on-surface);
+}
+
+.tab-button:hover .material-symbols-outlined {
+    color: var(--md-on-surface);
 }
 
 .tab-button.active {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.tab-button.active .material-symbols-outlined {
+    color: var(--md-on-secondary-container);
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Active indicator for Material 3 navigation */
+.tab-button.active::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 3px;
     background: var(--md-primary);
-    color: var(--md-text-on-primary);
-    box-shadow: var(--md-elevation-1);
+    border-radius: 3px 3px 0 0;
 }
 
 .tab-button .menu-icon {
@@ -573,23 +607,25 @@ nav::-webkit-scrollbar-thumb {
     letter-spacing: 0.0125em;
 }
 
-/* Cards */
+/* Cards - Material Design 3 */
 .card, .stat-card {
-    background: var(--md-card-bg);
+    background: var(--md-surface-container-low);
     padding: 24px;
-    border-radius: var(--md-radius-medium);
-    box-shadow: var(--md-elevation-1);
+    border-radius: var(--md-radius-large);
+    box-shadow: var(--md-elevation-0);
+    border: 1px solid var(--md-on-surface-variant);
     transition: all var(--md-transition-duration) var(--md-transition-timing);
     text-align: center;
 }
 
 .card:hover, .stat-card:hover {
-    box-shadow: var(--md-elevation-3);
+    box-shadow: var(--md-elevation-1);
+    border-color: var(--md-primary);
     transform: translateY(-2px);
 }
 
 .card h3, .stat-card h3 {
-    color: var(--md-text-primary);
+    color: var(--md-on-surface);
     margin-bottom: 16px;
     font-size: 1rem;
     font-weight: 500;
@@ -605,68 +641,144 @@ nav::-webkit-scrollbar-thumb {
 }
 
 .stat-label {
-    color: var(--md-text-secondary);
+    color: var(--md-on-surface-variant);
     font-size: 0.9em;
 }
 
-/* Buttons */
-/* Buttons - Material Design */
+/* Dashboard and Stats Cards */
+.home-section, .dashboard-section {
+    background: var(--md-surface-container-low);
+    padding: 20px;
+    border-radius: var(--md-radius-large);
+    margin-bottom: 16px;
+    box-shadow: var(--md-elevation-0);
+    border: 1px solid var(--md-on-surface-variant);
+}
+
+.home-section h2, .dashboard-section h2, .home-section h3, .dashboard-section h3 {
+    color: var(--md-on-surface);
+    margin-bottom: 16px;
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0.0125em;
+}
+
+/* Buttons - Material Design 3 */
 .btn {
     padding: 10px 24px;
     border: none;
-    border-radius: var(--md-radius-small);
+    border-radius: var(--md-radius-large);
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 500;
-    letter-spacing: 0.0892857143em;
-    text-transform: uppercase;
+    letter-spacing: 0.0071428571em;
+    text-transform: none;
     transition: all var(--md-transition-duration) var(--md-transition-timing);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 36px;
-    box-shadow: var(--md-elevation-1);
+    min-height: 40px;
+    box-shadow: var(--md-elevation-0);
+    position: relative;
+    overflow: hidden;
 }
 
-.btn:hover {
-    box-shadow: var(--md-elevation-2);
+/* State layer effect for Material 3 buttons */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--md-transition-duration) var(--md-transition-timing);
 }
 
-.btn:active {
-    box-shadow: var(--md-elevation-1);
+.btn:hover::before {
+    opacity: 0.08;
 }
 
+.btn:active::before {
+    opacity: 0.12;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* Filled Button (Primary) */
 .btn-primary {
     background: var(--md-primary);
-    color: var(--md-text-on-primary);
+    color: var(--md-on-primary);
+    box-shadow: var(--md-elevation-1);
 }
 
 .btn-primary:hover {
-    background: var(--md-primary-dark);
-    box-shadow: var(--md-elevation-3);
+    background: var(--md-primary);
+    box-shadow: var(--md-elevation-2);
 }
 
+.btn-primary:active {
+    box-shadow: var(--md-elevation-1);
+}
+
+/* Outlined Button (Secondary) */
 .btn-secondary {
     background: transparent;
     color: var(--md-primary);
     box-shadow: none;
-    border: 1px solid var(--md-border);
+    border: 1px solid var(--md-on-surface-variant);
 }
 
 .btn-secondary:hover {
-    background: rgba(25, 118, 210, 0.08);
+    background: rgba(103, 80, 164, 0.08);
     box-shadow: none;
 }
 
+.btn-secondary:active {
+    background: rgba(103, 80, 164, 0.12);
+}
+
+/* Filled Tonal Button */
+.btn-tonal {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+    box-shadow: var(--md-elevation-0);
+}
+
+.btn-tonal:hover {
+    background: var(--md-secondary-container);
+    box-shadow: var(--md-elevation-1);
+}
+
+/* Error/Danger Button */
 .btn-danger {
     background: var(--md-error);
-    color: var(--md-text-on-primary);
+    color: var(--md-on-error);
+    box-shadow: var(--md-elevation-1);
 }
 
 .btn-danger:hover {
-    background: #d32f2f;
-    box-shadow: var(--md-elevation-3);
+    background: var(--md-error);
+    box-shadow: var(--md-elevation-2);
+}
+
+.btn-sm {
+    padding: 6px 16px;
+    min-height: 32px;
+    font-size: 0.8125rem;
+}
+
+.btn-sm .material-symbols-outlined {
+    font-size: 16px;
 }
 
 .section-actions {
@@ -676,30 +788,32 @@ nav::-webkit-scrollbar-thumb {
     flex-wrap: wrap;
 }
 
-/* Forms - Material Design */
+/* Forms - Material Design 3 Text Fields */
 .form-container {
-    background: var(--md-card-bg);
+    background: var(--md-surface-container-low);
     padding: 24px;
-    border-radius: var(--md-radius-medium);
-    box-shadow: var(--md-elevation-1);
+    border-radius: var(--md-radius-large);
+    box-shadow: var(--md-elevation-0);
+    border: 1px solid var(--md-on-surface-variant);
     margin-bottom: 24px;
 }
 
 .form-container h3 {
     margin-bottom: 20px;
-    color: var(--md-text-primary);
+    color: var(--md-on-surface);
     font-size: 1.25rem;
     font-weight: 500;
 }
 
 .form-group {
     margin-bottom: 24px;
+    position: relative;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: var(--md-text-primary);
+    color: var(--md-on-surface-variant);
     font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.0333333333em;
@@ -710,20 +824,20 @@ nav::-webkit-scrollbar-thumb {
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--md-border);
+    padding: 16px 16px;
+    border: 1px solid var(--md-on-surface-variant);
     border-radius: var(--md-radius-small);
     font-size: 1rem;
     font-family: inherit;
-    color: var(--md-text-primary);
-    background: var(--md-card-bg);
+    color: var(--md-on-surface);
+    background: var(--md-surface-container);
     transition: all var(--md-transition-duration) var(--md-transition-timing);
 }
 
 .form-group input:hover,
 .form-group textarea:hover,
 .form-group select:hover {
-    border-color: var(--md-text-primary);
+    border-color: var(--md-on-surface);
 }
 
 .form-group input:focus,
@@ -732,13 +846,14 @@ nav::-webkit-scrollbar-thumb {
     outline: none;
     border-color: var(--md-primary);
     border-width: 2px;
-    padding: 13px 15px;
+    padding: 15px 15px;
+    box-shadow: 0 0 0 1px var(--md-primary);
 }
 
 .form-group small {
     display: block;
     margin-top: 4px;
-    color: var(--md-text-secondary);
+    color: var(--md-on-surface-variant);
     font-size: 0.75rem;
     line-height: 1.66;
 }
@@ -754,51 +869,56 @@ nav::-webkit-scrollbar-thumb {
 .lessons-list,
 .students-list {
     display: grid;
-    gap: 15px;
+    gap: 16px;
 }
 
 .lesson-item,
 .student-item,
 .activity-item {
-    background: var(--md-card-bg);
+    background: var(--md-surface-container-low);
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    border-radius: var(--md-radius-large);
+    box-shadow: var(--md-elevation-0);
+    border: 1px solid var(--md-on-surface-variant);
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
 }
 
 .lesson-item:hover,
 .student-item:hover,
 .activity-item:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateX(5px);
+    box-shadow: var(--md-elevation-1);
+    border-color: var(--md-primary);
+    transform: translateX(4px);
 }
 
 .lesson-item h4,
 .student-item h4,
 .activity-item h4 {
     color: var(--md-primary);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 1.125rem;
+    font-weight: 500;
 }
 
 .lesson-item p,
 .student-item p,
 .activity-item p {
-    color: var(--md-text-secondary);
-    margin: 5px 0;
+    color: var(--md-on-surface-variant);
+    margin: 8px 0;
+    font-size: 0.875rem;
 }
 
 .item-actions,
 .activity-actions {
-    margin-top: 15px;
+    margin-top: 16px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .item-actions button,
 .activity-actions button {
     padding: 6px 12px;
-    font-size: 0.9em;
+    font-size: 0.875rem;
 }
 
 /* Activity-specific styles */
