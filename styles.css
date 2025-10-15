@@ -4221,3 +4221,62 @@ body.dark-theme textarea {
     }
 }
 
+
+/* CRUD Item Styles */
+.class-item,
+.student-item,
+.lesson-item,
+.activity-item,
+.evaluation-item {
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.class-item h4,
+.student-item h4,
+.lesson-item h4,
+.activity-item h4,
+.evaluation-item h4 {
+    color: var(--md-text-primary);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.class-item p,
+.student-item p,
+.lesson-item p,
+.activity-item p,
+.evaluation-item p {
+    color: var(--md-text-secondary);
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.item-actions .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* Make cards in lists not centered */
+#classes-list .card,
+#students-list .card,
+#lessons-list .card,
+#activities-list .card,
+#evaluations-list .card {
+    text-align: left;
+}
+
+/* Button spacing on tabs */
+.tab-content > .btn,
+.tab-content > div > .btn {
+    margin-bottom: 16px;
+    margin-right: 8px;
+}
