@@ -1,6 +1,6 @@
 # 🎓 Docente++
 
-**Stato del Progetto: v1.0.0 - Stabile**
+**Stato del Progetto: v1.1.0 - In Sviluppo**
 
 **Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
@@ -8,12 +8,23 @@
 
 ## ✨ Funzionalità Principali
 
-La versione 1.0.0 include un set completo di strumenti per la gestione quotidiana:
+La versione 1.1.0 introduce nuove funzionalità di configurazione avanzata:
 
 - **✅ Onboarding Guidato**: Inizia in pochi secondi configurando il tuo profilo, la scuola e le materie che insegni.
 - **🎨 Theme Picker Material 3**: Personalizza l'aspetto dell'app con temi Chiaro, Scuro o Automatico (dinamico) che segue le preferenze del sistema. I temi utilizzano Material Design 3 Expressive con palette di colori moderne e Material Symbols per le icone.
 - **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
 - **🗓️ Pianificazione Lezioni e Orario**: Organizza le tue lezioni con dettagli su argomenti, obiettivi e materiali. Le lezioni appaiono automaticamente in un orario settimanale e giornaliero interattivo.
+- **📅 Orario Settimanale Modificabile (NUOVO)**: Configura l'orario delle lezioni secondo le tue esigenze:
+  - Imposta il numero di ore al giorno (predefinito: 6 ore)
+  - Definisci l'orario di inizio e fine (predefinito: 8:00-14:00)
+  - Seleziona i giorni lavorativi (predefinito: Lun-Ven)
+  - Tabella oraria interattiva, modificabile con click/tap sulle celle
+- **⚙️ Configurazione Avanzata (NUOVO)**: Personalizza l'app secondo le tue esigenze:
+  - Anno scolastico configurabile
+  - Gestione classi disponibili
+  - Chiave API IA per funzionalità avanzate
+  - Selezione modello IA (GPT-3.5, GPT-4, Claude, Llama)
+  - Tutte le impostazioni persistono tra le sessioni
 - **✍️ Creazione di Attività e Valutazioni**: Assegna compiti, verifiche o progetti alle classi. Registra i voti e i giudizi per ogni studente, costruendo uno storico delle performance.
 - **📊 Dashboard Dinamica**: Una schermata principale che ti offre una panoramica immediata delle prossime scadenze e delle ultime valutazioni inserite.
 - **🤖 Assistente IA (Simulato)**: Un assistente virtuale sempre a disposizione. Chiedigli di creare una bozza di lezione, suggerire idee per un'attività o aiutarti a trovare informazioni.
@@ -32,6 +43,28 @@ Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirl
     python -m http.server
     ```
     Successivamente, apri il browser all'indirizzo `http://localhost:8000`.
+
+## 📖 Documentazione
+
+- **[Guida Rapida](docs/QUICK_START.md)**: Per iniziare subito
+- **[Guida Configurazione](docs/CONFIGURATION_GUIDE.md)**: Come configurare orario, classi e impostazioni IA ⭐ NUOVO
+- **[Guida Utente](docs/user-guide.md)**: Manuale completo
+- **[Guida Sviluppatore](docs/dev-guide.md)**: Per chi vuole contribuire
+- **[Risoluzione Problemi](docs/TROUBLESHOOTING.md)**: Soluzioni ai problemi comuni
+
+## 🔮 Roadmap Funzionalità Future
+
+Le seguenti funzionalità sono pianificate per prossime versioni:
+
+- 🔄 **Pipeline Auto-Pianificante**: Ripianificazione automatica delle attività quando cambiano le impostazioni
+- 📅 **Integrazione Calendario Esterno**: Sync con Google Calendar/Outlook
+- 🔔 **Notifiche Push Avanzate**: Promemoria personalizzati
+- 🤝 **Modalità Collaborativa**: Condivisione con colleghi
+- 📊 **Import/Export API**: Integrazione con registro elettronico
+- ☁️ **Backup Cloud**: Sincronizzazione automatica
+- 🧠 **IA Avanzata**: Suggerimenti automatici e ottimizzazione
+
+Consulta la sezione "Impostazioni Avanzate" nell'app per maggiori dettagli sulle funzionalità future.
 
 ## 🛠️ Contribuire
 
