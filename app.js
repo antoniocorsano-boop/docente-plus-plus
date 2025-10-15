@@ -4,6 +4,7 @@ import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData,
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { initializeTheme, setupThemePicker } from './js/theme.js';
+import { initAppBar } from './js/appbar.js';
 import { 
     showModal, hideModal, 
     createClass, editClass, deleteClass,
@@ -100,6 +101,9 @@ class DocentePlusPlus {
             setupEventListeners();
             setupThemePicker();
             createToastContainer();
+            
+            // Initialize AppBar scroll behavior
+            initAppBar();
             
             // Initialize AI Agent FAB
             initAIAgentFAB();

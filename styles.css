@@ -475,6 +475,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-top: 56px; /* Account for fixed header */
 }
 
 .container {
@@ -484,35 +485,60 @@ body {
 }
 
 /* Header - Material Design */
+/* AppBar - Compact and Responsive Design */
 header {
     background: var(--md-primary);
     color: var(--md-text-on-primary);
     box-shadow: var(--md-elevation-2);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
-    transition: box-shadow var(--md-transition-duration) var(--md-transition-timing);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: transform var(--md-transition-duration) var(--md-transition-timing),
+                box-shadow var(--md-transition-duration) var(--md-transition-timing);
+}
+
+/* Hide header when scrolling down */
+header.header-hidden {
+    transform: translateY(-100%);
 }
 
 header .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 8px 16px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
 }
 
+header h1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.0125em;
+    pointer-events: none;
+}
+
 header .header-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
+    margin-left: auto;
 }
 
-.icon-btn {
+/* Header Icon Buttons */
+header .icon-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border: none;
     background: transparent;
     color: var(--md-text-on-primary);
@@ -522,12 +548,27 @@ header .header-actions {
     justify-content: center;
     cursor: pointer;
     transition: background-color var(--md-transition-duration) var(--md-transition-timing);
+    position: relative;
 }
 
-.icon-btn:hover {
+header .icon-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+header .icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+header .icon-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+
+/* Menu toggle button - always visible */
+.menu-toggle {
+    display: flex !important;
+}
+
+/* Minimal header variant (not used in new design) */
 header.minimal .icon-btn {
     color: var(--md-text-primary);
 }
@@ -545,76 +586,9 @@ header.minimal {
 
 header.minimal h1 {
     color: var(--md-text-primary);
-    font-size: 1.5rem;
-    font-weight: 500;
-    margin: 0;
 }
 
-header h1 {
-    font-size: 1.75rem;
-    font-weight: 500;
-    margin: 0;
-    letter-spacing: 0.0125em;
-}
-
-.subtitle {
-    font-size: 0.875rem;
-    opacity: 0.9;
-    margin-top: 4px;
-}
-
-#active-class-badge {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 8px 16px;
-    border-radius: var(--md-radius-large);
-    font-size: 0.875rem;
-    font-weight: 500;
-    box-shadow: var(--md-elevation-1);
-}
-
-header.minimal #active-class-badge {
-    background: var(--md-surface-variant);
-    color: var(--md-text-primary);
-}
-
-/* Hamburger Menu - Material Design */
-.menu-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 12px;
-    border-radius: var(--md-radius-medium);
-    transition: background-color var(--md-transition-duration) var(--md-transition-timing);
-}
-
-.menu-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-}
-
-.menu-toggle span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--md-text-primary);
-    border-radius: 2px;
-    transition: all var(--md-transition-duration) var(--md-transition-timing);
-}
-
-.menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.menu-toggle.active span:nth-child(2) {
-    opacity: 0;
-}
-
-.menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
-}
+/* Removed old active-class-badge styles - now using icon button */
 
 /* Active Class Badge - Material Design */
 .active-class-badge {
@@ -3329,9 +3303,9 @@ nav::-webkit-scrollbar-thumb {
 
 /* Mobile optimizations for lesson session */
 @media (max-width: 768px) {
-    /* Show hamburger menu on mobile */
-    .menu-toggle {
-        display: flex;
+    /* Adjust header title for mobile */
+    header h1 {
+        font-size: 1.125rem;
     }
     
     /* Compact side menu - reduced width and spacing */
