@@ -1,6 +1,8 @@
 
 // app.js
-
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("JS ERROR:\n" + message + "\nIn: " + source + ":" + lineno);
+};
 import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
