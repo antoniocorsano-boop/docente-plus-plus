@@ -300,6 +300,21 @@
                 <p>Anno Scolastico: <span id="settings-school-year">-</span></p>
             </div>
             <div class="settings-section">
+                <h3>🤖 Agente IA Floating</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="ai-fab-enabled-checkbox" checked>
+                        Mostra Agente IA Floating
+                    </label>
+                    <p class="help-text">Attiva o disattiva il pulsante floating dell'Agente IA visibile su tutte le pagine.</p>
+                </div>
+                <button id="reset-ai-fab-position-btn" class="btn btn-secondary" style="margin-top: 10px;">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Ripristina Posizione Agente IA
+                </button>
+                <p class="help-text">Riporta il pulsante floating alla posizione predefinita (in basso a destra).</p>
+            </div>
+            <div class="settings-section">
                 <h3>Risoluzione Problemi</h3>
                 <button id="clear-all-data-btn" class="btn btn-danger">Cancella Tutti i Dati</button>
                 <p class="help-text">⚠️ Questa azione cancellerà tutti i tuoi dati salvati e ripristinerà l'app.</p>
@@ -577,6 +592,61 @@
                     <button type="submit" class="btn btn-primary" id="theme-apply-btn">Applica</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- AI Agent Floating Action Button (FAB) -->
+    <button id="ai-fab" class="ai-fab" title="Apri Agente IA Contestuale">
+        🤖
+    </button>
+
+    <!-- AI Agent Modal -->
+    <div id="ai-agent-modal" class="modal" style="display: none;">
+        <div class="modal-content ai-agent-content">
+            <h2>🤖 Agente IA - Assistenza Contestuale</h2>
+            <div class="ai-agent-body">
+                <!-- Context Info Section -->
+                <div class="ai-context-info">
+                    <p><strong>Sezione attiva:</strong> <span id="ai-current-section">Dashboard</span></p>
+                    <p>L'agente IA fornisce suggerimenti specifici per questa sezione dell'applicazione.</p>
+                </div>
+
+                <!-- Contextual Suggestions Section -->
+                <div class="ai-agent-suggestions">
+                    <p><strong>💡 Suggerimenti Contestuali:</strong></p>
+                    <div id="ai-suggestions-buttons">
+                        <!-- Suggestions will be populated dynamically based on context -->
+                    </div>
+                </div>
+
+                <!-- User Prompt Input -->
+                <div class="form-group">
+                    <label for="ai-prompt-input"><strong>Chiedi all'Agente IA:</strong></label>
+                    <textarea id="ai-prompt-input" rows="3" placeholder="Es: Suggerisci le attività prioritarie per oggi..."></textarea>
+                    <button class="btn btn-primary" id="ai-submit-prompt" style="margin-top: 10px;">
+                        <span class="material-symbols-outlined">send</span>
+                        Invia Richiesta
+                    </button>
+                </div>
+
+                <!-- AI Output Area (stub) -->
+                <div class="ai-agent-results" id="ai-output-section" style="display: none;">
+                    <h4>📋 Risposta Agente IA</h4>
+                    <div id="ai-agent-results-content">
+                        <!-- AI response will be populated here -->
+                    </div>
+                    <!-- TODO: Add proposed actions section when API integration is complete -->
+                    <div class="ai-agent-actions" id="ai-proposed-actions-section" style="display: none;">
+                        <h5>🎯 Azioni Proposte</h5>
+                        <div id="ai-agent-proposed-actions">
+                            <!-- Proposed actions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="window.app.closeAIAgentModal()">Chiudi</button>
+            </div>
         </div>
     </div>
 
