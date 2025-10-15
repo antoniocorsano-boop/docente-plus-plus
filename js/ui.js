@@ -101,3 +101,21 @@ export function renderTemplate(templateId, containerId, data) {
     }
     container.innerHTML = html;
 }
+
+export function renderChatMessages() {
+    const messagesContainer = document.getElementById('ai-chat-messages');
+    if (!messagesContainer) return;
+    
+    if (state.chatMessages.length === 0) {
+        messagesContainer.innerHTML = '<p class="empty-state">Inizia una conversazione con l\'assistente IA!</p>';
+        return;
+    }
+    
+    messagesContainer.innerHTML = state.chatMessages.map(msg => {
+        const className = msg.sender === 'user' ? 'chat-message-user' : 'chat-message-ai';
+        return `<div class="${className}"><strong>${msg.sender === 'user' ? 'Tu' : 'IA'}:</strong> ${msg.text}</div>`;
+    }).join('');
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}

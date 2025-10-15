@@ -2,9 +2,8 @@
 // app.js
 
 import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
-import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding } from './js/ui.js';
+import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
-import { renderChatMessages } from './js/ai.js';
 
 class DocentePlusPlus {
     constructor() {
