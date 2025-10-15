@@ -1435,6 +1435,41 @@ class DocentePlusPlus {
         
         // Load AI settings
         this.loadAISettingsForm();
+
+        // Load notification settings
+        this.loadNotificationSettingsForm();
+    }
+
+    loadNotificationSettingsForm() {
+        if (!window.notificationSystem) return;
+
+        const preferences = window.notificationSystem.preferences;
+
+        // Load notification modes
+        const inAppCheckbox = document.getElementById('notification-enable-inapp');
+        if (inAppCheckbox) inAppCheckbox.checked = preferences.enableInApp;
+
+        const pushCheckbox = document.getElementById('notification-enable-push');
+        if (pushCheckbox) pushCheckbox.checked = preferences.enablePush;
+
+        const emailCheckbox = document.getElementById('notification-enable-email');
+        if (emailCheckbox) emailCheckbox.checked = preferences.enableEmail;
+
+        // Load notification types
+        const deadlinesCheckbox = document.getElementById('notification-deadlines');
+        if (deadlinesCheckbox) deadlinesCheckbox.checked = preferences.notifyDeadlines;
+
+        const scheduleChangesCheckbox = document.getElementById('notification-schedule-changes');
+        if (scheduleChangesCheckbox) scheduleChangesCheckbox.checked = preferences.notifyScheduleChanges;
+
+        const newDocumentsCheckbox = document.getElementById('notification-new-documents');
+        if (newDocumentsCheckbox) newDocumentsCheckbox.checked = preferences.notifyNewDocuments;
+
+        const smartSuggestionsCheckbox = document.getElementById('notification-smart-suggestions');
+        if (smartSuggestionsCheckbox) smartSuggestionsCheckbox.checked = preferences.notifySmartSuggestions;
+
+        const institutionalCheckbox = document.getElementById('notification-institutional');
+        if (institutionalCheckbox) institutionalCheckbox.checked = preferences.notifyInstitutional;
     }
     
     loadScheduleSettingsForm() {
