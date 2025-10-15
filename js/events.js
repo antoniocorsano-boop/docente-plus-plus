@@ -1,7 +1,7 @@
 
 // js/events.js
 
-import { completeOnboarding, state } from './data.js';
+import { completeOnboarding, skipOnboarding, clearAllData, state } from './data.js';
 import { hideOnboarding, showToast, switchTab } from './ui.js';
 import { sendMessageToAI } from './ai.js';
 import { handleFileUpload } from './files.js';
@@ -32,15 +32,40 @@ export function setupEventListeners() {
 
     document.getElementById('onboarding-form')?.addEventListener('submit', e => {
         e.preventDefault();
-        const settings = {
-            teacherName: document.getElementById('onboarding-first-name').value,
-            teacherLastName: document.getElementById('onboarding-last-name').value,
-            schoolYear: document.getElementById('onboarding-school-year').value,
-        };
-        completeOnboarding(settings);
-        hideOnboarding();
-        showToast('Profilo configurato! Benvenuto in Docente++.', 'success');
-        window.app.initializeAppUI();
+        try {
+            const settings = {
+                teacherName: document.getElementById('onboarding-first-name')?.value || '',
+                teacherLastName: document.getElementById('onboarding-last-name')?.value || '',
+                schoolYear: document.getElementById('onboarding-school-year')?.value || '',
+            };
+            
+            // Basic validation
+            if (!settings.teacherName.trim()) {
+                showToast('Inserisci almeno il tuo nome.', 'warning');
+                return;
+            }
+            
+            completeOnboarding(settings);
+            hideOnboarding();
+            showToast('Profilo configurato! Benvenuto in Docente++.', 'success');
+            window.app.initializeAppUI();
+        } catch (error) {
+            console.error('Error completing onboarding:', error);
+            showToast('Errore durante il salvataggio. Riprova.', 'error');
+        }
+    });
+    
+    // Skip onboarding button handler
+    document.getElementById('onboarding-skip')?.addEventListener('click', () => {
+        try {
+            skipOnboarding();
+            hideOnboarding();
+            showToast('Onboarding saltato. Puoi configurare il tuo profilo nelle impostazioni.', 'info');
+            window.app.initializeAppUI();
+        } catch (error) {
+            console.error('Error skipping onboarding:', error);
+            showToast('Errore. Riprova.', 'error');
+        }
     });
 
     document.getElementById('ai-chat-send')?.addEventListener('click', () => sendMessageToAI());
@@ -51,4 +76,22 @@ export function setupEventListeners() {
         }
     });
     document.getElementById('pdf-upload')?.addEventListener('change', e => handleFileUpload(e));
+    
+    // Clear all data button (troubleshooting)
+    document.getElementById('clear-all-data-btn')?.addEventListener('click', () => {
+        if (confirm('⚠️ ATTENZIONE: Questa azione cancellerà TUTTI i tuoi dati salvati (classi, studenti, lezioni, ecc.). Questa azione è irreversibile. Sei sicuro di voler continuare?')) {
+            if (confirm('Sei VERAMENTE sicuro? Non potrai recuperare i dati cancellati.')) {
+                try {
+                    clearAllData();
+                    showToast('Tutti i dati sono stati cancellati. La pagina verrà ricaricata.', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    showToast('Errore durante la cancellazione dei dati.', 'error');
+                }
+            }
+        }
+    });
 }

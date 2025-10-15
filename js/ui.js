@@ -65,7 +65,19 @@ export function updateActiveClassBadge() {
 }
 
 export function showOnboarding() {
-    document.getElementById('onboarding-modal').style.display = 'flex';
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error('Onboarding modal not found. Skipping onboarding.');
+        // If modal doesn't exist, skip onboarding to not block the app
+        import('./data.js').then(({ skipOnboarding }) => {
+            skipOnboarding();
+            if (window.app && typeof window.app.initializeAppUI === 'function') {
+                window.app.initializeAppUI();
+            }
+        });
+    }
 }
 
 export function hideOnboarding() {
@@ -88,4 +100,22 @@ export function renderTemplate(templateId, containerId, data) {
         });
     }
     container.innerHTML = html;
+}
+
+export function renderChatMessages() {
+    const messagesContainer = document.getElementById('ai-chat-messages');
+    if (!messagesContainer) return;
+    
+    if (state.chatMessages.length === 0) {
+        messagesContainer.innerHTML = '<p class="empty-state">Inizia una conversazione con l\'assistente IA!</p>';
+        return;
+    }
+    
+    messagesContainer.innerHTML = state.chatMessages.map(msg => {
+        const className = msg.sender === 'user' ? 'chat-message-user' : 'chat-message-ai';
+        return `<div class="${className}"><strong>${msg.sender === 'user' ? 'Tu' : 'IA'}:</strong> ${msg.text}</div>`;
+    }).join('');
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
