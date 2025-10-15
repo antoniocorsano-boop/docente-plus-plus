@@ -3,6 +3,7 @@
 import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
+import { initializeTheme, setupThemePicker } from './js/theme.js';
 import { 
     showModal, hideModal, 
     createClass, editClass, deleteClass,
@@ -23,6 +24,9 @@ class DocentePlusPlus {
 
     init() {
         try {
+            // Initialize theme first (before loading data)
+            initializeTheme();
+            
             const dataLoaded = loadData();
             if (!dataLoaded) {
                 showToast('Dati corrotti rilevati. App ripristinata ai valori predefiniti.', 'warning', 5000);
@@ -34,6 +38,7 @@ class DocentePlusPlus {
                 this.initializeAppUI();
             }
             setupEventListeners();
+            setupThemePicker();
             createToastContainer();
             console.log("Docente++ v1.1.0 (Refactored) initialized.");
         } catch (error) {
@@ -442,6 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         window.app = new DocentePlusPlus();
         window.app.init();
+        // Expose showToast globally for theme picker
+        window.showToast = showToast;
     } catch (error) {
         console.error("Fatal error during app initialization:", error);
         document.body.innerHTML = '<div style="text-align:center;padding:20px;"><h1>Errore Critico</h1><p>L\'applicazione non è riuscita a caricarsi. Controlla la console per i dettagli.</p></div>';
