@@ -25,17 +25,33 @@
     <!-- Roboto Font -->
     <link href="fonts/roboto.css" rel="stylesheet">
     
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- PDF and Excel Export Libraries -->
-    <script src="libs/jspdf.umd.min.js"></script>
-    <script src="libs/jspdf.plugin.autotable.min.js"></script>
-    <script src="libs/xlsx.full.min.js"></script>
-    <!-- PapaParse for CSV parsing -->
-    <script src="libs/papaparse.min.js"></script>
-    <!-- PDF.js for PDF text extraction -->
-    <script src="libs/pdf.min.js"></script>
-    <!-- JSZip for backup ZIP creation -->
-    <script src="libs/jszip.min.js"></script>
+    <!-- Note: PDF/Excel/ZIP libraries can be loaded dynamically when needed to avoid ES6 module conflicts -->
+    <!--
+    <script>
+        // Dynamically load third-party libraries to avoid ES6 module strict mode conflicts
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Load libraries after DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            Promise.all([
+                loadScript('libs/papaparse.min.js'),
+                loadScript('libs/jszip.min.js'),
+                loadScript('libs/jspdf.umd.min.js').then(() => loadScript('libs/jspdf.plugin.autotable.min.js')),
+                loadScript('libs/xlsx.full.min.js')
+            ]).catch(err => console.error('Error loading libraries:', err));
+        });
+    </script>
+    -->
 </head>
 <body>
     <!-- Onboarding Modal -->
@@ -144,30 +160,42 @@
         <!-- Lessons Tab -->
         <div id="lessons" class="tab-content">
             <h2>Gestione Lezioni</h2>
+            <button class="btn btn-primary" onclick="window.app.newLesson()">➕ Nuova Lezione</button>
             <div id="lessons-list"></div>
         </div>
 
         <!-- Students Tab -->
         <div id="students" class="tab-content">
             <h2>Gestione Studenti</h2>
+            <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="window.app.newStudent()">➕ Nuovo Studente</button>
+                <button class="btn btn-secondary" onclick="window.app.exportStudentsCSV()">📥 Esporta CSV</button>
+                <label class="btn btn-secondary" style="cursor: pointer;">
+                    📤 Importa CSV
+                    <input type="file" id="import-csv-input" accept=".csv" style="display:none;" onchange="window.app.importStudentsCSV(this.files[0])">
+                </label>
+            </div>
             <div id="students-list"></div>
         </div>
 
         <!-- Classes Tab -->
         <div id="classes" class="tab-content">
             <h2>Gestione Classi</h2>
+            <button class="btn btn-primary" onclick="window.app.newClass()">➕ Nuova Classe</button>
             <div id="classes-list"></div>
         </div>
 
         <!-- Activities Tab -->
         <div id="activities" class="tab-content">
             <h2>Gestione Attività</h2>
+            <button class="btn btn-primary" onclick="window.app.newActivity()">➕ Nuova Attività</button>
             <div id="activities-list"></div>
         </div>
 
         <!-- Evaluations Tab -->
         <div id="evaluations" class="tab-content">
             <h2>Gestione Valutazioni</h2>
+            <button class="btn btn-primary" onclick="window.app.newEvaluation()">➕ Nuova Valutazione</button>
             <div id="evaluations-list"></div>
         </div>
 
@@ -250,6 +278,199 @@
         </div>
     </main>
 
+    <!-- Class Modal -->
+    <div id="class-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Classe</h2>
+            <form id="class-modal-form">
+                <div class="form-group">
+                    <label for="class-modal-name">Nome Classe *</label>
+                    <input type="text" id="class-modal-name" name="name" required placeholder="es. 3A, 5B">
+                </div>
+                <div class="form-group">
+                    <label for="class-modal-schoolYear">Anno Scolastico</label>
+                    <input type="text" id="class-modal-schoolYear" name="schoolYear" placeholder="es. 2024/2025">
+                </div>
+                <div class="form-group">
+                    <label for="class-modal-description">Descrizione</label>
+                    <textarea id="class-modal-description" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('class-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="student-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Studente</h2>
+            <form id="student-modal-form">
+                <div class="form-group">
+                    <label for="student-modal-firstName">Nome *</label>
+                    <input type="text" id="student-modal-firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-lastName">Cognome *</label>
+                    <input type="text" id="student-modal-lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-email">Email</label>
+                    <input type="email" id="student-modal-email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-classId">Classe</label>
+                    <select id="student-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-birthDate">Data di Nascita</label>
+                    <input type="date" id="student-modal-birthDate" name="birthDate">
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-notes">Note</label>
+                    <textarea id="student-modal-notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('student-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lesson Modal -->
+    <div id="lesson-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Lezione</h2>
+            <form id="lesson-modal-form">
+                <div class="form-group">
+                    <label for="lesson-modal-title">Titolo *</label>
+                    <input type="text" id="lesson-modal-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-subject">Materia *</label>
+                    <select id="lesson-modal-subject" name="subject" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-date">Data *</label>
+                    <input type="date" id="lesson-modal-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-time">Ora</label>
+                    <input type="time" id="lesson-modal-time" name="time" value="09:00">
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-classId">Classe</label>
+                    <select id="lesson-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-description">Descrizione</label>
+                    <textarea id="lesson-modal-description" name="description" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('lesson-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activity Modal -->
+    <div id="activity-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Attività</h2>
+            <form id="activity-modal-form">
+                <div class="form-group">
+                    <label for="activity-modal-title">Titolo *</label>
+                    <input type="text" id="activity-modal-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-type">Tipo *</label>
+                    <select id="activity-modal-type" name="type" required>
+                        <option value="">-- Seleziona --</option>
+                        <option value="Compito">Compito</option>
+                        <option value="Verifica">Verifica</option>
+                        <option value="Progetto">Progetto</option>
+                        <option value="Laboratorio">Laboratorio</option>
+                        <option value="Esercitazione">Esercitazione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-date">Data *</label>
+                    <input type="date" id="activity-modal-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-status">Stato</label>
+                    <select id="activity-modal-status" name="status">
+                        <option value="pianificata">Pianificata</option>
+                        <option value="in corso">In corso</option>
+                        <option value="completata">Completata</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-classId">Classe</label>
+                    <select id="activity-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-description">Descrizione</label>
+                    <textarea id="activity-modal-description" name="description" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('activity-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div id="evaluation-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Valutazione</h2>
+            <form id="evaluation-modal-form">
+                <div class="form-group">
+                    <label for="evaluation-modal-studentId">Studente *</label>
+                    <select id="evaluation-modal-studentId" name="studentId" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-activityId">Attività *</label>
+                    <select id="evaluation-modal-activityId" name="activityId" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-grade">Voto</label>
+                    <input type="text" id="evaluation-modal-grade" name="grade" placeholder="es. 8, 9/10, Ottimo">
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-date">Data</label>
+                    <input type="date" id="evaluation-modal-date" name="date">
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-comment">Commento</label>
+                    <textarea id="evaluation-modal-comment" name="comment" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('evaluation-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="app.js"></script>
+
 </body>
 </html>
