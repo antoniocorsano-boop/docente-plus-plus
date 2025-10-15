@@ -1397,8 +1397,158 @@ class DocentePlusPlus {
     }
     
     renderAiAssistant() { renderChatMessages(); }
-    renderDocumentImport() { 
-        // Document import functionality handled by file input
+    renderDocumentImport() {
+        const container = document.getElementById('documentImport');
+        if (!container) return;
+
+        // Check if container already has the enhanced UI
+        const existingUpload = container.querySelector('.document-import-container');
+        if (existingUpload) return; // Already rendered
+
+        // Create enhanced document import UI
+        const importUI = document.createElement('div');
+        importUI.className = 'document-import-container';
+        importUI.innerHTML = `
+            <div class="import-header">
+                <h2>Importa Documenti Didattici</h2>
+                <p class="import-subtitle">Carica documenti e lascia che l'IA estragga automaticamente lezioni, compiti, orari e altro</p>
+            </div>
+
+            <div class="import-upload-area">
+                <div class="upload-zone" id="upload-zone">
+                    <span class="material-symbols-outlined upload-icon">upload_file</span>
+                    <h3>Trascina qui i file o clicca per caricare</h3>
+                    <p>Formati supportati: PDF, Word, Excel, CSV, TXT</p>
+                    <input type="file" id="document-upload-input" accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.xls" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('document-upload-input').click()">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        Seleziona File
+                    </button>
+                </div>
+            </div>
+
+            <div class="import-status" id="import-status" style="display: none;">
+                <div class="status-indicator">
+                    <span class="material-symbols-outlined spinning">sync</span>
+                    <span id="status-text">Analisi in corso...</span>
+                </div>
+            </div>
+
+            <div id="import-preview-container" class="import-preview-container"></div>
+
+            <div class="import-help">
+                <h3><span class="material-symbols-outlined">help</span> Tipi di documenti supportati</h3>
+                <div class="supported-types">
+                    <div class="type-card">
+                        <span class="type-icon">📚</span>
+                        <h4>Curriculum/Programma</h4>
+                        <p>Estrazione di competenze, obiettivi e unità didattiche</p>
+                    </div>
+                    <div class="type-card">
+                        <span class="type-icon">📋</span>
+                        <h4>Piano Attività</h4>
+                        <p>Riconoscimento di lezioni, compiti, verifiche e progetti</p>
+                    </div>
+                    <div class="type-card">
+                        <span class="type-icon">🗓️</span>
+                        <h4>Orario Scolastico</h4>
+                        <p>Parsing di orari settimanali e slot temporali</p>
+                    </div>
+                    <div class="type-card">
+                        <span class="type-icon">👥</span>
+                        <h4>Anagrafica Studenti</h4>
+                        <p>Importazione elenchi studenti con dati anagrafici</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Clear existing content and add new UI
+        const existingContent = container.querySelector('.import-area');
+        if (existingContent) {
+            existingContent.replaceWith(importUI);
+        } else {
+            // Find where to insert (after h2)
+            const h2 = container.querySelector('h2');
+            if (h2 && h2.nextSibling) {
+                h2.parentNode.insertBefore(importUI, h2.nextSibling);
+            } else {
+                container.appendChild(importUI);
+            }
+        }
+
+        // Set up event listeners
+        this.setupDocumentImportListeners();
+    }
+
+    setupDocumentImportListeners() {
+        const fileInput = document.getElementById('document-upload-input');
+        const uploadZone = document.getElementById('upload-zone');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await this.handleDocumentUpload(file);
+                }
+            });
+        }
+
+        if (uploadZone) {
+            // Drag and drop support
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('drag-over');
+            });
+
+            uploadZone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+                
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    await this.handleDocumentUpload(file);
+                }
+            });
+        }
+    }
+
+    async handleDocumentUpload(file) {
+        const statusDiv = document.getElementById('import-status');
+        const statusText = document.getElementById('status-text');
+        const previewContainer = document.getElementById('import-preview-container');
+
+        if (statusDiv) statusDiv.style.display = 'block';
+        if (statusText) statusText.textContent = 'Analisi documento in corso...';
+        if (previewContainer) previewContainer.innerHTML = '';
+
+        try {
+            // Use import pipeline to process the document
+            const importData = await importPipeline.handleDocumentUpload(file);
+            
+            if (importData) {
+                // Hide status and show preview
+                if (statusDiv) statusDiv.style.display = 'none';
+                
+                // Generate and display preview
+                const previewHTML = importPipeline.generatePreviewHTML(importData);
+                if (previewContainer) {
+                    previewContainer.innerHTML = previewHTML;
+                    importPipeline.attachFieldListeners();
+                }
+            } else {
+                if (statusDiv) statusDiv.style.display = 'none';
+                showToast('Errore durante l\'analisi del documento', 'error');
+            }
+        } catch (error) {
+            console.error('Error handling document upload:', error);
+            if (statusDiv) statusDiv.style.display = 'none';
+            showToast('Errore durante l\'elaborazione del file: ' + error.message, 'error');
+        }
     }
     
     renderNotifications() {
