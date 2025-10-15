@@ -108,4 +108,35 @@ export function setupEventListeners() {
             window.app.resetAIFABPosition();
         }
     });
+    
+    // Schedule settings form
+    document.getElementById('schedule-settings-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (window.app) {
+            window.app.saveScheduleSettings();
+        }
+    });
+    
+    // School year settings form
+    document.getElementById('school-year-settings-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (window.app) {
+            window.app.saveSchoolYearSettings();
+        }
+    });
+    
+    // AI settings form
+    document.getElementById('ai-settings-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (window.app) {
+            window.app.saveAISettings();
+        }
+    });
+    
+    // Edit profile button
+    document.getElementById('edit-profile-btn')?.addEventListener('click', () => {
+        if (window.app) {
+            window.app.editProfile();
+        }
+    });
 }

@@ -31,9 +31,29 @@ function safeJSONParse(value, fallback) {
     }
 }
 
+// Default schedule settings
+export function getDefaultScheduleSettings() {
+    return {
+        hoursPerDay: 6,
+        startTime: '08:00',
+        endTime: '14:00',
+        workingDays: [1, 2, 3, 4, 5], // Monday to Friday (0 = Sunday, 1 = Monday, etc.)
+        slotDuration: 60 // minutes per slot
+    };
+}
+
 export function loadData() {
     try {
         state.settings = safeJSONParse(localStorage.getItem('settings'), {});
+        
+        // Initialize schedule settings with defaults if not present
+        if (!state.settings.schedule) {
+            state.settings.schedule = getDefaultScheduleSettings();
+        } else {
+            // Merge with defaults to ensure all properties exist
+            state.settings.schedule = { ...getDefaultScheduleSettings(), ...state.settings.schedule };
+        }
+        
         state.classes = safeJSONParse(localStorage.getItem('classes'), []);
         state.students = safeJSONParse(localStorage.getItem('students'), []);
         state.lessons = safeJSONParse(localStorage.getItem('lessons'), []);

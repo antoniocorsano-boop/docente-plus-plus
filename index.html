@@ -294,11 +294,110 @@
         <!-- Settings Tab -->
         <div id="settings" class="tab-content">
             <h2>Impostazioni</h2>
+            
+            <!-- Profile Section -->
             <div class="settings-section">
                 <h3>Profilo Docente</h3>
                 <p>Nome: <span id="settings-teacher-name">-</span></p>
                 <p>Anno Scolastico: <span id="settings-school-year">-</span></p>
+                <button id="edit-profile-btn" class="btn btn-secondary">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modifica Profilo
+                </button>
             </div>
+            
+            <!-- Schedule Configuration Section -->
+            <div class="settings-section">
+                <h3>📅 Configurazione Orario</h3>
+                <form id="schedule-settings-form">
+                    <div class="form-group">
+                        <label for="schedule-hours-per-day">Ore di lezione al giorno</label>
+                        <input type="number" id="schedule-hours-per-day" min="1" max="12" value="6" required>
+                        <p class="help-text">Numero di ore di lezione per ogni giorno lavorativo</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="schedule-start-time">Orario inizio lezioni</label>
+                        <input type="time" id="schedule-start-time" value="08:00" required>
+                        <p class="help-text">Ora di inizio delle lezioni</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Giorni lavorativi</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="schedule-day-1" value="1" checked> Lunedì</label>
+                            <label><input type="checkbox" id="schedule-day-2" value="2" checked> Martedì</label>
+                            <label><input type="checkbox" id="schedule-day-3" value="3" checked> Mercoledì</label>
+                            <label><input type="checkbox" id="schedule-day-4" value="4" checked> Giovedì</label>
+                            <label><input type="checkbox" id="schedule-day-5" value="5" checked> Venerdì</label>
+                            <label><input type="checkbox" id="schedule-day-6" value="6"> Sabato</label>
+                            <label><input type="checkbox" id="schedule-day-0" value="0"> Domenica</label>
+                        </div>
+                        <p class="help-text">Seleziona i giorni della settimana in cui si svolgono le lezioni</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Impostazioni Orario
+                    </button>
+                </form>
+            </div>
+            
+            <!-- School Year Configuration -->
+            <div class="settings-section">
+                <h3>🎓 Anno Scolastico e Classi</h3>
+                <form id="school-year-settings-form">
+                    <div class="form-group">
+                        <label for="school-year-input">Anno Scolastico</label>
+                        <input type="text" id="school-year-input" placeholder="2024/2025" required>
+                        <p class="help-text">Inserisci l'anno scolastico corrente (es. 2024/2025)</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Anno Scolastico
+                    </button>
+                </form>
+                <p class="help-text" style="margin-top: 16px;">
+                    💡 <strong>Suggerimento:</strong> Gestisci le classi disponibili dalla sezione <a href="#" onclick="window.app.switchTab('classes'); return false;">Gestione Classi</a>
+                </p>
+            </div>
+            
+            <!-- AI Configuration Section -->
+            <div class="settings-section">
+                <h3>🤖 Configurazione IA</h3>
+                <form id="ai-settings-form">
+                    <div class="form-group">
+                        <label for="ai-api-key-input">Chiave API OpenRouter (Opzionale)</label>
+                        <input type="password" id="ai-api-key-input" placeholder="sk-or-v1-...">
+                        <p class="help-text">
+                            Inserisci la tua chiave API di OpenRouter per abilitare le funzionalità IA avanzate.
+                            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Ottieni una chiave API</a>
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ai-model-select">Modello IA</label>
+                        <select id="ai-model-select">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Veloce ed Economico)</option>
+                            <option value="gpt-4">GPT-4 (Più Accurato)</option>
+                            <option value="claude-2">Claude 2</option>
+                            <option value="llama-2-70b">Llama 2 70B</option>
+                        </select>
+                        <p class="help-text">Seleziona il modello IA da utilizzare per le funzionalità avanzate</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Impostazioni IA
+                    </button>
+                </form>
+                <p class="help-text" style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    ⚠️ <strong>Nota:</strong> Senza una chiave API, l'assistente IA funzionerà in modalità simulata con risposte predefinite.
+                </p>
+            </div>
+            
+            <!-- AI Agent FAB Settings -->
             <div class="settings-section">
                 <h3>🤖 Agente IA Floating</h3>
                 <div class="form-group">
@@ -314,10 +413,32 @@
                 </button>
                 <p class="help-text">Riporta il pulsante floating alla posizione predefinita (in basso a destra).</p>
             </div>
+            
+            <!-- Advanced Settings TODO -->
             <div class="settings-section">
-                <h3>Risoluzione Problemi</h3>
-                <button id="clear-all-data-btn" class="btn btn-danger">Cancella Tutti i Dati</button>
-                <p class="help-text">⚠️ Questa azione cancellerà tutti i tuoi dati salvati e ripristinerà l'app.</p>
+                <h3>⚙️ Impostazioni Avanzate</h3>
+                <p class="help-text" style="padding: 12px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                    📝 <strong>TODO:</strong> Le seguenti funzionalità saranno disponibili in versioni future:
+                </p>
+                <ul class="help-text" style="margin-left: 20px; margin-top: 8px;">
+                    <li>Import/Export configurazioni tramite API esterna</li>
+                    <li>Sincronizzazione calendario con Google Calendar/Outlook</li>
+                    <li>Notifiche push personalizzate</li>
+                    <li>Automazione pianificazione lezioni con IA</li>
+                    <li>Integrazione con registro elettronico</li>
+                    <li>Backup automatico su cloud</li>
+                    <li>Modalità collaborativa per team docenti</li>
+                </ul>
+            </div>
+            
+            <!-- Troubleshooting Section -->
+            <div class="settings-section">
+                <h3>🔧 Risoluzione Problemi</h3>
+                <button id="clear-all-data-btn" class="btn btn-danger">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    Cancella Tutti i Dati
+                </button>
+                <p class="help-text">⚠️ Questa azione cancellerà tutti i tuoi dati salvati e ripristinerà l'app allo stato iniziale.</p>
             </div>
         </div>
 

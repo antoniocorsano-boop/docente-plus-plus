@@ -36,8 +36,34 @@ class DocentePlusPlus {
         // Schedule management properties
         this.scheduleView = 'weekly'; // 'weekly' or 'daily'
         this.currentScheduleDate = null; // Will be set to current/next weekday
-        this.scheduleTimeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00'];
         this.currentEditingSlot = null; // Track the slot being edited
+    }
+    
+    // Generate time slots based on settings
+    getScheduleTimeSlots() {
+        if (!state.settings.schedule) {
+            return ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00'];
+        }
+        
+        const { startTime, hoursPerDay } = state.settings.schedule;
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const slots = [];
+        
+        for (let i = 0; i < hoursPerDay; i++) {
+            const hour = String(startHour + i).padStart(2, '0');
+            const minute = String(startMinute).padStart(2, '0');
+            slots.push(`${hour}:${minute}`);
+        }
+        
+        return slots;
+    }
+    
+    // Get working days from settings
+    getWorkingDays() {
+        if (!state.settings.schedule || !state.settings.schedule.workingDays) {
+            return [1, 2, 3, 4, 5]; // Default Monday to Friday
+        }
+        return state.settings.schedule.workingDays;
     }
 
     init() {
@@ -377,18 +403,29 @@ class DocentePlusPlus {
     renderWeeklySchedule(container) {
         const weekStart = this.getWeekStart(this.currentScheduleDate);
         const weekDays = [];
+        const workingDays = this.getWorkingDays();
         
-        // Generate Monday to Friday
-        for (let i = 0; i < 5; i++) {
+        // Generate days based on working days configuration
+        // Start from Monday and include all days in the week
+        for (let i = 0; i < 7; i++) {
             const day = new Date(weekStart);
             day.setDate(weekStart.getDate() + i);
-            weekDays.push(day);
+            // Only include if it's a working day
+            if (workingDays.includes(day.getDay())) {
+                weekDays.push(day);
+            }
+        }
+        
+        // If no working days in current week, show message
+        if (weekDays.length === 0) {
+            container.innerHTML += '<p class="no-schedule">Nessun giorno lavorativo configurato per questa settimana.</p>';
+            return;
         }
         
         // Create table header
         let tableHtml = `
             <div class="schedule-week-info">
-                Settimana dal ${weekDays[0].toLocaleDateString()} al ${weekDays[4].toLocaleDateString()}
+                Settimana dal ${weekDays[0].toLocaleDateString()} al ${weekDays[weekDays.length - 1].toLocaleDateString()}
             </div>
             <div class="schedule-table-wrapper">
                 <table class="schedule-table">
@@ -402,7 +439,8 @@ class DocentePlusPlus {
         `;
         
         // Create table rows for each time slot
-        this.scheduleTimeSlots.forEach(time => {
+        const timeSlots = this.getScheduleTimeSlots();
+        timeSlots.forEach(time => {
             tableHtml += '<tr>';
             tableHtml += `<td class="schedule-time">${time}</td>`;
             
@@ -457,7 +495,8 @@ class DocentePlusPlus {
                     <tbody>
         `;
         
-        this.scheduleTimeSlots.forEach(time => {
+        const timeSlots = this.getScheduleTimeSlots();
+        timeSlots.forEach(time => {
             const scheduleKey = this.getScheduleKey(day, time);
             const slot = state.schedule[scheduleKey];
             
@@ -1024,6 +1063,171 @@ class DocentePlusPlus {
             const fabEnabled = localStorage.getItem('ai-fab-enabled');
             fabCheckbox.checked = fabEnabled !== 'false'; // Default to true if not set
         }
+        
+        // Load schedule settings
+        this.loadScheduleSettingsForm();
+        
+        // Load school year settings
+        this.loadSchoolYearSettingsForm();
+        
+        // Load AI settings
+        this.loadAISettingsForm();
+    }
+    
+    loadScheduleSettingsForm() {
+        const scheduleSettings = state.settings.schedule || {};
+        
+        // Load hours per day
+        const hoursInput = document.getElementById('schedule-hours-per-day');
+        if (hoursInput) {
+            hoursInput.value = scheduleSettings.hoursPerDay || 6;
+        }
+        
+        // Load start time
+        const startTimeInput = document.getElementById('schedule-start-time');
+        if (startTimeInput) {
+            startTimeInput.value = scheduleSettings.startTime || '08:00';
+        }
+        
+        // Load working days
+        const workingDays = scheduleSettings.workingDays || [1, 2, 3, 4, 5];
+        for (let i = 0; i <= 6; i++) {
+            const checkbox = document.getElementById(`schedule-day-${i}`);
+            if (checkbox) {
+                checkbox.checked = workingDays.includes(i);
+            }
+        }
+    }
+    
+    loadSchoolYearSettingsForm() {
+        const schoolYearInput = document.getElementById('school-year-input');
+        if (schoolYearInput) {
+            schoolYearInput.value = state.settings.schoolYear || '';
+        }
+    }
+    
+    loadAISettingsForm() {
+        const apiKeyInput = document.getElementById('ai-api-key-input');
+        if (apiKeyInput) {
+            apiKeyInput.value = state.settings.aiApiKey || '';
+        }
+        
+        const modelSelect = document.getElementById('ai-model-select');
+        if (modelSelect) {
+            modelSelect.value = state.settings.aiModel || 'gpt-3.5-turbo';
+        }
+    }
+    
+    saveScheduleSettings() {
+        const hoursPerDay = parseInt(document.getElementById('schedule-hours-per-day').value);
+        const startTime = document.getElementById('schedule-start-time').value;
+        
+        // Get selected working days
+        const workingDays = [];
+        for (let i = 0; i <= 6; i++) {
+            const checkbox = document.getElementById(`schedule-day-${i}`);
+            if (checkbox && checkbox.checked) {
+                workingDays.push(i);
+            }
+        }
+        
+        if (workingDays.length === 0) {
+            showToast('Seleziona almeno un giorno lavorativo', 'error');
+            return;
+        }
+        
+        // Calculate end time based on hours per day
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const endHour = startHour + hoursPerDay;
+        const endTime = `${String(endHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+        
+        // Update settings
+        state.settings.schedule = {
+            hoursPerDay,
+            startTime,
+            endTime,
+            workingDays,
+            slotDuration: 60
+        };
+        
+        saveData();
+        showToast('Impostazioni orario salvate! Ripianificazione in corso...', 'success');
+        
+        // Trigger auto-planning pipeline
+        this.triggerAutoPlanning();
+        
+        // Re-render schedule
+        this.renderSchedule();
+    }
+    
+    saveSchoolYearSettings() {
+        const schoolYear = document.getElementById('school-year-input').value.trim();
+        
+        if (!schoolYear) {
+            showToast('Inserisci un anno scolastico valido', 'error');
+            return;
+        }
+        
+        state.settings.schoolYear = schoolYear;
+        saveData();
+        showToast('Anno scolastico salvato!', 'success');
+        
+        // Update display
+        this.renderSettings();
+        
+        // Trigger auto-planning pipeline
+        this.triggerAutoPlanning();
+    }
+    
+    saveAISettings() {
+        const apiKey = document.getElementById('ai-api-key-input').value.trim();
+        const model = document.getElementById('ai-model-select').value;
+        
+        state.settings.aiApiKey = apiKey;
+        state.settings.aiModel = model;
+        
+        saveData();
+        showToast('Impostazioni IA salvate!', 'success');
+        
+        // Update AI ready status on home
+        const aiReadyElement = document.getElementById('home-ai-ready');
+        if (aiReadyElement) {
+            aiReadyElement.textContent = apiKey ? 'Configurata ✓' : 'Non configurata';
+            aiReadyElement.style.color = apiKey ? '#27ae60' : '#e74c3c';
+        }
+    }
+    
+    editProfile() {
+        // Show a simple prompt dialog for editing profile
+        const firstName = prompt('Nome:', state.settings.teacherName || '');
+        if (firstName === null) return; // User cancelled
+        
+        const lastName = prompt('Cognome:', state.settings.teacherLastName || '');
+        if (lastName === null) return; // User cancelled
+        
+        state.settings.teacherName = firstName;
+        state.settings.teacherLastName = lastName;
+        
+        saveData();
+        showToast('Profilo aggiornato!', 'success');
+        this.renderSettings();
+    }
+    
+    triggerAutoPlanning() {
+        // TODO: Implement auto-planning pipeline
+        // This function should:
+        // 1. Re-validate all scheduled activities against new time slots
+        // 2. Update notifications based on new schedule
+        // 3. Generate suggestions for rescheduling if conflicts exist
+        // 4. Update AI suggestions based on new configuration
+        
+        console.log('Auto-planning pipeline triggered');
+        console.log('Current schedule settings:', state.settings.schedule);
+        
+        // For now, just show a toast with TODO
+        setTimeout(() => {
+            showToast('📝 TODO: Pipeline auto-pianificante sarà implementata in versioni future', 'info', 4000);
+        }, 1000);
     }
     renderBackupRestore() { 
         // Backup/restore functionality
