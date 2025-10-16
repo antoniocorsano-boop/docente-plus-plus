@@ -1,7 +1,7 @@
 
 // app.js
-import { loadData, saveData, isOnboardingComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
-import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, renderChatMessages } from './js/ui.js';
+import { loadData, saveData, isOnboardingComplete, isProfileComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
+import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, showOnboardingBanner, hideOnboardingBanner, disableMenuItems, enableAllMenuItems, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { initializeTheme, setupThemePicker } from './js/theme.js';
 import { initAppBar } from './js/appbar.js';
@@ -94,10 +94,23 @@ class DocentePlusPlus {
             }
             
             if (!isOnboardingComplete()) {
+                // Onboarding not complete - show modal and disable menu
                 showOnboarding();
+                disableMenuItems(['home', 'settings']);
+            } else if (!isProfileComplete()) {
+                // Onboarding marked complete but profile is incomplete
+                // This handles corrupted data scenario
+                showOnboardingBanner();
+                disableMenuItems(['home', 'settings']);
+                this.initializeAppUI();
+                showToast('Profilo incompleto. Completa i dati mancanti per accedere a tutte le funzionalità.', 'warning', 5000);
             } else {
+                // Everything is OK
+                hideOnboardingBanner();
+                enableAllMenuItems();
                 this.initializeAppUI();
             }
+            
             setupEventListeners();
             setupThemePicker();
             createToastContainer();
@@ -126,6 +139,15 @@ class DocentePlusPlus {
         this.renderAllTabs();
         updateActiveClassBadge();
         switchTab('home');
+        
+        // Check if profile is complete and update UI accordingly
+        if (isProfileComplete()) {
+            hideOnboardingBanner();
+            enableAllMenuItems();
+        } else {
+            showOnboardingBanner();
+            disableMenuItems(['home', 'settings']);
+        }
     }
     
     // Public method to switch tabs - used by landing page cards
@@ -1775,12 +1797,25 @@ class DocentePlusPlus {
         const lastName = prompt('Cognome:', state.settings.teacherLastName || '');
         if (lastName === null) return; // User cancelled
         
+        // Validate that at least first name is provided
+        if (!firstName.trim()) {
+            showToast('Il nome è obbligatorio', 'warning');
+            return;
+        }
+        
         state.settings.teacherName = firstName;
         state.settings.teacherLastName = lastName;
         
         saveData();
         showToast('Profilo aggiornato!', 'success');
         this.renderSettings();
+        
+        // Check if profile is now complete and update UI
+        if (isProfileComplete()) {
+            hideOnboardingBanner();
+            enableAllMenuItems();
+            showToast('Profilo completo! Tutte le funzionalità sono ora disponibili.', 'success');
+        }
     }
     
     triggerAutoPlanning() {

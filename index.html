@@ -87,9 +87,27 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Inizia ad Usare Docente++</button>
-                    <button type="button" id="onboarding-skip" class="btn btn-secondary">Salta per Ora</button>
                 </div>
             </form>
+            <p style="margin-top: 16px; color: var(--md-text-secondary); font-size: var(--font-size-sm);">
+                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">info</span>
+                Il completamento del profilo è necessario per accedere all'applicazione.
+            </p>
+        </div>
+    </div>
+
+    <!-- Onboarding Incomplete Banner -->
+    <div id="onboarding-incomplete-banner" class="onboarding-banner" style="display: none;">
+        <div class="onboarding-banner-content">
+            <span class="material-symbols-outlined">info</span>
+            <div class="onboarding-banner-text">
+                <strong>Configurazione incompleta</strong>
+                <p>Completa il tuo profilo per accedere a tutte le funzionalità</p>
+            </div>
+            <button id="complete-onboarding-btn" class="btn btn-primary btn-sm">
+                <span class="material-symbols-outlined">person</span>
+                Completa Profilo
+            </button>
         </div>
     </div>
 

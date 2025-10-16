@@ -16,7 +16,20 @@ export function setupEventListeners() {
     // Handle nav-item clicks
     document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
         button.addEventListener('click', () => {
+            // Check if item is disabled
+            if (button.classList.contains('disabled')) {
+                showToast('Completa il profilo per accedere a questa funzionalità', 'warning');
+                return;
+            }
             switchTab(button.dataset.tab);
+        });
+    });
+    
+    // Complete onboarding button in banner
+    document.getElementById('complete-onboarding-btn')?.addEventListener('click', () => {
+        // Navigate to settings or show onboarding modal
+        import('./ui.js').then(({ showOnboarding }) => {
+            showOnboarding();
         });
     });
 
@@ -38,24 +51,21 @@ export function setupEventListeners() {
             completeOnboarding(settings);
             hideOnboarding();
             showToast('Profilo configurato! Benvenuto in Docente++.', 'success');
-            window.app.initializeAppUI();
+            
+            // Enable all menu items and hide banner
+            if (window.app) {
+                window.app.initializeAppUI();
+            }
         } catch (error) {
             console.error('Error completing onboarding:', error);
             showToast('Errore durante il salvataggio. Riprova.', 'error');
         }
     });
     
-    // Skip onboarding button handler
+    // Skip onboarding button handler - DISABLED
+    // Skipping is no longer allowed to prevent unclear intermediate states
     document.getElementById('onboarding-skip')?.addEventListener('click', () => {
-        try {
-            skipOnboarding();
-            hideOnboarding();
-            showToast('Onboarding saltato. Puoi configurare il tuo profilo nelle impostazioni.', 'info');
-            window.app.initializeAppUI();
-        } catch (error) {
-            console.error('Error skipping onboarding:', error);
-            showToast('Errore. Riprova.', 'error');
-        }
+        showToast('Devi completare il profilo per utilizzare l\'applicazione.', 'warning');
     });
 
     document.getElementById('ai-chat-send')?.addEventListener('click', () => sendMessageToAI());

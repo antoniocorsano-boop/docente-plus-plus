@@ -46,29 +46,60 @@ Questa guida ti aiuterà a risolvere i problemi più comuni che potresti incontr
 
 ## 🎯 Problemi con l'Onboarding
 
+### Il menu è disabilitato / Le funzionalità sono bloccate
+
+**Causa:** Il profilo docente non è stato completato.
+
+**Soluzione:**
+1. Vedrai un banner arancione in cima alla pagina con il messaggio "Configurazione incompleta"
+2. Clicca sul pulsante **"Completa Profilo"** nel banner
+3. Inserisci almeno il tuo nome nel form di onboarding
+4. Clicca su **"Inizia ad Usare Docente++"**
+5. Tutte le funzionalità del menu saranno ora disponibili
+
+**Nota importante:** A partire dalla versione 1.2.0, non è più possibile saltare l'onboarding. Devi completare il profilo con almeno il nome per accedere a tutte le funzionalità dell'applicazione. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore.
+
 ### La modale di onboarding non si apre
 
 **Soluzione:**
-L'app è stata progettata per funzionare anche se la modale di onboarding non si apre. Se la modale non appare, l'app salterà automaticamente l'onboarding e ti permetterà di usare l'applicazione con le impostazioni predefinite.
-
-Puoi configurare il tuo profilo in qualsiasi momento andando in **Impostazioni**.
+1. Controlla se vedi il banner arancione "Configurazione incompleta" in cima alla pagina
+2. Clicca sul pulsante "Completa Profilo" nel banner per aprire la modale di onboarding
+3. Se il banner non appare e il menu è disabilitato, vai in **Impostazioni** (accessibile anche senza completare l'onboarding)
+4. Clicca su **"Modifica Profilo"** nella sezione "Profilo Docente"
+5. Inserisci almeno il tuo nome
 
 ### Non riesco a completare l'onboarding
 
 **Soluzione:**
 1. Assicurati di aver compilato almeno il campo "Nome" (obbligatorio)
-2. Se vuoi saltare l'onboarding, clicca sul pulsante **"Salta per Ora"**
-3. Potrai configurare il tuo profilo successivamente dalle Impostazioni
+2. Il campo "Nome" non può essere vuoto
+3. Se riscontri errori, controlla la console del browser (F12) per messaggi di errore
+4. Verifica che localStorage sia abilitato nel tuo browser
 
 ### L'onboarding continua a riapparirsi
 
-**Causa:** Il salvataggio non è andato a buon fine
+**Causa:** Il salvataggio non è andato a buon fine o i dati del profilo sono corrotti
 
 **Soluzione:**
 1. Verifica che il browser non sia in modalità Incognito
 2. Controlla che localStorage sia abilitato
-3. Prova a completare l'onboarding o a saltarlo
-4. Se il problema persiste, cancella tutti i dati e riprova
+3. Prova a completare l'onboarding con tutti i campi compilati
+4. Se il problema persiste:
+   - Apri gli strumenti per sviluppatori (F12)
+   - Vai alla tab "Console"
+   - Digita: `localStorage.setItem('onboardingComplete', 'true')`
+   - Ricarica la pagina e vai in Impostazioni → Modifica Profilo per completare i dati
+
+### Il menu resta disabilitato anche dopo aver completato l'onboarding
+
+**Causa:** Dati del profilo mancanti o corrotti
+
+**Soluzione:**
+1. Vai in **Impostazioni** (accessibile anche con profilo incompleto)
+2. Verifica che il nome sia presente nella sezione "Profilo Docente"
+3. Se il nome non c'è o è vuoto, clicca su **"Modifica Profilo"**
+4. Inserisci il tuo nome e salva
+5. Il menu si abiliterà automaticamente e il banner scomparirà
 
 ---
 
@@ -254,6 +285,6 @@ Se dopo aver provato tutte le soluzioni sopra continui ad avere problemi:
 
 ---
 
-**Versione documento:** 1.0  
-**Ultimo aggiornamento:** 2025-10-15  
-**Compatibile con:** Docente++ v1.1.0+
+**Versione documento:** 1.1  
+**Ultimo aggiornamento:** 2025-10-16  
+**Compatibile con:** Docente++ v1.2.0+

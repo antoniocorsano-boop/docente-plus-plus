@@ -88,6 +88,8 @@ export function showOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     if (modal) {
         modal.style.display = 'flex';
+        // Also show the banner
+        showOnboardingBanner();
     } else {
         console.error('Onboarding modal not found. Skipping onboarding.');
         // If modal doesn't exist, skip onboarding to not block the app
@@ -102,6 +104,41 @@ export function showOnboarding() {
 
 export function hideOnboarding() {
     document.getElementById('onboarding-modal').style.display = 'none';
+}
+
+export function showOnboardingBanner() {
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (banner) {
+        banner.style.display = 'block';
+    }
+}
+
+export function hideOnboardingBanner() {
+    const banner = document.getElementById('onboarding-incomplete-banner');
+    if (banner) {
+        banner.style.display = 'none';
+    }
+}
+
+export function disableMenuItems(enabledItems = ['home', 'settings']) {
+    // Disable all menu items except the ones specified
+    document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
+        const tab = button.dataset.tab;
+        if (!enabledItems.includes(tab)) {
+            button.classList.add('disabled');
+            button.setAttribute('aria-disabled', 'true');
+            button.setAttribute('title', 'Completa il profilo per accedere a questa funzionalità');
+        }
+    });
+}
+
+export function enableAllMenuItems() {
+    // Enable all menu items
+    document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
+        button.classList.remove('disabled');
+        button.removeAttribute('aria-disabled');
+        button.setAttribute('title', button.querySelector('.nav-label')?.textContent || '');
+    });
 }
 
 export function renderTemplate(templateId, containerId, data) {
