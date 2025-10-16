@@ -1835,8 +1835,16 @@ class DocentePlusPlus {
         
         // Apply theme immediately
         import('./js/theme.js').then(({ applyTheme }) => {
-            applyTheme();
-            showToast('Tema applicato!', 'success');
+            try {
+                applyTheme();
+                showToast('Tema applicato!', 'success');
+            } catch (err) {
+                console.error("Errore durante l'applicazione del tema:", err);
+                showToast('Impossibile applicare il tema. Riprova più tardi.', 'error');
+            }
+        }).catch((err) => {
+            console.error("Errore nel caricamento del modulo tema:", err);
+            showToast('Impossibile caricare il tema. Riprova più tardi.', 'error');
         });
     }
     
