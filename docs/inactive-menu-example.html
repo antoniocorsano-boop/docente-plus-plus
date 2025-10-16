@@ -50,10 +50,11 @@
 <body>
     <!-- Demo Banner -->
     <div class="demo-banner">
-        <h2>🔒 Esempio: Menu Inattivo dopo Onboarding Incompleto</h2>
-        <p>Questo è un esempio visivo che mostra come appaiono le voci di menu quando l'onboarding non è completo o i dati del profilo sono corrotti.</p>
-        <p><span class="demo-highlight">PROBLEMA</span>: Le voci di menu sono <strong>disabilitate</strong> e mostrano un'icona lucchetto 🔒</p>
-        <p><span class="demo-highlight">SOLUZIONE</span>: L'utente deve completare il profilo tramite il banner in alto o le impostazioni</p>
+        <h2>✅ Comportamento Nuovo: Menu Sempre Attivo</h2>
+        <p><strong>IMPORTANTE:</strong> Questo file è stato mantenuto solo come riferimento storico.</p>
+        <p><span class="demo-highlight">COMPORTAMENTO ATTUALE</span>: Le voci di menu sono <strong>SEMPRE ATTIVE</strong>, anche se il profilo non è completo</p>
+        <p><span class="demo-highlight">COSA SUCCEDE</span>: L'utente vede il banner arancione per completare il profilo, ma può comunque navigare liberamente nell'app</p>
+        <p>Questo esempio mostra il <strong>vecchio comportamento</strong> (menu disabilitato) che non è più utilizzato nell'applicazione.</p>
     </div>
 
     <!-- Onboarding Incomplete Banner -->
@@ -137,17 +138,24 @@
     <!-- Main Content -->
     <main style="padding-left: 260px; padding-top: 60px;">
         <div style="padding: 40px;">
-            <h2>Esempio di Menu Inattivo</h2>
-            <p>Osserva come le voci di menu nella sidebar a sinistra sono disabilitate (opache con icona lucchetto).</p>
-            <p>Solo <strong>Home</strong> e <strong>Impostazioni</strong> sono accessibili.</p>
-            <p>Questo succede quando:</p>
+            <h2>⚠️ Esempio Storico - Menu Inattivo (NON PIÙ UTILIZZATO)</h2>
+            <p><strong>Questo è solo un esempio storico del vecchio comportamento.</strong></p>
+            <p>In questo esempio, le voci di menu nella sidebar a sinistra sono disabilitate (opache con icona lucchetto).</p>
+            
+            <h3>Comportamento Attuale dell'Applicazione:</h3>
+            <div style="background: #d4edda; border: 2px solid #28a745; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="color: #155724; margin: 0;"><strong>✅ Il menu è SEMPRE ATTIVO</strong></p>
+                <p style="color: #155724; margin: 10px 0 0 0;">Anche se il profilo non è completo, l'utente può navigare liberamente in tutte le sezioni dell'app. Il banner arancione serve solo come promemoria per completare il profilo.</p>
+            </div>
+            
+            <h3>Vecchio Comportamento (mostrato in questo esempio):</h3>
             <ul>
-                <li>L'utente non ha completato l'onboarding</li>
-                <li>I dati del profilo sono corrotti o mancanti</li>
-                <li>localStorage ha problemi</li>
+                <li>Le voci di menu erano disabilitate quando l'utente non aveva completato l'onboarding</li>
+                <li>Solo <strong>Home</strong> e <strong>Impostazioni</strong> erano accessibili</li>
+                <li>Questo causava frustrazione agli utenti</li>
             </ul>
-            <h3>Soluzione:</h3>
-            <p>L'utente vede il banner arancione in alto che lo guida a completare il profilo.</p>
+            
+            <p><strong>Questo comportamento è stato rimosso per migliorare l'esperienza utente.</strong></p>
         </div>
     </main>
 </body>

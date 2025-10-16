@@ -133,6 +133,7 @@ export function enableAllMenuItems() {
         button.classList.remove('disabled');
         button.removeAttribute('data-tooltip');
         button.removeAttribute('disabled');
+        button.removeAttribute('aria-disabled');
         button.setAttribute('title', button.querySelector('.nav-label')?.textContent || '');
     });
 }
