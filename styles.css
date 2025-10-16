@@ -602,7 +602,7 @@ header.minimal h1 {
     width: 280px;
     background: var(--md-surface-container);
     box-shadow: var(--md-elevation-2);
-    z-index: 1000;
+    z-index: 1050;
     overflow-y: auto;
     overflow-x: hidden;
     transition: transform var(--md-transition-duration) var(--md-transition-timing);
@@ -3414,7 +3414,7 @@ body.dark-theme .warning-message {
         width: 100%;
         height: 100vh;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
+        z-index: 999;
     }
     
     .menu-backdrop.active {
