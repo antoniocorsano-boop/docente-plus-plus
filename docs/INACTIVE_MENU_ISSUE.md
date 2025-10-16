@@ -1,8 +1,16 @@
-# 🔒 Menu Inattivo - Esempio e Risoluzione
+# ✅ Menu Sempre Attivo - Documentazione Storica
 
-## Problema: Menu Inattivo dopo Onboarding Incompleto
+## NOTA: Funzionalità Rimossa nella Versione 1.2.2+
 
-Questo documento descrive il problema del menu inattivo che può verificarsi in Docente++ e le soluzioni implementate nella versione 1.2.1.
+**⚠️ IMPORTANTE**: A partire dalla versione 1.2.2, il menu è SEMPRE attivo e accessibile, indipendentemente dallo stato dell'onboarding o del profilo utente. Questo documento è mantenuto solo per riferimento storico.
+
+Le voci di menu non vengono più disabilitate. Gli utenti possono esplorare liberamente l'applicazione sin dal primo avvio.
+
+---
+
+## Problema Storico: Menu Inattivo dopo Onboarding Incompleto
+
+Questo documento descrive il problema del menu inattivo che poteva verificarsi in Docente++ nelle versioni precedenti alla 1.2.2.
 
 ## Screenshot del Problema
 
@@ -338,6 +346,47 @@ La gestione del menu inattivo è completamente accessibile:
 
 ---
 
-**Versione**: 1.2.1  
+## Versione 1.2.2+ - Menu Sempre Attivo
+
+A partire dalla versione 1.2.2, **tutte le funzionalità di disabilitazione del menu sono state rimosse**:
+
+### Modifiche Implementate
+
+1. **Funzione `disableMenuItems()` (js/ui.js)**
+   - Ora è una funzione vuota (no-op)
+   - Mantenuta solo per retrocompatibilità
+   - Non esegue più alcuna logica di disabilitazione
+
+2. **Funzione `enableAllMenuItems()` (js/ui.js)**
+   - Continua a rimuovere eventuali stati disabilitati residui
+   - Garantisce che il menu sia sempre accessibile
+
+3. **CSS (styles.css)**
+   - Regole `.disabled` e `.needs-profile` svuotate
+   - Nessuno stile visivo per stati disabilitati
+
+4. **HTML (index.html)**
+   - Nessuna voce di menu con attributi `disabled` o `aria-disabled`
+   - Menu completamente accessibile da subito
+
+5. **Logica App (app.js)**
+   - Chiamate a `enableAllMenuItems()` eseguite sempre
+   - Nessuna chiamata a `disableMenuItems()`
+   - Banner informativo invece di blocchi funzionali
+
+### Filosofia di Design
+
+Il menu è ora **sempre navigabile** per permettere agli utenti di:
+- Esplorare l'applicazione liberamente
+- Scoprire le funzionalità disponibili
+- Accedere alle impostazioni in qualsiasi momento
+- Non sentirsi bloccati dall'interfaccia
+
+Il profilo incompleto mostra solo un banner informativo discreto che suggerisce di completare la configurazione, ma non impedisce l'accesso a nessuna funzionalità.
+
+---
+
+**Versione Storica**: 1.2.1  
+**Versione Corrente**: 1.2.2+  
 **Ultimo Aggiornamento**: Ottobre 2025  
 **Autore**: Docente++ Team

@@ -20,10 +20,14 @@ Tutte le modifiche significative di Docente++ saranno documentate in questo file
 - **Impostazioni Organizzate**: Tutte le impostazioni suddivise in sezioni chiare con icone
 
 ### Modificato
-- **Comportamento Menu con Profilo Incompleto**: Rimosso blocco completo del menu; ora mostra solo un indicatore visivo di avviso
-- **Redirect Automatico**: Al primo avvio, l'app apre automaticamente la pagina Impostazioni per completare il profilo
-- **Banner Onboarding**: Banner informativo (invece di modal bloccante) che rimanda alle Impostazioni
+- **Menu Completamente Accessibile**: Rimossa definitivamente ogni logica di disabilitazione del menu. Tutte le voci sono sempre attive, cliccabili e accessibili, indipendentemente dallo stato del profilo o dell'onboarding. La funzione `disableMenuItems()` è ora una no-op mantenuta solo per retrocompatibilità.
+- **Banner Onboarding Non Bloccante**: Il banner informativo per profilo incompleto non impedisce più la navigazione. L'utente può esplorare liberamente l'app mentre completa il profilo.
 - **Workspace Button**: Rimosso temporaneamente il pulsante Workspace dall'AppBar (header) poiché la funzionalità non è attualmente utilizzata. Il codice è stato mantenuto e commentato per un facile ripristino futuro. Vedi `docs/WORKSPACE_RESTORATION.md` per istruzioni di ripristino.
+
+### Rimosso
+- **Controlli Menu Disabilitati**: Eliminate tutte le funzioni, condizioni e classi CSS che disabilitavano le voci del menu (`disabled`, `needs-profile`, `aria-disabled="true"`, tooltip bloccanti).
+- **Logica di Blocco Navigazione**: Rimossa ogni verifica dello stato del profilo che impediva l'accesso alle voci del menu.
+- **CSS Stati Disabilitati**: Svuotate le regole CSS per `.nav-item.disabled` e `.nav-item.needs-profile`.
 
 ## [1.1.0] - In Sviluppo
 
