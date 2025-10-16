@@ -190,11 +190,41 @@
             
             <div class="nav-divider"></div>
             
-            <!-- MOVED: Settings higher for better mobile accessibility -->
-            <button class="nav-item" data-tab="settings">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="nav-label">Impostazioni</span>
-            </button>
+            <!-- Settings with submenu -->
+            <div class="nav-submenu-container" id="settings-submenu-container">
+                <button class="nav-item" id="settings-menu-toggle" aria-expanded="false" aria-controls="settings-submenu">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="nav-label">Impostazioni</span>
+                    <span class="material-symbols-outlined expand-icon">expand_more</span>
+                </button>
+                <div class="nav-submenu" id="settings-submenu" role="group" aria-label="Menu impostazioni">
+                    <button class="nav-submenu-item" data-tab="settings" data-section="profile">
+                        <span class="material-symbols-outlined">person</span>
+                        <span class="nav-label">Profilo</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="preferences">
+                        <span class="material-symbols-outlined">tune</span>
+                        <span class="nav-label">Preferenze</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="privacy">
+                        <span class="material-symbols-outlined">lock</span>
+                        <span class="nav-label">Privacy</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="nav-label">Notifiche</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="backup">
+                        <span class="material-symbols-outlined">backup</span>
+                        <span class="nav-label">Backup & Ripristino</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="theme">
+                        <span class="material-symbols-outlined">palette</span>
+                        <span class="nav-label">Tema</span>
+                    </button>
+                </div>
+            </div>
+            
             <button class="nav-item" id="notification-bell-btn-sidebar" title="Centro Notifiche" aria-label="Apri centro notifiche">
                 <span class="material-symbols-outlined">notifications</span>
                 <span class="nav-label">Notifiche</span>
@@ -435,7 +465,7 @@
             <h2>Impostazioni</h2>
             
             <!-- Theme Settings Section (NEW: Moved from sidebar to settings) -->
-            <div class="settings-section">
+            <div class="settings-section" data-settings-section="theme">
                 <h3>🎨 Aspetto e Tema</h3>
                 <form id="theme-settings-form">
                     <div class="form-group">
@@ -471,7 +501,7 @@
             </div>
             
             <!-- Profile Section (NEW: Enhanced with email) -->
-            <div class="settings-section">
+            <div class="settings-section" data-settings-section="profile">
                 <h3>👤 Profilo Docente</h3>
                 <form id="profile-settings-form">
                     <div class="form-group">
@@ -497,7 +527,7 @@
             </div>
             
             <!-- School Year Configuration (NEW: Dropdown selection) -->
-            <div class="settings-section">
+            <div class="settings-section" data-settings-section="preferences">
                 <h3>🎓 Anno Scolastico</h3>
                 <form id="school-year-settings-form">
                     <div class="form-group">
@@ -572,7 +602,7 @@
             </div>
             
             <!-- AI Configuration Section (NEW: Enhanced with privacy and validation) -->
-            <div class="settings-section">
+            <div class="settings-section" data-settings-section="privacy">
                 <h3>🤖 Configurazione Agente IA</h3>
                 <form id="ai-settings-form">
                     <div class="form-group">
@@ -668,7 +698,7 @@
             </div>
 
             <!-- Notification Settings -->
-            <div class="settings-section">
+            <div class="settings-section" data-settings-section="notifications">
                 <h3>🔔 Impostazioni Notifiche</h3>
                 <form id="notification-settings-form">
                     <div class="form-group">
@@ -739,6 +769,24 @@
                     <li>Backup automatico su cloud</li>
                     <li>Modalità collaborativa per team docenti</li>
                 </ul>
+            </div>
+            
+            <!-- Backup/Restore Section -->
+            <div class="settings-section" data-settings-section="backup">
+                <h3>💾 Backup e Ripristino</h3>
+                <div class="backup-section">
+                    <p class="help-text">Esporta i tuoi dati per creare un backup o importa un backup precedente.</p>
+                    <div class="form-actions" style="margin-top: 16px;">
+                        <button class="btn btn-primary">
+                            <span class="material-symbols-outlined">download</span>
+                            Esporta Backup
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span class="material-symbols-outlined">upload</span>
+                            Importa Backup
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- Troubleshooting Section -->
