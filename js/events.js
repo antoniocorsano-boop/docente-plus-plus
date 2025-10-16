@@ -16,12 +16,52 @@ export function setupEventListeners() {
     // Handle nav-item clicks
     document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
         button.addEventListener('click', () => {
-            // Check if item is disabled
-            if (button.classList.contains('disabled')) {
-                showToast('Completa il profilo per accedere a questa funzionalità', 'warning');
-                return;
-            }
+            // Menu items are always active - no disabled check needed
             switchTab(button.dataset.tab);
+        });
+    });
+    
+    // Handle settings submenu toggle
+    const settingsToggle = document.getElementById('settings-menu-toggle');
+    const settingsContainer = document.getElementById('settings-submenu-container');
+    
+    if (settingsToggle && settingsContainer) {
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent tab switch when clicking toggle
+            const isExpanded = settingsContainer.classList.toggle('expanded');
+            settingsToggle.setAttribute('aria-expanded', isExpanded.toString());
+            
+            // Add visual feedback
+            if (isExpanded) {
+                settingsToggle.classList.add('active');
+            }
+        });
+    }
+    
+    // Handle settings submenu item clicks
+    document.querySelectorAll('.nav-submenu-item[data-tab]').forEach(button => {
+        button.addEventListener('click', () => {
+            const tab = button.dataset.tab;
+            const section = button.dataset.section;
+            
+            // Switch to settings tab
+            switchTab(tab);
+            
+            // Scroll to the specific section if specified
+            if (section) {
+                setTimeout(() => {
+                    const sectionElement = document.querySelector(`[data-settings-section="${section}"]`);
+                    if (sectionElement) {
+                        sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            }
+            
+            // Update active state for submenu items
+            document.querySelectorAll('.nav-submenu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            button.classList.add('active');
         });
     });
     

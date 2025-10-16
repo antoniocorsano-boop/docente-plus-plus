@@ -115,15 +115,28 @@ class NavigationManager {
      */
     updateBreadcrumb() {
         const breadcrumbContainer = document.getElementById('breadcrumb-container');
+        const navigationBar = document.getElementById('navigation-bar');
+        
         if (!breadcrumbContainer) return;
+
+        // Hide breadcrumb navigation on homepage
+        if (this.currentPage.name === 'home') {
+            if (navigationBar) {
+                navigationBar.style.display = 'none';
+            }
+            return;
+        }
+
+        // Show navigation bar on internal pages
+        if (navigationBar) {
+            navigationBar.style.display = 'flex';
+        }
 
         // Build breadcrumb trail
         const trail = [{ name: 'home', title: 'Home' }];
         
-        // Add current page if not home
-        if (this.currentPage.name !== 'home') {
-            trail.push(this.currentPage);
-        }
+        // Add current page
+        trail.push(this.currentPage);
 
         // Generate breadcrumb HTML
         const breadcrumbHTML = trail.map((item, index) => {
