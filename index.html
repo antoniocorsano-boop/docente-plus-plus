@@ -193,42 +193,92 @@
 
     <!-- Main Content Area -->
     <main>
-        <!-- Home Tab -->
+        <!-- Home Tab - New Landing Page -->
         <div id="home" class="tab-content">
-            <h2>Dashboard</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Lezioni</h3>
-                    <p id="home-lesson-count">0</p>
+            <div class="landing-page">
+                <div class="landing-header">
+                    <h2>Benvenuto in Docente++</h2>
+                    <p class="landing-subtitle">Scegli dove vuoi andare</p>
                 </div>
-                <div class="stat-card">
-                    <h3>Studenti</h3>
-                    <p id="home-student-count">0</p>
+                
+                <!-- Quick Access Cards -->
+                <div class="landing-cards">
+                    <button class="landing-card landing-card-primary" onclick="window.app.switchTab('classes')">
+                        <span class="material-symbols-outlined landing-card-icon">school</span>
+                        <h3>Entra in Classe</h3>
+                        <p>Gestisci le tue classi e gli studenti</p>
+                    </button>
+                    
+                    <button class="landing-card landing-card-secondary" onclick="window.app.switchTab('lessons')">
+                        <span class="material-symbols-outlined landing-card-icon">menu_book</span>
+                        <h3>Sala Docenti</h3>
+                        <p>Pianifica lezioni e attività didattiche</p>
+                    </button>
+                    
+                    <button class="landing-card landing-card-tertiary" onclick="window.app.switchTab('evaluations')">
+                        <span class="material-symbols-outlined landing-card-icon">assessment</span>
+                        <h3>Consigli e Scrutini</h3>
+                        <p>Valutazioni e analisi degli studenti</p>
+                    </button>
                 </div>
-                <div class="stat-card">
-                    <h3>Attività</h3>
-                    <p id="home-activity-count">0</p>
+                
+                <!-- Secondary Quick Access -->
+                <div class="landing-section">
+                    <h3>Accesso Rapido</h3>
+                    <div class="landing-quick-links">
+                        <button class="quick-link-btn" onclick="window.app.switchTab('schedule')">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span>Orario</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('agenda')">
+                            <span class="material-symbols-outlined">event</span>
+                            <span>Agenda</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('activities')">
+                            <span class="material-symbols-outlined">assignment</span>
+                            <span>Attività</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('aiAssistant')">
+                            <span class="material-symbols-outlined">psychology</span>
+                            <span>Assistente IA</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Valutazioni</h3>
-                    <p id="home-evaluation-count">0</p>
+                
+                <!-- Dashboard Summary -->
+                <div class="landing-section">
+                    <h3>Riepilogo</h3>
+                    <div class="landing-stats">
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-lesson-count">0</span>
+                                <span class="landing-stat-label">Lezioni</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">group</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-student-count">0</span>
+                                <span class="landing-stat-label">Studenti</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">assignment</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-activity-count">0</span>
+                                <span class="landing-stat-label">Attività</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">assessment</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-evaluation-count">0</span>
+                                <span class="landing-stat-label">Valutazioni</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="dashboard-section">
-                <h3>Orario di Oggi</h3>
-                <div id="today-schedule-enhanced"></div>
-            </div>
-            
-            <div class="dashboard-section">
-                <h3>Cose da Fare</h3>
-                <div id="things-todo-list"></div>
-            </div>
-            
-            <div class="dashboard-section">
-                <h3>Suggerimenti IA</h3>
-                <div id="ai-suggestions-content"></div>
-                <div>Stato IA: <span id="home-ai-ready">Non configurata</span></div>
             </div>
         </div>
 
@@ -874,40 +924,85 @@
     <!-- Theme Picker Dialog -->
     <div id="theme-picker-dialog" class="modal theme-picker-modal" style="display: none;">
         <div class="modal-content theme-picker-content">
-            <h2>Scegli Tema</h2>
+            <h2>Personalizza Tema</h2>
             <form id="theme-picker-form">
-                <div class="theme-options">
-                    <label class="theme-option">
-                        <input type="radio" name="theme" value="light" id="theme-light">
-                        <span class="theme-option-content">
-                            <span class="material-symbols-outlined">light_mode</span>
-                            <span class="theme-option-text">
-                                <strong>Chiaro</strong>
-                                <small>Tema luminoso per ambienti ben illuminati</small>
+                <!-- Theme Mode Selection -->
+                <div class="theme-section">
+                    <h3>Modalità Tema</h3>
+                    <div class="theme-options">
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="light" id="theme-light">
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">light_mode</span>
+                                <span class="theme-option-text">
+                                    <strong>Chiaro</strong>
+                                    <small>Tema luminoso per ambienti ben illuminati</small>
+                                </span>
                             </span>
-                        </span>
-                    </label>
-                    <label class="theme-option">
-                        <input type="radio" name="theme" value="dark" id="theme-dark">
-                        <span class="theme-option-content">
-                            <span class="material-symbols-outlined">dark_mode</span>
-                            <span class="theme-option-text">
-                                <strong>Scuro</strong>
-                                <small>Tema scuro per ridurre l'affaticamento degli occhi</small>
+                        </label>
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="dark" id="theme-dark">
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">dark_mode</span>
+                                <span class="theme-option-text">
+                                    <strong>Scuro</strong>
+                                    <small>Tema scuro per ridurre l'affaticamento degli occhi</small>
+                                </span>
                             </span>
-                        </span>
-                    </label>
-                    <label class="theme-option">
-                        <input type="radio" name="theme" value="auto" id="theme-auto" checked>
-                        <span class="theme-option-content">
-                            <span class="material-symbols-outlined">contrast</span>
-                            <span class="theme-option-text">
-                                <strong>Automatico (Dinamico)</strong>
-                                <small>Segue le impostazioni del sistema operativo</small>
+                        </label>
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="auto" id="theme-auto" checked>
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">contrast</span>
+                                <span class="theme-option-text">
+                                    <strong>Automatico (Dinamico)</strong>
+                                    <small>Segue le impostazioni del sistema operativo</small>
+                                </span>
                             </span>
-                        </span>
-                    </label>
+                        </label>
+                    </div>
                 </div>
+                
+                <!-- Theme Color Selection -->
+                <div class="theme-section">
+                    <h3>Colore Principale</h3>
+                    <p class="theme-description">Scegli il colore principale dell'interfaccia</p>
+                    <div class="theme-color-options">
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="purple" id="color-purple" checked>
+                            <span class="theme-color-swatch" style="background: #6750A4;" title="Viola (Predefinito)"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="blue" id="color-blue">
+                            <span class="theme-color-swatch" style="background: #1976D2;" title="Blu"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="green" id="color-green">
+                            <span class="theme-color-swatch" style="background: #388E3C;" title="Verde"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="red" id="color-red">
+                            <span class="theme-color-swatch" style="background: #C62828;" title="Rosso"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="orange" id="color-orange">
+                            <span class="theme-color-swatch" style="background: #EF6C00;" title="Arancione"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="teal" id="color-teal">
+                            <span class="theme-color-swatch" style="background: #00796B;" title="Teal"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="indigo" id="color-indigo">
+                            <span class="theme-color-swatch" style="background: #303F9F;" title="Indigo"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="pink" id="color-pink">
+                            <span class="theme-color-swatch" style="background: #C2185B;" title="Rosa"></span>
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="theme-cancel-btn">Annulla</button>
                     <button type="submit" class="btn btn-primary" id="theme-apply-btn">Applica</button>

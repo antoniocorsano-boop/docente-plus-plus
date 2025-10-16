@@ -656,6 +656,15 @@ header.minimal h1 {
     text-overflow: ellipsis;
 }
 
+.nav-item:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.nav-item:focus:not(:focus-visible) {
+    outline: none;
+}
+
 .nav-item .material-symbols-outlined {
     font-size: 24px;
     color: var(--md-on-surface-variant);
@@ -4791,7 +4800,7 @@ body.dark-theme textarea {
 }
 
 .theme-picker-content {
-    max-width: 480px;
+    max-width: 600px;
     width: 90%;
 }
 
@@ -4892,6 +4901,81 @@ body.dark-theme textarea {
     font-size: 24px;
     font-weight: bold;
     color: var(--md-primary);
+}
+
+/* Theme Section */
+.theme-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.theme-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--md-on-surface);
+    margin-bottom: var(--spacing-sm);
+}
+
+.theme-description {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Theme Color Options */
+.theme-color-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.theme-color-option {
+    display: block;
+    cursor: pointer;
+    position: relative;
+}
+
+.theme-color-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.theme-color-swatch {
+    display: block;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--md-radius-medium);
+    border: 3px solid transparent;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    box-shadow: var(--md-elevation-1);
+}
+
+.theme-color-option:hover .theme-color-swatch {
+    box-shadow: var(--md-elevation-2);
+    transform: scale(1.05);
+}
+
+.theme-color-option input[type="radio"]:checked + .theme-color-swatch {
+    border-color: var(--md-on-surface);
+    box-shadow: var(--md-elevation-3);
+    transform: scale(1.1);
+}
+
+.theme-color-option input[type="radio"]:checked + .theme-color-swatch::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.theme-color-option input[type="radio"]:focus + .theme-color-swatch {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
 }
 
 /* Material Web Components customization (if loaded) */
@@ -6279,4 +6363,229 @@ body.dark-theme .banner strong,
 body.dark-theme .note strong,
 body.dark-theme .info-box strong {
     color: var(--md-on-surface);
+}
+
+/* ====================================
+   Landing Page Styles
+   ==================================== */
+
+.landing-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.landing-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xxl);
+}
+
+.landing-header h2 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--md-primary);
+    margin-bottom: var(--spacing-sm);
+    letter-spacing: var(--letter-spacing-headline);
+}
+
+.landing-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--md-on-surface-variant);
+    font-weight: var(--font-weight-regular);
+}
+
+/* Landing Cards Grid */
+.landing-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xxl);
+}
+
+.landing-card {
+    background: var(--md-surface-container);
+    border: 2px solid transparent;
+    border-radius: var(--md-radius-extra-large);
+    padding: var(--spacing-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    box-shadow: var(--md-elevation-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.landing-card:hover {
+    box-shadow: var(--md-elevation-3);
+    transform: translateY(-4px);
+    border-color: var(--md-primary);
+}
+
+.landing-card:active {
+    transform: translateY(-2px);
+    box-shadow: var(--md-elevation-2);
+}
+
+.landing-card-icon {
+    font-size: 64px !important;
+    color: var(--md-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.landing-card h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--md-on-surface);
+    margin: 0;
+}
+
+.landing-card p {
+    font-size: var(--font-size-base);
+    color: var(--md-on-surface-variant);
+    margin: 0;
+}
+
+/* Landing Card Variants */
+.landing-card-primary:hover {
+    background: var(--md-primary-container);
+    border-color: var(--md-primary);
+}
+
+.landing-card-primary:hover .landing-card-icon {
+    color: var(--md-on-primary-container);
+}
+
+.landing-card-secondary:hover {
+    background: var(--md-secondary-container);
+    border-color: var(--md-secondary);
+}
+
+.landing-card-secondary:hover .landing-card-icon {
+    color: var(--md-on-secondary-container);
+}
+
+.landing-card-tertiary:hover {
+    background: var(--md-tertiary-container);
+    border-color: var(--md-tertiary);
+}
+
+.landing-card-tertiary:hover .landing-card-icon {
+    color: var(--md-on-tertiary-container);
+}
+
+/* Landing Section */
+.landing-section {
+    margin-bottom: var(--spacing-xxl);
+}
+
+.landing-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--md-on-surface);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Quick Links */
+.landing-quick-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.quick-link-btn {
+    background: var(--md-surface-container);
+    border: 1px solid var(--md-divider);
+    border-radius: var(--md-radius-large);
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    color: var(--md-on-surface);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.quick-link-btn:hover {
+    background: var(--md-secondary-container);
+    border-color: var(--md-secondary);
+    box-shadow: var(--md-elevation-1);
+    transform: translateY(-2px);
+}
+
+.quick-link-btn .material-symbols-outlined {
+    font-size: 32px;
+    color: var(--md-primary);
+}
+
+.quick-link-btn:hover .material-symbols-outlined {
+    color: var(--md-on-secondary-container);
+}
+
+/* Landing Stats */
+.landing-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.landing-stat-card {
+    background: var(--md-surface-container);
+    border-radius: var(--md-radius-large);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    box-shadow: var(--md-elevation-1);
+}
+
+.landing-stat-card .material-symbols-outlined {
+    font-size: 48px;
+    color: var(--md-primary);
+}
+
+.landing-stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.landing-stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--md-on-surface);
+    line-height: 1;
+}
+
+.landing-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Responsive Landing Page */
+@media (max-width: 768px) {
+    .landing-page {
+        padding: var(--spacing-lg);
+    }
+    
+    .landing-header h2 {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .landing-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .landing-quick-links {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .landing-stats {
+        grid-template-columns: 1fr;
+    }
 }

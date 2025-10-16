@@ -152,24 +152,37 @@ class DocentePlusPlus {
         document.getElementById('home-activity-count').textContent = filteredActivities.length;
         document.getElementById('home-evaluation-count').textContent = state.evaluations.length;
 
-        // Render today's schedule with smart planner integration
-        this.renderTodaySchedule();
-
+        // The new landing page doesn't have the old dashboard elements
+        // These are legacy elements, check if they exist before updating
         const todoContainer = document.getElementById('things-todo-list');
-        const upcomingActivities = filteredActivities.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
-        if (upcomingActivities.length > 0) {
-            todoContainer.innerHTML = upcomingActivities.map(a => `<div class="todo-item">- Valutare <strong>${a.title}</strong></div>`).join('');
-        } else {
-            todoContainer.innerHTML = '<p class="home-placeholder">Nessuna attività imminente.</p>';
+        if (todoContainer) {
+            const upcomingActivities = filteredActivities.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
+            if (upcomingActivities.length > 0) {
+                todoContainer.innerHTML = upcomingActivities.map(a => `<div class="todo-item">- Valutare <strong>${a.title}</strong></div>`).join('');
+            } else {
+                todoContainer.innerHTML = '<p class="home-placeholder">Nessuna attività imminente.</p>';
+            }
         }
 
-        document.getElementById('ai-suggestions-content').innerHTML = `
-            <div class="ai-suggestion-item">💡 Potresti creare un'attività di ripasso sulla "Rivoluzione Francese".</div>
-            <div class="ai-suggestion-item">💡 Considera di pianificare una verifica per la classe 5B.</div>
-        `;
+        const aiSuggestionsContent = document.getElementById('ai-suggestions-content');
+        if (aiSuggestionsContent) {
+            aiSuggestionsContent.innerHTML = `
+                <div class="ai-suggestion-item">💡 Potresti creare un'attività di ripasso sulla "Rivoluzione Francese".</div>
+                <div class="ai-suggestion-item">💡 Considera di pianificare una verifica per la classe 5B.</div>
+            `;
+        }
 
-        document.getElementById('home-ai-ready').textContent = "Pronta";
-        document.getElementById('home-ai-ready').style.color = 'green';
+        const homeAiReady = document.getElementById('home-ai-ready');
+        if (homeAiReady) {
+            homeAiReady.textContent = "Pronta";
+            homeAiReady.style.color = 'green';
+        }
+
+        // Render today's schedule if element exists (legacy dashboard)
+        const todayScheduleContainer = document.getElementById('today-schedule-enhanced');
+        if (todayScheduleContainer) {
+            this.renderTodaySchedule();
+        }
     }
 
     renderTodaySchedule() {
