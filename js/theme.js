@@ -93,17 +93,18 @@ export function initializeTheme() {
 export function setupThemePicker() {
     const dialog = document.getElementById('theme-picker-dialog');
     const openButton = document.getElementById('theme-picker-btn');
+    const openButtonSidebar = document.getElementById('theme-picker-btn-sidebar');
     const form = document.getElementById('theme-picker-form');
     const cancelBtn = document.getElementById('theme-cancel-btn');
     const applyBtn = document.getElementById('theme-apply-btn');
     
-    if (!dialog || !openButton || !form) {
+    if (!dialog || (!openButton && !openButtonSidebar) || !form) {
         console.error('Theme picker elements not found');
         return;
     }
     
-    // Open dialog when button is clicked
-    openButton.addEventListener('click', () => {
+    // Function to open the dialog
+    const openDialog = () => {
         // Set current theme in radio buttons
         const currentTheme = getThemePreference();
         const radioToCheck = document.getElementById(`theme-${currentTheme}`);
@@ -114,7 +115,17 @@ export function setupThemePicker() {
         
         // Focus the apply button
         setTimeout(() => applyBtn.focus(), 100);
-    });
+    };
+    
+    // Open dialog when button is clicked (original button in header, if exists)
+    if (openButton) {
+        openButton.addEventListener('click', openDialog);
+    }
+    
+    // Open dialog when sidebar button is clicked
+    if (openButtonSidebar) {
+        openButtonSidebar.addEventListener('click', openDialog);
+    }
     
     // Close dialog function
     const closeDialog = () => {
