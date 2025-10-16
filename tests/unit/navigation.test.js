@@ -73,7 +73,8 @@ describe('Navigation System', () => {
       const mockNav = {
         navigateToPage: function(pageName, params, updateHistory) {
           if (updateHistory) {
-            history.pushState({ page: pageName, params }, '', `#${pageName}`);
+            // Use the mocked history directly
+            mockHistory.pushState({ page: pageName, params }, '', `#${pageName}`);
           }
         }
       };
@@ -104,7 +105,8 @@ describe('Navigation System', () => {
         navigateToPage: function(pageName, params, updateHistory) {
           if (updateHistory) {
             const url = `#${pageName}${params ? '?id=' + params.id : ''}`;
-            history.pushState({ page: pageName, params }, '', url);
+            // Use the mocked history directly
+            mockHistory.pushState({ page: pageName, params }, '', url);
           }
         }
       };
@@ -124,8 +126,8 @@ describe('Navigation System', () => {
       
       const mockNav = {
         goBack: function() {
-          if (history.length > 1) {
-            history.back();
+          if (mockHistory.length > 1) {
+            mockHistory.back();
           }
         }
       };
@@ -140,8 +142,8 @@ describe('Navigation System', () => {
       const mockNav = {
         navigateToHome: jest.fn(),
         goBack: function() {
-          if (history.length > 1) {
-            history.back();
+          if (mockHistory.length > 1) {
+            mockHistory.back();
           } else {
             this.navigateToHome();
           }
@@ -339,7 +341,8 @@ describe('Navigation System', () => {
       link.textContent = 'Home';
       
       // Links should be keyboard navigable
-      expect(link.href).toBe('#home');
+      // In JSDOM, href becomes absolute URL, so we check hash or endsWith
+      expect(link.href.endsWith('#home')).toBe(true);
       expect(link.className).toBe('breadcrumb-link');
     });
 

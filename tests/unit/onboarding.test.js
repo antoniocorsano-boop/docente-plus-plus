@@ -55,9 +55,10 @@ describe('Onboarding State Management', () => {
       const mockData = {
         isOnboardingComplete: () => localStorage.getItem('onboardingComplete') === 'true',
         isProfileComplete: () => {
-          return mockData.isOnboardingComplete() && 
-                 mockState.settings.teacherName && 
-                 mockState.settings.teacherName.trim() !== '';
+          // NEW v1.2.2: Profile completion is independent of onboarding state
+          // Menu is always active, this only affects banner display
+          return !!(mockState.settings.teacherName && 
+                    mockState.settings.teacherName.trim() !== '');
         }
       };
       
@@ -71,9 +72,9 @@ describe('Onboarding State Management', () => {
       const mockData = {
         isOnboardingComplete: () => localStorage.getItem('onboardingComplete') === 'true',
         isProfileComplete: () => {
-          return mockData.isOnboardingComplete() && 
-                 mockState.settings.teacherName && 
-                 mockState.settings.teacherName.trim() !== '';
+          // NEW v1.2.2: Profile completion is independent of onboarding state
+          return !!(mockState.settings.teacherName && 
+                    mockState.settings.teacherName.trim() !== '');
         }
       };
       
@@ -87,9 +88,9 @@ describe('Onboarding State Management', () => {
       const mockData = {
         isOnboardingComplete: () => localStorage.getItem('onboardingComplete') === 'true',
         isProfileComplete: () => {
-          return mockData.isOnboardingComplete() && 
-                 mockState.settings.teacherName && 
-                 mockState.settings.teacherName.trim() !== '';
+          // NEW v1.2.2: Profile completion is independent of onboarding state
+          return !!(mockState.settings.teacherName && 
+                    mockState.settings.teacherName.trim() !== '');
         }
       };
       
@@ -171,6 +172,9 @@ describe('Onboarding State Management', () => {
 
   describe('completeOnboarding', () => {
     test('should save settings and set onboarding flag', () => {
+      // Spy on localStorage methods
+      const setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+      
       const settings = {
         teacherName: 'Mario',
         teacherLastName: 'Rossi',
@@ -187,8 +191,11 @@ describe('Onboarding State Management', () => {
       
       mockData.completeOnboarding(settings);
       
-      expect(localStorage.setItem).toHaveBeenCalledWith('onboardingComplete', 'true');
-      expect(localStorage.setItem).toHaveBeenCalledWith('settings', JSON.stringify(settings));
+      expect(setItemSpy).toHaveBeenCalledWith('onboardingComplete', 'true');
+      expect(setItemSpy).toHaveBeenCalledWith('settings', JSON.stringify(settings));
+      
+      // Cleanup
+      setItemSpy.mockRestore();
     });
   });
 
@@ -234,6 +241,9 @@ describe('Onboarding State Management', () => {
     });
 
     test('should reset onboarding flag when profile cannot be recovered', () => {
+      // Spy on localStorage methods
+      const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
+      
       localStorage.setItem('onboardingComplete', 'true');
       const mockState = { settings: {} };
       
@@ -256,7 +266,10 @@ describe('Onboarding State Management', () => {
       };
       
       expect(mockData.validateAndFixOnboardingState()).toBe(false);
-      expect(localStorage.removeItem).toHaveBeenCalledWith('onboardingComplete');
+      expect(removeItemSpy).toHaveBeenCalledWith('onboardingComplete');
+      
+      // Cleanup
+      removeItemSpy.mockRestore();
     });
   });
 

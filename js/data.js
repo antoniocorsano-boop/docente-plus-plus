@@ -119,9 +119,10 @@ export function isOnboardingComplete() {
 }
 
 export function isProfileComplete() {
-    // Check if the user has completed the essential profile information
-    return isOnboardingComplete() && 
-           state.settings.teacherName && 
+    // NEW v1.2.2: Check if the user has completed the essential profile information
+    // This is independent of onboarding state - menu is always active
+    // This only affects whether the profile completion banner is shown
+    return state.settings.teacherName && 
            state.settings.teacherName.trim() !== '';
 }
 
