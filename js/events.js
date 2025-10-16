@@ -25,12 +25,9 @@ export function setupEventListeners() {
         });
     });
     
-    // Complete onboarding button in banner (NEW: Navigate to settings)
-    document.getElementById('complete-onboarding-btn')?.addEventListener('click', () => {
-        // Navigate to settings page
-        switchTab('settings');
-        showToast('Completa il tuo profilo nella sezione Impostazioni', 'info');
-    });
+    // REMOVED: complete-onboarding-btn event listener (button no longer exists)
+    // The profile notice now uses a simple link that calls switchTab directly
+
 
     document.getElementById('onboarding-form')?.addEventListener('submit', e => {
         e.preventDefault();

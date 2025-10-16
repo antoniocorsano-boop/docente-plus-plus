@@ -107,6 +107,7 @@ export function hideOnboarding() {
 }
 
 export function showOnboardingBanner() {
+    // NEW: Show minimal text notice instead of invasive banner
     const banner = document.getElementById('onboarding-incomplete-banner');
     if (banner) {
         banner.style.display = 'block';
@@ -121,9 +122,9 @@ export function hideOnboardingBanner() {
 }
 
 export function disableMenuItems(enabledItems = ['home', 'settings']) {
-    // REMOVED: Menu items are now always active
-    // This function is kept for backward compatibility but does nothing
-    console.warn('DEPRECATION WARNING: disableMenuItems() is deprecated and does nothing. Please remove any calls to this function.');
+    // REMOVED: This function is deprecated and does nothing.
+    // Menu items are now ALWAYS active - no disabling logic.
+    // Keeping for backward compatibility only.
 }
 
 export function enableAllMenuItems() {
