@@ -123,7 +123,7 @@ export function hideOnboardingBanner() {
 export function disableMenuItems(enabledItems = ['home', 'settings']) {
     // REMOVED: Menu items are now always active
     // This function is kept for backward compatibility but does nothing
-    console.log('Menu items are always enabled - disableMenuItems is deprecated');
+    console.warn('DEPRECATION WARNING: disableMenuItems() is deprecated and does nothing. Please remove any calls to this function.');
 }
 
 export function enableAllMenuItems() {
