@@ -96,18 +96,11 @@
         </div>
     </div>
 
-    <!-- Onboarding Incomplete Banner -->
-    <div id="onboarding-incomplete-banner" class="onboarding-banner" style="display: none;">
-        <div class="onboarding-banner-content">
+    <!-- Profile Notice - Small, non-invasive text reminder -->
+    <div id="onboarding-incomplete-banner" class="profile-notice" style="display: none;">
+        <div class="profile-notice-content">
             <span class="material-symbols-outlined">info</span>
-            <div class="onboarding-banner-text">
-                <strong>Configurazione incompleta</strong>
-                <p>Completa il tuo profilo per accedere a tutte le funzionalità</p>
-            </div>
-            <button id="complete-onboarding-btn" class="btn btn-primary btn-sm">
-                <span class="material-symbols-outlined">person</span>
-                Completa Profilo
-            </button>
+            <span class="profile-notice-text">Profilo incompleto. <a href="#settings" onclick="window.app.switchTab('settings'); return false;">Completa dalle Impostazioni</a></span>
         </div>
     </div>
 
