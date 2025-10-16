@@ -2,7 +2,27 @@
 
 ## Overview
 
-This document outlines the testing strategy for Docente++ v1.2.1, focusing on **local, cost-free testing** that doesn't consume premium resources.
+This document outlines the testing strategy for Docente++ v1.2.2, focusing on **local, cost-free testing** that doesn't consume premium resources.
+
+## Recent Changes (v1.2.2)
+
+### Updated Test Scenarios
+
+1. **Menu Accessibility Tests**: 
+   - All menu items should be active from first launch
+   - No disabled states based on onboarding
+   - Profile banner appears but doesn't block functionality
+
+2. **Mobile UX Tests**:
+   - Settings accessibility on mobile (position in menu)
+   - Theme settings integration in Settings page
+   - Responsive behavior of new menu layout
+
+3. **Theme Tests**:
+   - Theme mode selection (Chiaro/Scuro/Automatico)
+   - Theme color selection
+   - Persistence across sessions
+   - System preference detection (Auto mode)
 
 ## Testing Philosophy
 
@@ -70,7 +90,7 @@ npm test -- --coverage
 | Functions | ≥ 50% |
 | Lines | ≥ 50% |
 
-**Note**: These are minimum thresholds. Critical modules (onboarding, navigation, data) should aim for 70-80% coverage.
+**Note**: These are minimum thresholds. Critical modules (onboarding, navigation, data, theme) should aim for 70-80% coverage.
 
 ## Test Categories
 
@@ -79,21 +99,32 @@ npm test -- --coverage
 **Purpose**: Test individual functions and modules in isolation
 
 **Coverage**:
-- Onboarding state management
+- Onboarding state management (now non-blocking)
 - Navigation functions
 - Data validation
 - State recovery
 - Browser storage health
+- Theme management
 
 **Location**: `tests/unit/`
 
 **Examples**:
 ```javascript
-// tests/unit/onboarding.test.js
-test('should detect corrupted profile state', () => {
-  localStorage.setItem('onboardingComplete', 'true');
-  const state = recoverOnboardingState();
-  expect(state.reason).toBe('corrupted_profile');
+// tests/unit/onboarding.test.js (UPDATED for v1.2.2)
+test('menu should always be enabled regardless of profile state', () => {
+  // Profile not complete
+  expect(isMenuEnabled()).toBe(true);
+  
+  // Profile complete
+  completeProfile({ teacherName: 'Mario' });
+  expect(isMenuEnabled()).toBe(true);
+});
+
+// tests/unit/theme.test.js (NEW in v1.2.2)
+test('should apply auto theme based on system preference', () => {
+  applyTheme('auto');
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  expect(document.body.classList.contains('dark-theme')).toBe(isDark);
 });
 
 // tests/unit/navigation.test.js
@@ -109,24 +140,31 @@ test('should update breadcrumb when navigating', () => {
 **Purpose**: Test how multiple modules work together
 
 **Coverage**:
-- Onboarding flow (modal → completion → menu enable)
+- Profile completion flow (optional, non-blocking)
 - Navigation flow (page change → breadcrumb update → history push)
 - Data persistence (save → load → validate)
+- Theme application (selection → save → apply)
 
 **Location**: `tests/integration/`
 
 **Examples**:
 ```javascript
-// tests/integration/onboarding-flow.test.js
-test('complete onboarding flow enables menu', () => {
-  // Start with incomplete onboarding
-  expect(isMenuDisabled()).toBe(true);
+// tests/integration/profile-flow.test.js (UPDATED for v1.2.2)
+test('profile completion removes banner but does not enable menu', () => {
+  // Menu is already enabled
+  expect(isMenuEnabled()).toBe(true);
   
-  // Complete onboarding
-  completeOnboarding({ teacherName: 'Mario' });
+  // Banner is visible
+  expect(isBannerVisible()).toBe(true);
   
-  // Menu should be enabled
-  expect(isMenuDisabled()).toBe(false);
+  // Complete profile
+  completeProfile({ teacherName: 'Mario' });
+  
+  // Menu still enabled (was never disabled)
+  expect(isMenuEnabled()).toBe(true);
+  
+  // Banner should be hidden
+  expect(isBannerVisible()).toBe(false);
 });
 ```
 
@@ -135,11 +173,13 @@ test('complete onboarding flow enables menu', () => {
 **Purpose**: Verify complete user workflows in real browser
 
 **Coverage**:
-- Full onboarding flow
+- Full profile setup flow (optional)
 - Navigation across all pages
 - Browser back/forward buttons
 - Keyboard navigation (Tab, Enter, Escape)
 - Screen reader announcements
+- Theme switching (Chiaro/Scuro/Auto)
+- Mobile menu accessibility (Settings position)
 
 **Location**: `tests/manual/`
 

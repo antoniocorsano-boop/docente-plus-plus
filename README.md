@@ -1,6 +1,6 @@
 # 🎓 Docente++
 
-**Stato del Progetto: v1.2.0 - In Sviluppo**
+**Stato del Progetto: v1.2.2 - In Sviluppo**
 
 **Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
@@ -8,15 +8,17 @@
 
 ## ✨ Funzionalità Principali
 
-La versione 1.2.1 introduce un sistema di navigazione completo e accessibile:
+La versione 1.2.2 introduce un menu sempre accessibile e miglioramenti UX mobile:
 
-- **🧭 Navigazione Avanzata (NUOVO)**: Sistema completo di navigazione con breadcrumb (briciole di pane), pulsante indietro e pulsante Home sempre visibile
-- **⌨️ Accessibilità Completa (NUOVO)**: Navigazione con tastiera (Tab), etichette ARIA, indicatori di focus visibili e supporto per lettori di schermo
-- **🔙 Integrazione History Browser (NUOVO)**: I pulsanti avanti/indietro del browser funzionano correttamente, URL aggiornati con hash per ogni pagina
-- **🧪 Test Automatici (NUOVO)**: Suite di test Jest con 40+ test per onboarding e navigazione, eseguibili localmente senza costi
-- **✅ Onboarding Obbligatorio**: Il completamento del profilo è obbligatorio per accedere a tutte le funzionalità. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore
-- **🔒 Gestione Intelligente dei Permessi**: Le voci di menu sono disabilitate finché il profilo non è completo, con indicatori visivi chiari (icona lucchetto 🔒) e feedback informativo
-- **🟧 Banner Guida**: Un banner persistente guida l'utente a completare il profilo quando necessario, con un pulsante di accesso rapido alla configurazione
+- **🎯 Menu Sempre Attivo (NUOVO)**: Tutte le voci di menu sono sempre accessibili, senza blocchi legati all'onboarding. L'app è completamente esplorabile sin dal primo avvio.
+- **📱 UX Mobile Migliorata (NUOVO)**: La voce "Impostazioni" è stata spostata più in alto nel menu mobile per facilitare l'accesso rapido alla configurazione.
+- **🎨 Tema Unificato nelle Impostazioni (NUOVO)**: Selezione del tema (Chiaro/Scuro/Automatico) integrata nella pagina Impostazioni per un'esperienza più coerente.
+- **🧭 Navigazione Avanzata**: Sistema completo di navigazione con breadcrumb (briciole di pane), pulsante indietro e pulsante Home sempre visibile
+- **⌨️ Accessibilità Completa**: Navigazione con tastiera (Tab), etichette ARIA, indicatori di focus visibili e supporto per lettori di schermo
+- **🔙 Integrazione History Browser**: I pulsanti avanti/indietro del browser funzionano correttamente, URL aggiornati con hash per ogni pagina
+- **🧪 Test Automatici**: Suite di test Jest con 40+ test per onboarding e navigazione, eseguibili localmente senza costi
+- **✅ Profilo Consigliato**: Il completamento del profilo è consigliato per un'esperienza ottimale, ma non blocca più l'esplorazione dell'app
+- **🟧 Banner Informativo**: Un banner discreto ricorda all'utente di completare il profilo quando necessario
 - **🛡️ Gestione Errori Migliorata**: Miglior gestione di localStorage corrotto o non disponibile, con messaggi di errore chiari e procedure di recupero automatiche
 - **🎨 Theme Picker Material 3**: Personalizza l'aspetto dell'app con temi Chiaro, Scuro o Automatico (dinamico) che segue le preferenze del sistema. I temi utilizzano Material Design 3 Expressive con palette di colori moderne e Material Symbols per le icone.
 - **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
@@ -31,6 +33,7 @@ La versione 1.2.1 introduce un sistema di navigazione completo e accessibile:
   - Gestione classi disponibili
   - Chiave API IA per funzionalità avanzate
   - Selezione modello IA (GPT-3.5, GPT-4, Claude, Llama)
+  - Selezione tema (Chiaro/Scuro/Automatico) e colore principale
   - Tutte le impostazioni persistono tra le sessioni
 - **✍️ Creazione di Attività e Valutazioni**: Assegna compiti, verifiche o progetti alle classi. Registra i voti e i giudizi per ogni studente, costruendo uno storico delle performance.
 - **📊 Dashboard Dinamica**: Una schermata principale che ti offre una panoramica immediata delle prossime scadenze e delle ultime valutazioni inserite.
@@ -51,7 +54,7 @@ Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirl
     ```
     Successivamente, apri il browser all'indirizzo `http://localhost:8000`.
 
-3.  **Completa l'Onboarding**: Al primo avvio, dovrai completare un breve onboarding inserendo almeno il tuo nome. Questo è necessario per accedere a tutte le funzionalità dell'applicazione.
+3.  **Esplora Liberamente**: Tutte le funzionalità sono accessibili immediatamente. Per un'esperienza ottimale, ti consigliamo di configurare il tuo profilo dalla pagina Impostazioni.
 
 ## 📖 Documentazione
 

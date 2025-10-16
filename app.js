@@ -98,23 +98,22 @@ class DocentePlusPlus {
             const onboardingState = recoverOnboardingState();
             console.log('Onboarding state:', onboardingState);
             
-            // NEW: Always enable all menu items (sidebar always active)
+            // NEW: Always enable all menu items (sidebar always active - no more blocking)
             enableAllMenuItems();
             
             if (onboardingState.needsOnboarding) {
-                // NEW: Instead of showing modal, initialize UI and redirect to settings
+                // NEW: Show banner but don't block menu - user can explore freely
                 this.initializeAppUI();
                 showOnboardingBanner();
-                // Auto-open settings page
+                // Suggest settings but don't force it
                 setTimeout(() => {
-                    switchTab('settings');
-                    showToast('👋 Benvenuto! Completa il tuo profilo per iniziare.', 'info', 5000);
+                    showToast('👋 Benvenuto! Per iniziare, configura il tuo profilo dalle Impostazioni.', 'info', 5000);
                 }, 500);
             } else if (onboardingState.needsProfileCompletion) {
                 // Onboarding marked complete but profile is incomplete (corrupted data)
                 showOnboardingBanner();
                 this.initializeAppUI();
-                showToast('⚠️ Profilo incompleto rilevato. Completa i dati mancanti dalle Impostazioni.', 'warning', 6000);
+                showToast('⚠️ Profilo incompleto rilevato. Completa i dati dalle Impostazioni per un\'esperienza ottimale.', 'info', 6000);
             } else {
                 // Everything is OK - profile complete
                 hideOnboardingBanner();
@@ -158,12 +157,15 @@ class DocentePlusPlus {
         updateActiveClassBadge();
         switchTab('home');
         
-        // NEW: Check profile status and show banner if needed (but don't disable menu)
+        // NEW: Menu is always active - just show/hide banner based on profile status
         if (isProfileComplete()) {
             hideOnboardingBanner();
         } else {
             showOnboardingBanner();
         }
+        
+        // Ensure all menu items are always enabled
+        enableAllMenuItems();
     }
     
     // Public method to switch tabs - used by landing page cards
@@ -1629,6 +1631,9 @@ class DocentePlusPlus {
             fabCheckbox.checked = fabEnabled !== 'false'; // Default to true if not set
         }
         
+        // Load theme settings
+        this.loadThemeSettingsForm();
+        
         // Load profile settings
         this.loadProfileSettingsForm();
         
@@ -1643,6 +1648,22 @@ class DocentePlusPlus {
 
         // Load notification settings
         this.loadNotificationSettingsForm();
+    }
+    
+    // NEW: Load theme settings form
+    loadThemeSettingsForm() {
+        const themeMode = localStorage.getItem('docente-plus-plus-theme') || 'auto';
+        const themeColor = localStorage.getItem('docente-plus-plus-theme-color') || 'purple';
+        
+        const themeModeSelect = document.getElementById('theme-mode-select');
+        if (themeModeSelect) {
+            themeModeSelect.value = themeMode;
+        }
+        
+        const themeColorSelect = document.getElementById('theme-color-select');
+        if (themeColorSelect) {
+            themeColorSelect.value = themeColor;
+        }
     }
     
     // NEW: Load profile settings form
@@ -1803,6 +1824,30 @@ class DocentePlusPlus {
         this.triggerAutoPlanning();
     }
     
+    // NEW: Save theme settings
+    saveThemeSettings() {
+        const themeMode = document.getElementById('theme-mode-select').value;
+        const themeColor = document.getElementById('theme-color-select').value;
+        
+        // Save to localStorage
+        localStorage.setItem('docente-plus-plus-theme', themeMode);
+        localStorage.setItem('docente-plus-plus-theme-color', themeColor);
+        
+        // Apply theme immediately
+        import('./js/theme.js').then(({ applyTheme }) => {
+            try {
+                applyTheme();
+                showToast('Tema applicato!', 'success');
+            } catch (err) {
+                console.error("Errore durante l'applicazione del tema:", err);
+                showToast('Impossibile applicare il tema. Riprova più tardi.', 'error');
+            }
+        }).catch((err) => {
+            console.error("Errore nel caricamento del modulo tema:", err);
+            showToast('Impossibile caricare il tema. Riprova più tardi.', 'error');
+        });
+    }
+    
     // NEW: Save profile settings
     saveProfileSettings() {
         const firstName = document.getElementById('profile-first-name').value.trim();
@@ -1927,9 +1972,10 @@ class DocentePlusPlus {
     checkProfileCompleteness() {
         if (isProfileComplete()) {
             hideOnboardingBanner();
-            enableAllMenuItems();
-            showToast('✅ Profilo completo! Tutte le funzionalità sono disponibili.', 'success');
+            showToast('✅ Profilo completo!', 'success');
         }
+        // Menu is always enabled regardless of profile status
+        enableAllMenuItems();
     }
     
     saveAISettings() {
@@ -1995,9 +2041,10 @@ class DocentePlusPlus {
         // Check if profile is now complete and update UI
         if (isProfileComplete()) {
             hideOnboardingBanner();
-            enableAllMenuItems();
-            showToast('Profilo completo! Tutte le funzionalità sono ora disponibili.', 'success');
+            showToast('Profilo completo!', 'success');
         }
+        // Menu is always enabled regardless of profile status
+        enableAllMenuItems();
     }
     
     triggerAutoPlanning() {

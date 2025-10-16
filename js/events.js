@@ -116,6 +116,14 @@ export function setupEventListeners() {
         }
     });
     
+    // NEW: Theme settings form
+    document.getElementById('theme-settings-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (window.app) {
+            window.app.saveThemeSettings();
+        }
+    });
+    
     // NEW: Profile settings form
     document.getElementById('profile-settings-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
