@@ -121,23 +121,18 @@ export function hideOnboardingBanner() {
 }
 
 export function disableMenuItems(enabledItems = ['home', 'settings']) {
-    // NEW: Keep all menu items visible and clickable, but show a tooltip
-    // indicating that profile completion is recommended
-    document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
-        const tab = button.dataset.tab;
-        if (!enabledItems.includes(tab)) {
-            // Don't disable, just add a visual indicator
-            button.classList.add('needs-profile');
-            button.setAttribute('data-tooltip', 'Completa il profilo per un\'esperienza ottimale');
-        }
-    });
+    // REMOVED: Menu items are now always active
+    // This function is kept for backward compatibility but does nothing
+    console.log('Menu items are always enabled - disableMenuItems is deprecated');
 }
 
 export function enableAllMenuItems() {
-    // Enable all menu items (remove visual indicators)
+    // Ensure all menu items are always clickable and accessible
     document.querySelectorAll('.nav-item[data-tab]').forEach(button => {
         button.classList.remove('needs-profile');
+        button.classList.remove('disabled');
         button.removeAttribute('data-tooltip');
+        button.removeAttribute('disabled');
         button.setAttribute('title', button.querySelector('.nav-label')?.textContent || '');
     });
 }
