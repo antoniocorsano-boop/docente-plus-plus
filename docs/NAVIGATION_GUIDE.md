@@ -2,13 +2,52 @@
 
 ## Overview
 
-Docente++ v1.2.1 introduces a comprehensive, accessible navigation system that includes:
+Docente++ v1.2.2 includes a comprehensive, accessible navigation system with key improvements:
 
-- **Breadcrumb navigation** (briciole di pane) for clear page hierarchy
+- **Always-active menu** (NEW): All menu items are accessible from the first launch, no onboarding blocks
+- **Mobile-optimized layout** (NEW): Settings moved higher in the mobile menu for easy access
+- **Breadcrumb navigation** for clear page hierarchy
 - **Back button** with browser history integration
 - **Persistent Home button** for quick return to main page
 - **Full keyboard accessibility** (Tab navigation, ARIA labels, visible focus)
 - **Browser history management** (back/forward button support)
+
+## Key Changes in v1.2.2
+
+### Always-Active Menu
+
+**Previous behavior (v1.2.1 and earlier):**
+- Menu items were disabled until onboarding completion
+- Lock icons (🔒) indicated blocked features
+- Tooltips explained why items were disabled
+
+**New behavior (v1.2.2):**
+- ✅ **All menu items are always active and clickable**
+- ✅ **No more blocking or disabled states**
+- ✅ **Complete exploration from first launch**
+- ℹ️ Optional banner suggests profile completion
+
+### Mobile Menu Optimization
+
+**Settings position:**
+- **Desktop**: Position unchanged (near bottom of menu)
+- **Mobile**: **Moved higher** in the menu (after main content sections)
+
+**Mobile menu order:**
+1. Home
+2. Lezioni
+3. Studenti
+4. Classi
+5. Attività
+6. Valutazioni
+7. Orario
+8. Agenda
+9. Assistente IA
+10. Importa Documenti
+11. **⚙️ Impostazioni** (moved up for better accessibility)
+12. 🔔 Notifiche
+
+**Rationale**: On mobile devices, accessing Settings is crucial for initial configuration. Moving it higher reduces scrolling and improves first-time user experience.
 
 ## Navigation Components
 

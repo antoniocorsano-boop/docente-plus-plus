@@ -5,7 +5,7 @@ Questa guida ti aiuterà a risolvere i problemi più comuni che potresti incontr
 ## 📋 Indice
 
 1. [Problemi di Avvio](#problemi-di-avvio)
-2. [Problemi con l'Onboarding](#problemi-con-lonboarding)
+2. [Problemi con il Profilo](#problemi-con-il-profilo)
 3. [Dati Corrotti o Mancanti](#dati-corrotti-o-mancanti)
 4. [Problemi di Storage](#problemi-di-storage)
 5. [Ripristino dell'App](#ripristino-dellapp)
@@ -44,60 +44,48 @@ Questa guida ti aiuterà a risolvere i problemi più comuni che potresti incontr
 
 ---
 
-## 🎯 Problemi con l'Onboarding
+## 🎯 Problemi con il Profilo
 
-### Il menu è disabilitato / Le funzionalità sono bloccate
+### Vedo un banner "Configura il tuo profilo"
 
-**Causa:** Il profilo docente non è stato completato.
-
-**Soluzione:**
-1. Vedrai un banner arancione in cima alla pagina con il messaggio "Configurazione incompleta"
-2. Clicca sul pulsante **"Completa Profilo"** nel banner
-3. Inserisci almeno il tuo nome nel form di onboarding
-4. Clicca su **"Inizia ad Usare Docente++"**
-5. Tutte le funzionalità del menu saranno ora disponibili
-
-**Nota importante:** A partire dalla versione 1.2.0, non è più possibile saltare l'onboarding. Devi completare il profilo con almeno il nome per accedere a tutte le funzionalità dell'applicazione. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore.
-
-### La modale di onboarding non si apre
+**Causa:** Il profilo docente non è ancora stato configurato (comportamento normale al primo avvio).
 
 **Soluzione:**
-1. Controlla se vedi il banner arancione "Configurazione incompleta" in cima alla pagina
-2. Clicca sul pulsante "Completa Profilo" nel banner per aprire la modale di onboarding
-3. Se il banner non appare e il menu è disabilitato, vai in **Impostazioni** (accessibile anche senza completare l'onboarding)
-4. Clicca su **"Modifica Profilo"** nella sezione "Profilo Docente"
-5. Inserisci almeno il tuo nome
+1. **Opzione 1 - Configura ora**: 
+   - Clicca sul pulsante **"Completa Profilo"** nel banner
+   - Vai direttamente alla pagina Impostazioni
+   - Compila almeno il campo "Nome"
+   - Salva per rimuovere il banner
 
-### Non riesco a completare l'onboarding
+2. **Opzione 2 - Configura dopo**: 
+   - Puoi esplorare liberamente l'app
+   - Tutte le funzionalità sono già accessibili
+   - Il banner scomparirà quando configurerai il profilo
 
-**Soluzione:**
-1. Assicurati di aver compilato almeno il campo "Nome" (obbligatorio)
-2. Il campo "Nome" non può essere vuoto
-3. Se riscontri errori, controlla la console del browser (F12) per messaggi di errore
-4. Verifica che localStorage sia abilitato nel tuo browser
+**Nota importante:** A partire dalla versione 1.2.2, **tutte le voci di menu sono sempre attive**. Non ci sono più blocchi o funzionalità disabilitate. Il completamento del profilo è consigliato per un'esperienza personalizzata, ma non è obbligatorio.
 
-### L'onboarding continua a riapparirsi
-
-**Causa:** Il salvataggio non è andato a buon fine o i dati del profilo sono corrotti
+### Non trovo dove configurare il profilo
 
 **Soluzione:**
-1. Verifica che il browser non sia in modalità Incognito
-2. Controlla che localStorage sia abilitato
-3. Prova a completare l'onboarding con tutti i campi compilati
-4. Se il problema persiste:
-   - Apri gli strumenti per sviluppatori (F12)
-   - Vai alla tab "Console"
-   - Digita: `localStorage.setItem('onboardingComplete', 'true')`
-   - Ricarica la pagina e vai in Impostazioni → Modifica Profilo per completare i dati
+1. Clicca su **⚙️ Impostazioni** nel menu laterale
+   - Su mobile: la voce Impostazioni è ora più in alto nel menu per facilitare l'accesso
+2. Nella pagina Impostazioni, trova la sezione **"👤 Profilo Docente"**
+3. Compila i campi:
+   - **Nome** (consigliato)
+   - Cognome (opzionale)
+   - Email (opzionale)
+4. Clicca su **"Salva Profilo"**
 
-### Il menu resta disabilitato anche dopo aver completato l'onboarding
+### Il profilo non si salva
 
-**Causa:** Dati del profilo mancanti o corrotti
+**Causa:** Problemi con localStorage o validazione
 
 **Soluzione:**
-1. Vai in **Impostazioni** (accessibile anche con profilo incompleto)
-2. Verifica che il nome sia presente nella sezione "Profilo Docente"
-3. Se il nome non c'è o è vuoto, clicca su **"Modifica Profilo"**
+1. Assicurati di aver compilato almeno il campo "Nome"
+2. Se hai inserito un'email, verifica che sia in formato valido (es. nome@dominio.it)
+3. Verifica che localStorage sia abilitato nel browser
+4. Controlla la console del browser (F12) per messaggi di errore
+5. Prova a ricaricare la pagina e riprovare
 4. Inserisci il tuo nome e salva
 5. Il menu si abiliterà automaticamente e il banner scomparirà
 

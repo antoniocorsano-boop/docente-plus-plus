@@ -2,13 +2,13 @@
 
 ## Panoramica
 
-A partire dalla versione 1.2.0, Docente++ implementa un flusso di onboarding obbligatorio per garantire che tutti gli utenti configurino correttamente il proprio profilo prima di accedere alle funzionalità principali dell'applicazione.
+A partire dalla versione 1.2.2, Docente++ ha semplificato il flusso di onboarding rendendo tutte le funzionalità dell'app accessibili immediatamente, senza blocchi. Il completamento del profilo è consigliato per un'esperienza ottimale, ma non è più obbligatorio per esplorare l'applicazione.
 
 ## Obiettivi del Nuovo Flusso
 
-1. **Prevenire stati intermedi non chiari** - Gli utenti non possono più trovarsi in uno stato in cui l'app è parzialmente funzionante
-2. **Garantire dati essenziali** - Assicura che ogni utente abbia almeno un nome configurato
-3. **Esperienza utente migliore** - Guida chiara su cosa fare quando le funzionalità sono bloccate
+1. **Massima Libertà di Esplorazione** - Gli utenti possono navigare liberamente in tutte le sezioni dell'app sin dal primo avvio
+2. **Profilo Consigliato** - Il sistema suggerisce all'utente di completare il profilo per un'esperienza personalizzata
+3. **UX Non Invasiva** - Un banner discreto ricorda la configurazione del profilo senza bloccare l'utilizzo
 4. **Gestione errori robusta** - Migliore gestione di localStorage corrotto o non disponibile
 
 ## Flusso Utente
@@ -21,133 +21,128 @@ Quando un utente apre Docente++ per la prima volta:
 ┌─────────────────────────────────────┐
 │  Docente++ si carica                │
 │  ↓                                   │
-│  Controlla isOnboardingComplete()    │
+│  Tutte le voci di menu attive       │
 │  ↓                                   │
-│  FALSE: Mostra modal onboarding      │
+│  Banner informativo (discreto)       │
+│  "Configura il tuo profilo per      │
+│   un'esperienza personalizzata"     │
 │  ↓                                   │
-│  Disabilita menu (tranne Home/Settings)│
-│  ↓                                   │
-│  Mostra banner "Configurazione incompleta"│
+│  L'utente può esplorare liberamente │
 └─────────────────────────────────────┘
 ```
 
-**Elemento visivo:** Modal di onboarding centrata con sfondo overlay
+**Elemento visivo:** Banner informativo in alto con pulsante "Completa Profilo"
 
-**Campi del form:**
-- Nome * (obbligatorio)
+**Campi suggeriti del profilo:**
+- Nome * (consigliato per personalizzazione)
 - Cognome (opzionale)
+- Email (opzionale)
 - Anno Scolastico (opzionale, es. 2024/2025)
 
 **Azioni disponibili:**
-- ✅ "Inizia ad Usare Docente++" (submit)
-- ℹ️ Messaggio informativo: "Il completamento del profilo è necessario per accedere all'applicazione"
+- ✅ Esplora l'app liberamente
+- ⚙️ Vai alle Impostazioni per configurare il profilo
+- ❌ Chiudi il banner (può essere mostrato nuovamente)
 
-**Nota:** Il pulsante "Salta per Ora" è stato rimosso nella v1.2.0
+### 2. Configurazione Profilo (Consigliata)
 
-### 2. Completamento Onboarding
-
-Quando l'utente compila e invia il form:
+Quando l'utente accede alle Impostazioni per configurare il profilo:
 
 ```
 ┌─────────────────────────────────────┐
-│  Valida che "Nome" sia compilato    │
+│  Vai a Impostazioni                 │
 │  ↓                                   │
-│  Salva dati in localStorage          │
+│  Compila i campi del profilo        │
 │  ↓                                   │
-│  Imposta onboardingComplete = true   │
+│  Salva                               │
 │  ↓                                   │
-│  Nascondi modal                      │
+│  Banner nascosto automaticamente     │
 │  ↓                                   │
-│  Nascondi banner                     │
-│  ↓                                   │
-│  Abilita tutte le voci di menu       │
-│  ↓                                   │
-│  Inizializza UI completa             │
-│  ↓                                   │
-│  Toast: "Profilo configurato!"       │
+│  Toast: "Profilo completo!"         │
 └─────────────────────────────────────┘
 ```
 
 ### 3. Avvii Successivi
 
-Quando un utente ritorna all'app dopo aver completato l'onboarding:
+Quando un utente ritorna all'app dopo aver completato il profilo:
 
 ```
 ┌─────────────────────────────────────┐
 │  Docente++ si carica                │
 │  ↓                                   │
-│  Controlla isOnboardingComplete()    │
+│  Controlla profilo                   │
 │  ↓                                   │
-│  TRUE: Controlla isProfileComplete() │
+│  Profilo completo: nessun banner    │
 │  ↓                                   │
-│  TRUE: App completamente funzionante │
-│  ↓                                   │
-│  Abilita tutte le voci di menu       │
-│  ↓                                   │
-│  Nascondi banner                     │
+│  App completamente funzionante       │
 └─────────────────────────────────────┘
 ```
 
-### 4. Gestione Dati Corrotti
+### 4. Gestione Dati Corrotti (Raro)
 
-Se localStorage contiene dati corrotti o il profilo è incompleto:
+Se localStorage contiene dati corrotti:
 
 ```
 ┌─────────────────────────────────────┐
 │  Docente++ si carica                │
 │  ↓                                   │
-│  onboardingComplete = TRUE           │
-│  MA teacherName è vuoto/missing      │
+│  Rileva dati corrotti                │
+│  ↓                                   │
+│  Mostra banner informativo           │
+│  ↓                                   │
+│  Toast: "Profilo incompleto rilevato"│
+│  ↓                                   │
+│  L'utente può ancora esplorare      │
+└─────────────────────────────────────┘
+```
 │  ↓                                   │
 │  Mostra banner "Configurazione incompleta"│
 │  ↓                                   │
-│  Disabilita menu (tranne Home/Settings)│
+│  Mostra banner informativo           │
 │  ↓                                   │
-│  Inizializza UI limitata             │
+│  Toast: "Profilo incompleto rilevato"│
 │  ↓                                   │
-│  Toast: "Profilo incompleto. Completa i dati..."│
+│  L'utente può ancora esplorare      │
 └─────────────────────────────────────┘
 ```
 
 **Come risolvere:**
-1. Clicca sul banner "Completa Profilo"
-2. Inserisci i dati mancanti
-3. Salva
-4. Menu si abilita automaticamente
+1. Ignora il banner e esplora l'app
+2. Oppure clicca "Completa Profilo" per configurare
+3. Inserisci i dati consigliati
+4. Salva (il banner scompare)
 
 ## Componenti UI
 
-### Banner "Configurazione Incompleta"
+### Banner "Configurazione Consigliata"
 
 **Posizione:** Sticky top, subito sotto l'header principale
 
 **Aspetto:**
-- Sfondo: Gradiente arancione (#ff9800 → #f57c00)
+- Sfondo: Gradiente blu info (#2196f3 → #1976d2)
 - Icona: Material Symbol "info"
 - Testo: 
-  - Titolo: "Configurazione incompleta" (bold)
-  - Sottotitolo: "Completa il tuo profilo per accedere a tutte le funzionalità"
-- Pulsante: "Completa Profilo" (bianco su arancione)
+  - Titolo: "Configura il tuo profilo" (bold)
+  - Sottotitolo: "Per un'esperienza personalizzata"
+- Pulsante: "Completa Profilo" (bianco su blu)
 
 **Comportamento:**
-- Appare solo se il profilo non è completo
+- Appare solo se il profilo non è configurato
 - Scompare automaticamente quando il profilo viene completato
 - È sempre visibile durante lo scroll
+- Può essere chiuso dall'utente (ma si può rimostrare)
 - Animazione di entrata: slide down con fade in
 
-### Voci di Menu Disabilitate
+### Menu Sempre Attivo
 
-**Aspetto visivo:**
-- Opacità: 40%
-- Cursore: not-allowed
-- Icona lucchetto: 🔒 aggiunta dopo il testo
-- Non clickabile (pointer-events: none)
+**Comportamento nuovo (v1.2.2):**
+- **Tutte le voci sono sempre attive e cliccabili**
+- Nessuna voce viene disabilitata
+- Nessuna icona lucchetto
+- Nessun tooltip di blocco
 
-**Voci abilitate sempre:**
+**Voci di menu disponibili:**
 - 🏠 Home
-- ⚙️ Impostazioni
-
-**Voci disabilitate prima del completamento:**
 - 📚 Lezioni
 - 👥 Studenti
 - 🎓 Classi
@@ -157,44 +152,54 @@ Se localStorage contiene dati corrotti o il profilo è incompleto:
 - 📆 Agenda
 - 🤖 Assistente IA
 - 📄 Importa Documenti
+- ⚙️ Impostazioni (spostata più in alto su mobile)
 
-**Feedback al click:**
-- Toast: "Completa il profilo per accedere a questa funzionalità"
+**Ordine menu mobile ottimizzato:**
+1. Home
+2. Lezioni
+3. Studenti
+4. Classi
+5. Attività
+6. Valutazioni
+7. Orario
+8. Agenda
+9. Assistente IA
+10. Importa Documenti
+11. **Impostazioni** (prima era in fondo, ora qui per facilità d'accesso)
+12. Notifiche
 
 ## Validazione e Controlli
 
 ### Funzioni di Controllo
 
 ```javascript
-// Controlla se l'onboarding è stato completato
-isOnboardingComplete()
-// Returns: boolean
-// Controlla: localStorage.getItem('onboardingComplete') === 'true'
-
 // Controlla se il profilo è completo e valido
 isProfileComplete()
 // Returns: boolean
 // Controlla: 
-//   - isOnboardingComplete() === true
 //   - state.settings.teacherName esiste
 //   - state.settings.teacherName.trim() !== ''
 ```
 
-### Validazione Form Onboarding
+### Validazione Form Profilo (Impostazioni)
 
 **Campo Nome:**
-- Required: true
+- Required: true (consigliato)
 - Validazione: Non può essere vuoto o solo spazi
-- Errore: "Inserisci almeno il tuo nome."
+- Messaggio: "Il nome è consigliato per personalizzazione"
 
 **Campo Cognome:**
 - Required: false
 - Nessuna validazione particolare
 
+**Campo Email:**
+- Required: false
+- Validazione: Formato email se compilato
+- Pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
+
 **Campo Anno Scolastico:**
 - Required: false
-- Placeholder: "2024/2025"
-- Nessuna validazione particolare
+- Formato dropdown con opzioni predefinite
 
 ## Gestione Errori
 
@@ -216,7 +221,7 @@ if (!checkStorageHealth()) {
 
 **Azione utente:** 
 - Messaggio di errore persistente (10 secondi)
-- Guida l'utente a verificare le impostazioni del browser
+- L'app continua a funzionare in modalità limitata (senza salvataggio)
 
 ### Dati Corrotti in localStorage
 
@@ -241,16 +246,16 @@ try {
 - Toast: "Dati corrotti rilevati. App ripristinata ai valori predefiniti."
 - L'app continua a funzionare con dati puliti
 
-### Profilo Incompleto dopo Onboarding
+### Profilo Incompleto
 
 **Scenari:**
-- Dati del profilo cancellati manualmente
+- Primo avvio
+- Dati del profilo non ancora configurati
 - localStorage parzialmente corrotto
-- Bug durante il salvataggio
 
 **Comportamento:**
-- Banner "Configurazione incompleta" visibile
-- Menu disabilitato (tranne Home/Settings)
+- Banner informativo visibile (non bloccante)
+- **Tutte le voci di menu rimangono attive**
 - Toast: "Profilo incompleto. Completa i dati mancanti..."
 
 **Recupero:**
