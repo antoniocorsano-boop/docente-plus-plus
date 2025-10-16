@@ -581,8 +581,8 @@ export class NotificationSystem {
      * Update UI (notification center badge, etc.)
      */
     updateUI() {
-        // Update notification badge
-        const badge = document.getElementById('notification-badge');
+        // Update notification badge (now in sidebar)
+        const badge = document.getElementById('notification-badge-sidebar');
         const unreadCount = this.getUnreadCount();
         if (badge) {
             badge.textContent = unreadCount > 99 ? '99+' : unreadCount;

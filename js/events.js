@@ -130,8 +130,8 @@ export function setupEventListeners() {
         }
     });
 
-    // Notification Center Controls
-    document.getElementById('notification-bell-btn')?.addEventListener('click', (e) => {
+    // Notification Center Controls - now in sidebar
+    document.getElementById('notification-bell-btn-sidebar')?.addEventListener('click', (e) => {
         e.stopPropagation();
         const center = document.getElementById('notification-center');
         if (center) {
@@ -147,7 +147,7 @@ export function setupEventListeners() {
     // Close notification center when clicking outside
     document.addEventListener('click', (e) => {
         const center = document.getElementById('notification-center');
-        const bellBtn = document.getElementById('notification-bell-btn');
+        const bellBtn = document.getElementById('notification-bell-btn-sidebar');
         
         if (center && bellBtn && 
             center.style.display !== 'none' &&
