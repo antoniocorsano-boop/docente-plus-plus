@@ -1,9 +1,6 @@
 // tests/setup.js
 // Jest test setup configuration
 
-// Extend Jest matchers with @testing-library/jest-dom
-import '@testing-library/jest-dom';
-
 // Mock localStorage
 const localStorageMock = {
   getItem: jest.fn(),

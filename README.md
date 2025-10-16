@@ -8,12 +8,16 @@
 
 ## ✨ Funzionalità Principali
 
-La versione 1.2.0 introduce miglioramenti significativi al flusso di onboarding e alla gestione degli errori:
+La versione 1.2.1 introduce un sistema di navigazione completo e accessibile:
 
-- **✅ Onboarding Obbligatorio (NUOVO)**: Il completamento del profilo è ora obbligatorio per accedere a tutte le funzionalità. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore. Non è più possibile saltare l'onboarding.
-- **🔒 Gestione Intelligente dei Permessi (NUOVO)**: Le voci di menu sono disabilitate finché il profilo non è completo, con indicatori visivi chiari (icona lucchetto 🔒) e feedback informativo.
-- **🟧 Banner Guida (NUOVO)**: Un banner persistente guida l'utente a completare il profilo quando necessario, con un pulsante di accesso rapido alla configurazione.
-- **🛡️ Gestione Errori Migliorata (NUOVO)**: Miglior gestione di localStorage corrotto o non disponibile, con messaggi di errore chiari e procedure di recupero automatiche.
+- **🧭 Navigazione Avanzata (NUOVO)**: Sistema completo di navigazione con breadcrumb (briciole di pane), pulsante indietro e pulsante Home sempre visibile
+- **⌨️ Accessibilità Completa (NUOVO)**: Navigazione con tastiera (Tab), etichette ARIA, indicatori di focus visibili e supporto per lettori di schermo
+- **🔙 Integrazione History Browser (NUOVO)**: I pulsanti avanti/indietro del browser funzionano correttamente, URL aggiornati con hash per ogni pagina
+- **🧪 Test Automatici (NUOVO)**: Suite di test Jest con 40+ test per onboarding e navigazione, eseguibili localmente senza costi
+- **✅ Onboarding Obbligatorio**: Il completamento del profilo è obbligatorio per accedere a tutte le funzionalità. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore
+- **🔒 Gestione Intelligente dei Permessi**: Le voci di menu sono disabilitate finché il profilo non è completo, con indicatori visivi chiari (icona lucchetto 🔒) e feedback informativo
+- **🟧 Banner Guida**: Un banner persistente guida l'utente a completare il profilo quando necessario, con un pulsante di accesso rapido alla configurazione
+- **🛡️ Gestione Errori Migliorata**: Miglior gestione di localStorage corrotto o non disponibile, con messaggi di errore chiari e procedure di recupero automatiche
 - **🎨 Theme Picker Material 3**: Personalizza l'aspetto dell'app con temi Chiaro, Scuro o Automatico (dinamico) che segue le preferenze del sistema. I temi utilizzano Material Design 3 Expressive con palette di colori moderne e Material Symbols per le icone.
 - **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
 - **🗓️ Pianificazione Lezioni e Orario**: Organizza le tue lezioni con dettagli su argomenti, obiettivi e materiali. Le lezioni appaiono automaticamente in un orario settimanale e giornaliero interattivo.
@@ -52,11 +56,34 @@ Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirl
 ## 📖 Documentazione
 
 - **[Guida Rapida](docs/QUICK_START.md)**: Per iniziare subito
-- **[Guida Flusso Onboarding](docs/ONBOARDING_FLOW_GUIDE.md)**: Informazioni dettagliate sul nuovo flusso di onboarding ⭐ NUOVO
+- **[Guida Navigazione](docs/NAVIGATION_GUIDE.md)**: Sistema di navigazione, breadcrumb e accessibilità ⭐ NUOVO
+- **[Guida Testing](docs/TESTING_STRATEGY.md)**: Strategia di test e best practice ⭐ NUOVO
+- **[Guida Flusso Onboarding](docs/ONBOARDING_FLOW_GUIDE.md)**: Informazioni dettagliate sul flusso di onboarding
 - **[Guida Configurazione](docs/CONFIGURATION_GUIDE.md)**: Come configurare orario, classi e impostazioni IA
 - **[Guida Utente](docs/user-guide.md)**: Manuale completo
 - **[Guida Sviluppatore](docs/dev-guide.md)**: Per chi vuole contribuire
 - **[Risoluzione Problemi](docs/TROUBLESHOOTING.md)**: Soluzioni ai problemi comuni
+
+## 🧪 Testing
+
+Docente++ include una suite completa di test automatici:
+
+```bash
+# Installa le dipendenze (solo la prima volta)
+npm install
+
+# Esegui tutti i test
+npm test
+
+# Esegui i test in modalità watch (durante lo sviluppo)
+npm run test:watch
+
+# Esegui test specifici
+npm run test:navigation
+npm run test:onboarding
+```
+
+**Nota**: Tutti i test girano localmente senza consumare risorse premium. Vedi [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) per dettagli.
 
 ## 🔮 Roadmap Funzionalità Future
 
