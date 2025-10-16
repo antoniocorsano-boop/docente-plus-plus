@@ -127,6 +127,11 @@ class DocentePlusPlus {
         updateActiveClassBadge();
         switchTab('home');
     }
+    
+    // Public method to switch tabs - used by landing page cards
+    switchTab(tabName) {
+        switchTab(tabName);
+    }
 
     renderAllTabs() {
         this.renderHome();
