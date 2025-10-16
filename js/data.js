@@ -45,6 +45,13 @@ export function getDefaultScheduleSettings() {
 
 export function loadData() {
     try {
+        // First check if localStorage is accessible
+        if (!checkStorageHealth()) {
+            console.error('localStorage is not accessible');
+            showStorageError();
+            return false;
+        }
+        
         state.settings = safeJSONParse(localStorage.getItem('settings'), {});
         
         // Initialize schedule settings with defaults if not present
@@ -80,6 +87,13 @@ export function loadData() {
     }
 }
 
+function showStorageError() {
+    // Show a user-friendly error message when localStorage is not available
+    if (typeof window !== 'undefined' && window.showToast) {
+        window.showToast('Errore: localStorage non disponibile. Verifica le impostazioni del browser.', 'error', 10000);
+    }
+}
+
 export function saveData() {
     try {
         localStorage.setItem('settings', JSON.stringify(state.settings));
@@ -104,6 +118,13 @@ export function isOnboardingComplete() {
     return localStorage.getItem('onboardingComplete') === 'true';
 }
 
+export function isProfileComplete() {
+    // Check if the user has completed the essential profile information
+    return isOnboardingComplete() && 
+           state.settings.teacherName && 
+           state.settings.teacherName.trim() !== '';
+}
+
 export function completeOnboarding(settings) {
     state.settings = settings;
     localStorage.setItem('onboardingComplete', 'true');
@@ -111,14 +132,10 @@ export function completeOnboarding(settings) {
 }
 
 export function skipOnboarding() {
-    // Allow users to skip onboarding and use app with minimal config
-    localStorage.setItem('onboardingComplete', 'true');
-    state.settings = {
-        teacherName: 'Docente',
-        teacherLastName: '',
-        schoolYear: new Date().getFullYear() + '/' + (new Date().getFullYear() + 1)
-    };
-    saveData();
+    // Don't allow skipping - user must complete onboarding
+    // This ensures we never have an intermediate unclear state
+    console.warn('Skipping onboarding is not allowed. User must complete profile setup.');
+    return false;
 }
 
 export function resetToDefaults() {

@@ -1,6 +1,6 @@
 # 🎓 Docente++
 
-**Stato del Progetto: v1.1.0 - In Sviluppo**
+**Stato del Progetto: v1.2.0 - In Sviluppo**
 
 **Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
@@ -8,18 +8,21 @@
 
 ## ✨ Funzionalità Principali
 
-La versione 1.1.0 introduce nuove funzionalità di configurazione avanzata:
+La versione 1.2.0 introduce miglioramenti significativi al flusso di onboarding e alla gestione degli errori:
 
-- **✅ Onboarding Guidato**: Inizia in pochi secondi configurando il tuo profilo, la scuola e le materie che insegni.
+- **✅ Onboarding Obbligatorio (NUOVO)**: Il completamento del profilo è ora obbligatorio per accedere a tutte le funzionalità. Questo previene stati intermedi non chiari e garantisce un'esperienza utente migliore. Non è più possibile saltare l'onboarding.
+- **🔒 Gestione Intelligente dei Permessi (NUOVO)**: Le voci di menu sono disabilitate finché il profilo non è completo, con indicatori visivi chiari (icona lucchetto 🔒) e feedback informativo.
+- **🟧 Banner Guida (NUOVO)**: Un banner persistente guida l'utente a completare il profilo quando necessario, con un pulsante di accesso rapido alla configurazione.
+- **🛡️ Gestione Errori Migliorata (NUOVO)**: Miglior gestione di localStorage corrotto o non disponibile, con messaggi di errore chiari e procedure di recupero automatiche.
 - **🎨 Theme Picker Material 3**: Personalizza l'aspetto dell'app con temi Chiaro, Scuro o Automatico (dinamico) che segue le preferenze del sistema. I temi utilizzano Material Design 3 Expressive con palette di colori moderne e Material Symbols per le icone.
 - **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
 - **🗓️ Pianificazione Lezioni e Orario**: Organizza le tue lezioni con dettagli su argomenti, obiettivi e materiali. Le lezioni appaiono automaticamente in un orario settimanale e giornaliero interattivo.
-- **📅 Orario Settimanale Modificabile (NUOVO)**: Configura l'orario delle lezioni secondo le tue esigenze:
+- **📅 Orario Settimanale Modificabile**: Configura l'orario delle lezioni secondo le tue esigenze:
   - Imposta il numero di ore al giorno (predefinito: 6 ore)
   - Definisci l'orario di inizio e fine (predefinito: 8:00-14:00)
   - Seleziona i giorni lavorativi (predefinito: Lun-Ven)
   - Tabella oraria interattiva, modificabile con click/tap sulle celle
-- **⚙️ Configurazione Avanzata (NUOVO)**: Personalizza l'app secondo le tue esigenze:
+- **⚙️ Configurazione Avanzata**: Personalizza l'app secondo le tue esigenze:
   - Anno scolastico configurabile
   - Gestione classi disponibili
   - Chiave API IA per funzionalità avanzate
@@ -44,10 +47,13 @@ Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirl
     ```
     Successivamente, apri il browser all'indirizzo `http://localhost:8000`.
 
+3.  **Completa l'Onboarding**: Al primo avvio, dovrai completare un breve onboarding inserendo almeno il tuo nome. Questo è necessario per accedere a tutte le funzionalità dell'applicazione.
+
 ## 📖 Documentazione
 
 - **[Guida Rapida](docs/QUICK_START.md)**: Per iniziare subito
-- **[Guida Configurazione](docs/CONFIGURATION_GUIDE.md)**: Come configurare orario, classi e impostazioni IA ⭐ NUOVO
+- **[Guida Flusso Onboarding](docs/ONBOARDING_FLOW_GUIDE.md)**: Informazioni dettagliate sul nuovo flusso di onboarding ⭐ NUOVO
+- **[Guida Configurazione](docs/CONFIGURATION_GUIDE.md)**: Come configurare orario, classi e impostazioni IA
 - **[Guida Utente](docs/user-guide.md)**: Manuale completo
 - **[Guida Sviluppatore](docs/dev-guide.md)**: Per chi vuole contribuire
 - **[Risoluzione Problemi](docs/TROUBLESHOOTING.md)**: Soluzioni ai problemi comuni
