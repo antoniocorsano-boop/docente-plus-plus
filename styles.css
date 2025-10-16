@@ -6684,3 +6684,210 @@ body.dark-theme .info-box strong {
         font-size: var(--font-size-md);
     }
 }
+
+/* ============================================
+   NAVIGATION COMPONENTS
+   ============================================ */
+
+/* Navigation Bar - Breadcrumb and Back/Home buttons */
+.navigation-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--md-surface-container);
+    border-bottom: 1px solid var(--md-divider);
+    position: sticky;
+    top: 60px; /* Below header */
+    z-index: 90;
+    min-height: 48px;
+}
+
+/* Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: transparent;
+    border: 1px solid var(--md-border);
+    border-radius: var(--md-radius-small);
+    color: var(--md-text-primary);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background: var(--md-primary-container);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary-container);
+}
+
+.back-button:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.back-button:active {
+    transform: scale(0.98);
+}
+
+.back-button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--md-text-secondary);
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.breadcrumb::-webkit-scrollbar {
+    height: 4px;
+}
+
+.breadcrumb::-webkit-scrollbar-thumb {
+    background: var(--md-border);
+    border-radius: 2px;
+}
+
+.breadcrumb-link {
+    color: var(--md-primary);
+    text-decoration: none;
+    transition: color var(--md-transition-duration) var(--md-transition-timing);
+    white-space: nowrap;
+}
+
+.breadcrumb-link:hover {
+    color: var(--md-on-primary-container);
+    text-decoration: underline;
+}
+
+.breadcrumb-link:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+    border-radius: var(--md-radius-small);
+}
+
+.breadcrumb-separator {
+    margin: 0 var(--spacing-xs);
+    color: var(--md-text-disabled);
+    user-select: none;
+}
+
+.breadcrumb-current {
+    color: var(--md-text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Home Button */
+.home-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--md-primary);
+    border: none;
+    border-radius: var(--md-radius-small);
+    color: var(--md-on-primary);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    box-shadow: var(--md-elevation-1);
+}
+
+.home-button:hover {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    box-shadow: var(--md-elevation-2);
+}
+
+.home-button:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.home-button:active {
+    transform: scale(0.98);
+    box-shadow: var(--md-elevation-1);
+}
+
+.home-button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navigation-bar {
+        gap: var(--spacing-sm);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    .back-button-text,
+    .home-button-text {
+        display: none;
+    }
+
+    .back-button,
+    .home-button {
+        padding: var(--spacing-xs);
+        min-width: 36px;
+        justify-content: center;
+    }
+
+    .breadcrumb {
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* Accessibility - High Contrast Mode */
+@media (prefers-contrast: high) {
+    .navigation-bar {
+        border-bottom-width: 2px;
+    }
+
+    .back-button,
+    .home-button {
+        border-width: 2px;
+    }
+
+    .breadcrumb-link:focus,
+    .back-button:focus,
+    .home-button:focus {
+        outline-width: 3px;
+    }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .back-button,
+    .home-button,
+    .breadcrumb-link {
+        transition: none;
+    }
+
+    .back-button:active,
+    .home-button:active {
+        transform: none;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+.back-button:focus-visible,
+.home-button:focus-visible,
+.breadcrumb-link:focus-visible {
+    outline: 3px solid var(--md-primary);
+    outline-offset: 2px;
+}
