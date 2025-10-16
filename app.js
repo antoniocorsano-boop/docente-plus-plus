@@ -1,10 +1,11 @@
 
 // app.js
-import { loadData, saveData, isOnboardingComplete, isProfileComplete, skipOnboarding, clearAllData, checkStorageHealth, state } from './js/data.js';
+import { loadData, saveData, isOnboardingComplete, isProfileComplete, skipOnboarding, clearAllData, checkStorageHealth, recoverOnboardingState, validateAndFixOnboardingState, state } from './js/data.js';
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, showOnboardingBanner, hideOnboardingBanner, disableMenuItems, enableAllMenuItems, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { initializeTheme, setupThemePicker } from './js/theme.js';
 import { initAppBar } from './js/appbar.js';
+import { initNavigation } from './js/navigation.js';
 import { 
     showModal, hideModal, 
     createClass, editClass, deleteClass,
@@ -93,22 +94,30 @@ class DocentePlusPlus {
                 showToast('Dati corrotti rilevati. App ripristinata ai valori predefiniti.', 'warning', 5000);
             }
             
-            if (!isOnboardingComplete()) {
+            // Validate and recover onboarding state if needed
+            const onboardingState = recoverOnboardingState();
+            console.log('Onboarding state:', onboardingState);
+            
+            if (onboardingState.needsOnboarding) {
                 // Onboarding not complete - show modal and disable menu
                 showOnboarding();
                 disableMenuItems(['home', 'settings']);
-            } else if (!isProfileComplete()) {
-                // Onboarding marked complete but profile is incomplete
-                // This handles corrupted data scenario
+            } else if (onboardingState.needsProfileCompletion) {
+                // Onboarding marked complete but profile is incomplete (corrupted data)
                 showOnboardingBanner();
                 disableMenuItems(['home', 'settings']);
                 this.initializeAppUI();
-                showToast('Profilo incompleto. Completa i dati mancanti per accedere a tutte le funzionalità.', 'warning', 5000);
+                showToast('⚠️ Profilo incompleto rilevato. Completa i dati mancanti per accedere a tutte le funzionalità.', 'warning', 6000);
             } else {
-                // Everything is OK
+                // Everything is OK - profile complete
                 hideOnboardingBanner();
                 enableAllMenuItems();
                 this.initializeAppUI();
+                
+                // Log success for debugging
+                if (onboardingState.reason === 'complete') {
+                    console.log('✅ App initialized with complete profile');
+                }
             }
             
             setupEventListeners();
@@ -118,13 +127,16 @@ class DocentePlusPlus {
             // Initialize AppBar scroll behavior
             initAppBar();
             
+            // Initialize Navigation system
+            initNavigation();
+            
             // Initialize AI Agent FAB
             initAIAgentFAB();
             
             // Initialize notification system
             notificationSystem.startAutoCheck();
             
-            console.log("Docente++ v1.2.0 (Intelligent Base) initialized.");
+            console.log("Docente++ v1.2.1 (Navigation & Improved Onboarding) initialized.");
         } catch (error) {
             console.error("Error during init:", error);
             // Try to recover by showing a minimal UI
