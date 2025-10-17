@@ -30,6 +30,7 @@ La versione 1.2.2 introduce un menu sempre accessibile e miglioramenti UX mobile
   - Tabella oraria interattiva, modificabile con click/tap sulle celle
 - **⚙️ Configurazione Avanzata**: Personalizza l'app secondo le tue esigenze:
   - Anno scolastico configurabile
+  - **📚 Selezione Discipline Insegnate (NUOVO)**: Configura le materie che insegni per filtrare lezioni e orari automaticamente
   - Gestione classi disponibili
   - Chiave API IA per funzionalità avanzate
   - Selezione modello IA (GPT-3.5, GPT-4, Claude, Llama)
