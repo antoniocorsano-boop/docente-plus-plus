@@ -34,6 +34,10 @@
     <link rel="stylesheet" href="css/schedule-component.css">
     <!-- Import System Styles -->
     <link rel="stylesheet" href="css/import-system.css">
+    <!-- Breadcrumbs Component -->
+    <link rel="stylesheet" href="components/breadcrumbs/breadcrumbs.css">
+    <!-- Floating Assistant -->
+    <link rel="stylesheet" href="ui/floating-assistant/floating-assistant.css">
     
     <!-- Third-party libraries for document processing -->
     <script src="libs/papaparse.min.js"></script>
@@ -112,6 +116,8 @@
             </button>
             <h1>Docente++</h1>
         </div>
+        <!-- Breadcrumbs Container -->
+        <div id="breadcrumbs-container"></div>
     </header>
 
     <!-- Notification Center Dropdown -->
@@ -1277,6 +1283,52 @@
                 <button class="btn btn-secondary" onclick="window.app.closeAIAgentModal()">Chiudi</button>
             </div>
         </div>
+    </div>
+
+    <!-- Floating Assistant Panel -->
+    <div id="floating-assistant-backdrop" class="floating-assistant-backdrop"></div>
+    <div id="floating-assistant-panel" class="floating-assistant-panel">
+        <div class="floating-assistant-header">
+            <div>
+                <h2 class="floating-assistant-title">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                    Assistente IA
+                </h2>
+                <div class="floating-assistant-context">
+                    Contesto: <span id="floating-assistant-context">Generale</span>
+                </div>
+            </div>
+            <button class="floating-assistant-close" aria-label="Chiudi assistente">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div id="floating-assistant-messages" class="floating-assistant-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="floating-assistant-input-area">
+            <form id="floating-assistant-form" class="floating-assistant-form">
+                <textarea 
+                    id="floating-assistant-input" 
+                    class="floating-assistant-input"
+                    placeholder="Chiedimi qualcosa..."
+                    rows="1"
+                    aria-label="Messaggio per assistente IA"></textarea>
+                <button 
+                    type="button" 
+                    id="floating-assistant-mic-btn" 
+                    class="floating-assistant-mic-btn"
+                    aria-label="Registra messaggio vocale">
+                    <span class="material-symbols-outlined">mic</span>
+                </button>
+                <button 
+                    type="submit" 
+                    class="floating-assistant-send-btn"
+                    aria-label="Invia messaggio">
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </form>
+        </div>
+        <div id="floating-assistant-live-region" class="floating-assistant-live-region" aria-live="polite" aria-atomic="true"></div>
     </div>
 
     <!-- Icon Component -->

@@ -37,6 +37,8 @@ import {
     generateSmartSuggestions,
     createEventFromScheduleSlot
 } from './js/agenda.js';
+import { initBreadcrumbs, updateBreadcrumbs } from './components/breadcrumbs/breadcrumbs.js';
+import { initFloatingAssistant } from './ui/floating-assistant/floating-assistant.js';
 
 class DocentePlusPlus {
     constructor() {
@@ -135,8 +137,14 @@ class DocentePlusPlus {
             // Initialize Navigation system
             initNavigation();
             
+            // Initialize Breadcrumbs
+            initBreadcrumbs('breadcrumbs-container');
+            
             // Initialize AI Agent FAB
             initAIAgentFAB();
+            
+            // Initialize Floating Assistant
+            initFloatingAssistant();
             
             // Initialize notification system
             notificationSystem.startAutoCheck();
@@ -2539,6 +2547,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.app.init();
         // Expose showToast globally for theme picker
         window.showToast = showToast;
+        // Expose breadcrumbs update function
+        window.updateBreadcrumbs = updateBreadcrumbs;
     } catch (error) {
         console.error("Fatal error during app initialization:", error);
         document.body.innerHTML = '<div style="text-align:center;padding:20px;"><h1>Errore Critico</h1><p>L\'applicazione non è riuscita a caricarsi. Controlla la console per i dettagli.</p></div>';
