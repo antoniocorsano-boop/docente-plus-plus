@@ -23,11 +23,15 @@ La versione 1.2.2 introduce un menu sempre accessibile e miglioramenti UX mobile
 - **🎨 Theme Picker Material 3**: Personalizza l'aspetto dell'app con temi Chiaro, Scuro o Automatico (dinamico) che segue le preferenze del sistema. I temi utilizzano Material Design 3 Expressive con palette di colori moderne e Material Symbols per le icone.
 - **🏫 Gestione Classi e Studenti**: Crea le tue classi e aggiungi gli studenti. Il sistema tiene traccia di tutto, aggiornando automaticamente i contatori e le associazioni.
 - **🗓️ Pianificazione Lezioni e Orario**: Organizza le tue lezioni con dettagli su argomenti, obiettivi e materiali. Le lezioni appaiono automaticamente in un orario settimanale e giornaliero interattivo.
-- **📅 Orario Settimanale Modificabile**: Configura l'orario delle lezioni secondo le tue esigenze:
+- **📅 Orario Personale del Docente (NUOVO)**: Gestisci il tuo orario settimanale ricorrente:
+  - Orario personale del docente, non più basato sulle classi
+  - Ogni cella è editabile: inserisci classe e tipo lezione (T, D, L, ECiv, V, P)
   - Imposta il numero di ore al giorno (predefinito: 6 ore)
   - Definisci l'orario di inizio e fine (predefinito: 8:00-14:00)
   - Seleziona i giorni lavorativi (predefinito: Lun-Ven)
   - Tabella oraria interattiva, modificabile con click/tap sulle celle
+  - Pulsante "Entra in Classe" disponibile quando classe e tipo lezione sono configurati
+  - Tutti gli orari mostrati nell'app derivano dall'orario personale principale
 - **⚙️ Configurazione Avanzata**: Personalizza l'app secondo le tue esigenze:
   - Anno scolastico configurabile
   - **📚 Selezione Discipline Insegnate (NUOVO)**: Configura le materie che insegni per filtrare lezioni e orari automaticamente
