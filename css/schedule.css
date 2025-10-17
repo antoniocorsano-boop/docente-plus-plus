@@ -11,6 +11,7 @@
   border-collapse: collapse;
   background: white;
   min-width: 600px;
+  table-layout: fixed;
 }
 
 .schedule-table th,
@@ -18,6 +19,12 @@
   padding: 12px;
   text-align: center;
   border: 1px solid #e0e0e0;
+  width: 16.6%; /* Equal width for 6 columns (1 time + 5 days) */
+}
+
+.schedule-table th:first-child,
+.schedule-table td:first-child {
+  width: 80px; /* Fixed width for time column */
 }
 
 .schedule-table thead th {
