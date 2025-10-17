@@ -177,6 +177,14 @@ export function setupEventListeners() {
         }
     });
     
+    // Disciplines settings form (NEW)
+    document.getElementById('disciplines-settings-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (window.app) {
+            window.app.saveDisciplinesSettings();
+        }
+    });
+    
     // NEW: Class management form
     document.getElementById('class-management-form')?.addEventListener('submit', (e) => {
         e.preventDefault();

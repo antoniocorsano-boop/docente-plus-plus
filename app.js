@@ -292,7 +292,17 @@ class DocentePlusPlus {
         // Sort lessons by date (newest first)
         const sortedLessons = [...state.lessons].sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        list.innerHTML = sortedLessons.map(lesson => {
+        // Filter lessons by teacher's disciplines
+        const filteredLessons = sortedLessons.filter(lesson => 
+            !lesson.subject || this.shouldDisplaySubject(lesson.subject)
+        );
+        
+        if (filteredLessons.length === 0) {
+            list.innerHTML = '<p>Nessuna lezione per le discipline selezionate. Verifica le tue discipline nelle <a href="#" onclick="window.app.switchTab(\'settings\'); return false;">Impostazioni</a>.</p>';
+            return;
+        }
+        
+        list.innerHTML = filteredLessons.map(lesson => {
             const classObj = state.classes.find(c => c.id === lesson.classId);
             const className = classObj ? classObj.name : '';
             
@@ -529,18 +539,24 @@ class DocentePlusPlus {
                 tableHtml += `<td class="schedule-cell" onclick="window.app.showScheduleSlotEditor('${scheduleKey}', '${day.toISOString()}', '${time}')">`;
                 
                 if (slot && slot.classId) {
-                    const classObj = state.classes.find(c => c.id === slot.classId);
-                    const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
-                    
-                    tableHtml += `
-                        <div class="schedule-slot-content">
-                            <div class="schedule-class-name">${classObj ? classObj.name : 'Classe N/A'}</div>
-                            <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
-                                ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                    // Filter by teacher's disciplines if a subject is set
+                    if (slot.subject && !this.shouldDisplaySubject(slot.subject)) {
+                        tableHtml += '<div class="schedule-slot-empty">+ Aggiungi</div>';
+                    } else {
+                        const classObj = state.classes.find(c => c.id === slot.classId);
+                        const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
+                        
+                        tableHtml += `
+                            <div class="schedule-slot-content">
+                                <div class="schedule-class-name">${classObj ? classObj.name : 'Classe N/A'}</div>
+                                ${slot.subject ? `<div class="schedule-subject">${slot.subject}</div>` : ''}
+                                <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
+                                    ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                                </div>
+                                <button class="btn btn-xs btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia</button>
                             </div>
-                            <button class="btn btn-xs btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia</button>
-                        </div>
-                    `;
+                        `;
+                    }
                 } else {
                     tableHtml += '<div class="schedule-slot-empty">+ Aggiungi</div>';
                 }
@@ -586,18 +602,24 @@ class DocentePlusPlus {
             `;
             
             if (slot && slot.classId) {
-                const classObj = state.classes.find(c => c.id === slot.classId);
-                const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
-                
-                tableHtml += `
-                    <div class="schedule-slot-content schedule-slot-content-daily">
-                        <div class="schedule-class-name">${classObj ? classObj.name : 'Classe N/A'}</div>
-                        <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
-                            ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                // Filter by teacher's disciplines if a subject is set
+                if (slot.subject && !this.shouldDisplaySubject(slot.subject)) {
+                    tableHtml += '<div class="schedule-slot-empty">+ Aggiungi Lezione</div>';
+                } else {
+                    const classObj = state.classes.find(c => c.id === slot.classId);
+                    const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
+                    
+                    tableHtml += `
+                        <div class="schedule-slot-content schedule-slot-content-daily">
+                            <div class="schedule-class-name">${classObj ? classObj.name : 'Classe N/A'}</div>
+                            ${slot.subject ? `<div class="schedule-subject"><strong>Materia:</strong> ${slot.subject}</div>` : ''}
+                            <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
+                                ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                            </div>
+                            <button class="btn btn-sm btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia Lezione</button>
                         </div>
-                        <button class="btn btn-sm btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia Lezione</button>
-                    </div>
-                `;
+                    `;
+                }
             } else {
                 tableHtml += '<div class="schedule-slot-empty">+ Aggiungi Lezione</div>';
             }
@@ -647,6 +669,25 @@ class DocentePlusPlus {
     getDayName(date) {
         const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
         return days[date.getDay()];
+    }
+    
+    // NEW: Get teacher's subjects (either selected disciplines or all preset subjects)
+    getTeacherSubjects() {
+        const teacherDisciplines = state.settings.teacherDisciplines;
+        return (teacherDisciplines && teacherDisciplines.length > 0) 
+            ? teacherDisciplines 
+            : this.subjectsPreset;
+    }
+    
+    // NEW: Check if a subject should be displayed based on teacher's disciplines
+    shouldDisplaySubject(subject) {
+        const teacherDisciplines = state.settings.teacherDisciplines;
+        // If no disciplines selected, show all
+        if (!teacherDisciplines || teacherDisciplines.length === 0) {
+            return true;
+        }
+        // Otherwise, only show if it's in the teacher's disciplines
+        return teacherDisciplines.includes(subject);
     }
     
     getActivityTypeIcon(type) {
@@ -727,6 +768,13 @@ class DocentePlusPlus {
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="slot-subject">Materia</label>
+                        <select id="slot-subject" required>
+                            <option value="">-- Seleziona Materia --</option>
+                            ${this.getTeacherSubjects().map(subject => `<option value="${subject}" ${slot.subject === subject ? 'selected' : ''}>${subject}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="slot-activity-type">Tipo Attività</label>
                         <select id="slot-activity-type" required>
                             <option value="">-- Seleziona Tipo --</option>
@@ -758,15 +806,17 @@ class DocentePlusPlus {
     
     saveScheduleSlot() {
         const classId = document.getElementById('slot-class').value;
+        const subject = document.getElementById('slot-subject').value;
         const activityType = document.getElementById('slot-activity-type').value;
         
-        if (!classId || !activityType) {
-            showToast('Seleziona classe e tipo attività', 'error');
+        if (!classId || !subject || !activityType) {
+            showToast('Seleziona classe, materia e tipo attività', 'error');
             return;
         }
         
         state.schedule[this.currentEditingSlot] = {
             classId: classId,
+            subject: subject,
             activityType: activityType
         };
         
@@ -1682,6 +1732,27 @@ class DocentePlusPlus {
         if (emailInput) {
             emailInput.value = state.settings.teacherEmail || '';
         }
+        
+        // Load disciplines settings
+        this.loadDisciplinesSettingsForm();
+    }
+    
+    // NEW: Load disciplines settings form
+    loadDisciplinesSettingsForm() {
+        const teacherDisciplines = state.settings.teacherDisciplines || [];
+        
+        // Uncheck all first
+        document.querySelectorAll('.discipline-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Check selected disciplines
+        teacherDisciplines.forEach(discipline => {
+            const checkbox = document.querySelector(`.discipline-checkbox[value="${discipline}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
     }
 
     loadNotificationSettingsForm() {
@@ -1879,6 +1950,25 @@ class DocentePlusPlus {
         
         // Check if profile is now complete
         this.checkProfileCompleteness();
+        
+        this.renderSettings();
+    }
+    
+    // NEW: Save disciplines settings
+    saveDisciplinesSettings() {
+        const selectedDisciplines = [];
+        document.querySelectorAll('.discipline-checkbox:checked').forEach(checkbox => {
+            selectedDisciplines.push(checkbox.value);
+        });
+        
+        // Save to state
+        state.settings.teacherDisciplines = selectedDisciplines;
+        
+        saveData();
+        showToast('Discipline salvate!', 'success');
+        
+        // Update lesson subject dropdown if visible
+        this.populateSubjectDropdown();
         
         this.renderSettings();
     }
@@ -2189,7 +2279,13 @@ class DocentePlusPlus {
             select.innerHTML = '';
             select.appendChild(firstOption);
             
-            this.subjectsPreset.forEach(subject => {
+            // Use teacher's selected disciplines if available, otherwise show all preset subjects
+            const teacherDisciplines = state.settings.teacherDisciplines;
+            const subjectsToShow = (teacherDisciplines && teacherDisciplines.length > 0) 
+                ? teacherDisciplines 
+                : this.subjectsPreset;
+            
+            subjectsToShow.forEach(subject => {
                 const option = document.createElement('option');
                 option.value = subject;
                 option.textContent = subject;
