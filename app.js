@@ -235,16 +235,15 @@ class DocentePlusPlus {
         if (!container) return;
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayStr = today.toISOString().split('T')[0];
+        const dayName = this.getDayName(today);
 
-        // Get today's slots from schedule
+        // Get today's slots from personal weekly schedule
         const todaySlots = Object.entries(state.schedule)
-            .filter(([key, slot]) => key.startsWith(todayStr))
+            .filter(([key, slot]) => key.startsWith(dayName))
             .map(([key, slot]) => {
-                const hour = key.split('-')[3];
+                const time = key.split('-')[1]; // Get time from "DayName-Time" format
                 return {
-                    time: `${hour}:00`,
+                    time: time,
                     slot: slot,
                     key: key
                 };
@@ -266,13 +265,20 @@ class DocentePlusPlus {
                     <div class="schedule-time">${time}</div>
                     <div class="schedule-info">
                         <strong>${classObj ? classObj.name : 'N/A'}</strong>
+                        ${slot.subject ? `<span>${slot.subject}</span>` : ''}
                         <span class="activity-badge" style="background-color: ${activityTypeInfo.color}">
                             ${activityTypeInfo.icon} ${activityTypeInfo.label}
                         </span>
                     </div>
-                    <button class="btn btn-sm btn-primary" onclick="window.app.launchScheduleActivity('${key}')">
-                        ▶ Avvia
-                    </button>
+                    ${slot.classId && slot.activityType ? `
+                        <button class="btn btn-sm btn-primary" onclick="window.app.enterClassroom('${key}')">
+                            <span class="material-symbols-outlined">login</span> Entra
+                        </button>
+                    ` : `
+                        <button class="btn btn-sm btn-secondary" onclick="window.app.showScheduleSlotEditor('${key}', '${today.toISOString()}', '${time}')">
+                            <span class="material-symbols-outlined">edit</span> Configura
+                        </button>
+                    `}
                 </div>
             `;
         });
