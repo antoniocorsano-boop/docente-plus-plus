@@ -8,7 +8,7 @@ export const state = {
     lessons: [],
     activities: [],
     evaluations: [],
-    schedule: {},
+    schedule: {}, // Teacher's personal weekly recurring schedule (key: "day-time" e.g., "Lunedì-08:00")
     events: [], // Agenda events
     chatMessages: [],
     activeClass: null,

@@ -553,7 +553,11 @@ class DocentePlusPlus {
                                 <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
                                     ${activityTypeInfo.icon} ${activityTypeInfo.label}
                                 </div>
-                                <button class="btn btn-xs btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia</button>
+                                ${slot.classId && slot.activityType ? `
+                                    <button class="btn btn-xs btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.enterClassroom('${scheduleKey}')">
+                                        <span class="material-symbols-outlined">login</span> Entra in Classe
+                                    </button>
+                                ` : ''}
                             </div>
                         `;
                     }
@@ -616,7 +620,11 @@ class DocentePlusPlus {
                             <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
                                 ${activityTypeInfo.icon} ${activityTypeInfo.label}
                             </div>
-                            <button class="btn btn-sm btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.launchScheduleActivity('${scheduleKey}')">▶ Avvia Lezione</button>
+                            ${slot.classId && slot.activityType ? `
+                                <button class="btn btn-sm btn-success schedule-launch-btn" onclick="event.stopPropagation(); window.app.enterClassroom('${scheduleKey}')">
+                                    <span class="material-symbols-outlined">login</span> Entra in Classe
+                                </button>
+                            ` : ''}
                         </div>
                     `;
                 }
@@ -633,13 +641,11 @@ class DocentePlusPlus {
     }
     
     // Helper methods for schedule management
+    // NEW: Personal weekly recurring schedule - key is "DayName-Time" (e.g., "Lunedì-08:00")
     getScheduleKey(date, time) {
         const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const hour = time.split(':')[0];
-        return `${year}-${month}-${day}-${hour}`;
+        const dayName = this.getDayName(d);
+        return `${dayName}-${time}`;
     }
     
     getNextWeekday(date) {
@@ -692,9 +698,15 @@ class DocentePlusPlus {
     
     getActivityTypeIcon(type) {
         const types = {
-            'theory': { icon: 'T', label: 'Teoria', color: '#3498db' },
-            'drawing': { icon: 'D', label: 'Disegno', color: '#e67e22' },
-            'lab': { icon: 'L', label: 'Laboratorio', color: '#27ae60' }
+            'T': { icon: 'T', label: 'Teoria', color: '#3498db' },
+            'D': { icon: 'D', label: 'Disegno', color: '#e67e22' },
+            'L': { icon: 'L', label: 'Laboratorio', color: '#27ae60' },
+            'ECiv': { icon: 'EC', label: 'Ed. Civica', color: '#9b59b6' },
+            'V': { icon: 'V', label: 'Verifica', color: '#e74c3c' },
+            'P': { icon: 'P', label: 'Pratica', color: '#f39c12' },
+            'theory': { icon: 'T', label: 'Teoria', color: '#3498db' }, // Backward compatibility
+            'drawing': { icon: 'D', label: 'Disegno', color: '#e67e22' }, // Backward compatibility
+            'lab': { icon: 'L', label: 'Laboratorio', color: '#27ae60' } // Backward compatibility
         };
         return types[type] || { icon: '?', label: 'N/A', color: '#999' };
     }
@@ -775,12 +787,15 @@ class DocentePlusPlus {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="slot-activity-type">Tipo Attività</label>
+                        <label for="slot-activity-type">Tipo Lezione</label>
                         <select id="slot-activity-type" required>
                             <option value="">-- Seleziona Tipo --</option>
-                            <option value="theory" ${slot.activityType === 'theory' ? 'selected' : ''}>Teoria</option>
-                            <option value="drawing" ${slot.activityType === 'drawing' ? 'selected' : ''}>Disegno</option>
-                            <option value="lab" ${slot.activityType === 'lab' ? 'selected' : ''}>Laboratorio</option>
+                            <option value="T" ${slot.activityType === 'T' || slot.activityType === 'theory' ? 'selected' : ''}>T - Teoria</option>
+                            <option value="D" ${slot.activityType === 'D' || slot.activityType === 'drawing' ? 'selected' : ''}>D - Disegno</option>
+                            <option value="L" ${slot.activityType === 'L' || slot.activityType === 'lab' ? 'selected' : ''}>L - Laboratorio</option>
+                            <option value="ECiv" ${slot.activityType === 'ECiv' ? 'selected' : ''}>ECiv - Ed. Civica</option>
+                            <option value="V" ${slot.activityType === 'V' ? 'selected' : ''}>V - Verifica</option>
+                            <option value="P" ${slot.activityType === 'P' ? 'selected' : ''}>P - Pratica</option>
                         </select>
                     </div>
                     <div class="form-actions">
@@ -844,6 +859,166 @@ class DocentePlusPlus {
         }
     }
     
+    // NEW: Direct classroom entry from schedule
+    enterClassroom(scheduleKey) {
+        const slot = state.schedule[scheduleKey];
+        if (!slot || !slot.classId || !slot.activityType) {
+            showToast('Configura classe e tipo lezione prima di entrare', 'error');
+            return;
+        }
+        
+        const classObj = state.classes.find(c => c.id === slot.classId);
+        if (!classObj) {
+            showToast('Classe non trovata', 'error');
+            return;
+        }
+        
+        // Set active class
+        state.activeClass = slot.classId;
+        saveData();
+        
+        // Navigate to classes tab with classroom mode
+        this.switchTab('classes');
+        
+        // Show in-class interface with schedule data
+        this.showInClassInterface(scheduleKey, slot);
+    }
+    
+    showInClassInterface(scheduleKey, slot) {
+        const classObj = state.classes.find(c => c.id === slot.classId);
+        const students = state.students.filter(s => s.classId === slot.classId);
+        const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
+        
+        // Parse schedule key for display
+        const [dayName, time] = scheduleKey.split('-');
+        
+        // Create in-class interface
+        const classesTab = document.getElementById('classes');
+        if (!classesTab) return;
+        
+        classesTab.innerHTML = `
+            <div class="in-class-interface">
+                <div class="in-class-header">
+                    <div class="in-class-info">
+                        <h2>
+                            <span class="material-symbols-outlined">school</span>
+                            In Classe: ${classObj.name}
+                        </h2>
+                        <div class="in-class-details">
+                            <span><strong>Giorno:</strong> ${dayName}</span>
+                            <span><strong>Ora:</strong> ${time}</span>
+                            <span><strong>Materia:</strong> ${slot.subject || 'N/A'}</span>
+                            <span class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
+                                ${activityTypeInfo.icon} ${activityTypeInfo.label}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="in-class-actions">
+                        <button class="btn btn-secondary" onclick="window.app.exitClassroom()">
+                            <span class="material-symbols-outlined">logout</span>
+                            Esci
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="in-class-content">
+                    <h3>Studenti (${students.length})</h3>
+                    ${students.length === 0 ? 
+                        '<p class="no-students">Nessuno studente registrato per questa classe.</p>' : 
+                        `<div class="students-grid">
+                            ${students.map(student => `
+                                <div class="student-card">
+                                    <div class="student-info">
+                                        <span class="material-symbols-outlined">person</span>
+                                        <div>
+                                            <strong>${student.firstName} ${student.lastName}</strong>
+                                            <small>ID: ${student.id}</small>
+                                        </div>
+                                    </div>
+                                    <div class="student-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="window.app.quickEvaluate('${student.id}')">
+                                            <span class="material-symbols-outlined">edit_note</span>
+                                            Valuta
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>`
+                    }
+                    
+                    <div class="in-class-notes">
+                        <h3>Note della Lezione</h3>
+                        <textarea id="lesson-notes-${scheduleKey}" placeholder="Scrivi le note della lezione qui..." rows="6"></textarea>
+                        <button class="btn btn-primary" onclick="window.app.saveLessonNotes('${scheduleKey}')">
+                            <span class="material-symbols-outlined">save</span>
+                            Salva Note
+                        </button>
+                    </div>
+                    
+                    <div class="in-class-quick-actions">
+                        <h3>Azioni Rapide</h3>
+                        <div class="quick-actions-grid">
+                            <button class="btn btn-secondary" onclick="window.app.openAttendance('${slot.classId}')">
+                                <span class="material-symbols-outlined">how_to_reg</span>
+                                Appello
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.app.switchTab('activities')">
+                                <span class="material-symbols-outlined">assignment</span>
+                                Nuova Attività
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.app.switchTab('aiAssistant')">
+                                <span class="material-symbols-outlined">psychology</span>
+                                Chiedi all'IA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        updateActiveClassBadge();
+        showToast(`Entrato in classe ${classObj.name}`, 'success');
+    }
+    
+    exitClassroom() {
+        // Return to normal classes view
+        this.switchTab('classes');
+        this.renderClasses();
+        showToast('Uscito dalla classe', 'info');
+    }
+    
+    saveLessonNotes(scheduleKey) {
+        const notes = document.getElementById(`lesson-notes-${scheduleKey}`)?.value || '';
+        if (!notes.trim()) {
+            showToast('Scrivi alcune note prima di salvare', 'warning');
+            return;
+        }
+        
+        // Save notes to schedule slot
+        if (state.schedule[scheduleKey]) {
+            state.schedule[scheduleKey].notes = notes;
+            saveData();
+            showToast('Note salvate con successo', 'success');
+        }
+    }
+    
+    quickEvaluate(studentId) {
+        // Quick evaluation modal for a single student
+        const student = state.students.find(s => s.id === studentId);
+        if (!student) {
+            showToast('Studente non trovato', 'error');
+            return;
+        }
+        
+        showToast(`Funzionalità di valutazione rapida per ${student.firstName} ${student.lastName} in sviluppo`, 'info');
+        // TODO: Implement quick evaluation modal
+    }
+    
+    openAttendance(classId) {
+        showToast('Funzionalità appello in sviluppo', 'info');
+        // TODO: Implement attendance modal
+    }
+    
     launchScheduleActivity(scheduleKey) {
         const slot = state.schedule[scheduleKey];
         if (!slot || !slot.classId) {
@@ -866,10 +1041,8 @@ class DocentePlusPlus {
         const classObj = state.classes.find(c => c.id === slot.classId);
         const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
         
-        // Parse schedule key to get date/time info
-        const parts = scheduleKey.split('-');
-        const date = new Date(parts[0], parts[1] - 1, parts[2]);
-        const hour = parts[3];
+        // Parse schedule key to get day/time info (NEW format: "DayName-Time")
+        const [dayName, time] = scheduleKey.split('-');
         
         const modal = document.createElement('div');
         modal.id = 'activity-selection-modal';
@@ -917,7 +1090,7 @@ class DocentePlusPlus {
                 <h2>🎓 Avvia Lezione</h2>
                 <div class="lesson-header">
                     <div><strong>Classe:</strong> ${classObj ? classObj.name : 'N/A'}</div>
-                    <div><strong>Data/Ora:</strong> ${date.toLocaleDateString()} - ${hour}:00</div>
+                    <div><strong>Orario:</strong> ${dayName} - ${time}</div>
                     <div class="schedule-activity-badge" style="background-color: ${activityTypeInfo.color}">
                         ${activityTypeInfo.icon} ${activityTypeInfo.label}
                     </div>
@@ -956,10 +1129,8 @@ class DocentePlusPlus {
         const classObj = state.classes.find(c => c.id === activity.classId);
         const students = state.students.filter(s => s.classId === activity.classId);
         
-        // Parse schedule key for date/time
-        const parts = scheduleKey.split('-');
-        const date = new Date(parts[0], parts[1] - 1, parts[2]);
-        const hour = parts[3];
+        // Parse schedule key for day/time (NEW format: "DayName-Time")
+        const [dayName, time] = scheduleKey.split('-');
         
         const modal = document.createElement('div');
         modal.id = 'student-evaluation-modal';
@@ -1008,7 +1179,7 @@ class DocentePlusPlus {
                     <div class="lesson-info">
                         <span><strong>Classe:</strong> ${classObj ? classObj.name : 'N/A'}</span> | 
                         <span><strong>Attività:</strong> ${activity.title}</span> | 
-                        <span><strong>Data/Ora:</strong> ${date.toLocaleDateString()} ${hour}:00</span>
+                        <span><strong>Orario:</strong> ${dayName} ${time}</span>
                     </div>
                 </div>
                 
