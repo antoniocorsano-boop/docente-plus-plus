@@ -82,6 +82,71 @@ Le classi disponibili vengono gestite attraverso la sezione dedicata:
 
 **Suggerimento**: Mantieni aggiornato l'elenco delle classi per facilitare la pianificazione delle lezioni.
 
+## 📚 Configurazione Discipline Insegnate
+
+### Impostazione Discipline
+
+La sezione **Discipline Insegnate** permette di configurare le materie che il docente insegna. Questo consente di:
+
+- Filtrare le lezioni per mostrare solo quelle delle discipline selezionate
+- Filtrare l'orario personale per visualizzare solo gli slot relativi alle proprie materie
+- Limitare le opzioni disponibili durante la creazione di nuove lezioni
+
+### Accesso alle Impostazioni
+
+1. Apri il menu principale (☰)
+2. Naviga in **Impostazioni > Profilo**
+3. Scorri fino alla sezione **📚 Discipline Insegnate**
+
+### Discipline Disponibili
+
+L'applicazione supporta 20 discipline predefinite:
+
+- **Materie Umanistiche**: Italiano, Storia, Geografia, Filosofia, Latino, Greco
+- **Materie Scientifiche**: Matematica, Scienze, Fisica, Chimica
+- **Lingue Straniere**: Inglese, Francese, Spagnolo, Tedesco
+- **Materie Artistiche e Tecniche**: Arte e Immagine, Musica, Educazione Fisica, Tecnologia, Informatica
+- **Altre**: Religione
+
+### Configurazione
+
+1. Seleziona le discipline che insegni spuntando le relative caselle
+2. Clicca su **Salva Discipline**
+3. Le impostazioni vengono salvate automaticamente in `localStorage`
+
+### Comportamento Predefinito
+
+**Se non selezioni alcuna disciplina**: Tutte le discipline rimangono disponibili (comportamento predefinito). Questo assicura la retrocompatibilità con i dati esistenti.
+
+**Se selezioni una o più discipline**: L'applicazione filtrerà automaticamente:
+- Le lezioni visualizzate nella sezione "Lezioni"
+- Gli slot dell'orario personale
+- Le opzioni nel menu a tendina durante la creazione di nuove lezioni
+
+### Esempio di Utilizzo
+
+**Scenario: Docente di Matematica e Fisica**
+```
+Discipline selezionate: Matematica, Fisica
+Risultato:
+- Nella sezione "Lezioni" vengono mostrate solo le lezioni di Matematica e Fisica
+- Nell'orario personale vengono mostrati solo gli slot con Matematica o Fisica
+- Quando si crea una nuova lezione, il menu "Materia" mostra solo Matematica e Fisica
+```
+
+### Impatto sul Modello Dati
+
+Le discipline selezionate vengono salvate in:
+```javascript
+state.settings.teacherDisciplines = ['Matematica', 'Fisica', ...]
+```
+
+Questo campo viene utilizzato da:
+- `populateSubjectDropdown()` - popola il menu delle materie
+- `renderLessons()` - filtra le lezioni visualizzate
+- `renderWeeklySchedule()` / `renderDailySchedule()` - filtra gli slot dell'orario
+- `shouldDisplaySubject()` - verifica se una materia deve essere mostrata
+
 ## 🤖 Configurazione IA
 
 ### Chiave API OpenRouter
