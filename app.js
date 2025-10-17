@@ -891,6 +891,18 @@ class DocentePlusPlus {
     }
     
     showInClassInterface(scheduleKey, slot) {
+        // Open dedicated In Classe page with lesson data
+        const params = new URLSearchParams({
+            lesson: scheduleKey,
+            classId: slot.classId,
+            subject: slot.subject || '',
+            activityType: slot.activityType || ''
+        });
+        
+        // Open in new window/tab or redirect
+        window.open(`in-classe.html?${params.toString()}`, '_blank');
+        
+        // Legacy code below - kept for backward compatibility but can be removed
         const classObj = state.classes.find(c => c.id === slot.classId);
         const students = state.students.filter(s => s.classId === slot.classId);
         const activityTypeInfo = this.getActivityTypeIcon(slot.activityType);
