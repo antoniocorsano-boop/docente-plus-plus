@@ -297,28 +297,35 @@ function setupFABDragAndDrop(fab) {
 
 /**
  * Open AI Agent Modal with contextual suggestions
+ * Now uses the new floating assistant panel
  */
 export function openAIAgentModal() {
-    const modal = document.getElementById('ai-agent-modal');
-    if (!modal) return;
+    // Use the new floating assistant panel instead
+    if (window.floatingAssistant) {
+        window.floatingAssistant.open();
+    } else {
+        // Fallback to old modal if floating assistant not available
+        const modal = document.getElementById('ai-agent-modal');
+        if (!modal) return;
 
-    // Get current active tab/section
-    const currentSection = getCurrentSection();
-    
-    // Update context info
-    updateContextInfo(currentSection);
-    
-    // Load contextual suggestions
-    loadContextualSuggestions(currentSection);
-    
-    // Clear previous output
-    clearAIOutput();
-    
-    // Show modal
-    modal.style.display = 'flex';
+        // Get current active tab/section
+        const currentSection = getCurrentSection();
+        
+        // Update context info
+        updateContextInfo(currentSection);
+        
+        // Load contextual suggestions
+        loadContextualSuggestions(currentSection);
+        
+        // Clear previous output
+        clearAIOutput();
+        
+        // Show modal
+        modal.style.display = 'flex';
 
-    // Setup event listeners
-    setupModalEventListeners();
+        // Setup event listeners
+        setupModalEventListeners();
+    }
 }
 
 /**

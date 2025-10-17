@@ -22,6 +22,11 @@ import {
     resetFABPosition, 
     toggleFABVisibility 
 } from './js/ai-agent.js';
+import { 
+    initFloatingAssistant, 
+    openAssistantPanel, 
+    closeAssistantPanel 
+} from './js/floating-assistant.js';
 import { importPipeline } from './js/import-pipeline.js';
 import { smartPlanner } from './js/planner.js';
 import { notificationSystem } from './js/notifications.js';
@@ -137,6 +142,9 @@ class DocentePlusPlus {
             
             // Initialize AI Agent FAB
             initAIAgentFAB();
+            
+            // Initialize Floating AI Assistant Panel
+            initFloatingAssistant();
             
             // Initialize notification system
             notificationSystem.startAutoCheck();
