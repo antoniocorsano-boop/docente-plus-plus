@@ -1,6 +1,6 @@
 # 🎓 Docente++
 
-**Stato del Progetto: v1.2.2 - In Sviluppo**
+**Stato del Progetto: v1.2.4 - In Sviluppo**
 
 **Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
@@ -8,9 +8,18 @@
 
 ## ✨ Funzionalità Principali
 
-La versione 1.2.2 introduce un menu sempre accessibile e miglioramenti UX mobile:
+La versione 1.2.4 introduce la pagina "In Classe" completa:
 
-- **🎯 Menu Sempre Attivo (NUOVO)**: Tutte le voci di menu sono sempre accessibili, senza blocchi legati all'onboarding. L'app è completamente esplorabile sin dal primo avvio.
+- **📚 Pagina "In Classe" Completa (NUOVO)**: Interfaccia dedicata per gestire le lezioni in tempo reale
+  - Design mobile-first completamente responsive
+  - **Attività**: Gestisci attività della lezione (aggiungi, visualizza, elimina)
+  - **Compiti**: Assegna compiti con scadenze e tracking
+  - **Valutazioni**: Valuta rapidamente gli studenti
+  - **Appunto Vocale**: Registra audio con trascrizione IA (demo)
+  - **Analytics**: Dashboard con grafici presenze e performance
+  - **Sintesi**: Editor sintesi lezione ed export
+  - Vedi [docs/IN_CLASSE_PAGE.md](docs/IN_CLASSE_PAGE.md) per dettagli completi
+- **🎯 Menu Sempre Attivo**: Tutte le voci di menu sono sempre accessibili, senza blocchi legati all'onboarding. L'app è completamente esplorabile sin dal primo avvio.
 - **📱 UX Mobile Migliorata (NUOVO)**: La voce "Impostazioni" è stata spostata più in alto nel menu mobile per facilitare l'accesso rapido alla configurazione.
 - **🎨 Tema Unificato nelle Impostazioni (NUOVO)**: Selezione del tema (Chiaro/Scuro/Automatico) integrata nella pagina Impostazioni per un'esperienza più coerente.
 - **🧭 Navigazione Avanzata**: Sistema completo di navigazione con breadcrumb (briciole di pane), pulsante indietro e pulsante Home sempre visibile
@@ -64,8 +73,10 @@ Docente++ è progettato per funzionare senza un backend complesso. Puoi eseguirl
 ## 📖 Documentazione
 
 - **[Guida Rapida](docs/QUICK_START.md)**: Per iniziare subito
-- **[Guida Navigazione](docs/NAVIGATION_GUIDE.md)**: Sistema di navigazione, breadcrumb e accessibilità ⭐ NUOVO
-- **[Guida Testing](docs/TESTING_STRATEGY.md)**: Strategia di test e best practice ⭐ NUOVO
+- **[Pagina In Classe](docs/IN_CLASSE_PAGE.md)**: Guida completa alla nuova interfaccia "In Classe" ⭐ NUOVO
+- **[Guida Navigazione](docs/NAVIGATION_GUIDE.md)**: Sistema di navigazione, breadcrumb e accessibilità
+- **[Guida Orario Personale](docs/PERSONAL_SCHEDULE_GUIDE.md)**: Come usare il sistema orario personale
+- **[Guida Testing](docs/TESTING_STRATEGY.md)**: Strategia di test e best practice
 - **[Guida Flusso Onboarding](docs/ONBOARDING_FLOW_GUIDE.md)**: Informazioni dettagliate sul flusso di onboarding
 - **[Guida Configurazione](docs/CONFIGURATION_GUIDE.md)**: Come configurare orario, classi e impostazioni IA
 - **[Guida Utente](docs/user-guide.md)**: Manuale completo

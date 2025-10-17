@@ -4,6 +4,32 @@ Tutte le modifiche significative di Docente++ saranno documentate in questo file
 
 ## [Non Rilasciato]
 
+### Aggiunto - v1.2.4 (2024-10-17)
+- **📚 Pagina "In Classe" Completa**: Nuova interfaccia dedicata e completa per la gestione delle lezioni
+  - Design mobile-first completamente responsive (mobile/tablet/desktop)
+  - 6 sezioni collapsibili con tutte le funzionalità richieste:
+    - **Attività**: Gestione attività della lezione (aggiungi, visualizza, elimina)
+    - **Compiti**: Assegnazione compiti con scadenze e tracking completamento
+    - **Valutazioni**: Interfaccia rapida per valutare studenti con storico
+    - **Appunto Vocale**: Registrazione audio con trascrizione IA (demo/mock)
+    - **Analytics**: Dashboard con grafici presenze, performance e andamento (demo)
+    - **Agenda/Sintesi**: Editor sintesi lezione, next steps, export
+  - Persistenza dati con localStorage (pronto per API REST)
+  - Web Audio API per registrazione vocale
+  - Accessibilità completa (ARIA, keyboard navigation)
+  - Moduli JavaScript ES6+ con architettura pulita
+  - CSS3 con Material Design 3 coerente con l'app
+- **📄 Documentazione Completa**: Guida dettagliata in `docs/IN_CLASSE_PAGE.md`
+  - Architettura e componenti
+  - Guida all'uso di tutte le sezioni
+  - Struttura dati e localStorage
+  - Preparazione per integrazione API
+  - Performance e sicurezza
+  - Roadmap future implementazioni
+
+### Modificato - v1.2.4
+- **app.js**: Aggiornato `showInClassInterface()` per aprire la nuova pagina dedicata invece della vista inline
+
 ### Aggiunto - v1.2.3 (2024-10-17)
 - **🎓 Orario Personale del Docente**: Sistema di orario completamente rinnovato
   - Orario settimanale ricorrente personale del docente (non più basato su date)
