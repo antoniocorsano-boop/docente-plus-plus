@@ -46,11 +46,6 @@ export function switchTab(tabName) {
     if (window.app) {
         window.app.currentActiveTab = tabName;
     }
-    
-    // Update breadcrumbs
-    if (window.updateBreadcrumbs) {
-        window.updateBreadcrumbs('breadcrumbs-container', tabName);
-    }
 
     const renderFunction = `render${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
     if (typeof window.app[renderFunction] === 'function') {

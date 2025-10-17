@@ -17,50 +17,10 @@ class InClasseDataManager {
 
     getLessonKeyFromURL() {
         const params = new URLSearchParams(window.location.search);
-        
-        // Support new deep-linking format: /in-classe?date=YYYY-MM-DD&time=HH:MM&class=ClassName&slotId=xxx
-        const date = params.get('date');
-        const time = params.get('time');
-        const classParam = params.get('class');
-        const slotId = params.get('slotId');
-        
-        if (date && time && classParam) {
-            // Build lesson key from date and time
-            const dateObj = new Date(date);
-            const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-            const day = dayNames[dateObj.getDay()];
-            return `${day}-${time}-${classParam}`;
-        }
-        
-        // Fallback to legacy format or default
         return params.get('lesson') || 'Lunedì-08:00';
     }
 
     loadLessonData() {
-        // Get URL parameters for deep-linking support
-        const params = new URLSearchParams(window.location.search);
-        const classParam = params.get('class');
-        const date = params.get('date');
-        const time = params.get('time');
-        
-        // If we have deep-link params, prefill lesson data
-        if (classParam && date && time) {
-            const dateObj = new Date(date);
-            const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-            const day = dayNames[dateObj.getDay()];
-            
-            return {
-                classId: classParam,
-                className: `Classe ${classParam}`,
-                subject: params.get('subject') || 'Materia',
-                day: day,
-                time: `${time} - ${this.addOneHour(time)}`,
-                activityType: params.get('activityType') || 'Lezione',
-                date: date,
-                students: this.loadStudentsForClass(classParam)
-            };
-        }
-        
         // Mock lesson data - in production, fetch from API
         const mockData = {
             'Lunedì-08:00': {
@@ -80,24 +40,6 @@ class InClasseDataManager {
         };
         
         return mockData[this.lessonKey] || mockData['Lunedì-08:00'];
-    }
-    
-    addOneHour(time) {
-        const [hours, minutes] = time.split(':').map(Number);
-        const newHours = (hours + 1) % 24;
-        return `${String(newHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    }
-    
-    loadStudentsForClass(classId) {
-        // Try to load students from localStorage for this class
-        // In production, this would fetch from API
-        const allStudents = JSON.parse(localStorage.getItem('students') || '[]');
-        return allStudents.filter(s => s.classId === classId).map(s => ({
-            id: s.id,
-            firstName: s.firstName,
-            lastName: s.lastName,
-            avatar: `${s.firstName.charAt(0)}${s.lastName.charAt(0)}`
-        }));
     }
 
     loadActivities() {
