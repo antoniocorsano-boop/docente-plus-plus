@@ -17,11 +17,31 @@ class InClasseDataManager {
 
     getLessonKeyFromURL() {
         const params = new URLSearchParams(window.location.search);
-        return params.get('lesson') || 'Lunedì-08:00';
+        return params.get('lesson') || null;
     }
 
     loadLessonData() {
-        // Mock lesson data - in production, fetch from API
+        if (!this.lessonKey) {
+            return null; // No lesson selected yet
+        }
+
+        // Try to load from localStorage schedule first
+        const schedule = this.getScheduleFromStorage();
+        if (schedule && schedule[this.lessonKey]) {
+            const slot = schedule[this.lessonKey];
+            const [day, time] = this.lessonKey.split('-');
+            return {
+                classId: slot.classId || '',
+                className: slot.className || `Classe ${slot.classId}`,
+                subject: slot.subject || '',
+                day: day,
+                time: time,
+                activityType: slot.activityType || '',
+                students: this.getStudentsForClass(slot.classId)
+            };
+        }
+
+        // Fallback to mock data - in production, fetch from API
         const mockData = {
             'Lunedì-08:00': {
                 classId: '3A',
@@ -39,7 +59,34 @@ class InClasseDataManager {
             }
         };
         
-        return mockData[this.lessonKey] || mockData['Lunedì-08:00'];
+        return mockData[this.lessonKey] || null;
+    }
+
+    getScheduleFromStorage() {
+        try {
+            const scheduleStr = localStorage.getItem('schedule');
+            return scheduleStr ? JSON.parse(scheduleStr) : {};
+        } catch (e) {
+            console.error('Error loading schedule:', e);
+            return {};
+        }
+    }
+
+    getStudentsForClass(classId) {
+        if (!classId) return [];
+        try {
+            const studentsStr = localStorage.getItem('students');
+            const students = studentsStr ? JSON.parse(studentsStr) : [];
+            return students.filter(s => s.classId === classId).map(s => ({
+                id: s.id,
+                firstName: s.firstName,
+                lastName: s.lastName,
+                avatar: `${s.firstName?.charAt(0) || ''}${s.lastName?.charAt(0) || ''}`
+            }));
+        } catch (e) {
+            console.error('Error loading students:', e);
+            return [];
+        }
     }
 
     loadActivities() {
@@ -739,11 +786,120 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 }
 
+// Lesson Picker Modal Manager
+class LessonPickerModal {
+    constructor() {
+        this.modal = document.getElementById('lesson-picker-modal');
+        this.form = document.getElementById('lesson-picker-form');
+        this.select = document.getElementById('lesson-picker-select');
+        this.cancelBtn = document.getElementById('lesson-picker-cancel');
+    }
+
+    init() {
+        if (!this.modal || !this.form || !this.select) {
+            console.error('Lesson picker modal elements not found');
+            return;
+        }
+
+        // Load available lessons from schedule
+        this.loadAvailableLessons();
+
+        // Setup event listeners
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLessonSelection();
+        });
+
+        this.cancelBtn.addEventListener('click', () => {
+            this.close();
+            // Redirect to home if user cancels
+            window.location.href = 'index.html#home';
+        });
+    }
+
+    loadAvailableLessons() {
+        try {
+            const scheduleStr = localStorage.getItem('schedule');
+            const schedule = scheduleStr ? JSON.parse(scheduleStr) : {};
+            
+            // Clear existing options except the first one
+            this.select.innerHTML = '<option value="">-- Seleziona una lezione --</option>';
+
+            // Add lessons from schedule
+            const lessons = Object.entries(schedule);
+            if (lessons.length === 0) {
+                this.select.innerHTML += '<option value="" disabled>Nessuna lezione disponibile nell\'orario</option>';
+                return;
+            }
+
+            // Sort lessons by day and time
+            const dayOrder = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+            lessons.sort(([keyA], [keyB]) => {
+                const [dayA, timeA] = keyA.split('-');
+                const [dayB, timeB] = keyB.split('-');
+                const dayDiff = dayOrder.indexOf(dayA) - dayOrder.indexOf(dayB);
+                return dayDiff !== 0 ? dayDiff : timeA.localeCompare(timeB);
+            });
+
+            lessons.forEach(([key, slot]) => {
+                if (slot.classId && slot.subject) {
+                    const [day, time] = key.split('-');
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `${day} ${time} - ${slot.className || slot.classId} - ${slot.subject}${slot.activityType ? ' (' + slot.activityType + ')' : ''}`;
+                    this.select.appendChild(option);
+                }
+            });
+        } catch (e) {
+            console.error('Error loading available lessons:', e);
+        }
+    }
+
+    handleLessonSelection() {
+        const selectedLesson = this.select.value;
+        if (!selectedLesson) {
+            return;
+        }
+
+        // Reload page with selected lesson as URL parameter
+        window.location.href = `in-classe.html?lesson=${encodeURIComponent(selectedLesson)}`;
+    }
+
+    show() {
+        if (this.modal) {
+            this.modal.style.display = 'flex';
+        }
+    }
+
+    close() {
+        if (this.modal) {
+            this.modal.style.display = 'none';
+        }
+    }
+}
+
 // Initialize app
 let inClasseApp;
 
 document.addEventListener('DOMContentLoaded', () => {
     const dataManager = new InClasseDataManager();
+    
+    // Check if lesson is selected
+    if (!dataManager.lessonKey) {
+        // Show lesson picker modal
+        const lessonPicker = new LessonPickerModal();
+        lessonPicker.init();
+        lessonPicker.show();
+        return; // Don't initialize the full UI yet
+    }
+
+    // Check if lesson data is available
+    if (!dataManager.lessonData) {
+        alert('Lezione non trovata. Verrai reindirizzato alla home.');
+        window.location.href = 'index.html#home';
+        return;
+    }
+
     const audioRecorder = new AudioRecorder();
     const analytics = new AnalyticsManager(dataManager);
     

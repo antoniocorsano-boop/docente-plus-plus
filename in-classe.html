@@ -61,6 +61,32 @@
         </button>
     </nav>
 
+    <!-- Lesson Picker Modal -->
+    <div id="lesson-picker-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Seleziona Lezione</h2>
+            <p>Scegli la lezione da gestire</p>
+            <form id="lesson-picker-form">
+                <div class="form-group">
+                    <label for="lesson-picker-select">Lezione *</label>
+                    <select id="lesson-picker-select" required>
+                        <option value="">-- Seleziona una lezione --</option>
+                    </select>
+                    <p class="help-text">Seleziona una lezione dal tuo orario per entrare in classe</p>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">login</span>
+                        Entra in Classe
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="lesson-picker-cancel">
+                        Annulla
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
         
