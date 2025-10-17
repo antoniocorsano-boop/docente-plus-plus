@@ -749,7 +749,50 @@ document.addEventListener('DOMContentLoaded', () => {
     
     inClasseApp = new InClasseUI(dataManager, audioRecorder, analytics);
     inClasseApp.init();
+    
+    // Initialize breadcrumb navigation
+    initBreadcrumbNavigation();
+    
+    // Initialize floating AI assistant if available
+    if (typeof initFloatingAssistant === 'function') {
+        initFloatingAssistant();
+    }
 });
+
+// Initialize breadcrumb navigation
+function initBreadcrumbNavigation() {
+    const backButton = document.getElementById('breadcrumb-back-button');
+    const homeButton = document.getElementById('breadcrumb-home-button');
+    const headerBackButton = document.getElementById('back-button');
+    
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            window.location.href = 'index.html#schedule';
+        });
+    }
+    
+    if (homeButton) {
+        homeButton.addEventListener('click', () => {
+            window.location.href = 'index.html#home';
+        });
+    }
+    
+    if (headerBackButton) {
+        headerBackButton.addEventListener('click', () => {
+            window.location.href = 'index.html#schedule';
+        });
+    }
+    
+    // Setup AI FAB button
+    const aiFab = document.getElementById('ai-fab');
+    if (aiFab) {
+        aiFab.addEventListener('click', () => {
+            if (window.floatingAssistant) {
+                window.floatingAssistant.open();
+            }
+        });
+    }
+}
 
 // Export for global access
 window.inClasseApp = inClasseApp;

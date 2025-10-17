@@ -17,6 +17,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="css/in-classe.css">
+    <link rel="stylesheet" href="css/floating-assistant.css">
 </head>
 <body>
     <!-- Header with Lesson Info -->
@@ -40,6 +41,25 @@
             </button>
         </div>
     </header>
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="navigation-bar" id="navigation-bar-in-classe" aria-label="Navigazione breadcrumb">
+        <button id="breadcrumb-back-button" class="back-button" aria-label="Torna indietro" title="Torna indietro">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span class="back-button-text">Indietro</span>
+        </button>
+        <div id="breadcrumb-container-in-classe" class="breadcrumb" aria-label="Percorso di navigazione">
+            <a href="index.html" class="breadcrumb-link">Home</a>
+            <span class="breadcrumb-separator" aria-hidden="true">/</span>
+            <a href="index.html#schedule" class="breadcrumb-link">Orario</a>
+            <span class="breadcrumb-separator" aria-hidden="true">/</span>
+            <span class="breadcrumb-current" aria-current="page">In Classe</span>
+        </div>
+        <button id="breadcrumb-home-button" class="home-button" aria-label="Vai alla home" title="Vai alla home">
+            <span class="material-symbols-outlined" aria-hidden="true">home</span>
+            <span class="home-button-text">Home</span>
+        </button>
+    </nav>
 
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
@@ -323,6 +343,16 @@
 
     <!-- Scripts -->
     <script src="js/icons.js"></script>
+    <script type="module">
+        // Import floating assistant
+        import { initFloatingAssistant } from './js/floating-assistant.js';
+        window.initFloatingAssistant = initFloatingAssistant;
+    </script>
     <script type="module" src="js/in-classe.js"></script>
+
+    <!-- AI Agent Floating Action Button (FAB) -->
+    <button id="ai-fab" class="ai-fab" title="Apri Assistente IA" aria-label="Apri Assistente IA">
+        <span class="material-symbols-outlined">smart_toy</span>
+    </button>
 </body>
 </html>
