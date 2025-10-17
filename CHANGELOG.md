@@ -4,6 +4,32 @@ Tutte le modifiche significative di Docente++ saranno documentate in questo file
 
 ## [Non Rilasciato]
 
+### Aggiunto - v1.2.3 (2024-10-17)
+- **🎓 Orario Personale del Docente**: Sistema di orario completamente rinnovato
+  - Orario settimanale ricorrente personale del docente (non più basato su date)
+  - Chiavi formato `"GiornoSettimana-Ora"` invece di date specifiche
+  - Ogni cella dell'orario è editabile direttamente
+  - 6 tipi di lezione configurabili: T (Teoria), D (Disegno), L (Laboratorio), ECiv (Ed. Civica), V (Verifica), P (Pratica)
+- **🚪 Interfaccia "In Classe"**: Nuova interfaccia dedicata per gestire le lezioni
+  - Pulsante "Entra in Classe" visibile solo quando classe e tipo lezione sono configurati
+  - Vista studenti con possibilità di valutazione rapida
+  - Note della lezione salvate per ogni slot
+  - Azioni rapide: Appello, Nuova Attività, Assistente IA
+  - Pulsante "Esci" per tornare alla vista normale
+- **📊 Dashboard Integrata**: Vista orario di oggi con accesso diretto alle classi
+  - Mostra solo le lezioni del giorno corrente dall'orario personale
+  - Pulsante "Entra in Classe" per slot configurati
+  - Pulsante "Configura" per slot vuoti
+- **📚 Documentazione Completa**: Nuova guida all'orario personale (`docs/PERSONAL_SCHEDULE_GUIDE.md`)
+- **✅ Test Automatizzati**: Suite di 15 nuovi test per il sistema orario personale
+
+### Modificato - v1.2.3
+- **Formato Dati Orario**: Migrazione da chiavi date-based a day-time based per supportare orari ricorrenti
+- **Funzione getScheduleKey()**: Ora restituisce formato `"GiornoSettimana-Ora"` invece di `"YYYY-MM-DD-HH"`
+- **renderTodaySchedule()**: Aggiornato per usare il nuovo formato orario personale
+- **Tutte le visualizzazioni orario**: Derivano dall'unico orario personale principale
+- **README.md**: Aggiornato con nuove funzionalità orario personale
+
 ### Aggiunto - v1.2.2 (2024-10-16)
 - **Menù Laterale Sempre Attivo**: Il menù laterale è ora sempre visibile e accessibile, indipendentemente dallo stato di onboarding
 - **Onboarding Unificato nelle Impostazioni**: Il flusso di onboarding è stato integrato nella pagina Impostazioni, sempre accessibile dal menù
