@@ -34,48 +34,62 @@ jobs:
 
             for (const label of labels) {
               try {
-                await github.rest.issues.createLabel({
+                // check if label exists
+                await github.rest.issues.getLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  name: label.name,
-                  color: label.color,
-                  description: label.description
+                  name: label.name
                 });
-                core.info(`Created label ${label.name}`);
+                console.log(`Label ${label.name} already exists`);
               } catch (err) {
-                if (err.status === 422) {
-                  core.info(`Label ${label.name} already exists`);
+                if (err.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  console.log(`Created label ${label.name}`);
                 } else {
                   throw err;
                 }
               }
             }
 
-            // Create a classic project board for the repo
             try {
               const projectName = 'Class Page Planning';
               const projectBody = 'Board per idee e attività: To do / In progress / Review / Done';
 
-              const project = await github.rest.projects.createForRepo({
+              const projects = await github.rest.projects.listForRepo({
                 owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: projectName,
-                body: projectBody
+                repo: context.repo.repo
               });
 
-              core.info(`Created project ${project.data.name} #${project.data.number}`);
-
-              // Create columns (To do / In progress / Review / Done)
-              const columns = ['To do', 'In progress', 'Review', 'Done'];
-              for (const col of columns) {
-                await github.rest.projects.createColumn({
-                  project_id: project.data.id,
-                  name: col
+              const exists = projects.data.find(p => p.name === projectName);
+              if (exists) {
+                console.log(`Project "${projectName}" already exists (#${exists.number})`);
+              } else {
+                const project = await github.rest.projects.createForRepo({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: projectName,
+                  body: projectBody
                 });
-                core.info(`Created column ${col}`);
+
+                console.log(`Created project ${project.data.name} #${project.data.number}`);
+
+                const columns = ['To do', 'In progress', 'Review', 'Done'];
+                for (const col of columns) {
+                  await github.rest.projects.createColumn({
+                    project_id: project.data.id,
+                    name: col
+                  });
+                  console.log(`Created column ${col}`);
+                }
               }
             } catch (err) {
-              core.info('Project creation skipped or failed: ' + err.message);
+              console.log('Project creation skipped or failed: ' + err.message);
             }
 
             return 'Done';
