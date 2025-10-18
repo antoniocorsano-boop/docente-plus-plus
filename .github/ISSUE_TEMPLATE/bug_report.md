@@ -1,9 +1,10 @@
 ---
-name: 🐛 Segnalazione Bug
+name: "\U0001F41B Segnalazione Bug"
 about: Segnala un problema o malfunzionamento dell'app
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
 assignees: ''
+
 ---
 
 ## 🐛 Descrizione del Bug
