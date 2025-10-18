@@ -90,6 +90,72 @@
 
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
+        <!-- Static Schedule Grid (Enhanced by schedule-enhance.js) -->
+        <div class="schedule-table-wrapper" role="region" aria-label="Orario settimanale">
+            <table id="static-schedule-grid" role="table" aria-label="Griglia orario settimanale">
+                <thead>
+                    <tr>
+                        <th scope="col">Ora</th>
+                        <th scope="col">Lunedì</th>
+                        <th scope="col">Martedì</th>
+                        <th scope="col">Mercoledì</th>
+                        <th scope="col">Giovedì</th>
+                        <th scope="col">Venerdì</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="schedule-time">08:00</td>
+                        <td data-day="Lunedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                    <tr>
+                        <td class="schedule-time">09:00</td>
+                        <td data-day="Lunedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                    <tr>
+                        <td class="schedule-time">10:00</td>
+                        <td data-day="Lunedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                    <tr>
+                        <td class="schedule-time">11:00</td>
+                        <td data-day="Lunedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                    <tr>
+                        <td class="schedule-time">12:00</td>
+                        <td data-day="Lunedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                    <tr>
+                        <td class="schedule-time">13:00</td>
+                        <td data-day="Lunedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Martedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Mercoledì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Giovedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                        <td data-day="Venerdì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
         <!-- Schedule Container -->
         <div id="schedule-container"></div>
         
@@ -379,6 +445,7 @@
         window.initFloatingAssistant = initFloatingAssistant;
     </script>
     <script type="module" src="js/in-classe.js"></script>
+    <script src="js/schedule-enhance.js"></script>
 
     <!-- AI Agent Floating Action Button (FAB) -->
     <button id="ai-fab" class="ai-fab" title="Apri Assistente IA" aria-label="Apri Assistente IA">

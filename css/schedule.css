@@ -184,3 +184,207 @@ body.dark-theme .schedule-subject {
 body.dark-theme .schedule-slot-empty {
   color: #666;
 }
+
+/* Static grid enhancements */
+.slot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  margin: 4px 0;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #6750A4;
+}
+
+.slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-subject {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+.slot-class {
+  color: #555;
+  font-size: 12px;
+}
+
+.slot-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #6750A4;
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.slot-actions {
+  margin-top: 4px;
+}
+
+.slot-enter-btn {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  background: #6750A4;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.slot-enter-btn:hover {
+  background: #5347a1;
+}
+
+.slot-enter-btn:focus {
+  outline: 2px solid #6750A4;
+  outline-offset: 2px;
+}
+
+.slot-placeholder {
+  color: #999;
+  font-style: italic;
+  display: block;
+  padding: 20px;
+}
+
+/* Keyboard navigation styles */
+td[data-day][data-time]:focus {
+  outline: 3px solid #6750A4;
+  outline-offset: -3px;
+  background-color: rgba(103, 80, 164, 0.05);
+}
+
+td[data-day][data-time]:focus-visible {
+  outline: 3px solid #6750A4;
+  outline-offset: -3px;
+}
+
+/* Static schedule grid table */
+#static-schedule-grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin: 20px 0;
+  min-width: 600px;
+}
+
+#static-schedule-grid th,
+#static-schedule-grid td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+}
+
+#static-schedule-grid th {
+  background: #6750A4;
+  color: white;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#static-schedule-grid td:first-child {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+#static-schedule-grid td[data-day][data-time] {
+  vertical-align: top;
+  min-height: 80px;
+  position: relative;
+  cursor: pointer;
+}
+
+/* Responsive for static grid */
+@media (max-width: 768px) {
+  .slot-item {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .slot-subject {
+    font-size: 12px;
+  }
+
+  .slot-class {
+    font-size: 11px;
+  }
+
+  .slot-enter-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  #static-schedule-grid {
+    font-size: 12px;
+  }
+
+  #static-schedule-grid th,
+  #static-schedule-grid td {
+    padding: 8px 4px;
+  }
+}
+
+/* Dark theme for static grid */
+body.dark-theme #static-schedule-grid {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body.dark-theme #static-schedule-grid th,
+body.dark-theme #static-schedule-grid td {
+  border-color: #333;
+}
+
+body.dark-theme #static-schedule-grid td:first-child {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+body.dark-theme .slot-item {
+  background: #2a2a2a;
+  border-left-color: #8b7fc7;
+}
+
+body.dark-theme .slot-subject {
+  color: #e0e0e0;
+}
+
+body.dark-theme .slot-class {
+  color: #aaa;
+}
+
+body.dark-theme .slot-badge {
+  background: #8b7fc7;
+}
+
+body.dark-theme .slot-enter-btn {
+  background: #8b7fc7;
+}
+
+body.dark-theme .slot-enter-btn:hover {
+  background: #9f93d1;
+}
+
+body.dark-theme .slot-placeholder {
+  color: #666;
+}
+
+body.dark-theme td[data-day][data-time]:focus {
+  background-color: rgba(139, 127, 199, 0.1);
+  outline-color: #8b7fc7;
+}
