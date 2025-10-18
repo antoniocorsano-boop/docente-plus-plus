@@ -263,8 +263,8 @@
 
 /* Voice Recording Button */
 .ai-voice-button {
-    width: 4var(--md-spacing-xs);
-    height: 4var(--md-spacing-xs);
+    width: calc(11 * var(--md-spacing-xs));
+    height: calc(11 * var(--md-spacing-xs));
     background: var(--md-secondary-container);
     border: none;
     border-radius: 50%;
