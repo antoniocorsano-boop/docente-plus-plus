@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Configurazione (modifica solo se necessario)
 GITHUB_USER="${GITHUB_USER:-antoniocorsano-boop}"
-UPSTREAM="antbrogame-a11y/docente-plus-plus"
-REPO_NAME="docente-plus-plus"
+UPSTREAM="${2:-antbrogame-a11y/docente-plus-plus}"
+REPO_NAME="${UPSTREAM##*/}"
 UPSTREAM_SSH="git@github.com:${UPSTREAM}.git"
 FORK_SSH="git@github.com:${GITHUB_USER}/${REPO_NAME}.git"
 BRANCH="${1:-test-ssh}"
