@@ -333,15 +333,58 @@ class InClasseUI {
         this.renderSummary();
         this.setupCollapsibleSections();
         this.setupEventListeners();
+        
+        // Listen for active session class changes
+        window.addEventListener('activeSessionClassChanged', () => {
+            this.renderHeader();
+        });
     }
 
     renderHeader() {
-        const data = this.dataManager.lessonData;
-        document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
-        document.getElementById('lesson-class').textContent = data.className;
-        document.getElementById('lesson-subject').textContent = data.subject;
-        document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
-        document.getElementById('lesson-type').textContent = data.activityType;
+        // Check for active session class from sessionStorage
+        let activeSessionClass = null;
+        if (typeof window.getActiveSessionClass === 'function') {
+            activeSessionClass = window.getActiveSessionClass();
+        } else {
+            // Fallback: read directly from sessionStorage
+            try {
+                const data = sessionStorage.getItem('activeSessionClass');
+                activeSessionClass = data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.error('Failed to load active session class', e);
+            }
+        }
+        
+        // Use activeSessionClass if available, otherwise fallback to lessonData
+        const data = activeSessionClass || this.dataManager.lessonData;
+        
+        if (!activeSessionClass) {
+            // No active session - show generic header
+            document.getElementById('lesson-title').textContent = 'In Classe';
+            document.getElementById('lesson-class').textContent = 'Nessuna classe attiva';
+            document.getElementById('lesson-subject').textContent = '';
+            document.getElementById('lesson-datetime').textContent = '';
+            document.getElementById('lesson-type').textContent = '';
+            
+            // Hide the lesson meta section when no active session
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'none';
+            }
+        } else {
+            // Active session - show class details
+            document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
+            document.getElementById('lesson-class').textContent = data.className;
+            document.getElementById('lesson-subject').textContent = data.subject;
+            document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
+            document.getElementById('lesson-type').textContent = data.activityType;
+            
+            // Show the lesson meta section
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'flex';
+            }
+        }
     }
 
     renderActivities() {
@@ -777,6 +820,21 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 
     exit() {
+        // Clear active session class
+        if (typeof window.clearActiveSessionClass === 'function') {
+            window.clearActiveSessionClass();
+        } else {
+            // Fallback: clear directly from sessionStorage
+            try {
+                sessionStorage.removeItem('activeSessionClass');
+                window.dispatchEvent(new CustomEvent('activeSessionClassChanged', {
+                    detail: { classData: null }
+                }));
+            } catch (e) {
+                console.error('Failed to clear active session class', e);
+            }
+        }
+        
         // Navigate back to schedule or main app
         if (window.opener) {
             window.close();

@@ -168,6 +168,37 @@
    * Enter a lesson using available APIs or fallback
    */
   function enterLesson(lessonKey, classId) {
+    // Load the full slot data to populate activeSessionClass
+    const schedule = loadSchedule();
+    const slots = normalizeSchedule(schedule).map(normalizeSlot);
+    const slot = slots.find(s => s.lessonKey === lessonKey) || {};
+    
+    // Prepare class data for session
+    const classData = {
+      classId: classId || slot.classId || '',
+      className: slot.className || `Classe ${classId || slot.classId || ''}`,
+      subject: slot.subject || '',
+      day: slot.day || '',
+      time: slot.time || '',
+      activityType: slot.activityType || ''
+    };
+    
+    // Set active session class using the class-session module
+    // This will be imported dynamically since schedule-enhance.js is not a module
+    if (typeof window.setActiveSessionClass === 'function') {
+      window.setActiveSessionClass(classData);
+    } else {
+      // Fallback: set directly in sessionStorage
+      try {
+        sessionStorage.setItem('activeSessionClass', JSON.stringify(classData));
+        window.dispatchEvent(new CustomEvent('activeSessionClassChanged', {
+          detail: { classData }
+        }));
+      } catch (e) {
+        console.error('schedule-enhance: failed to set active session class', e);
+      }
+    }
+    
     // Try using the existing API if available
     if (typeof window.enterLessonFromSchedule === 'function') {
       try {
@@ -178,13 +209,14 @@
       }
     }
     
-    // Fallback: store in localStorage and reload
+    // Fallback: store in localStorage and navigate to in-classe page
     try {
       localStorage.setItem('lastOpenedLesson', lessonKey);
       if (classId) {
         localStorage.setItem('lastOpenedClassId', classId);
       }
-      window.location.reload();
+      // Navigate to in-classe.html with lesson parameter
+      window.location.href = `in-classe.html?lesson=${encodeURIComponent(lessonKey)}`;
     } catch (e) {
       console.error('schedule-enhance: failed to enter lesson', e);
     }
