@@ -26,7 +26,7 @@
 .upload-zone {
     border: 2px dashed var(--border-color, #ddd);
     border-radius: 12px;
-    padding: 4var(--md-spacing-sm) 2var(--md-spacing-xs);
+    padding: calc(2 * var(--md-spacing-lg)) var(--md-spacing-lg);
     text-align: center;
     background: var(--surface-color, var(--md-sys-color-surface-variant));
     transition: all 0.3s ease;
