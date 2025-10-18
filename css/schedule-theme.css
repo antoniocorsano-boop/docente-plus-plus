@@ -62,7 +62,7 @@
     --schedule-font-size-xs: var(--font-size-xs);        /* 12px */
     --schedule-font-size-sm: var(--font-size-sm);        /* 14px */
     --schedule-font-size-base: var(--font-size-base);    /* var(--md-spacing-md) */
-    --schedule-font-size-lg: var(--font-size-lg);        /* 1var(--md-spacing-sm) */
+    --schedule-font-size-lg: var(--font-size-lg);        /* 18px */
     --schedule-font-size-xl: var(--font-size-xl);        /* 20px */
     
     --schedule-font-weight-normal: var(--font-weight-regular);    /* 400 */
