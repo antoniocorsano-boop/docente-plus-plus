@@ -165,7 +165,7 @@
 }
 
 .ai-empty-state .material-symbols-outlined {
-    font-size: 6var(--md-spacing-xs);
+    font-size: calc(6 * var(--md-spacing-xs));
     color: var(--md-primary);
     margin-bottom: var(--spacing-md);
     opacity: 0.5;
