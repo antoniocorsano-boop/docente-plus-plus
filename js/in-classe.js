@@ -926,6 +926,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // User will use the static schedule grid to select a lesson
         console.debug('in-classe: No lesson selected. Use the schedule grid to select a lesson.');
         
+        // Update header to show generic "In Classe" without class details
+        updateHeaderForNoSession();
+        
         // Initialize breadcrumb navigation even without a lesson
         initBreadcrumbNavigation();
         
@@ -957,6 +960,70 @@ document.addEventListener('DOMContentLoaded', () => {
         initFloatingAssistant();
     }
 });
+
+// Update header when no session is active
+function updateHeaderForNoSession() {
+    try {
+        // Check if activeSessionClass exists in localStorage
+        let activeSession = null;
+        try {
+            const activeSessionStr = localStorage.getItem('activeSessionClass');
+            if (activeSessionStr) {
+                activeSession = JSON.parse(activeSessionStr);
+            }
+        } catch (e) {
+            console.debug('in-classe: failed to load activeSessionClass in updateHeaderForNoSession', e);
+        }
+
+        if (activeSession) {
+            // Show header with activeSessionClass details
+            const titleEl = document.getElementById('lesson-title');
+            if (titleEl) {
+                titleEl.textContent = `In Classe: ${activeSession.className || activeSession.classId}`;
+            }
+            
+            const lessonClass = document.getElementById('lesson-class');
+            if (lessonClass) {
+                lessonClass.textContent = activeSession.className || activeSession.classId;
+            }
+            
+            const lessonSubject = document.getElementById('lesson-subject');
+            if (lessonSubject) {
+                lessonSubject.textContent = activeSession.subject || '';
+            }
+            
+            const lessonDatetime = document.getElementById('lesson-datetime');
+            if (lessonDatetime) {
+                lessonDatetime.textContent = `${activeSession.day || ''}, ${activeSession.time || ''}`;
+            }
+            
+            const lessonType = document.getElementById('lesson-type');
+            if (lessonType) {
+                lessonType.textContent = activeSession.activityType || '';
+            }
+            
+            // Show the lesson meta section
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'flex';
+            }
+        } else {
+            // Show generic header without class details
+            const titleEl = document.getElementById('lesson-title');
+            if (titleEl) {
+                titleEl.textContent = 'In Classe';
+            }
+            
+            // Hide the lesson meta section
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        console.debug('in-classe: failed to update header for no session', e);
+    }
+}
 
 // Initialize breadcrumb navigation
 function initBreadcrumbNavigation() {
