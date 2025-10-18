@@ -1,0 +1,27 @@
+/**
+ * MD3 Expressive Theme - Spacing, Shape & Focus
+ * 
+ * This file defines spacing, shape, and focus variables for the MD3 Expressive theme.
+ * It complements the auto-generated color and elevation variables in generated-md3-expressive.css.
+ */
+
+:root,
+:root.light-theme,
+html.light-theme,
+body.light-theme {
+  /* Spacing */
+  --md-spacing-xs: 4px;
+  --md-spacing-sm: 8px;
+  --md-spacing-md: 16px;
+  --md-spacing-lg: 24px;
+
+  /* Shape / corner radii */
+  --md-shape-small: 6px;
+  --md-shape-medium: 12px;
+  --md-shape-large: 16px;
+
+  /* Focus ring */
+  --md-focus-width: 3px;
+  --md-focus-outline: rgba(134, 87, 255, 0.28);
+  --md-focus-offset: 2px;
+}
