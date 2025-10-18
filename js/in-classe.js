@@ -333,15 +333,68 @@ class InClasseUI {
         this.renderSummary();
         this.setupCollapsibleSections();
         this.setupEventListeners();
+        
+        // Listen for active session class changes
+        window.addEventListener('activeSessionClassChanged', (event) => {
+            console.debug('in-classe: Active session class changed', event.detail);
+            this.renderHeader();
+        });
     }
 
     renderHeader() {
         const data = this.dataManager.lessonData;
-        document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
-        document.getElementById('lesson-class').textContent = data.className;
-        document.getElementById('lesson-subject').textContent = data.subject;
-        document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
-        document.getElementById('lesson-type').textContent = data.activityType;
+        
+        // Check if we have an active session class from sessionStorage
+        let activeSessionClass = null;
+        try {
+            if (typeof window.loadActiveSessionClassFromStorage === 'function') {
+                activeSessionClass = window.loadActiveSessionClassFromStorage();
+            } else {
+                const stored = sessionStorage.getItem('activeSessionClass');
+                if (stored) {
+                    activeSessionClass = JSON.parse(stored);
+                }
+            }
+        } catch (e) {
+            console.debug('in-classe: Failed to load active session class', e);
+        }
+        
+        // If we have an active session class, use it for the header
+        if (activeSessionClass) {
+            document.getElementById('lesson-title').textContent = `In Classe: ${activeSessionClass.className || activeSessionClass.classId}`;
+            document.getElementById('lesson-class').textContent = activeSessionClass.className || activeSessionClass.classId;
+            document.getElementById('lesson-subject').textContent = activeSessionClass.subject;
+            
+            const timeText = activeSessionClass.time 
+                ? `${activeSessionClass.day}, ${activeSessionClass.time}` 
+                : activeSessionClass.day || '';
+            document.getElementById('lesson-datetime').textContent = timeText;
+            
+            if (activeSessionClass.activityType) {
+                document.getElementById('lesson-type').textContent = activeSessionClass.activityType;
+            } else {
+                document.getElementById('lesson-type').style.display = 'none';
+            }
+            
+            // Show the lesson metadata
+            document.getElementById('lesson-meta').style.display = 'flex';
+        } else if (data) {
+            // Fallback to lessonData if no active session class
+            document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
+            document.getElementById('lesson-class').textContent = data.className;
+            document.getElementById('lesson-subject').textContent = data.subject;
+            document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
+            document.getElementById('lesson-type').textContent = data.activityType;
+            
+            // Show the lesson metadata
+            document.getElementById('lesson-meta').style.display = 'flex';
+        } else {
+            // No active session and no lesson data - show only "In Classe"
+            document.getElementById('lesson-title').textContent = 'In Classe';
+            
+            // Hide the lesson metadata
+            document.getElementById('lesson-meta').style.display = 'none';
+        }
     }
 
     renderActivities() {
@@ -887,20 +940,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-open lesson picker is now disabled (suppressed by schedule-enhance.js)
     // Users must select lessons through the static schedule grid on this page
     
+    // Initialize breadcrumb navigation even without a lesson
+    initBreadcrumbNavigation();
+    
+    // Initialize floating AI assistant if available
+    if (typeof initFloatingAssistant === 'function') {
+        initFloatingAssistant();
+    }
+    
     // Check if lesson is selected
     if (!dataManager.lessonKey) {
-        // Don't auto-open picker modal - rely on schedule-enhance.js suppression
-        // User will use the static schedule grid to select a lesson
+        // No lesson selected yet - just show the schedule grid
         console.debug('in-classe: No lesson selected. Use the schedule grid to select a lesson.');
         
-        // Initialize breadcrumb navigation even without a lesson
-        initBreadcrumbNavigation();
+        // Initialize a minimal UI to show the header
+        const audioRecorder = new AudioRecorder();
+        const analytics = new AnalyticsManager(dataManager);
         
-        // Initialize floating AI assistant if available
-        if (typeof initFloatingAssistant === 'function') {
-            initFloatingAssistant();
-        }
-        return; // Don't initialize the full lesson UI yet
+        inClasseApp = new InClasseUI(dataManager, audioRecorder, analytics);
+        inClasseApp.renderHeader(); // This will show "In Classe" only
+        return;
     }
 
     // Check if lesson data is available
@@ -915,14 +974,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     inClasseApp = new InClasseUI(dataManager, audioRecorder, analytics);
     inClasseApp.init();
-    
-    // Initialize breadcrumb navigation
-    initBreadcrumbNavigation();
-    
-    // Initialize floating AI assistant if available
-    if (typeof initFloatingAssistant === 'function') {
-        initFloatingAssistant();
-    }
 });
 
 // Initialize breadcrumb navigation

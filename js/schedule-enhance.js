@@ -168,6 +168,52 @@
    * Enter a lesson using available APIs or fallback
    */
   function enterLesson(lessonKey, classId) {
+    // Load the full schedule to get complete class data
+    const schedule = loadSchedule();
+    let classData = null;
+    
+    // Try to find the lesson data from the schedule
+    if (schedule) {
+      const slots = normalizeSchedule(schedule);
+      const slot = slots.find(s => {
+        const slotKey = s.lessonKey || `${s.day || s.giorno}-${s.time || s.orario}`;
+        return slotKey === lessonKey;
+      });
+      
+      if (slot) {
+        const normalized = normalizeSlot(slot);
+        classData = {
+          classId: normalized.classId,
+          className: normalized.classId ? `Classe ${normalized.classId}` : '',
+          subject: normalized.subject,
+          day: normalized.day,
+          time: normalized.time,
+          activityType: normalized.activityType,
+          lessonKey: lessonKey
+        };
+      }
+    }
+    
+    // Use class-session module if available
+    if (typeof window.setActiveSessionClass === 'function' && classData) {
+      try {
+        window.setActiveSessionClass(classData);
+        console.debug('schedule-enhance: Set active session class via window API');
+      } catch (e) {
+        console.debug('schedule-enhance: Failed to set via window API', e);
+      }
+    } else {
+      // Fallback: store in sessionStorage directly
+      try {
+        if (classData) {
+          sessionStorage.setItem('activeSessionClass', JSON.stringify(classData));
+          console.debug('schedule-enhance: Set active session class via sessionStorage');
+        }
+      } catch (e) {
+        console.debug('schedule-enhance: Failed to set session storage', e);
+      }
+    }
+    
     // Try using the existing API if available
     if (typeof window.enterLessonFromSchedule === 'function') {
       try {
@@ -178,13 +224,9 @@
       }
     }
     
-    // Fallback: store in localStorage and reload
+    // Navigate to in-classe page with lesson parameter
     try {
-      localStorage.setItem('lastOpenedLesson', lessonKey);
-      if (classId) {
-        localStorage.setItem('lastOpenedClassId', classId);
-      }
-      window.location.reload();
+      window.location.href = `in-classe.html?lesson=${encodeURIComponent(lessonKey)}`;
     } catch (e) {
       console.error('schedule-enhance: failed to enter lesson', e);
     }
