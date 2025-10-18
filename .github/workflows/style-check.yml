@@ -93,7 +93,7 @@ jobs:
       
       - name: Upload token check results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: token-check-results
           path: token-check.log
