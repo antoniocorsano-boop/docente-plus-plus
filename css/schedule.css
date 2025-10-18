@@ -53,6 +53,9 @@
 .schedule-grid td[data-day]:focus {
   outline: 3px solid var(--md-primary);
   outline-offset: 2px;
+  /* Fallback for browsers without color-mix support */
+  box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.1);
+  /* Modern browsers with color-mix support */
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) 10%, transparent);
 }
 
@@ -95,6 +98,9 @@
 .slot-actions button:focus { 
   outline: 3px solid var(--md-primary);
   outline-offset: 2px;
+  /* Fallback for browsers without color-mix support */
+  box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.1);
+  /* Modern browsers with color-mix support */
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) 10%, transparent);
 }
 
