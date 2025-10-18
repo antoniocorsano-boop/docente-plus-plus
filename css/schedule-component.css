@@ -472,7 +472,8 @@ body.dark-theme .schedule-btn--secondary:hover {
 }
 
 /* Responsive Styles */
-@media (max-width: calc(256 * var(--md-spacing-xs))) {
+/* 1024px is a common tablet breakpoint; replace calc(256 * var(--md-spacing-xs)) for clarity */
+@media (max-width: 1024px) {
     .schedule-wrapper {
         padding: var(--schedule-spacing-md);
     }
