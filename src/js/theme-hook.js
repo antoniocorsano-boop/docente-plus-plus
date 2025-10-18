@@ -244,9 +244,12 @@ export function integrateWithLegacyThemePicker() {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        // Check if --md-primary was changed by legacy theme.js
-        const primaryColor = getComputedStyle(document.documentElement)
-          .getPropertyValue('--md-primary').trim();
+        // Try both legacy and new variable names
+        const style = getComputedStyle(document.documentElement);
+        let primaryColor = (style.getPropertyValue('--md-primary') || '').trim();
+        if (!primaryColor) {
+          primaryColor = (style.getPropertyValue('--md-sys-color-primary') || '').trim();
+        }
         
         if (primaryColor && primaryColor !== currentSeed) {
           // Try to map it to a known seed or use it directly
