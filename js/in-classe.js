@@ -830,6 +830,17 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 
     exit() {
+        // Clear the active session class when exiting
+        try {
+            if (typeof window.clearActiveSessionClass === 'function') {
+                window.clearActiveSessionClass();
+            } else {
+                sessionStorage.removeItem('activeSessionClass');
+            }
+        } catch (e) {
+            console.debug('in-classe: Failed to clear active session class', e);
+        }
+        
         // Navigate back to schedule or main app
         if (window.opener) {
             window.close();
