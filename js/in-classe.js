@@ -884,13 +884,23 @@ let inClasseApp;
 document.addEventListener('DOMContentLoaded', () => {
     const dataManager = new InClasseDataManager();
     
+    // Auto-open lesson picker is now disabled (suppressed by schedule-enhance.js)
+    // Users must select lessons through the static schedule grid on this page
+    
     // Check if lesson is selected
     if (!dataManager.lessonKey) {
-        // Show lesson picker modal
-        const lessonPicker = new LessonPickerModal();
-        lessonPicker.init();
-        lessonPicker.show();
-        return; // Don't initialize the full UI yet
+        // Don't auto-open picker modal - rely on schedule-enhance.js suppression
+        // User will use the static schedule grid to select a lesson
+        console.debug('in-classe: No lesson selected. Use the schedule grid to select a lesson.');
+        
+        // Initialize breadcrumb navigation even without a lesson
+        initBreadcrumbNavigation();
+        
+        // Initialize floating AI assistant if available
+        if (typeof initFloatingAssistant === 'function') {
+            initFloatingAssistant();
+        }
+        return; // Don't initialize the full lesson UI yet
     }
 
     // Check if lesson data is available

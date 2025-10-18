@@ -5,6 +5,47 @@
 (function() {
   'use strict';
 
+  // ========== SAFEGUARDS: Suppress auto-open lesson picker ==========
+  // Remove any auto-open state from localStorage
+  try {
+    localStorage.removeItem('lastOpenedLesson');
+    localStorage.removeItem('lastOpenedClassId');
+  } catch (e) {
+    console.debug('schedule-enhance: failed to clear auto-open state', e);
+  }
+
+  // Hide the legacy lesson-picker modal and set aria-hidden
+  const modal = document.getElementById('lesson-picker-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  // Override window.showLessonPicker and window.showLessonPickerInline with no-ops
+  // that dispatch events so calling code knows they were suppressed
+  window.__orig_showLessonPicker = window.showLessonPicker;
+  window.__orig_showLessonPickerInline = window.showLessonPickerInline;
+  
+  window.showLessonPicker = function() {
+    console.debug('schedule-enhance: showLessonPicker() suppressed');
+    window.dispatchEvent(new CustomEvent('lesson-picker-suppressed', { 
+      detail: { function: 'showLessonPicker' } 
+    }));
+    return false;
+  };
+  
+  window.showLessonPickerInline = function() {
+    console.debug('schedule-enhance: showLessonPickerInline() suppressed');
+    window.dispatchEvent(new CustomEvent('lesson-picker-suppressed', { 
+      detail: { function: 'showLessonPickerInline' } 
+    }));
+    return false;
+  };
+
+  // Set flag to disable auto lesson picker
+  window.__disableAutoLessonPicker = true;
+  // ========== END SAFEGUARDS ==========
+
   const STORAGE_KEYS = ['teacherSchedule', 'schedule', 'appSchedule', 'stateSchedule'];
   const DAY_ORDER = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 
