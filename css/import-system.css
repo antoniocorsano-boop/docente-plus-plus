@@ -45,7 +45,7 @@
 }
 
 .upload-icon {
-    font-size: 6var(--md-spacing-xs) !important;
+    font-size: calc(6 * var(--md-spacing-xs)) !important;
     color: var(--primary-color, var(--md-sys-color-primary));
     display: block;
     margin: 0 auto var(--md-spacing-md);
