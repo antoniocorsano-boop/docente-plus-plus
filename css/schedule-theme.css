@@ -60,7 +60,7 @@
     /* Typography - Use app's font system */
     --schedule-font-family: var(--font-family-primary);  /* Roboto */
     --schedule-font-size-xs: var(--font-size-xs);        /* 12px */
-    --schedule-font-size-sm: var(--font-size-sm);        /* 1var(--md-spacing-xs) */
+    --schedule-font-size-sm: var(--font-size-sm);        /* 14px */
     --schedule-font-size-base: var(--font-size-base);    /* var(--md-spacing-md) */
     --schedule-font-size-lg: var(--font-size-lg);        /* 1var(--md-spacing-sm) */
     --schedule-font-size-xl: var(--font-size-xl);        /* 20px */
