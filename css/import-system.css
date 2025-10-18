@@ -193,7 +193,7 @@
 .editable-table select,
 .editable-table textarea {
     width: 100%;
-    padding: 6px var(--md-spacing-sm);
+    padding: calc(1.5 * var(--md-spacing-xs)) var(--md-spacing-sm);
     border: 1px solid var(--border-color, #ddd);
     border-radius: var(--md-spacing-xs);
     font-family: inherit;
