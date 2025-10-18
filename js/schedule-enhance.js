@@ -168,6 +168,29 @@
    * Enter a lesson using available APIs or fallback
    */
   function enterLesson(lessonKey, classId) {
+    // Set activeSessionClass when entering a lesson
+    try {
+      const schedule = loadSchedule();
+      const slots = normalizeSchedule(schedule);
+      const normalizedSlots = slots.map(normalizeSlot);
+      const lessonSlot = normalizedSlots.find(s => s.lessonKey === lessonKey);
+      
+      if (lessonSlot) {
+        const activeSession = {
+          lessonKey: lessonKey,
+          classId: lessonSlot.classId || classId,
+          className: lessonSlot.classId ? `Classe ${lessonSlot.classId}` : '',
+          subject: lessonSlot.subject,
+          day: lessonSlot.day,
+          time: lessonSlot.time,
+          activityType: lessonSlot.activityType
+        };
+        localStorage.setItem('activeSessionClass', JSON.stringify(activeSession));
+      }
+    } catch (e) {
+      console.debug('schedule-enhance: failed to set activeSessionClass', e);
+    }
+    
     // Try using the existing API if available
     if (typeof window.enterLessonFromSchedule === 'function') {
       try {

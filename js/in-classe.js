@@ -336,12 +336,38 @@ class InClasseUI {
     }
 
     renderHeader() {
-        const data = this.dataManager.lessonData;
-        document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
-        document.getElementById('lesson-class').textContent = data.className;
-        document.getElementById('lesson-subject').textContent = data.subject;
-        document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
-        document.getElementById('lesson-type').textContent = data.activityType;
+        // Check if activeSessionClass exists in localStorage
+        let activeSession = null;
+        try {
+            const activeSessionStr = localStorage.getItem('activeSessionClass');
+            if (activeSessionStr) {
+                activeSession = JSON.parse(activeSessionStr);
+            }
+        } catch (e) {
+            console.debug('in-classe: failed to load activeSessionClass', e);
+        }
+
+        // Use activeSessionClass if available, otherwise show generic header
+        if (activeSession) {
+            document.getElementById('lesson-title').textContent = `In Classe: ${activeSession.className || activeSession.classId}`;
+            document.getElementById('lesson-class').textContent = activeSession.className || activeSession.classId;
+            document.getElementById('lesson-subject').textContent = activeSession.subject || '';
+            document.getElementById('lesson-datetime').textContent = `${activeSession.day || ''}, ${activeSession.time || ''}`;
+            document.getElementById('lesson-type').textContent = activeSession.activityType || '';
+            // Show the lesson meta section
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'flex';
+            }
+        } else {
+            // Show generic header without class details
+            document.getElementById('lesson-title').textContent = 'In Classe';
+            // Hide the lesson meta section
+            const lessonMeta = document.getElementById('lesson-meta');
+            if (lessonMeta) {
+                lessonMeta.style.display = 'none';
+            }
+        }
     }
 
     renderActivities() {
@@ -777,6 +803,13 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 
     exit() {
+        // Clear activeSessionClass when exiting
+        try {
+            localStorage.removeItem('activeSessionClass');
+        } catch (e) {
+            console.debug('in-classe: failed to clear activeSessionClass', e);
+        }
+        
         // Navigate back to schedule or main app
         if (window.opener) {
             window.close();
