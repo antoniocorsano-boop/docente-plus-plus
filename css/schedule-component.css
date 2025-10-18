@@ -472,7 +472,7 @@ body.dark-theme .schedule-btn--secondary:hover {
 }
 
 /* Responsive Styles */
-@media (max-width: 102var(--md-spacing-xs)) {
+@media (max-width: calc(102 * var(--md-spacing-xs))) {
     .schedule-wrapper {
         padding: var(--schedule-spacing-md);
     }
