@@ -314,8 +314,8 @@
 
 /* Send Button */
 .ai-send-button {
-    width: 4var(--md-spacing-xs);
-    height: 4var(--md-spacing-xs);
+    width: calc(11 * var(--md-spacing-xs));
+    height: calc(11 * var(--md-spacing-xs));
     background: var(--md-primary);
     border: none;
     border-radius: 50%;
