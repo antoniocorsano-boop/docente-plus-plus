@@ -126,7 +126,7 @@
 }
 
 .import-preview-message {
-    padding: var(--md-spacing-md) 20px;
+    padding: var(--md-spacing-md) calc(5 * var(--md-spacing-xs));
     border-bottom: 1px solid var(--border-color, #ddd);
 }
 
