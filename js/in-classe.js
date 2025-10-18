@@ -945,11 +945,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-open lesson picker is now disabled (suppressed by schedule-enhance.js)
     // Users must select lessons through the static schedule grid on this page
     
-    // Check if lesson is selected
-    if (!dataManager.lessonKey) {
-        // Don't auto-open picker modal - rely on schedule-enhance.js suppression
-        // User will use the static schedule grid to select a lesson
-        console.debug('in-classe: No lesson selected. Use the schedule grid to select a lesson.');
+    // Always initialize basic UI components
+    const audioRecorder = new AudioRecorder();
+    const analytics = dataManager.lessonData ? new AnalyticsManager(dataManager) : null;
+    
+    inClasseApp = new InClasseUI(dataManager, audioRecorder, analytics);
+    
+    // Check if there's an active session or lesson selected
+    const hasActiveSession = typeof window.getActiveSessionClass === 'function' 
+        ? window.getActiveSessionClass() !== null 
+        : sessionStorage.getItem('activeSessionClass') !== null;
+    
+    const hasLessonKey = dataManager.lessonKey !== null;
+    
+    if (!hasActiveSession && !hasLessonKey) {
+        // No active session and no lesson key - show generic header
+        console.debug('in-classe: No active session. Header will show generic "In Classe".');
+        
+        // Initialize with minimal UI - just render header
+        inClasseApp.renderHeader();
         
         // Initialize breadcrumb navigation even without a lesson
         initBreadcrumbNavigation();
@@ -958,20 +972,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof initFloatingAssistant === 'function') {
             initFloatingAssistant();
         }
-        return; // Don't initialize the full lesson UI yet
-    }
-
-    // Check if lesson data is available
-    if (!dataManager.lessonData) {
-        alert('Lezione non trovata. Verrai reindirizzato alla home.');
-        window.location.href = 'index.html#home';
+        
+        // Don't initialize full UI yet - wait for user to select a lesson
         return;
     }
-
-    const audioRecorder = new AudioRecorder();
-    const analytics = new AnalyticsManager(dataManager);
     
-    inClasseApp = new InClasseUI(dataManager, audioRecorder, analytics);
+    // Check if lesson data is available
+    if (!dataManager.lessonData) {
+        // Show generic header if no lesson data but might have active session
+        inClasseApp.renderHeader();
+        
+        console.warn('in-classe: Lesson key present but no lesson data found.');
+        
+        // Initialize breadcrumb navigation
+        initBreadcrumbNavigation();
+        
+        // Initialize floating AI assistant if available
+        if (typeof initFloatingAssistant === 'function') {
+            initFloatingAssistant();
+        }
+        return;
+    }
+    
+    // Full initialization with lesson data
     inClasseApp.init();
     
     // Initialize breadcrumb navigation
