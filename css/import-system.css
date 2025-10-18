@@ -5,7 +5,7 @@
 }
 
 .import-header {
-    margin-bottom: 2var(--md-spacing-xs);
+    margin-bottom: var(--md-spacing-lg);
 }
 
 .import-header h2 {
