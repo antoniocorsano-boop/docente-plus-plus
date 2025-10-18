@@ -141,7 +141,7 @@
 }
 
 .import-preview-instructions {
-    padding: var(--md-spacing-md) 20px;
+    padding: var(--md-spacing-md) calc(5 * var(--md-spacing-xs));
     background: var(--info-light, #e3f2fd);
     border-bottom: 1px solid var(--border-color, #ddd);
 }
