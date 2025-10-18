@@ -39,7 +39,7 @@
     --schedule-spacing-xs: var(--spacing-xs);      /* var(--md-spacing-xs) */
     --schedule-spacing-sm: var(--spacing-sm);      /* var(--md-spacing-sm) */
     --schedule-spacing-md: var(--spacing-md);      /* var(--md-spacing-md) */
-    --schedule-spacing-lg: var(--spacing-lg);      /* 2var(--md-spacing-xs) */
+    --schedule-spacing-lg: var(--spacing-lg);      /* 24px / var(--md-spacing-lg) */
     --schedule-spacing-xl: var(--spacing-xl);      /* 32px */
     
     /* Border radius - Use app's radius system */
