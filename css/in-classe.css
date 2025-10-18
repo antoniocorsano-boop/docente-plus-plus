@@ -130,8 +130,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 2var(--md-spacing-xs);
-    height: 2var(--md-spacing-xs);
+    min-width: calc(2 * var(--md-spacing-xs));
+    height: calc(2 * var(--md-spacing-xs));
     padding: 0 var(--spacing-xs);
     background: var(--md-primary);
     color: var(--md-on-primary);
