@@ -298,8 +298,8 @@ body {
 }
 
 .student-avatar {
-    width: calc(4 * var(--md-spacing-sm));
-    height: calc(4 * var(--md-spacing-sm));
+    width: calc(6 * var(--md-spacing-sm));
+    height: calc(6 * var(--md-spacing-sm));
     display: flex;
     align-items: center;
     justify-content: center;
