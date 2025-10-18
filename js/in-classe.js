@@ -922,6 +922,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // User will use the static schedule grid to select a lesson
         console.debug('in-classe: No lesson selected. Use the schedule grid to select a lesson.');
         
+        // Render generic header
+        renderGenericHeader();
+        
         // Initialize breadcrumb navigation even without a lesson
         initBreadcrumbNavigation();
         
@@ -953,6 +956,16 @@ document.addEventListener('DOMContentLoaded', () => {
         initFloatingAssistant();
     }
 });
+
+// Render generic header when no lesson is selected
+function renderGenericHeader() {
+    document.getElementById('lesson-title').textContent = 'In Classe';
+    // Hide lesson metadata
+    const lessonMeta = document.getElementById('lesson-meta');
+    if (lessonMeta) {
+        lessonMeta.style.display = 'none';
+    }
+}
 
 // Initialize breadcrumb navigation
 function initBreadcrumbNavigation() {
