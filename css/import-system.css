@@ -456,7 +456,7 @@
 
 /* Import Success Message */
 .import-success-message {
-    padding: 4var(--md-spacing-sm) 2var(--md-spacing-xs);
+    padding: calc(4 * var(--md-spacing-sm)) calc(2 * var(--md-spacing-xs));
     text-align: center;
     background: var(--success-light, #d5f4e6);
     border: 1px solid var(--success-color, #27ae60);
