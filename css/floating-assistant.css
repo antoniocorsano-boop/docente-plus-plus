@@ -73,7 +73,7 @@
 }
 
 .ai-assistant-close .material-symbols-outlined {
-    font-size: calc(2 * var(--md-spacing-xs));
+    font-size: var(--font-size-xl);
 }
 
 /* Panel Body */
