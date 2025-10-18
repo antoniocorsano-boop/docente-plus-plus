@@ -5,6 +5,10 @@
 
 class DailyView {
     constructor() {
+        // Constants
+        this.ACTIVE_SLOT_THRESHOLD_MINUTES = 60;
+        this.SWIPE_THRESHOLD_PX = 50;
+        
         this.currentDayIndex = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
         this.dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
         this.timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00'];
@@ -119,7 +123,7 @@ class DailyView {
         let status = 'future';
         if (slotTime < currentTime) {
             status = 'completed';
-        } else if (slotTime <= currentTime + 60) { // Within current hour
+        } else if (slotTime <= currentTime + this.ACTIVE_SLOT_THRESHOLD_MINUTES) {
             status = 'active';
         }
         
@@ -368,10 +372,9 @@ class DailyView {
      * Handle swipe gesture
      */
     handleSwipe() {
-        const swipeThreshold = 50; // minimum distance for a swipe
         const diff = this.touchStartX - this.touchEndX;
         
-        if (Math.abs(diff) > swipeThreshold) {
+        if (Math.abs(diff) > this.SWIPE_THRESHOLD_PX) {
             if (diff > 0) {
                 // Swipe left - next day
                 this.navigateNext();
@@ -389,9 +392,10 @@ let dailyView;
 function initDailyView() {
     dailyView = new DailyView();
     dailyView.init();
+    // Export for global access after initialization
+    window.dailyView = dailyView;
 }
 
 // Export for global access
 window.DailyView = DailyView;
 window.initDailyView = initDailyView;
-window.dailyView = dailyView;
