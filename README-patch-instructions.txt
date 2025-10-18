@@ -6,15 +6,26 @@ OVERVIEW
 This enhancement adds a static, accessible weekly schedule grid to in-classe.html with 
 keyboard navigation and auto-population from localStorage schedule data.
 
+**AUTO-OPEN SUPPRESSION (Updated):**
+The lesson picker modal is now suppressed from auto-opening on page load. All lesson
+selection must happen through the static schedule grid on the in-classe page.
+
 COMPONENTS ADDED
 ----------------
-1. js/schedule-enhance.js - Enhancement script
+1. js/schedule-enhance.js - Enhancement script with auto-open suppression
 2. css/schedule.css - Updated with new styles for static grid
 3. in-classe.html - Modified to include static HTML grid and script reference
 
 HOW IT WORKS
 ------------
 The enhancement script (schedule-enhance.js):
+- **Suppresses auto-open behavior:**
+  - Clears lastOpenedLesson and lastOpenedClassId from localStorage on page load
+  - Hides #lesson-picker-modal and sets aria-hidden="true"
+  - Overrides window.showLessonPicker() and window.showLessonPickerInline() with no-ops
+  - Dispatches 'lesson-picker-suppressed' events when suppressed functions are called
+  - Sets window.__disableAutoLessonPicker = true flag
+  - Preserves original functions as window.__orig_showLessonPicker and window.__orig_showLessonPickerInline
 - Auto-initializes on DOMContentLoaded
 - Loads schedule data from multiple localStorage keys (teacherSchedule, schedule, appSchedule, stateSchedule)
 - Normalizes different schedule data shapes (slots array or per-day arrays)
@@ -25,6 +36,48 @@ The enhancement script (schedule-enhance.js):
 - Falls back to localStorage (lastOpenedLesson, lastOpenedClassId) + reload if API not available
 - Provides keyboard navigation: Arrow keys to move between cells, Enter/Space to activate
 - Dispatches custom "open-lesson-list" event when multiple lessons exist in a cell
+- Exposes window.initScheduleGrid() for manual re-initialization
+
+LESSON SELECTION FLOW
+----------------------
+**New Flow (Enforced):**
+1. User navigates to in-classe.html from homepage (click "Entra in Classe")
+2. Page opens WITHOUT auto-opening the legacy lesson picker modal
+3. User sees the static schedule grid populated with their lessons
+4. User clicks on a time cell in the grid to view lessons for that slot
+5. User clicks "Entra" button on a specific lesson to enter it
+6. The lesson opens in the in-classe interface
+
+**Old Flow (Disabled):**
+The old behavior of auto-opening a lesson picker modal based on lastOpenedLesson
+localStorage entry is now disabled and will not occur.
+
+RESTORING ORIGINAL BEHAVIOR
+----------------------------
+If you need to restore the original auto-open lesson picker behavior:
+
+1. Call the original functions that were preserved:
+   ```javascript
+   // Restore original showLessonPicker
+   window.showLessonPicker = window.__orig_showLessonPicker;
+   
+   // Restore original showLessonPickerInline
+   window.showLessonPickerInline = window.__orig_showLessonPickerInline;
+   
+   // Remove the disable flag
+   delete window.__disableAutoLessonPicker;
+   ```
+
+2. Or, to temporarily bypass suppression for one call:
+   ```javascript
+   if (window.__orig_showLessonPicker) {
+     window.__orig_showLessonPicker();
+   }
+   ```
+
+3. To permanently restore old behavior, remove the suppression code from
+   js/schedule-enhance.js (lines ~7-50) and restore the auto-open code in
+   js/in-classe.js (around line 888-893).
 
 KEYBOARD NAVIGATION
 -------------------
