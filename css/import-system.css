@@ -362,7 +362,7 @@
 }
 
 .type-icon {
-    font-size: 4var(--md-spacing-sm);
+    font-size: calc(2 * var(--md-spacing-lg));
     display: block;
     margin-bottom: var(--md-spacing-sm);
 }
