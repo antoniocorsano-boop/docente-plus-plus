@@ -143,12 +143,17 @@ function analyzeFile(filePath) {
 /**
  * Apply replacements to a file
  */
+function escapeRegExp(string) {
+  // Escapes special characters for use in a regular expression
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function applyReplacements(filePath, findings) {
   let content = readFileSync(filePath, 'utf-8');
   let modified = false;
   
   findings.forEach(finding => {
-    const regex = new RegExp(finding.original.replace('#', '#'), 'gi');
+    const regex = new RegExp(escapeRegExp(finding.original), 'gi');
     const newContent = content.replace(regex, finding.replacement);
     
     if (newContent !== content) {
