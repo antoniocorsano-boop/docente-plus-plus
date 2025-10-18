@@ -888,6 +888,11 @@ class LessonPickerModal {
 let inClasseApp;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize daily view first
+    if (typeof initDailyView === 'function') {
+        initDailyView();
+    }
+    
     const dataManager = new InClasseDataManager();
     
     // Auto-open lesson picker is now disabled (suppressed by schedule-enhance.js)

@@ -7,6 +7,354 @@ body {
     font-family: var(--font-family-primary);
 }
 
+/* Daily View Container */
+.daily-view-container {
+    margin-bottom: var(--spacing-lg);
+    background: var(--md-surface-container);
+    border-radius: var(--md-radius-medium);
+    padding: var(--spacing-md);
+    box-shadow: var(--md-elevation-1);
+}
+
+/* Week Navigation */
+.week-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm) 0;
+}
+
+.week-info {
+    text-align: center;
+    flex: 1;
+}
+
+.week-info h2 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 500;
+    color: var(--md-text-primary);
+}
+
+.current-date {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--md-text-secondary);
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    box-shadow: var(--md-elevation-1);
+}
+
+.nav-btn:hover {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    box-shadow: var(--md-elevation-2);
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.nav-btn:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.nav-btn .material-symbols-outlined {
+    font-size: 24px;
+}
+
+/* Daily Schedule Grid */
+.daily-schedule-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+}
+
+/* Time Slot Card */
+.time-slot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    background: var(--md-surface);
+    border-radius: var(--md-radius-medium);
+    border-left: 4px solid var(--md-primary);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    box-shadow: var(--md-elevation-1);
+    min-height: 100px;
+}
+
+.time-slot:hover {
+    box-shadow: var(--md-elevation-3);
+    transform: translateY(-2px);
+}
+
+.time-slot:active {
+    transform: translateY(0);
+}
+
+.time-slot:focus {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Empty Slot */
+.time-slot.empty {
+    background: var(--md-surface-container-low);
+    border-left-color: var(--md-divider);
+    cursor: default;
+    opacity: 0.6;
+}
+
+.time-slot.empty:hover {
+    transform: none;
+    box-shadow: var(--md-elevation-1);
+}
+
+/* Slot Status States */
+.time-slot.active {
+    border-left-color: var(--md-primary);
+    background: var(--md-primary-container);
+}
+
+.time-slot.completed {
+    border-left-color: var(--md-tertiary);
+    opacity: 0.8;
+}
+
+.time-slot.future {
+    border-left-color: var(--md-secondary);
+}
+
+/* Subject Colors */
+.time-slot[data-subject="Matematica"] {
+    border-left-color: #2196F3;
+}
+
+.time-slot[data-subject="Italiano"] {
+    border-left-color: #F44336;
+}
+
+.time-slot[data-subject="Inglese"] {
+    border-left-color: #4CAF50;
+}
+
+.time-slot[data-subject="Scienze"] {
+    border-left-color: #9C27B0;
+}
+
+.time-slot[data-subject="Storia"] {
+    border-left-color: #FF9800;
+}
+
+.time-slot[data-subject="Geografia"] {
+    border-left-color: #00BCD4;
+}
+
+.time-slot[data-subject="Arte"] {
+    border-left-color: #E91E63;
+}
+
+.time-slot[data-subject="Musica"] {
+    border-left-color: #9E9D24;
+}
+
+.time-slot[data-subject="Educazione Fisica"] {
+    border-left-color: #795548;
+}
+
+/* Slot Header */
+.slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.slot-time {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--md-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.slot-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.slot-status-indicator.active {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+.slot-status-indicator.completed {
+    background: var(--md-tertiary-container);
+    color: var(--md-on-tertiary-container);
+}
+
+.slot-status-indicator.future {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+/* Slot Body */
+.slot-body {
+    flex: 1;
+}
+
+.slot-subject {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--md-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.slot-class {
+    font-size: var(--font-size-sm);
+    color: var(--md-text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.slot-activity-type {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--md-surface-container-high);
+    border-radius: var(--md-radius-small);
+    font-size: var(--font-size-xs);
+    color: var(--md-text-secondary);
+}
+
+/* Empty Slot Content */
+.empty-slot-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--md-text-secondary);
+    padding: var(--spacing-md) 0;
+}
+
+.empty-slot-content .material-symbols-outlined {
+    font-size: 32px;
+    opacity: 0.3;
+    margin-bottom: var(--spacing-xs);
+}
+
+.empty-slot-content p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+/* Lesson Details Modal */
+.lesson-details-content {
+    max-width: 500px;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: transparent;
+    border: none;
+    color: var(--md-text-secondary);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.modal-close-btn:hover {
+    background: var(--md-surface-container-high);
+}
+
+.lesson-details-body {
+    margin: var(--spacing-lg) 0;
+}
+
+.detail-item {
+    display: flex;
+    align-items: baseline;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--md-divider);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--md-text-secondary);
+    min-width: 100px;
+    font-size: var(--font-size-sm);
+}
+
+.detail-value {
+    color: var(--md-text-primary);
+    font-size: var(--font-size-base);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--md-radius-small);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+.status-badge.completed {
+    background: var(--md-tertiary-container);
+    color: var(--md-on-tertiary-container);
+}
+
+.status-badge.future {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+    margin-top: var(--spacing-lg);
+}
+
 /* Lesson Header */
 .lesson-header {
     position: sticky;
@@ -671,6 +1019,11 @@ body {
     .analytics-card.full-width {
         grid-column: 1 / -1;
     }
+    
+    /* Daily Schedule Grid - 2 columns on tablet */
+    .daily-schedule-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Responsive - Desktop */
@@ -681,6 +1034,11 @@ body {
     
     .summary-actions {
         justify-content: flex-start;
+    }
+    
+    /* Daily Schedule Grid - 3 columns on desktop */
+    .daily-schedule-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

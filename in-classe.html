@@ -93,70 +93,64 @@
 
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
-        <!-- Static Schedule Grid (Enhanced by schedule-enhance.js) -->
-        <div class="schedule-table-wrapper" role="region" aria-label="Orario settimanale">
-            <table id="static-schedule-grid" role="table" aria-label="Griglia orario settimanale">
-                <thead>
-                    <tr>
-                        <th scope="col">Ora</th>
-                        <th scope="col">Lunedì</th>
-                        <th scope="col">Martedì</th>
-                        <th scope="col">Mercoledì</th>
-                        <th scope="col">Giovedì</th>
-                        <th scope="col">Venerdì</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="schedule-time">08:00</td>
-                        <td data-day="Lunedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="08:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                    <tr>
-                        <td class="schedule-time">09:00</td>
-                        <td data-day="Lunedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="09:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                    <tr>
-                        <td class="schedule-time">10:00</td>
-                        <td data-day="Lunedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="10:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                    <tr>
-                        <td class="schedule-time">11:00</td>
-                        <td data-day="Lunedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="11:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                    <tr>
-                        <td class="schedule-time">12:00</td>
-                        <td data-day="Lunedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="12:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                    <tr>
-                        <td class="schedule-time">13:00</td>
-                        <td data-day="Lunedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Martedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Mercoledì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Giovedì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                        <td data-day="Venerdì" data-time="13:00" tabindex="-1"><span class="slot-placeholder">—</span></td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Daily View Section -->
+        <div class="daily-view-container" role="region" aria-label="Vista giornaliera">
+            <!-- Week Navigation -->
+            <div class="week-navigation">
+                <button id="prev-week-btn" class="nav-btn" aria-label="Settimana precedente">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <div class="week-info">
+                    <h2 id="current-day-name">Lunedì</h2>
+                    <p id="current-date" class="current-date"></p>
+                </div>
+                <button id="next-week-btn" class="nav-btn" aria-label="Settimana successiva">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+
+            <!-- Daily Schedule Grid -->
+            <div class="daily-schedule-grid" id="daily-schedule-grid">
+                <!-- Slots will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Lesson Details Modal -->
+        <div id="lesson-details-modal" class="modal" style="display: none;">
+            <div class="modal-content lesson-details-content">
+                <button class="modal-close-btn" id="lesson-details-close" aria-label="Chiudi">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <h3 id="modal-lesson-title">Dettagli Lezione</h3>
+                <div class="lesson-details-body">
+                    <div class="detail-item">
+                        <span class="detail-label">Classe:</span>
+                        <span id="modal-lesson-class" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Materia:</span>
+                        <span id="modal-lesson-subject" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Orario:</span>
+                        <span id="modal-lesson-time" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tipo:</span>
+                        <span id="modal-lesson-type" class="detail-value"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Stato:</span>
+                        <span id="modal-lesson-status" class="detail-value status-badge"></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="enter-lesson-btn">
+                        <span class="material-symbols-outlined">login</span>
+                        Entra in Classe
+                    </button>
+                </div>
+            </div>
         </div>
         
         <!-- Schedule Container -->
@@ -442,6 +436,7 @@
     <!-- Scripts -->
     <script src="js/icons.js"></script>
     <script src="js/schedule-patch.js"></script>
+    <script src="js/daily-view.js"></script>
     <!-- MD3 Theme Hook (runtime theme integration) -->
     <script type="module" src="src/js/theme-hook.js"></script>
     <script type="module">
