@@ -365,9 +365,20 @@
   }
 
   /**
+   * Hide the legacy lesson-picker modal to prevent auto-opening
+   */
+  function hideLegacyModal() {
+    const modal = document.getElementById('lesson-picker-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  /**
    * Initialize the schedule grid enhancement
    */
   function initScheduleGrid() {
+    hideLegacyModal();
     populateGrid();
     addKeyboardNavigation();
   }
