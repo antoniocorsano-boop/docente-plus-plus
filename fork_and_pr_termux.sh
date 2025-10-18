@@ -54,7 +54,7 @@ echo
 
 # 4) assicura che ssh-agent e la chiave siano caricati
 echo "Avvio ssh-agent e provo a caricare la chiave ~/.ssh/id_ed25519 (se presente)..."
-eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
+eval "$(ssh-agent -s)" >/dev/null
 if ssh-add -l >/dev/null 2>&1; then
   echo "Chiavi già caricate nell'agent:"
   ssh-add -l
