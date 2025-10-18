@@ -29,7 +29,7 @@ if command -v gh >/dev/null 2>&1; then
     echo "Fork già presente: ${GITHUB_USER}/${REPO_NAME}"
   else
     echo "Creo fork via gh..."
-    gh repo fork "${UPSTREAM}" --clone=false || echo "Attenzione: creazione fork con gh fallita o già esistente."
+    gh repo fork "${UPSTREAM}" --clone=false
   fi
 else
   echo "gh non installato: apro la pagina upstream per creare il fork manualmente."
