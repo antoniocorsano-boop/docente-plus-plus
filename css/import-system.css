@@ -327,7 +327,7 @@
 /* Import Help Section */
 .import-help {
     margin: 32px 0;
-    padding: 2var(--md-spacing-xs);
+    padding: var(--md-spacing-lg);
     background: var(--surface-color, var(--md-sys-color-surface-variant));
     border-radius: 12px;
 }
