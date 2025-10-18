@@ -353,7 +353,7 @@
 }
 
 .ai-send-button .material-symbols-outlined {
-    font-size: 2var(--md-spacing-xs);
+    font-size: var(--md-spacing-lg);
 }
 
 /* Recording Status */
