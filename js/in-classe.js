@@ -337,11 +337,33 @@ class InClasseUI {
 
     renderHeader() {
         const data = this.dataManager.lessonData;
-        document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
-        document.getElementById('lesson-class').textContent = data.className;
-        document.getElementById('lesson-subject').textContent = data.subject;
-        document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
-        document.getElementById('lesson-type').textContent = data.activityType;
+        
+        // Check if user has entered via "Entra" button (activeSessionClass is set)
+        let activeSessionClass = null;
+        try {
+            const stored = localStorage.getItem('activeSessionClass');
+            if (stored) {
+                activeSessionClass = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.debug('in-classe: failed to read activeSessionClass', e);
+        }
+        
+        // Only show class details if activeSessionClass is set and matches current lesson
+        if (activeSessionClass && activeSessionClass.lessonKey === this.dataManager.lessonKey) {
+            document.getElementById('lesson-title').textContent = `In Classe: ${data.className}`;
+            document.getElementById('lesson-class').textContent = data.className;
+            document.getElementById('lesson-subject').textContent = data.subject;
+            document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
+            document.getElementById('lesson-type').textContent = data.activityType;
+            // Show lesson metadata
+            document.getElementById('lesson-meta').style.display = '';
+        } else {
+            // Show generic header without class details
+            document.getElementById('lesson-title').textContent = 'In Classe';
+            // Hide lesson metadata
+            document.getElementById('lesson-meta').style.display = 'none';
+        }
     }
 
     renderActivities() {
@@ -777,6 +799,13 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 
     exit() {
+        // Clear activeSessionClass when exiting
+        try {
+            localStorage.removeItem('activeSessionClass');
+        } catch (e) {
+            console.debug('in-classe: failed to clear activeSessionClass', e);
+        }
+        
         // Navigate back to schedule or main app
         if (window.opener) {
             window.close();

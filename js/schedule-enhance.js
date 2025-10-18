@@ -168,6 +168,33 @@
    * Enter a lesson using available APIs or fallback
    */
   function enterLesson(lessonKey, classId) {
+    // Set activeSessionClass when "Entra" is clicked
+    try {
+      const schedule = loadSchedule();
+      if (schedule) {
+        // Find the lesson data
+        let slots = normalizeSchedule(schedule);
+        slots = slots.map(normalizeSlot).filter(s => s.day && s.time);
+        const lesson = slots.find(s => s.lessonKey === lessonKey);
+        
+        if (lesson) {
+          // Store activeSessionClass with full lesson details
+          const activeSessionClass = {
+            lessonKey: lessonKey,
+            classId: lesson.classId || classId,
+            className: lesson.className || `Classe ${lesson.classId || classId}`,
+            subject: lesson.subject,
+            day: lesson.day,
+            time: lesson.time,
+            activityType: lesson.activityType
+          };
+          localStorage.setItem('activeSessionClass', JSON.stringify(activeSessionClass));
+        }
+      }
+    } catch (e) {
+      console.debug('schedule-enhance: failed to set activeSessionClass', e);
+    }
+    
     // Try using the existing API if available
     if (typeof window.enterLessonFromSchedule === 'function') {
       try {
@@ -178,13 +205,9 @@
       }
     }
     
-    // Fallback: store in localStorage and reload
+    // Fallback: navigate to in-classe page
     try {
-      localStorage.setItem('lastOpenedLesson', lessonKey);
-      if (classId) {
-        localStorage.setItem('lastOpenedClassId', classId);
-      }
-      window.location.reload();
+      window.location.href = `in-classe.html?lesson=${encodeURIComponent(lessonKey)}`;
     } catch (e) {
       console.error('schedule-enhance: failed to enter lesson', e);
     }
