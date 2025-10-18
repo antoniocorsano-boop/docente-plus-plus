@@ -63,7 +63,7 @@
 
 /* Import Status */
 .import-status {
-    margin: 2var(--md-spacing-xs) 0;
+    margin: var(--md-spacing-lg) 0;
     padding: var(--md-spacing-md);
     background: var(--info-light, #e3f2fd);
     border-radius: var(--md-spacing-sm);
