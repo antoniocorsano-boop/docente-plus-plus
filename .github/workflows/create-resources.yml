@@ -1,0 +1,81 @@
+name: Create GitHub Labels and Project
+on:
+  workflow_dispatch:
+
+jobs:
+  create-resources:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      metadata: read
+      projects: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create labels and project
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const labels = [
+              { name: 'idea', color: 'BFD4FF', description: 'Idea / proposta' },
+              { name: 'backlog', color: 'FFE7BF', description: 'Backlog' },
+              { name: 'todo', color: 'FFF0B3', description: 'Da fare' },
+              { name: 'in-progress', color: 'A7FFB3', description: 'In lavorazione' },
+              { name: 'blocked', color: 'FFCCCB', description: 'Bloccato' },
+              { name: 'done', color: 'CDEFFB', description: 'Completato' },
+              { name: 'priority/high', color: 'FF9AA2', description: 'Alta priorità' },
+              { name: 'priority/medium', color: 'FFCB6E', description: 'Priorità media' },
+              { name: 'priority/low', color: 'D3E4FF', description: 'Bassa priorità' },
+              { name: 'enhancement', color: 'B7E4C7', description: 'Miglioramento' },
+              { name: 'bug', color: 'FFB1B1', description: 'Bug' }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                  color: label.color,
+                  description: label.description
+                });
+                core.info(`Created label ${label.name}`);
+              } catch (err) {
+                if (err.status === 422) {
+                  core.info(`Label ${label.name} already exists`);
+                } else {
+                  throw err;
+                }
+              }
+            }
+
+            // Create a classic project board for the repo
+            try {
+              const projectName = 'Class Page Planning';
+              const projectBody = 'Board per idee e attività: To do / In progress / Review / Done';
+
+              const project = await github.rest.projects.createForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: projectName,
+                body: projectBody
+              });
+
+              core.info(`Created project ${project.data.name} #${project.data.number}`);
+
+              // Create columns (To do / In progress / Review / Done)
+              const columns = ['To do', 'In progress', 'Review', 'Done'];
+              for (const col of columns) {
+                await github.rest.projects.createColumn({
+                  project_id: project.data.id,
+                  name: col
+                });
+                core.info(`Created column ${col}`);
+              }
+            } catch (err) {
+              core.info('Project creation skipped or failed: ' + err.message);
+            }
+
+            return 'Done';
