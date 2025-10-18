@@ -20,7 +20,7 @@
 
 /* Upload Area */
 .import-upload-area {
-    margin: 2var(--md-spacing-xs) 0;
+    margin: var(--md-spacing-lg) 0;
 }
 
 .upload-zone {
