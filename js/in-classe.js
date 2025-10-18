@@ -342,6 +342,12 @@ class InClasseUI {
         document.getElementById('lesson-subject').textContent = data.subject;
         document.getElementById('lesson-datetime').textContent = `${data.day}, ${data.time}`;
         document.getElementById('lesson-type').textContent = data.activityType;
+        
+        // Show lesson metadata when active session is established
+        const lessonMeta = document.getElementById('lesson-meta');
+        if (lessonMeta) {
+            lessonMeta.style.display = '';
+        }
     }
 
     renderActivities() {
