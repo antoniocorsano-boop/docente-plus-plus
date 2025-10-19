@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
     <link rel="stylesheet" href="css/in-classe.css">
     <link rel="stylesheet" href="css/schedule.css">
+    <link rel="stylesheet" href="css/daily-timeline.css">
     <link rel="stylesheet" href="css/floating-assistant.css">
 </head>
 <body>
@@ -161,6 +162,13 @@
         
         <!-- Schedule Container -->
         <div id="schedule-container"></div>
+        
+        <!-- Daily Timeline Widget (shows lessons for the day) -->
+        <aside id="daily-timeline-widget" class="daily-timeline-widget" role="complementary" aria-label="Orario del giorno">
+            <div id="daily-timeline">
+                <!-- Timeline will be rendered here by DailyTimeline.js -->
+            </div>
+        </aside>
         
         <!-- Activities Section -->
         <section class="collapsible-section" data-section="activities">
@@ -460,6 +468,21 @@
         // Import floating assistant
         import { initFloatingAssistant } from './js/floating-assistant.js';
         window.initFloatingAssistant = initFloatingAssistant;
+        
+        // Import and initialize DailyTimeline
+        import { initDailyTimeline } from './src/components/DailyTimeline.js';
+        
+        // Initialize DailyTimeline on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const timeline = initDailyTimeline('daily-timeline', new Date(), (lesson) => {
+                console.log('Lesson clicked:', lesson);
+                // Navigate to lesson if needed
+                if (lesson.id) {
+                    window.location.href = `in-classe.html?lesson=${encodeURIComponent(lesson.id)}`;
+                }
+            });
+            window.dailyTimeline = timeline;
+        });
         
         // Make themeProvider available globally for debugging
         window.themeProvider = themeProvider;
