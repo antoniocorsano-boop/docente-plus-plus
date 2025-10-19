@@ -1,250 +1,223 @@
 /**
- * @file routing.test.js
- * @description Integration tests for SPA routing and navigation
+ * @file Routing Integration Tests
+ * @description Tests for SPA navigation and routing without page reloads
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
-describe('SPA Routing Tests', () => {
-    let originalWindowOpen;
-    let windowOpenMock;
+describe('SPA Routing', () => {
+    let originalLocation;
+    let originalHistory;
+    let pushStateSpy;
+    let replaceStateSpy;
 
     beforeEach(() => {
-        // Mock window.open
-        originalWindowOpen = window.open;
-        windowOpenMock = jest.fn();
-        window.open = windowOpenMock;
+        // Mock window.location
+        originalLocation = window.location;
+        delete window.location;
+        window.location = {
+            href: 'http://localhost/',
+            pathname: '/',
+            hash: '#home',
+            assign: jest.fn(),
+            replace: jest.fn(),
+            reload: jest.fn()
+        };
 
         // Mock history
-        history.pushState = jest.fn();
-        history.replaceState = jest.fn();
+        originalHistory = window.history;
+        pushStateSpy = jest.fn();
+        replaceStateSpy = jest.fn();
+        Object.defineProperty(window, 'history', {
+            writable: true,
+            value: {
+                pushState: pushStateSpy,
+                replaceState: replaceStateSpy,
+                back: jest.fn(),
+                forward: jest.fn(),
+                go: jest.fn(),
+                state: null,
+                length: 1
+            }
+        });
     });
 
     afterEach(() => {
-        // Restore original window.open
-        window.open = originalWindowOpen;
+        window.location = originalLocation;
+        window.history = originalHistory;
     });
 
-    describe('Main App Navigation', () => {
-        it('should use history API for internal navigation', () => {
-            // Simulate tab switch
-            const pushStateSpy = jest.spyOn(history, 'pushState');
-            
+    describe('Internal Navigation', () => {
+        it('should use pushState for internal navigation', () => {
             // Simulate internal navigation
-            history.pushState({ page: 'lessons' }, '', '#lessons');
-            
-            expect(pushStateSpy).toHaveBeenCalled();
-            expect(pushStateSpy).toHaveBeenCalledWith(
-                expect.objectContaining({ page: 'lessons' }),
-                expect.any(String),
-                expect.stringContaining('lessons')
-            );
-        });
+            const pageName = 'inClasse';
+            const state = { page: pageName, params: null };
+            const url = `#${pageName}`;
 
-        it('should not trigger full page reload for tab navigation', () => {
-            // Store original location
-            const originalLocation = window.location;
-            
-            // Mock location.assign
-            delete window.location;
-            window.location = { ...originalLocation, assign: jest.fn() };
+            window.history.pushState(state, '', url);
 
-            // Simulate tab navigation (not calling window.location.assign)
-            history.pushState({ page: 'home' }, '', '#home');
-            
+            expect(pushStateSpy).toHaveBeenCalledWith(state, '', url);
             expect(window.location.assign).not.toHaveBeenCalled();
-            
-            // Restore original location
-            window.location = originalLocation;
-        });
-    });
-
-    describe('In Classe Navigation', () => {
-        it('should open in-classe.html in new window/tab', () => {
-            // Simulate opening In Classe page
-            const inClasseUrl = 'in-classe.html';
-            window.open(inClasseUrl, '_blank');
-            
-            expect(windowOpenMock).toHaveBeenCalledWith(inClasseUrl, '_blank');
+            expect(window.location.reload).not.toHaveBeenCalled();
         });
 
-        it('should pass lesson parameters to in-classe.html', () => {
-            // Simulate opening In Classe with lesson data
-            const lessonKey = 'Lunedì-08:00';
-            const params = new URLSearchParams({
-                lesson: lessonKey,
-                classId: '3A',
-                subject: 'Matematica'
+        it('should not reload page when navigating between tabs', () => {
+            const pages = ['home', 'inClasse', 'lessons', 'students'];
+
+            pages.forEach(page => {
+                const state = { page, params: null };
+                window.history.pushState(state, '', `#${page}`);
             });
-            const url = `in-classe.html?${params.toString()}`;
-            
-            window.open(url, '_blank');
-            
-            expect(windowOpenMock).toHaveBeenCalledWith(
-                expect.stringContaining('in-classe.html?lesson='),
-                '_blank'
-            );
+
+            expect(pushStateSpy).toHaveBeenCalledTimes(pages.length);
+            expect(window.location.reload).not.toHaveBeenCalled();
+            expect(window.location.assign).not.toHaveBeenCalled();
+        });
+
+        it('should preserve query parameters in pushState', () => {
+            const pageName = 'inClasse';
+            const params = { lessonId: '123' };
+            const state = { page: pageName, params };
+            const url = `#${pageName}?lessonId=123`;
+
+            window.history.pushState(state, '', url);
+
+            expect(pushStateSpy).toHaveBeenCalledWith(state, '', url);
+            expect(pushStateSpy.mock.calls[0][0].params).toEqual(params);
         });
     });
 
-    describe('Back Navigation', () => {
+    describe('Navigation Manager', () => {
         it('should handle browser back button with popstate', () => {
-            const popstateHandler = jest.fn((event) => {
-                if (event.state && event.state.page) {
-                    // Navigate to previous page
-                    console.log('Navigate to:', event.state.page);
-                }
-            });
-
+            const popstateHandler = jest.fn();
             window.addEventListener('popstate', popstateHandler);
 
-            // Simulate back button
             const event = new PopStateEvent('popstate', {
                 state: { page: 'home', params: null }
             });
             window.dispatchEvent(event);
 
             expect(popstateHandler).toHaveBeenCalled();
-
             window.removeEventListener('popstate', popstateHandler);
         });
+
+        it('should maintain navigation history', () => {
+            const states = [
+                { page: 'home', params: null },
+                { page: 'inClasse', params: null },
+                { page: 'lessons', params: { id: '1' } }
+            ];
+
+            states.forEach(state => {
+                window.history.pushState(state, '', `#${state.page}`);
+            });
+
+            expect(pushStateSpy).toHaveBeenCalledTimes(states.length);
+            // Verify each call
+            states.forEach((state, index) => {
+                expect(pushStateSpy.mock.calls[index][0]).toEqual(state);
+            });
+        });
     });
 
-    describe('No Full Page Reloads', () => {
-        it('should not call window.location.reload() for navigation', () => {
-            // Store original location
-            const originalLocation = window.location;
-            
-            // Mock location.reload
-            delete window.location;
-            window.location = { ...originalLocation, reload: jest.fn() };
+    describe('Link Handling', () => {
+        it('should prevent default action on internal links', () => {
+            const link = document.createElement('a');
+            link.href = '#inClasse';
+            link.textContent = 'Go to InClasse';
+            document.body.appendChild(link);
 
-            // Simulate various navigation actions
-            history.pushState({ page: 'lessons' }, '', '#lessons');
-            history.pushState({ page: 'students' }, '', '#students');
-            history.pushState({ page: 'home' }, '', '#home');
+            const clickHandler = (e) => {
+                e.preventDefault();
+                const hash = link.getAttribute('href').substring(1);
+                window.history.pushState({ page: hash }, '', link.href);
+            };
 
-            expect(window.location.reload).not.toHaveBeenCalled();
-            
-            // Restore original location
-            window.location = originalLocation;
+            link.addEventListener('click', clickHandler);
+
+            // Simulate click
+            const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+            const defaultPrevented = !link.dispatchEvent(event);
+
+            expect(defaultPrevented).toBe(true);
+            expect(pushStateSpy).toHaveBeenCalled();
+            expect(pushStateSpy.mock.calls[0][0]).toEqual({ page: 'inClasse' });
+            // URL might be absolute or relative depending on environment
+            expect(pushStateSpy.mock.calls[0][2]).toMatch(/#inClasse$/);
+
+            link.remove();
         });
 
-        it('should not call window.location.assign() for same-app navigation', () => {
-            // Store original location
-            const originalLocation = window.location;
-            
-            // Mock location.assign
-            delete window.location;
-            window.location = { ...originalLocation, assign: jest.fn() };
+        it('should not intercept external links', () => {
+            const link = document.createElement('a');
+            link.href = 'https://external-site.com';
+            link.target = '_blank';
+            document.body.appendChild(link);
 
-            // Simulate internal tab switches
-            history.pushState({ page: 'schedule' }, '', '#schedule');
-            history.pushState({ page: 'agenda' }, '', '#agenda');
+            // External links should not use pushState
+            const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+            link.dispatchEvent(event);
 
+            // pushState should not be called for external links
             expect(window.location.assign).not.toHaveBeenCalled();
+
+            link.remove();
+        });
+    });
+
+    describe('Home to InClasse Navigation', () => {
+        it('should navigate from Home to InClasse without page reload', () => {
+            // Start at home
+            window.history.replaceState({ page: 'home' }, '', '#home');
             
-            // Restore original location
-            window.location = originalLocation;
-        });
-    });
+            // Navigate to InClasse
+            const targetState = { page: 'inClasse', params: null };
+            window.history.pushState(targetState, '', '#inClasse');
 
-    describe('URL Hash Management', () => {
-        it('should update URL hash on navigation', () => {
-            history.pushState({ page: 'activities' }, '', '#activities');
+            expect(pushStateSpy).toHaveBeenCalledWith(targetState, '', '#inClasse');
+            expect(window.location.reload).not.toHaveBeenCalled();
+            expect(window.location.assign).not.toHaveBeenCalled();
+        });
+
+        it('should update URL hash when navigating to InClasse', () => {
+            window.history.pushState({ page: 'inClasse' }, '', '#inClasse');
             
-            // Check that hash was included in URL
-            expect(history.pushState).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.anything(),
-                expect.stringContaining('#activities')
-            );
+            expect(pushStateSpy).toHaveBeenCalled();
+            const callArgs = pushStateSpy.mock.calls[0];
+            expect(callArgs[2]).toBe('#inClasse');
         });
 
-        it('should handle navigation with query parameters', () => {
-            const params = new URLSearchParams({ filter: 'pending', sort: 'date' });
-            history.pushState(
-                { page: 'activities', params: Object.fromEntries(params) },
-                '',
-                `#activities?${params.toString()}`
-            );
+        it('should allow navigation back to Home from InClasse', () => {
+            // Navigate to InClasse
+            window.history.pushState({ page: 'inClasse' }, '', '#inClasse');
+            
+            // Go back to Home
+            window.history.back();
 
-            expect(history.pushState).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    page: 'activities',
-                    params: expect.objectContaining({ filter: 'pending' })
-                }),
-                expect.anything(),
-                expect.stringContaining('?filter=pending')
-            );
+            expect(window.history.back).toHaveBeenCalled();
+            expect(window.location.reload).not.toHaveBeenCalled();
         });
     });
 
-    describe('Navigation State Preservation', () => {
-        it('should preserve navigation state in history', () => {
-            const state = {
-                page: 'lessons',
-                params: { classId: '3A' }
-            };
+    describe('State Management', () => {
+        it('should preserve state across navigation', () => {
+            const state1 = { page: 'inClasse', params: { lessonId: '1' } };
+            const state2 = { page: 'lessons', params: { filter: 'active' } };
 
-            history.pushState(state, '', '#lessons?classId=3A');
+            window.history.pushState(state1, '', '#inClasse?lessonId=1');
+            window.history.pushState(state2, '', '#lessons?filter=active');
 
-            expect(history.pushState).toHaveBeenCalledWith(
-                expect.objectContaining(state),
-                expect.anything(),
-                expect.any(String)
-            );
+            expect(pushStateSpy).toHaveBeenCalledTimes(2);
+            expect(pushStateSpy.mock.calls[0][0]).toEqual(state1);
+            expect(pushStateSpy.mock.calls[1][0]).toEqual(state2);
         });
-    });
-});
 
-describe('In Classe Page URL Handling', () => {
-    beforeEach(() => {
-        // Mock URLSearchParams for testing
-        global.URLSearchParams = jest.fn().mockImplementation((searchString) => {
-            const params = new Map();
-            if (searchString) {
-                const pairs = searchString.split('&');
-                pairs.forEach(pair => {
-                    const [key, value] = pair.split('=');
-                    params.set(decodeURIComponent(key), decodeURIComponent(value || ''));
-                });
-            }
-            return {
-                get: (key) => params.has(key) ? params.get(key) : null,
-                has: (key) => params.has(key),
-                toString: () => {
-                    const parts = [];
-                    params.forEach((value, key) => {
-                        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-                    });
-                    return parts.join('&');
-                }
-            };
+        it('should handle empty state gracefully', () => {
+            const event = new PopStateEvent('popstate', { state: null });
+            window.dispatchEvent(event);
+
+            // Should not throw error
+            expect(true).toBe(true);
         });
-    });
-
-    it('should parse lesson parameter from URL', () => {
-        const searchString = 'lesson=Lunedì-08:00&classId=3A&subject=Matematica';
-        const params = new URLSearchParams(searchString);
-
-        expect(params.get('lesson')).toBe('Lunedì-08:00');
-        expect(params.get('classId')).toBe('3A');
-        expect(params.get('subject')).toBe('Matematica');
-    });
-
-    it('should handle missing lesson parameter', () => {
-        const params = new URLSearchParams('');
-        
-        expect(params.get('lesson')).toBe(null);
-    });
-
-    it('should encode special characters in URL parameters', () => {
-        const params = new URLSearchParams();
-        const lessonKey = 'Mercoledì-10:00';
-        
-        // URLSearchParams should handle encoding
-        const encoded = encodeURIComponent(lessonKey);
-        expect(encoded).toContain('Mercoled%C3%AC');
     });
 });

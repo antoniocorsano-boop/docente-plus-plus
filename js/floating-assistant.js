@@ -154,23 +154,18 @@ class FloatingAssistant {
             }
         });
         
-        // Mobile: Scroll input into view on focus to ensure visibility
+        // Mobile: Scroll input into view on focus to handle virtual keyboard
         textInput.addEventListener('focus', () => {
             if (window.innerWidth < 769) {
                 setTimeout(() => {
-                    textInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
+                    textInput.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest',
+                        inline: 'nearest'
+                    });
+                }, 300); // Delay to allow keyboard to open
             }
         });
-        
-        // Mobile: Listen to visualViewport changes to adjust for keyboard
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                if (document.activeElement === textInput) {
-                    textInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            });
-        }
 
         // Send button
         const sendBtn = document.getElementById('ai-send-button');

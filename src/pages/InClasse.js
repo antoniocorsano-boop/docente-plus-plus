@@ -65,15 +65,33 @@ export class InClassePage {
      */
     _renderStructure() {
         this.container.innerHTML = `
-            <div class="in-classe-page">
+            <div class="in-classe-page app-page">
                 <!-- Header -->
-                <header class="page-header">
+                <header class="page-header app-header">
                     <h1>
                         <span class="material-symbols-outlined" aria-hidden="true">school</span>
                         In Classe
                     </h1>
                     <p class="page-subtitle">Esplora e iscriviti alle lezioni disponibili</p>
                 </header>
+
+                <!-- Daily Timeline Section -->
+                <section class="daily-timeline-section" aria-label="Lezioni di oggi">
+                    <div class="section-header">
+                        <h2>
+                            <span class="material-symbols-outlined" aria-hidden="true">today</span>
+                            Lezioni di Oggi
+                        </h2>
+                        <span id="today-date" class="today-date"></span>
+                    </div>
+                    <div id="daily-timeline" class="daily-timeline">
+                        <!-- Timeline will be rendered here -->
+                    </div>
+                    <div id="timeline-empty" class="timeline-empty" style="display: none;">
+                        <span class="material-symbols-outlined empty-icon" aria-hidden="true">event_busy</span>
+                        <p>Nessuna lezione programmata per oggi</p>
+                    </div>
+                </section>
 
                 <!-- Filters Section -->
                 <section class="filters-section" aria-label="Filtri lezioni">
@@ -203,13 +221,150 @@ export class InClassePage {
             this.lessons = await lessonsAPI.getLessons(this.currentFilters);
             this.filteredLessons = [...this.lessons];
             this._renderLessons();
+            this._renderDailyTimeline();
             this._updateResultsInfo();
         } catch (error) {
             console.error('Error loading lessons:', error);
             this._showError('Errore nel caricamento delle lezioni');
+            // Use fallback mock data for development
+            this._useFallbackData();
         } finally {
             this._showLoading(false);
         }
+    }
+
+    /**
+     * Render daily timeline with today's lessons
+     * @private
+     */
+    _renderDailyTimeline() {
+        const timeline = document.getElementById('daily-timeline');
+        const emptyState = document.getElementById('timeline-empty');
+        const dateDisplay = document.getElementById('today-date');
+        
+        if (!timeline) return;
+
+        // Get current date
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // Update date display
+        if (dateDisplay) {
+            dateDisplay.textContent = today.toLocaleDateString('it-IT', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        // Filter lessons for today and sort by time
+        const todaysLessons = this.lessons
+            .filter(lesson => lesson.date === todayStr)
+            .sort((a, b) => {
+                const timeA = a.time.split(' - ')[0];
+                const timeB = b.time.split(' - ')[0];
+                return timeA.localeCompare(timeB);
+            });
+
+        // Show/hide empty state
+        if (todaysLessons.length === 0) {
+            timeline.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'flex';
+            return;
+        }
+
+        timeline.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'none';
+
+        // Render timeline items
+        timeline.innerHTML = todaysLessons.map(lesson => `
+            <div class="timeline-item app-card" data-lesson-id="${lesson.id}">
+                <div class="timeline-time">
+                    <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                    <span>${lesson.time}</span>
+                </div>
+                <div class="timeline-content">
+                    <h3>${this._escapeHtml(lesson.title)}</h3>
+                    <div class="timeline-meta">
+                        <span class="timeline-subject">${this._escapeHtml(lesson.subject)}</span>
+                        <span class="timeline-separator">•</span>
+                        <span class="timeline-teacher">${this._escapeHtml(lesson.teacher)}</span>
+                        <span class="timeline-separator">•</span>
+                        <span class="timeline-class">${this._escapeHtml(lesson.className)}</span>
+                    </div>
+                    <div class="timeline-type">
+                        <span class="type-badge type-${lesson.type.toLowerCase()}">${lesson.type}</span>
+                    </div>
+                </div>
+                <button 
+                    class="timeline-action btn-icon" 
+                    onclick="window.inClassePage?._showLessonDetailsFromTimeline('${lesson.id}')"
+                    aria-label="Visualizza dettagli ${lesson.title}"
+                    title="Visualizza dettagli">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Show lesson details from timeline click
+     * @private
+     * @param {string} lessonId - Lesson ID
+     */
+    _showLessonDetailsFromTimeline(lessonId) {
+        const lesson = this.lessons.find(l => l.id === lessonId);
+        if (lesson) {
+            this._showLessonDetails(lesson);
+        }
+    }
+
+    /**
+     * Use fallback mock data when API is unavailable
+     * @private
+     */
+    _useFallbackData() {
+        // Provide development fallback with lessons for today
+        const today = new Date().toISOString().split('T')[0];
+        this.lessons = [
+            {
+                id: 'fallback-1',
+                title: 'Lezione di Esempio - Matematica',
+                teacher: 'Prof. Demo',
+                subject: 'Matematica',
+                date: today,
+                time: '09:00 - 10:00',
+                duration: 60,
+                classId: '3A',
+                className: 'Classe 3A',
+                type: 'Teoria',
+                status: 'scheduled',
+                enrolledCount: 15,
+                maxCapacity: 25
+            },
+            {
+                id: 'fallback-2',
+                title: 'Lezione di Esempio - Italiano',
+                teacher: 'Prof. Demo',
+                subject: 'Italiano',
+                date: today,
+                time: '10:00 - 11:00',
+                duration: 60,
+                classId: '3A',
+                className: 'Classe 3A',
+                type: 'Teoria',
+                status: 'scheduled',
+                enrolledCount: 18,
+                maxCapacity: 25
+            }
+        ];
+        this.filteredLessons = [...this.lessons];
+        this._renderLessons();
+        this._renderDailyTimeline();
+        this._updateResultsInfo();
+        
+        console.log('📝 Using fallback mock data for development');
     }
 
     /**
@@ -629,5 +784,9 @@ export class InClassePage {
 export function initInClassePage(containerId) {
     const page = new InClassePage({ containerId });
     page.init();
+    // Make globally accessible for timeline interactions
+    if (typeof window !== 'undefined') {
+        window.inClassePage = page;
+    }
     return page;
 }

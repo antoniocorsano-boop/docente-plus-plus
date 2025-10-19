@@ -8,6 +8,7 @@ import themeProvider from './src/components/ThemeProvider.js';
 import { initThemeSwitcher } from './src/components/ThemeSwitcher.js';
 import { initAppBar } from './js/appbar.js';
 import { initNavigation } from './js/navigation.js';
+import { initInClassePage } from './src/pages/InClasse.js';
 import { 
     showModal, hideModal, 
     createClass, editClass, deleteClass,
@@ -62,6 +63,9 @@ class DocentePlusPlus {
         this.agendaView = 'weekly'; // 'weekly' or 'daily'
         this.currentAgendaDate = null; // Current date for agenda view
         this.currentEditingEvent = null; // Track the event being edited
+        
+        // InClasse page instance
+        this.inClassePage = null;
     }
     
     // Generate time slots based on settings
@@ -197,6 +201,7 @@ class DocentePlusPlus {
 
     renderAllTabs() {
         this.renderHome();
+        this.renderInClasse();
         this.renderLessons();
         this.renderStudents();
         this.renderClasses();
@@ -207,6 +212,13 @@ class DocentePlusPlus {
         this.renderAiAssistant();
         this.renderDocumentImport();
         this.renderNotifications();
+    }
+
+    renderInClasse() {
+        // Initialize InClasse page on first render
+        if (!this.inClassePage) {
+            this.inClassePage = initInClassePage('in-classe-container');
+        }
     }
 
     renderHome() {

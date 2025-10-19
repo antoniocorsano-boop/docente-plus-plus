@@ -96,6 +96,7 @@ class NavigationManager {
     getPageTitle(pageName) {
         const titles = {
             home: 'Home',
+            inClasse: 'In Classe',
             lessons: 'Lezioni',
             students: 'Studenti',
             classes: 'Classi',

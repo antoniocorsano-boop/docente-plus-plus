@@ -32,6 +32,7 @@
     <!-- MD3 Theme Styles -->
     <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
     <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
+    <!-- Common Page Styles -->
     <link rel="stylesheet" href="src/styles/common-page.css">
     <!-- Theme Switcher Component -->
     <link rel="stylesheet" href="src/components/ThemeSwitcher.css">
@@ -159,6 +160,10 @@
                 <span class="material-symbols-outlined">home</span>
                 <span class="nav-label">Home</span>
             </button>
+            <button class="nav-item" data-tab="inClasse">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-label">In Classe</span>
+            </button>
             <button class="nav-item" data-tab="lessons">
                 <span class="material-symbols-outlined">menu_book</span>
                 <span class="nav-label">Lezioni</span>
@@ -253,7 +258,7 @@
                 
                 <!-- Quick Access Cards -->
                 <div class="landing-cards">
-                    <button class="landing-card landing-card-primary" onclick="window.app.openInClasse()">
+                    <button class="landing-card landing-card-primary" onclick="window.app.switchTab('inClasse')">
                         <span class="material-symbols-outlined landing-card-icon">school</span>
                         <h3>Entra in Classe</h3>
                         <p>Gestisci le tue classi e gli studenti</p>
@@ -329,6 +334,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- In Classe Tab -->
+        <div id="inClasse" class="tab-content app-page">
+            <div id="in-classe-container">
+                <!-- InClasse page content will be loaded here -->
             </div>
         </div>
 
