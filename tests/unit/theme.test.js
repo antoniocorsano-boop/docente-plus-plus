@@ -68,8 +68,8 @@ describe('Theme System', () => {
       expect(theme.getThemePreference()).toBe('light');
     });
 
-    test('getThemeColorPreference returns default purple when not set', () => {
-      expect(theme.getThemeColorPreference()).toBe('purple');
+    test('getThemeColorPreference returns default lilac when not set', () => {
+      expect(theme.getThemeColorPreference()).toBe('lilac');
     });
 
     test('saveThemeColorPreference stores color in localStorage', () => {
