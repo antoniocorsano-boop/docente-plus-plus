@@ -16,6 +16,9 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
+    <!-- MD3 Theme Styles -->
+    <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
+    <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
     <link rel="stylesheet" href="css/in-classe.css">
     <link rel="stylesheet" href="css/schedule.css">
     <link rel="stylesheet" href="css/floating-assistant.css">
@@ -440,15 +443,26 @@
     <script src="js/icons.js"></script>
     <script src="js/schedule-patch.js"></script>
     <script type="module">
-        // Import theme system first
+        // Import centralized theme system
+        import themeProvider from './src/components/ThemeProvider.js';
+        import { validatePageTheme } from './src/utils/ThemeValidator.js';
         import { initializeTheme, setupThemePicker } from './js/theme.js';
         
-        // Initialize theme immediately
+        // Initialize ThemeProvider (centralized theme management)
+        themeProvider.initialize();
+        
+        // Also initialize legacy theme system for backwards compatibility
         initializeTheme();
+        
+        // Validate theme setup
+        validatePageTheme('in-classe');
         
         // Import floating assistant
         import { initFloatingAssistant } from './js/floating-assistant.js';
         window.initFloatingAssistant = initFloatingAssistant;
+        
+        // Make themeProvider available globally for debugging
+        window.themeProvider = themeProvider;
     </script>
     <script type="module" src="js/in-classe.js"></script>
     <script src="js/schedule-enhance.js"></script>

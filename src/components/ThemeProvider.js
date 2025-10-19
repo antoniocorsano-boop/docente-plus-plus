@@ -20,6 +20,7 @@ class ThemeProvider {
         this.theme = getThemePreference();
         this.color = getThemeColorPreference();
         this.initialized = false;
+        this.validationEnabled = true; // Enable validation by default
     }
 
     /**
@@ -206,10 +207,92 @@ class ThemeProvider {
             palettes: this.getAvailablePalettes()
         };
     }
+
+    /**
+     * Validate that MD3 CSS variables are properly set
+     * This helps detect if theme is not properly initialized
+     * @returns {Object} Validation result with status and errors
+     */
+    validateThemeVariables() {
+        const errors = [];
+        const warnings = [];
+        
+        // Check if theme is initialized
+        if (!this.initialized) {
+            errors.push('ThemeProvider not initialized. Call themeProvider.initialize() at app startup.');
+        }
+        
+        // Check for required MD3 CSS variables
+        const requiredVars = [
+            '--md-sys-color-primary',
+            '--md-sys-color-on-primary',
+            '--md-sys-color-surface',
+            '--md-sys-color-on-surface',
+            '--md-sys-color-background',
+            '--md-sys-color-on-background'
+        ];
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        
+        requiredVars.forEach(varName => {
+            const value = rootStyles.getPropertyValue(varName).trim();
+            if (!value) {
+                errors.push(`Required CSS variable ${varName} is not set`);
+            }
+        });
+        
+        // Check for theme classes
+        const hasThemeClass = document.documentElement.classList.contains('light-theme') || 
+                             document.documentElement.classList.contains('dark-theme');
+        
+        if (!hasThemeClass) {
+            warnings.push('No theme class found on document element. Theme may not be properly applied.');
+        }
+        
+        return {
+            valid: errors.length === 0,
+            errors,
+            warnings
+        };
+    }
+
+    /**
+     * Log validation errors to console (only in development)
+     * @param {Object} validation - Validation result from validateThemeVariables
+     */
+    logValidationErrors(validation) {
+        if (!validation.valid) {
+            console.error('❌ Theme Validation Failed:', validation.errors);
+        }
+        if (validation.warnings.length > 0) {
+            console.warn('⚠️ Theme Validation Warnings:', validation.warnings);
+        }
+    }
+
+    /**
+     * Enable or disable validation
+     * @param {boolean} enabled - Whether to enable validation
+     */
+    setValidationEnabled(enabled) {
+        this.validationEnabled = enabled;
+    }
 }
 
 // Create a singleton instance
 const themeProvider = new ThemeProvider();
+
+// Set up validation check on initialization
+if (typeof window !== 'undefined') {
+    // Run validation after a short delay to allow theme to be applied
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (themeProvider.validationEnabled) {
+                const validation = themeProvider.validateThemeVariables();
+                themeProvider.logValidationErrors(validation);
+            }
+        }, 100);
+    });
+}
 
 // Export the singleton instance
 export default themeProvider;
