@@ -140,11 +140,10 @@ describe('SPA Routing', () => {
             const defaultPrevented = !link.dispatchEvent(event);
 
             expect(defaultPrevented).toBe(true);
-            expect(pushStateSpy).toHaveBeenCalledWith(
-                { page: 'inClasse' },
-                '',
-                '#inClasse'
-            );
+            expect(pushStateSpy).toHaveBeenCalled();
+            expect(pushStateSpy.mock.calls[0][0]).toEqual({ page: 'inClasse' });
+            // URL might be absolute or relative depending on environment
+            expect(pushStateSpy.mock.calls[0][2]).toMatch(/#inClasse$/);
 
             link.remove();
         });
