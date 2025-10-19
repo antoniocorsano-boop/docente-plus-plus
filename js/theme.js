@@ -6,11 +6,39 @@ const THEME_AUTO = 'auto';
 const THEME_LIGHT = 'light';
 const THEME_DARK = 'dark';
 
-// Color palettes for Material Design 3 (mapped to MD3 Expressive seed colors)
+// Material Design 3 Expressive Color Palettes
+// Following MD3 Expressive guidelines with vibrant, expressive colors
 const COLOR_PALETTES = {
-    purple: {
-        light: { primary: '#8657FF', primaryContainer: '#EDE6FF', onPrimary: '#FFFFFF', onPrimaryContainer: '#281A4D' },
-        dark: { primary: '#C3ABFF', primaryContainer: '#5E3DB3', onPrimary: '#221640', onPrimaryContainer: '#EDE6FF' }
+    lilac: {
+        name: 'Lilla',
+        light: { 
+            primary: '#8657FF', 
+            primaryContainer: '#E7DEFF', 
+            onPrimary: '#FFFFFF', 
+            onPrimaryContainer: '#20005B',
+            secondary: '#6E5EFF',
+            secondaryContainer: '#E6E0FF',
+            onSecondary: '#FFFFFF',
+            onSecondaryContainer: '#1B1144',
+            tertiary: '#FF7AC6',
+            tertiaryContainer: '#FFD8EC',
+            onTertiary: '#381326',
+            onTertiaryContainer: '#3B1020'
+        },
+        dark: { 
+            primary: '#CDB6FF', 
+            primaryContainer: '#4A2E78', 
+            onPrimary: '#2B1733', 
+            onPrimaryContainer: '#F0E6FF',
+            secondary: '#C9BDFF',
+            secondaryContainer: '#4A3A8F',
+            onSecondary: '#2A1B5F',
+            onSecondaryContainer: '#E9E1FF',
+            tertiary: '#FFB1D8',
+            tertiaryContainer: '#6B2E50',
+            onTertiary: '#4A1E35',
+            onTertiaryContainer: '#FFE0F0'
+        }
     },
     teal: {
         name: 'Teal',
@@ -335,13 +363,7 @@ function applyColorPalette(colorName, mode) {
     const colors = palette[mode];
     const root = document.documentElement;
     
-    // Apply colors as CSS variables using MD3 naming
-    root.style.setProperty('--md-sys-color-primary', colors.primary);
-    root.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
-    root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
-    root.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
-    
-    // Also set legacy variable names for backward compatibility
+    // Apply all MD3 color variables
     root.style.setProperty('--md-primary', colors.primary);
     root.style.setProperty('--md-primary-container', colors.primaryContainer);
     root.style.setProperty('--md-on-primary', colors.onPrimary);

@@ -1,266 +1,380 @@
-# MD3 Expressive Theme System
+# Material Design 3 Expressive - Guida alla Migrazione dei Token
 
-This document describes the Material Design 3 (MD3) Expressive theme system for Docente++.
+## Panoramica
 
-## Overview
+Questo documento fornisce una guida completa per migrare i valori hardcoded alle variabili del tema Material Design 3 (MD3) Expressive. Tutti i componenti dell'app devono utilizzare esclusivamente le variabili CSS MD3 per garantire coerenza visiva e facilità di manutenzione.
 
-The MD3 Expressive theme system provides a consistent, modern, and accessible design language across the application. It supports:
+## Regola Fondamentale
 
-- **Dynamic seed colors**: Generate color palettes from any seed color
-- **Light and dark modes**: Automatic theme switching based on user preference
-- **Consistent spacing**: Standardized spacing tokens
-- **Accessible focus states**: High-contrast focus indicators
-- **Expressive shapes**: Rounded corners and modern visual style
+**NON utilizzare mai valori hardcoded per colori, spaziatura o tipografia.** Utilizzare sempre le variabili CSS MD3.
 
-## Architecture
+## Variabili Colore MD3
 
-### Files
+### Colori Primari
 
-- **design/tokens-md3-expressive.json**: Design token definitions
-- **src/styles/theme-md3-expressive.css**: Base theme CSS with utility classes
-- **src/styles/generated-md3-expressive.css**: Auto-generated theme variables (light + dark)
-- **tools/generate-md3-expressive.js**: Generator for theme CSS from seed color
-- **tools/replace-tokens.js**: Migration tool to replace hardcoded values
-- **src/js/theme-hook.js**: Runtime theme management
-
-### Color System
-
-The theme uses the MD3 color system with the following roles:
-
-#### Primary Colors
-- `--md-sys-color-primary`: Main brand color
-- `--md-sys-color-on-primary`: Text on primary
-- `--md-sys-color-primary-container`: Lighter primary for containers
-- `--md-sys-color-on-primary-container`: Text on primary container
-
-#### Secondary Colors
-- `--md-sys-color-secondary`: Supporting color
-- `--md-sys-color-on-secondary`: Text on secondary
-- `--md-sys-color-secondary-container`: Lighter secondary
-- `--md-sys-color-on-secondary-container`: Text on secondary container
-
-#### Tertiary Colors
-- `--md-sys-color-tertiary`: Accent color (pink)
-- `--md-sys-color-on-tertiary`: Text on tertiary
-- `--md-sys-color-tertiary-container`: Lighter tertiary
-- `--md-sys-color-on-tertiary-container`: Text on tertiary container
-
-#### Surface Colors
-- `--md-sys-color-surface`: Default surface
-- `--md-sys-color-on-surface`: Text on surface
-- `--md-sys-color-surface-variant`: Variant surface
-- `--md-sys-color-on-surface-variant`: Text on surface variant
-- `--md-sys-color-surface-container-*`: Container surfaces (lowest to highest)
-
-#### Other Colors
-- `--md-sys-color-outline`: Border and divider color
-- `--md-sys-color-error`: Error state color
-- `--md-sys-color-background`: Page background
-
-### Spacing System
-
-Standard spacing tokens:
-
-- `--md-spacing-xs`: 4px
-- `--md-spacing-sm`: 8px
-- `--md-spacing-md`: 16px
-- `--md-spacing-lg`: 24px
-
-### Shape System
-
-Border radius tokens:
-
-- `--md-shape-small`: 10px
-- `--md-shape-medium`: 14px
-- `--md-shape-large`: 20px
-
-### Focus System
-
-Focus indicator styles:
-
-- `--md-focus-outline`: Focus color (rgba with seed color)
-- `--md-focus-width`: 2px
-- `--md-focus-offset`: 2px
-
-## Usage
-
-### Generating Theme CSS
-
-To regenerate the theme CSS with a new seed color:
-
-```bash
-node tools/generate-md3-expressive.js --seed=#8657FF
-```
-
-This will update `src/styles/generated-md3-expressive.css` with new color palettes.
-
-### Migration Tool
-
-To find hardcoded colors and spacing values in your CSS:
-
-```bash
-# Dry run (preview changes)
-node tools/replace-tokens.js --dir=./css --dry-run
-
-# Apply changes
-node tools/replace-tokens.js --dir=./css --apply
-
-# Single file
-node tools/replace-tokens.js --file=css/schedule.css --apply
-```
-
-### HTML Integration
-
-Include the theme CSS files in your HTML:
-
-```html
-<head>
-  <!-- Base theme with utilities -->
-  <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
-  
-  <!-- Generated color variables -->
-  <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
-</head>
-```
-
-### Using Theme Variables in CSS
-
-Replace hardcoded colors with theme variables:
+Utilizzare per elementi principali, pulsanti CTA, link importanti:
 
 ```css
-/* Before */
-.header {
+/* ❌ NON FARE */
+background: #8657FF;
+color: #FFFFFF;
+
+/* ✅ FARE */
+background: var(--md-sys-color-primary);
+color: var(--md-sys-color-on-primary);
+```
+
+**Variabili disponibili:**
+- `--md-sys-color-primary` - Colore primario principale
+- `--md-sys-color-on-primary` - Testo/icone su colore primario
+- `--md-sys-color-primary-container` - Contenitore con colore primario
+- `--md-sys-color-on-primary-container` - Testo/icone su contenitore primario
+
+### Colori Secondari
+
+Utilizzare per elementi di supporto, pulsanti secondari, badge:
+
+```css
+/* ❌ NON FARE */
+background: #6E5EFF;
+color: #FFFFFF;
+
+/* ✅ FARE */
+background: var(--md-sys-color-secondary);
+color: var(--md-sys-color-on-secondary);
+```
+
+**Variabili disponibili:**
+- `--md-sys-color-secondary`
+- `--md-sys-color-on-secondary`
+- `--md-sys-color-secondary-container`
+- `--md-sys-color-on-secondary-container`
+
+### Colori Terziari
+
+Utilizzare per elementi di accento, highlights:
+
+```css
+/* ❌ NON FARE */
+background: #FF7AC6;
+color: #381326;
+
+/* ✅ FARE */
+background: var(--md-sys-color-tertiary);
+color: var(--md-sys-color-on-tertiary);
+```
+
+**Variabili disponibili:**
+- `--md-sys-color-tertiary`
+- `--md-sys-color-on-tertiary`
+- `--md-sys-color-tertiary-container`
+- `--md-sys-color-on-tertiary-container`
+
+### Superfici e Sfondi
+
+Utilizzare per card, dialog, background delle pagine:
+
+```css
+/* ❌ NON FARE */
+background: #FFFFFF;
+color: #1B1224;
+
+/* ✅ FARE */
+background: var(--md-sys-color-surface);
+color: var(--md-sys-color-on-surface);
+```
+
+**Variabili disponibili:**
+- `--md-sys-color-surface` - Superficie principale
+- `--md-sys-color-on-surface` - Testo su superficie
+- `--md-sys-color-surface-variant` - Superficie alternativa
+- `--md-sys-color-on-surface-variant` - Testo su superficie alternativa
+- `--md-sys-color-background` - Sfondo pagina
+- `--md-sys-color-on-background` - Testo su sfondo
+
+### Colori di Stato
+
+Utilizzare per messaggi di errore, outline, bordi:
+
+```css
+/* ❌ NON FARE */
+border: 1px solid #8F8698;
+background: #D84B4B;
+
+/* ✅ FARE */
+border: 1px solid var(--md-sys-color-outline);
+background: var(--md-sys-color-error);
+```
+
+**Variabili disponibili:**
+- `--md-sys-color-outline` - Bordi e separatori
+- `--md-sys-color-error` - Errori
+- `--md-sys-color-on-error` - Testo su errore
+
+### Trasparenze e Overlay
+
+Per effetti con trasparenza, utilizzare `rgba()` con valori calcolati:
+
+```css
+/* ❌ NON FARE */
+background: rgba(134, 87, 255, 0.1);
+
+/* ✅ FARE - Usare CSS custom properties con trasparenza */
+background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+
+/* OPPURE per compatibilità */
+background: var(--md-sys-color-primary);
+opacity: 0.1;
+```
+
+## Variabili Spaziatura
+
+Utilizzare il sistema di spaziatura basato su griglia 8px:
+
+```css
+/* ❌ NON FARE */
+padding: 16px;
+margin: 24px;
+gap: 8px;
+
+/* ✅ FARE */
+padding: var(--md-spacing-md);
+margin: var(--md-spacing-lg);
+gap: var(--md-spacing-sm);
+```
+
+**Variabili disponibili:**
+- `--md-spacing-xs: 4px` - Extra small (0.5 unità)
+- `--md-spacing-sm: 8px` - Small (1 unità)
+- `--md-spacing-md: 16px` - Medium (2 unità)
+- `--md-spacing-lg: 24px` - Large (3 unità)
+- `--md-spacing-xl: 32px` - Extra large (4 unità)
+
+Oppure utilizzare le variabili alternative:
+- `--spacing-xs`, `--spacing-sm`, `--spacing-md`, `--spacing-lg`, `--spacing-xl`
+
+## Variabili Border Radius
+
+Utilizzare per consistenza negli angoli arrotondati:
+
+```css
+/* ❌ NON FARE */
+border-radius: 10px;
+border-radius: 14px;
+border-radius: 20px;
+
+/* ✅ FARE */
+border-radius: var(--md-shape-small);
+border-radius: var(--md-shape-medium);
+border-radius: var(--md-shape-large);
+```
+
+**Variabili disponibili:**
+- `--md-shape-small: 10px` - Piccoli elementi (button, chip)
+- `--md-shape-medium: 14px` - Card, dialog
+- `--md-shape-large: 20px` - Container grandi
+- `--md-radius-small: 8px` - Alternativa compatibile
+- `--md-radius-medium: 12px` - Alternativa compatibile
+- `--md-radius-large: 16px` - Alternativa compatibile
+
+## Focus Indicators
+
+Utilizzare le variabili per indicatori di focus accessibili:
+
+```css
+/* ❌ NON FARE */
+button:focus {
+  outline: 2px solid #8657FF;
+  outline-offset: 2px;
+}
+
+/* ✅ FARE */
+button:focus {
+  outline: var(--md-focus-width) solid var(--md-focus-outline);
+  outline-offset: var(--md-focus-offset);
+}
+```
+
+**Variabili disponibili:**
+- `--md-focus-outline` - Colore dell'outline di focus
+- `--md-focus-width: 2px` - Spessore dell'outline
+- `--md-focus-offset: 2px` - Distanza dall'elemento
+
+## Tipografia
+
+Utilizzare le variabili tipografiche per dimensioni e pesi:
+
+```css
+/* ❌ NON FARE */
+font-size: 16px;
+font-weight: 500;
+line-height: 1.5;
+
+/* ✅ FARE */
+font-size: var(--font-size-base);
+font-weight: var(--font-weight-medium);
+line-height: var(--line-height-normal);
+```
+
+**Variabili dimensioni:**
+- `--font-size-xs: 0.75rem` (12px)
+- `--font-size-sm: 0.875rem` (14px)
+- `--font-size-base: 1rem` (16px)
+- `--font-size-lg: 1.125rem` (18px)
+- `--font-size-xl: 1.25rem` (20px)
+- `--font-size-2xl: 1.5rem` (24px)
+
+**Variabili pesi:**
+- `--font-weight-light: 300`
+- `--font-weight-regular: 400`
+- `--font-weight-medium: 500`
+- `--font-weight-semibold: 600`
+- `--font-weight-bold: 700`
+
+## Ombre (Elevation)
+
+Utilizzare le elevation MD3 per ombre consistenti:
+
+```css
+/* ❌ NON FARE */
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+/* ✅ FARE */
+box-shadow: var(--md-elevation-1);
+box-shadow: var(--md-elevation-2);
+```
+
+**Variabili disponibili:**
+- `--md-elevation-0: none` - Nessuna ombra
+- `--md-elevation-1` - Elevazione minima (card)
+- `--md-elevation-2` - Elevazione media (hover)
+- `--md-elevation-3` - Elevazione alta (dialog)
+- `--md-elevation-4` - Elevazione molto alta
+- `--md-elevation-5` - Elevazione massima
+
+## Esempi di Migrazione
+
+### Esempio 1: Pulsante Primario
+
+```css
+/* ❌ PRIMA */
+.btn-primary {
   background: #8657FF;
   color: #FFFFFF;
-  padding: 16px;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(134, 87, 255, 0.2);
 }
 
-/* After */
-.header {
+/* ✅ DOPO */
+.btn-primary {
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
-  padding: var(--md-spacing-md);
+  padding: var(--md-spacing-sm) var(--md-spacing-md);
+  border-radius: var(--md-shape-small);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--md-elevation-1);
+}
+
+.btn-primary:focus {
+  outline: var(--md-focus-width) solid var(--md-focus-outline);
+  outline-offset: var(--md-focus-offset);
 }
 ```
 
-### Utility Classes
+### Esempio 2: Card
 
-The theme provides utility classes:
+```css
+/* ❌ PRIMA */
+.card {
+  background: #FFFFFF;
+  color: #1B1224;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E7E0EC;
+}
 
-```html
-<!-- Elevated surface -->
-<div class="surface-elevated">Content</div>
-
-<!-- Primary button -->
-<button class="btn-primary">Action</button>
-
-<!-- Accent pill -->
-<span class="pill-accent">Tag</span>
-
-<!-- In-classe header -->
-<header class="in-classe-topbar">
-  <h1 class="in-classe-header">Title</h1>
-</header>
+/* ✅ DOPO */
+.card {
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  padding: var(--md-spacing-md);
+  border-radius: var(--md-shape-medium);
+  box-shadow: var(--md-elevation-1);
+  border: 1px solid var(--md-sys-color-outline);
+}
 ```
 
-### Dark Mode
+### Esempio 3: Badge/Pill
 
-The theme automatically supports dark mode. Add the `dark-theme` class to `html`, `body`, or `:root`:
+```css
+/* ❌ PRIMA */
+.badge {
+  background: #E6E0FF;
+  color: #1B1144;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
-```javascript
-// Apply dark theme
-document.documentElement.classList.add('dark-theme');
-
-// Apply light theme
-document.documentElement.classList.remove('dark-theme');
-document.documentElement.classList.add('light-theme');
+/* ✅ DOPO */
+.badge {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  padding: var(--md-spacing-xs) var(--md-spacing-sm);
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
 ```
 
-## Runtime Theme Switching
+## Tema Scuro
 
-The `src/js/theme-hook.js` module provides runtime theme management:
+Le variabili MD3 gestiscono automaticamente il tema scuro quando la classe `.dark-theme` è applicata a `:root` o `body`. Non è necessario scrivere media query o override:
 
-```javascript
-import { applyDynamicTheme, setThemeSeed } from './src/js/theme-hook.js';
+```css
+/* ❌ NON FARE - Media query manuali */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1A1720;
+    color: #EDE7F8;
+  }
+}
 
-// Initialize with default seed
-applyDynamicTheme();
-
-// Change seed color dynamically
-setThemeSeed('#FF5722');
-
-// Listen to theme changes
-window.addEventListener('themechange', (e) => {
-  console.log('Theme changed:', e.detail);
-});
+/* ✅ FARE - Le variabili cambiano automaticamente */
+.card {
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
 ```
 
-## Migration Strategy
+## Checklist Migrazione
 
-### Phase 1: Core Components
-1. ✅ Add theme system files
-2. ✅ Generate CSS with seed color
-3. Apply to high-visibility components:
-   - Topbar/header
-   - "In Classe" page
-   - Schedule grid
-   - Primary buttons
+Quando migri un componente a MD3:
 
-### Phase 2: Secondary Components
-1. Card components
-2. Dialogs and modals
-3. Form inputs
-4. Navigation elements
+- [ ] Sostituisci tutti i colori hex/rgb con variabili `--md-sys-color-*`
+- [ ] Sostituisci padding/margin con variabili `--md-spacing-*`
+- [ ] Sostituisci border-radius con variabili `--md-shape-*` o `--md-radius-*`
+- [ ] Sostituisci font-size con variabili `--font-size-*`
+- [ ] Sostituisci font-weight con variabili `--font-weight-*`
+- [ ] Sostituisci box-shadow con variabili `--md-elevation-*`
+- [ ] Aggiungi indicatori di focus con `--md-focus-*`
+- [ ] Rimuovi media query `@media (prefers-color-scheme: dark)`
+- [ ] Testa in modalità chiara e scura
+- [ ] Testa con diverse palette di colori
 
-### Phase 3: Refinement
-1. Test dark mode thoroughly
-2. Verify accessibility (contrast ratios)
-3. Fine-tune spacing and shapes
-4. Document edge cases
+## Riferimenti
 
-## Best Practices
+- [docs/theme.md](./theme.md) - Documentazione completa del sistema tema
+- [Material Design 3 Guidelines](https://m3.material.io/)
+- [Color System](https://m3.material.io/styles/color/overview)
 
-### DO
-- ✅ Use theme variables for all colors
-- ✅ Use spacing tokens for padding/margin
-- ✅ Use shape tokens for border-radius
-- ✅ Test in both light and dark modes
-- ✅ Use utility classes when available
+## Supporto
 
-### DON'T
-- ❌ Hardcode hex colors
-- ❌ Use arbitrary spacing values
-- ❌ Override theme variables without reason
-- ❌ Mix old and new systems in same component
-
-## Accessibility
-
-The theme ensures:
-
-- **WCAG AA contrast**: All text meets minimum contrast ratios
-- **Focus indicators**: High-contrast, visible focus states
-- **Dark mode support**: Proper contrast in both themes
-- **Semantic colors**: Error states use red, success uses green
-
-## Future Enhancements
-
-- [ ] Integration with Material Color Utilities library
-- [ ] Custom color picker in settings
-- [ ] Per-component theme overrides
-- [ ] Theme presets (curated palettes)
-- [ ] CSS custom properties polyfill for older browsers
-
-## Support
-
-For issues or questions about the theme system:
-
-1. Check this documentation
-2. Review `design/tokens-md3-expressive.json`
-3. Test with migration tools
-4. Open an issue on GitHub
-
-## References
-
-- [Material Design 3](https://m3.material.io/)
-- [Material Color System](https://m3.material.io/styles/color/overview)
-- [Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+Per domande o problemi con la migrazione, consulta la documentazione in `docs/theme.md` o apri una issue su GitHub.

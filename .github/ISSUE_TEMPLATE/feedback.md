@@ -1,10 +1,9 @@
 ---
-name: "\U0001F4A1 Feedback e Suggerimenti"
+name: 💡 Feedback e Suggerimenti
 about: Condividi il tuo feedback sull'app o suggerisci miglioramenti
-title: "[FEEDBACK] "
-labels: enhancement
+title: '[FEEDBACK] '
+labels: feedback, enhancement
 assignees: ''
-
 ---
 
 ## 📝 Tipo di Feedback

@@ -994,11 +994,6 @@ function renderDailyTimeline() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize daily view first
-    if (typeof initDailyView === 'function') {
-        initDailyView();
-    }
-    
     const dataManager = new InClasseDataManager();
     
     // Initialize daily timeline widget
