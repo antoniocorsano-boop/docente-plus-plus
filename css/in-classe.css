@@ -1,55 +1,118 @@
 :root{
-  --md-primary: #6750A4;
-  --md-on-primary: #FFFFFF;
-  --md-secondary: #625B71;
-  --surface: #FEF7FF;
-  --bg: #FFFFFF;
-  --error: #BA1A1A;
-  --muted: #6b6b6b;
-  --base: 8px;
+  /* Material Design 3 - Expressive semantic tokens (MD3 style variables) */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #2A151B;
+
+  --md-sys-color-error: #BA1A1A;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-error-container: #FFDAD6;
+  --md-sys-color-on-error-container: #410002;
+
+  --md-sys-color-background: #FEF7FF;
+  --md-sys-color-on-background: #1C1B1F;
+  --md-sys-color-surface: #FFFFFF;
+  --md-sys-color-on-surface: #1C1B1F;
+  --md-sys-color-surface-variant: #EEE0F8;
+  --md-sys-color-on-surface-variant: #4C4454;
+
+  --md-sys-color-outline: #817391;
+  --md-sys-color-inverse-surface: #2F2D31;
+  --md-sys-color-inverse-on-surface: #F6EFF6;
+  --md-sys-color-surface-tint: var(--md-sys-color-primary);
+
+  /* state layer / overlay */
+  --md-sys-state-hover: rgba(103,80,164,0.08);
+  --md-sys-state-focus: rgba(103,80,164,0.12);
+  --md-sys-state-pressed: rgba(103,80,164,0.16);
+
+  /* spacing / radius / elevation */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --shadow-1: 0 1px 2px rgba(16,24,40,0.06);
-  --shadow-2: 0 6px 18px rgba(16,24,40,0.08);
-  font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial;
+  --elevation-1: 0 1px 2px rgba(16,24,40,0.06);
+  --elevation-2: 0 6px 18px rgba(16,24,40,0.08);
+
+  /* legacy / compatibility tokens used in this project */
+  --md-primary: var(--md-sys-color-primary);
+  --md-on-primary: var(--md-sys-color-on-primary);
+  --md-secondary: var(--md-sys-color-secondary);
+  --surface: var(--md-sys-color-background);
+  --bg: var(--md-sys-color-surface);
+  --error: var(--md-sys-color-error);
+  --muted: rgba(28,27,31,0.6);
 }
+
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--surface);color:#111}
-.container{max-width:1100px;margin:0 auto;padding:16px}
+html,body{height:100%;margin:0;background:var(--surface);color:var(--md-sys-color-on-background);font-family:Roboto,system-ui,-apple-system,"Segoe UI",Arial}
+.container{max-width:1100px;margin:0 auto;padding:var(--space-3)}
 .app{min-height:100vh}
-header#lesson-header{position:sticky;top:0;z-index:30;background:linear-gradient(90deg,var(--md-primary),#5b4b8a);color:var(--md-on-primary);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+
+header#lesson-header{
+  position:sticky;top:0;z-index:30;
+  background:linear-gradient(90deg,var(--md-sys-color-primary),#5b4b8a);
+  color:var(--md-sys-color-on-primary);
+  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);
+}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .lesson-info h1{margin:0;font-size:18px;font-weight:600}
 .lesson-info p{margin:2px 0;font-size:13px;color:rgba(255,255,255,0.95)}
 .header-actions{display:flex;align-items:center;gap:8px}
 .badge{background:rgba(255,255,255,0.12);padding:6px 8px;border-radius:999px;font-weight:600}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:none;background:var(--md-primary);color:var(--md-on-primary);cursor:pointer}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--md-on-primary)}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);border:none;
+  background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);cursor:pointer
+}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--md-sys-color-on-primary)}
 .btn-record{background:linear-gradient(90deg,#ff5252,#ff1744);box-shadow:0 6px 18px rgba(255,23,68,0.18)}
-.card{background:var(--bg);border-radius:var(--radius-md);box-shadow:var(--shadow-1);padding:12px;margin:12px 0}
+
+.card{background:var(--md-sys-color-surface);border-radius:var(--radius-md);box-shadow:var(--elevation-1);padding:12px;margin:12px 0}
 .section{overflow:hidden}
 .section .section-toggle{width:100%;text-align:left;background:transparent;border:none;padding:10px 4px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .section-body{padding:10px 4px}
 .toolbar{display:flex;gap:8px;margin-bottom:8px}
 .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
-.list .item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid #eee}
+.list .item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)}
 .empty{color:var(--muted);padding:8px}
 .students-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:8px}
-.student{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;border:1px solid #eee}
-.avatar{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white}
+.student{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)}
+.avatar{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--md-sys-color-on-primary);background:var(--md-sys-color-primary)}
 .timer{font-family:monospace;margin-left:8px}
-.transcription textarea, #summary-text{width:100%;min-height:120px;padding:8px;border-radius:8px;border:1px solid #ddd}
+.transcription textarea, #summary-text{width:100%;min-height:120px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)}
 .summary-actions{display:flex;gap:8px;margin-top:8px}
 .analytics-summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .canvas{width:100%;max-width:100%;height:auto}
-/* small utilities */
 .small{font-size:13px}
 .hidden{display:none !important}
-/* responsive */
+
 @media(min-width:768px){.students-grid{grid-template-columns:repeat(2,1fr)}.lesson-info h1{font-size:20px}}
 @media(min-width:1100px){.students-grid{grid-template-columns:repeat(3,1fr)}}
-/* dark mode */
-@media (prefers-color-scheme:dark){:root{--bg:#111;--surface:#080808;color:#eee}header#lesson-header{border-bottom-color:rgba(255,255,255,0.06)}.card{box-shadow:none;border:1px solid rgba(255,255,255,0.04)}}
-/* print */
+
+@media (prefers-color-scheme:dark){
+  :root{
+    --md-sys-color-background:#0f0b12;
+    --md-sys-color-surface:#111113;
+    --md-sys-color-on-background:#E8DEF8;
+    --md-sys-color-on-surface:#E8DEF8;
+  }
+  header#lesson-header{border-bottom-color:rgba(255,255,255,0.06)}
+  .card{box-shadow:none;border:1px solid rgba(255,255,255,0.04)}
+}
+
 @media print{body{background:white;color:black}.card{box-shadow:none;border:1px solid #ddd}.btn{display:none}}
