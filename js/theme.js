@@ -133,6 +133,11 @@ const COLOR_PALETTES = {
             onTertiaryContainer: '#FFD8E4'
         }
     },
+    lilla: {
+        name: 'Lilla',
+        light: { primary: '#9C27B0', primaryContainer: '#F3E5F5', onPrimary: '#FFFFFF', onPrimaryContainer: '#4A148C' },
+        dark: { primary: '#CE93D8', primaryContainer: '#6A1B9A', onPrimary: '#4A148C', onPrimaryContainer: '#F3E5F5' }
+    },
     blue: {
         name: 'Blu',
         light: { 
@@ -163,6 +168,11 @@ const COLOR_PALETTES = {
             onTertiary: '#3B2948',
             onTertiaryContainer: '#F2DAFF'
         }
+    },
+    teal: {
+        name: 'Teal',
+        light: { primary: '#00796B', primaryContainer: '#B2DFDB', onPrimary: '#FFFFFF', onPrimaryContainer: '#004D40' },
+        dark: { primary: '#4DB6AC', primaryContainer: '#00695C', onPrimary: '#004D40', onPrimaryContainer: '#E0F2F1' }
     },
     green: {
         name: 'Verde',
@@ -447,19 +457,52 @@ export function initializeTheme() {
 }
 
 /**
+ * Update preview with selected theme and color
+ * @param {string} theme - The theme mode ('light', 'dark', or 'auto')
+ * @param {string} color - The color palette name
+ */
+function updatePreview(theme, color) {
+    const preview = document.getElementById('theme-preview');
+    if (!preview) return;
+    
+    // Determine effective theme
+    let effectiveTheme = theme;
+    if (theme === THEME_AUTO) {
+        effectiveTheme = getSystemTheme();
+    }
+    
+    // Get color palette
+    const palette = COLOR_PALETTES[color];
+    if (!palette) return;
+    
+    const colors = palette[effectiveTheme];
+    
+    // Apply colors to preview container
+    preview.style.setProperty('--md-sys-color-primary', colors.primary);
+    preview.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
+    preview.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+    preview.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
+}
+
+/**
  * Setup the theme picker dialog
  */
 export function setupThemePicker() {
     const dialog = document.getElementById('theme-picker-dialog');
     const openButton = document.getElementById('theme-picker-btn');
     const openButtonSidebar = document.getElementById('theme-picker-btn-sidebar');
+    const openButtonSettings = document.getElementById('theme-picker-btn-settings');
     const form = document.getElementById('theme-picker-form');
     const cancelBtn = document.getElementById('theme-cancel-btn');
     const applyBtn = document.getElementById('theme-apply-btn');
     
-    if (!dialog || (!openButton && !openButtonSidebar) || !form) {
-        console.error('Theme picker elements not found');
+    if (!dialog || !form) {
+        console.error('Theme picker dialog or form not found');
         return;
+    }
+    
+    if (!openButton && !openButtonSidebar && !openButtonSettings) {
+        console.warn('No theme picker buttons found, but dialog exists');
     }
     
     // Function to open the dialog
@@ -478,11 +521,36 @@ export function setupThemePicker() {
             colorRadioToCheck.checked = true;
         }
         
+        // Update preview with current settings
+        updatePreview(currentTheme, currentColor);
+        
         dialog.style.display = 'flex';
         
         // Focus the apply button
         setTimeout(() => applyBtn.focus(), 100);
     };
+    
+    // Listen for theme mode changes to update preview
+    const themeRadios = form.querySelectorAll('input[name="theme"]');
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const selectedColor = form.querySelector('input[name="themeColor"]:checked');
+            if (selectedColor) {
+                updatePreview(radio.value, selectedColor.value);
+            }
+        });
+    });
+    
+    // Listen for color changes to update preview
+    const colorRadios = form.querySelectorAll('input[name="themeColor"]');
+    colorRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const selectedTheme = form.querySelector('input[name="theme"]:checked');
+            if (selectedTheme) {
+                updatePreview(selectedTheme.value, radio.value);
+            }
+        });
+    });
     
     // Open dialog when button is clicked (original button in header, if exists)
     if (openButton) {
@@ -492,6 +560,11 @@ export function setupThemePicker() {
     // Open dialog when sidebar button is clicked
     if (openButtonSidebar) {
         openButtonSidebar.addEventListener('click', openDialog);
+    }
+    
+    // Open dialog when settings button is clicked
+    if (openButtonSettings) {
+        openButtonSettings.addEventListener('click', openDialog);
     }
     
     // Close dialog function

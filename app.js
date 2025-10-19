@@ -2112,7 +2112,7 @@ class DocentePlusPlus {
         // Apply theme immediately
         import('./js/theme.js').then(({ applyTheme }) => {
             try {
-                applyTheme();
+                applyTheme(themeMode, themeColor);
                 showToast('Tema applicato!', 'success');
             } catch (err) {
                 console.error("Errore durante l'applicazione del tema:", err);
