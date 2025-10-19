@@ -153,6 +153,13 @@ class FloatingAssistant {
                 this.sendMessage();
             }
         });
+        
+        // Mobile keyboard fix - scroll input into view when focused
+        textInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                textInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+        });
 
         // Send button
         const sendBtn = document.getElementById('ai-send-button');
