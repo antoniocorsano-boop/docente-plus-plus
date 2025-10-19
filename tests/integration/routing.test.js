@@ -42,16 +42,20 @@ describe('SPA Routing Tests', () => {
         });
 
         it('should not trigger full page reload for tab navigation', () => {
-            const assignSpy = jest.fn();
-            Object.defineProperty(window.location, 'assign', {
-                configurable: true,
-                value: assignSpy
-            });
+            // Store original location
+            const originalLocation = window.location;
+            
+            // Mock location.assign
+            delete window.location;
+            window.location = { ...originalLocation, assign: jest.fn() };
 
             // Simulate tab navigation (not calling window.location.assign)
             history.pushState({ page: 'home' }, '', '#home');
             
-            expect(assignSpy).not.toHaveBeenCalled();
+            expect(window.location.assign).not.toHaveBeenCalled();
+            
+            // Restore original location
+            window.location = originalLocation;
         });
     });
 
@@ -108,32 +112,40 @@ describe('SPA Routing Tests', () => {
 
     describe('No Full Page Reloads', () => {
         it('should not call window.location.reload() for navigation', () => {
-            const reloadSpy = jest.fn();
-            Object.defineProperty(window.location, 'reload', {
-                configurable: true,
-                value: reloadSpy
-            });
+            // Store original location
+            const originalLocation = window.location;
+            
+            // Mock location.reload
+            delete window.location;
+            window.location = { ...originalLocation, reload: jest.fn() };
 
             // Simulate various navigation actions
             history.pushState({ page: 'lessons' }, '', '#lessons');
             history.pushState({ page: 'students' }, '', '#students');
             history.pushState({ page: 'home' }, '', '#home');
 
-            expect(reloadSpy).not.toHaveBeenCalled();
+            expect(window.location.reload).not.toHaveBeenCalled();
+            
+            // Restore original location
+            window.location = originalLocation;
         });
 
         it('should not call window.location.assign() for same-app navigation', () => {
-            const assignSpy = jest.fn();
-            Object.defineProperty(window.location, 'assign', {
-                configurable: true,
-                value: assignSpy
-            });
+            // Store original location
+            const originalLocation = window.location;
+            
+            // Mock location.assign
+            delete window.location;
+            window.location = { ...originalLocation, assign: jest.fn() };
 
             // Simulate internal tab switches
             history.pushState({ page: 'schedule' }, '', '#schedule');
             history.pushState({ page: 'agenda' }, '', '#agenda');
 
-            expect(assignSpy).not.toHaveBeenCalled();
+            expect(window.location.assign).not.toHaveBeenCalled();
+            
+            // Restore original location
+            window.location = originalLocation;
         });
     });
 
@@ -199,7 +211,7 @@ describe('In Classe Page URL Handling', () => {
                 });
             }
             return {
-                get: (key) => params.get(key),
+                get: (key) => params.has(key) ? params.get(key) : null,
                 has: (key) => params.has(key),
                 toString: () => {
                     const parts = [];
@@ -224,7 +236,7 @@ describe('In Classe Page URL Handling', () => {
     it('should handle missing lesson parameter', () => {
         const params = new URLSearchParams('');
         
-        expect(params.get('lesson')).toBeNull();
+        expect(params.get('lesson')).toBe(null);
     });
 
     it('should encode special characters in URL parameters', () => {
