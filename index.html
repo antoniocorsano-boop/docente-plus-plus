@@ -484,21 +484,28 @@
                         <label for="theme-color-select">Colore Principale</label>
                         <select id="theme-color-select">
                             <option value="purple">Viola (predefinito)</option>
+                            <option value="lilla">Lilla</option>
                             <option value="blue">Blu</option>
-                            <option value="green">Verde</option>
-                            <option value="red">Rosso</option>
-                            <option value="orange">Arancione</option>
                             <option value="teal">Teal</option>
-                            <option value="indigo">Indaco</option>
+                            <option value="green">Verde</option>
+                            <option value="orange">Arancione</option>
                             <option value="pink">Rosa</option>
+                            <option value="red">Rosso</option>
+                            <option value="indigo">Indaco</option>
                         </select>
                         <p class="help-text">Personalizza il colore principale dell'interfaccia</p>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">
-                        <span class="material-symbols-outlined">save</span>
-                        Salva Tema
-                    </button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">save</span>
+                            Salva Tema
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="theme-picker-btn-settings">
+                            <span class="material-symbols-outlined">palette</span>
+                            Anteprima Avanzata
+                        </button>
+                    </div>
                 </form>
             </div>
             

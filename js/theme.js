@@ -218,13 +218,18 @@ export function setupThemePicker() {
     const dialog = document.getElementById('theme-picker-dialog');
     const openButton = document.getElementById('theme-picker-btn');
     const openButtonSidebar = document.getElementById('theme-picker-btn-sidebar');
+    const openButtonSettings = document.getElementById('theme-picker-btn-settings');
     const form = document.getElementById('theme-picker-form');
     const cancelBtn = document.getElementById('theme-cancel-btn');
     const applyBtn = document.getElementById('theme-apply-btn');
     
-    if (!dialog || (!openButton && !openButtonSidebar) || !form) {
-        console.error('Theme picker elements not found');
+    if (!dialog || !form) {
+        console.error('Theme picker dialog or form not found');
         return;
+    }
+    
+    if (!openButton && !openButtonSidebar && !openButtonSettings) {
+        console.warn('No theme picker buttons found, but dialog exists');
     }
     
     // Function to open the dialog
@@ -282,6 +287,11 @@ export function setupThemePicker() {
     // Open dialog when sidebar button is clicked
     if (openButtonSidebar) {
         openButtonSidebar.addEventListener('click', openDialog);
+    }
+    
+    // Open dialog when settings button is clicked
+    if (openButtonSettings) {
+        openButtonSettings.addEventListener('click', openDialog);
     }
     
     // Close dialog function
