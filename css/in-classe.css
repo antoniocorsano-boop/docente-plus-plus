@@ -52,10 +52,11 @@ body {
 }
 
 .activity-badge {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--md-sys-color-surface-variant);
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--md-radius-small);
     font-weight: 500;
+    opacity: 0.8;
 }
 
 .lesson-header .icon-btn {
@@ -64,13 +65,15 @@ body {
 }
 
 .lesson-header .btn-secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--md-on-primary);
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
     border: none;
+    opacity: 0.8;
 }
 
 .lesson-header .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--md-sys-color-primary-container);
+    opacity: 1;
 }
 
 /* Main Content */
@@ -162,8 +165,8 @@ body {
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--md-sys-color-tertiary);
+    color: var(--md-sys-color-on-tertiary);
     font-size: 10px;
     font-weight: 700;
     border-radius: 4px;
