@@ -224,8 +224,7 @@ describe('SPA Routing', () => {
 
     describe('Safe Location Mocking', () => {
         it('should not trigger full page reload for tab navigation', () => {
-            mockWindowLocation({ assign: jest.fn() });
-
+            // The beforeEach already sets up window.location with assign mock
             // Simulate tab navigation (not calling window.location.assign)
             history.pushState({ page: 'home' }, '', '#home');
 
@@ -233,8 +232,7 @@ describe('SPA Routing', () => {
         });
 
         it('should not call window.location.reload() for navigation', () => {
-            mockWindowLocation({ reload: jest.fn() });
-
+            // The beforeEach already sets up window.location with reload mock
             // Simulate various navigation actions
             history.pushState({ page: 'lessons' }, '', '#lessons');
             history.pushState({ page: 'students' }, '', '#students');
@@ -244,8 +242,7 @@ describe('SPA Routing', () => {
         });
 
         it('should not call window.location.assign() for same-app navigation', () => {
-            mockWindowLocation({ assign: jest.fn() });
-
+            // The beforeEach already sets up window.location with assign mock
             // Simulate internal tab switches
             history.pushState({ page: 'schedule' }, '', '#schedule');
             history.pushState({ page: 'agenda' }, '', '#agenda');
