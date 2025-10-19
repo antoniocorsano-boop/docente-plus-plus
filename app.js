@@ -188,6 +188,12 @@ class DocentePlusPlus {
     switchTab(tabName) {
         switchTab(tabName);
     }
+    
+    // Open In Classe page - using window.open is acceptable for focused classroom mode
+    // This keeps the main app accessible while teacher is in class
+    openInClasse() {
+        window.open('in-classe.html', '_blank');
+    }
 
     renderAllTabs() {
         this.renderHome();
