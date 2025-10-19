@@ -1,32 +1,55 @@
 :root{
-  --md-sys-color-primary: #6750A4;
-  --md-sys-color-on-primary: #ffffff;
+  --md-primary: #6750A4;
+  --md-on-primary: #FFFFFF;
+  --md-secondary: #625B71;
   --surface: #FEF7FF;
+  --bg: #FFFFFF;
   --error: #BA1A1A;
-  --base-space: 8px;
-  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --muted: #6b6b6b;
+  --base: 8px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-1: 0 1px 2px rgba(16,24,40,0.06);
+  --shadow-2: 0 6px 18px rgba(16,24,40,0.08);
+  font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial;
 }
-
-/* Mobile-first base styles, responsive breakpoints, dark-mode, print styles,
-   focus styles for accessibility, animations and utility classes.
-   (Questo è lo stub; il file completo include ~700 linee CSS) */
-
-body{margin:0;background:var(--surface);color:#111;font-size:14px}
-
-/* Utilities */
-.container{padding:var(--base-space);max-width:1100px;margin:0 auto}
-
-/* Basic header */
-#lesson-header{position:sticky;top:0;background:linear-gradient(90deg,var(--md-sys-color-primary),#5b4b8a);color:var(--md-sys-color-on-primary);padding:12px 16px}
-
-/* Responsiveness */
-@media(min-width:768px){body{font-size:15px}} 
-@media(min-width:1024px){body{font-size:16px;}}
-
-/* Dark mode */
-@media(prefers-color-scheme:dark){:root{--surface:#121212;color:#eee}} 
-
-/* Print */
-@media print{body{color:#000;background:#fff}}
-
-/* End of stub */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--surface);color:#111}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+.app{min-height:100vh}
+header#lesson-header{position:sticky;top:0;z-index:30;background:linear-gradient(90deg,var(--md-primary),#5b4b8a);color:var(--md-on-primary);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lesson-info h1{margin:0;font-size:18px;font-weight:600}
+.lesson-info p{margin:2px 0;font-size:13px;color:rgba(255,255,255,0.95)}
+.header-actions{display:flex;align-items:center;gap:8px}
+.badge{background:rgba(255,255,255,0.12);padding:6px 8px;border-radius:999px;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:none;background:var(--md-primary);color:var(--md-on-primary);cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--md-on-primary)}
+.btn-record{background:linear-gradient(90deg,#ff5252,#ff1744);box-shadow:0 6px 18px rgba(255,23,68,0.18)}
+.card{background:var(--bg);border-radius:var(--radius-md);box-shadow:var(--shadow-1);padding:12px;margin:12px 0}
+.section{overflow:hidden}
+.section .section-toggle{width:100%;text-align:left;background:transparent;border:none;padding:10px 4px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.section-body{padding:10px 4px}
+.toolbar{display:flex;gap:8px;margin-bottom:8px}
+.list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.list .item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid #eee}
+.empty{color:var(--muted);padding:8px}
+.students-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:8px}
+.student{display:flex;gap:12px;align-items:center;padding:8px;border-radius:8px;border:1px solid #eee}
+.avatar{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white}
+.timer{font-family:monospace;margin-left:8px}
+.transcription textarea, #summary-text{width:100%;min-height:120px;padding:8px;border-radius:8px;border:1px solid #ddd}
+.summary-actions{display:flex;gap:8px;margin-top:8px}
+.analytics-summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.canvas{width:100%;max-width:100%;height:auto}
+/* small utilities */
+.small{font-size:13px}
+.hidden{display:none !important}
+/* responsive */
+@media(min-width:768px){.students-grid{grid-template-columns:repeat(2,1fr)}.lesson-info h1{font-size:20px}}
+@media(min-width:1100px){.students-grid{grid-template-columns:repeat(3,1fr)}}
+/* dark mode */
+@media (prefers-color-scheme:dark){:root{--bg:#111;--surface:#080808;color:#eee}header#lesson-header{border-bottom-color:rgba(255,255,255,0.06)}.card{box-shadow:none;border:1px solid rgba(255,255,255,0.04)}}
+/* print */
+@media print{body{background:white;color:black}.card{box-shadow:none;border:1px solid #ddd}.btn{display:none}}
