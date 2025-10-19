@@ -7,15 +7,94 @@
   <link rel="stylesheet" href="css/in-classe.css">
 </head>
 <body>
-  <header id="lesson-header" role="banner" aria-label="Informazioni lezione">
-    <!-- Contenuti dinamici generati da JS -->
-  </header>
+  <div class="app container" id="app-root">
+    <header id="lesson-header" role="banner" aria-label="Informazioni lezione">
+      <div class="header-inner">
+        <div class="lesson-info">
+          <h1 id="lesson-class">Classe — <span id="class-name">3A</span></h1>
+          <p id="lesson-subject">Materia: <strong id="subject-name">Matematica</strong></p>
+          <p id="lesson-datetime">Lunedì, 08:00</p>
+        </div>
+        <div class="header-actions">
+          <span id="activity-badge" class="badge">T</span>
+          <button id="exit-btn" class="btn btn-ghost" aria-label="Esci">Esci</button>
+        </div>
+      </div>
+    </header>
 
-  <main id="in-classe-app" role="main" aria-live="polite">
-    <!-- Sezioni: Attività, Compiti, Valutazioni, Appunto Vocale, Analytics, Sintesi -->
-  </main>
+    <main id="in-classe-app" role="main" aria-live="polite">
+      <section class="card section" id="activities">
+        <button class="section-toggle" data-target="activities-list" aria-expanded="true">Attività <span class="counter" id="activities-count">0</span></button>
+        <div id="activities-list" class="section-body">
+          <div class="toolbar">
+            <button id="add-activity-btn" class="btn">Nuova attività</button>
+          </div>
+          <ul id="activities-ul" class="list"></ul>
+          <p id="activities-empty" class="empty">Nessuna attività</p>
+        </div>
+      </section>
 
-  <div id="modals" aria-hidden="true"></div>
+      <section class="card section" id="homework">
+        <button class="section-toggle" data-target="homework-list" aria-expanded="false">Compiti <span class="counter" id="homework-count">0</span></button>
+        <div id="homework-list" class="section-body" hidden>
+          <div class="toolbar">
+            <button id="add-homework-btn" class="btn">Assegna compito</button>
+          </div>
+          <ul id="homework-ul" class="list"></ul>
+          <p id="homework-empty" class="empty">Nessun compito</p>
+        </div>
+      </section>
+
+      <section class="card section" id="evaluations">
+        <button class="section-toggle" data-target="evaluations-grid" aria-expanded="false">Valutazioni <span class="counter" id="evaluations-count">0</span></button>
+        <div id="evaluations-grid" class="section-body grid" hidden>
+          <div class="toolbar">
+            <button id="add-evaluation-btn" class="btn">Valuta studente</button>
+          </div>
+          <div id="students-grid" class="students-grid"></div>
+          <p id="evaluations-empty" class="empty">Nessuna valutazione</p>
+        </div>
+      </section>
+
+      <section class="card section" id="voice-note">
+        <button class="section-toggle" data-target="voice-body" aria-expanded="false">Appunto vocale <span class="badge demo">AI DEMO</span></button>
+        <div id="voice-body" class="section-body" hidden>
+          <div class="recorder">
+            <button id="rec-btn" class="btn btn-record" aria-pressed="false">Registra</button>
+            <span id="rec-timer" class="timer">00:00</span>
+            <div id="recordings-list" class="list small"></div>
+            <div id="transcription-area" class="transcription">
+              <h4>Trascrizione</h4>
+              <textarea id="transcription-text" placeholder="Trascrizione (demo)"></textarea>
+              <button id="save-transcription" class="btn">Salva trascrizione</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section" id="analytics">
+        <button class="section-toggle" data-target="analytics-body" aria-expanded="false">Analytics</button>
+        <div id="analytics-body" class="section-body" hidden>
+          <div id="analytics-summary" class="analytics-summary"></div>
+          <canvas id="chart-presences" width="600" height="160"></canvas>
+          <canvas id="chart-performance" width="600" height="160"></canvas>
+        </div>
+      </section>
+
+      <section class="card section" id="summary">
+        <button class="section-toggle" data-target="summary-body" aria-expanded="false">Sintesi / Agenda</button>
+        <div id="summary-body" class="section-body" hidden>
+          <textarea id="summary-text" placeholder="Inserisci la sintesi della lezione..."></textarea>
+          <div class="summary-actions">
+            <button id="save-summary" class="btn">Salva</button>
+            <button id="export-summary" class="btn">Export TXT</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modals" aria-hidden="true"></div>
+  </div>
 
   <script type="module" src="js/in-classe.js"></script>
 </body>
