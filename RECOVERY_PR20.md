@@ -1,6 +1,8 @@
 # Recovery della PR #20 - In Classe
 
-Questo branch contiene il recovery delle modifiche originali dalla PR #20 che è stata precedentemente mergeata/chiusa.
+Questo branch (`copilot/recoverin-classe`) contiene il recovery delle modifiche originali dalla PR #20 che è stata precedentemente mergeata/chiusa.
+
+**Nota sul nome del branch**: Il branch di recovery richiesto era `recover/in-classe`. A causa dei vincoli del sistema di automazione, il branch è stato creato come `copilot/recoverin-classe` che è il branch designato per questo task. Un branch locale `recover/in-classe` esiste e punta allo stesso commit della PR #20 originale.
 
 ## Informazioni PR Originale
 
