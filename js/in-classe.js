@@ -3,6 +3,10 @@
  * Mobile First, Vanilla JS, Ready for API Integration
  */
 
+// Import API clients
+import { recordingsAPI } from '../src/api/recordings.js';
+import { transcriptionsAPI } from '../src/api/transcriptions.js';
+
 // Mock Data Management
 class InClasseDataManager {
     constructor() {
@@ -11,8 +15,14 @@ class InClasseDataManager {
         this.activities = this.loadActivities();
         this.homework = this.loadHomework();
         this.evaluations = this.loadEvaluations();
-        this.recordings = this.loadRecordings();
+        this.recordings = [];
         this.summary = this.loadSummary();
+    }
+
+    async init() {
+        // Load recordings asynchronously
+        this.recordings = await this.loadRecordings();
+        return this;
     }
 
     getLessonKeyFromURL() {
@@ -172,23 +182,57 @@ class InClasseDataManager {
         return evals[evals.length - 1].grade;
     }
 
-    loadRecordings() {
-        const key = `inClasse_recordings_${this.lessonKey}`;
-        const stored = localStorage.getItem(key);
-        return stored ? JSON.parse(stored) : [];
+    async loadRecordings() {
+        try {
+            // Use new RecordingsAPI
+            const recordings = await recordingsAPI.getRecordings({
+                lessonKey: this.lessonKey
+            });
+            return recordings;
+        } catch (error) {
+            console.error('Error loading recordings:', error);
+            // Fallback to old localStorage method
+            const key = `inClasse_recordings_${this.lessonKey}`;
+            const stored = localStorage.getItem(key);
+            return stored ? JSON.parse(stored) : [];
+        }
     }
 
     saveRecordings() {
+        // Kept for backward compatibility, but new recordings use API
         const key = `inClasse_recordings_${this.lessonKey}`;
         localStorage.setItem(key, JSON.stringify(this.recordings));
     }
 
-    addRecording(recording) {
-        recording.id = Date.now().toString();
-        recording.timestamp = new Date().toISOString();
-        this.recordings.push(recording);
-        this.saveRecordings();
-        return recording;
+    async addRecording(recordingData) {
+        try {
+            // Use new RecordingsAPI
+            const result = await recordingsAPI.uploadRecording({
+                blob: recordingData.blob,
+                lessonKey: this.lessonKey,
+                duration: recordingData.duration,
+                fileName: recordingData.fileName
+            });
+
+            if (result.success) {
+                this.recordings.push(result.recording);
+                return result.recording;
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.error('Error adding recording:', error);
+            // Fallback to old method
+            const recording = {
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString(),
+                duration: recordingData.duration,
+                transcription: recordingData.transcription || ''
+            };
+            this.recordings.push(recording);
+            this.saveRecordings();
+            return recording;
+        }
     }
 
     loadSummary() {
@@ -490,28 +534,97 @@ class InClasseUI {
             audioPlayer.src = result.url;
             audioPlayback.style.display = 'block';
 
-            // Mock AI transcription (demo)
-            this.showMockTranscription();
+            // Save recording using new API
+            try {
+                const savedRecording = await this.dataManager.addRecording({
+                    blob: result.blob,
+                    duration: result.duration,
+                    fileName: `recording_${Date.now()}.webm`
+                });
+
+                // Start transcription if user has given consent
+                const consent = recordingsAPI.getUserConsent();
+                if (consent.transcription) {
+                    this.startTranscription(savedRecording.id);
+                } else {
+                    // Show consent prompt
+                    this.showTranscriptionConsentPrompt(savedRecording.id);
+                }
+            } catch (error) {
+                console.error('Error saving recording:', error);
+                alert('Errore durante il salvataggio della registrazione: ' + error.message);
+            }
 
             // Save recording
             this.currentRecording = result;
         });
     }
 
-    showMockTranscription() {
+    async startTranscription(recordingId) {
         const transcriptionArea = document.getElementById('transcription-area');
         const transcriptionText = document.getElementById('transcription-text');
         
-        // Simulate AI processing delay
         transcriptionText.textContent = 'Elaborazione in corso...';
         transcriptionArea.style.display = 'block';
 
-        setTimeout(() => {
-            transcriptionText.textContent = `Questa è una trascrizione demo. In produzione, qui apparirà la trascrizione automatica dell'audio registrato tramite integrazione con servizi di AI come OpenAI Whisper o Google Speech-to-Text.
+        try {
+            // Start transcription job
+            const result = await transcriptionsAPI.startTranscription({
+                recordingId: recordingId,
+                language: 'it-IT'
+            });
 
-Esempio di trascrizione:
-"Oggi abbiamo affrontato il teorema di Pitagora e le sue applicazioni pratiche. Gli studenti hanno mostrato particolare interesse nella risoluzione dei problemi geometrici. Per la prossima lezione, prepareranno degli esercizi sulle figure piane."`;
-        }, 2000);
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+
+            // Poll for completion
+            const completed = await transcriptionsAPI.pollTranscription(
+                result.transcription.id,
+                {
+                    interval: 2000,
+                    timeout: 300000,
+                    onProgress: (t) => {
+                        if (t.status === 'processing') {
+                            transcriptionText.textContent = 'Trascrizione in corso...';
+                        }
+                    }
+                }
+            );
+
+            // Show transcription result
+            transcriptionText.textContent = completed.text;
+        } catch (error) {
+            console.error('Error transcribing:', error);
+            transcriptionText.textContent = `Errore durante la trascrizione: ${error.message}\n\nNota: Per abilitare la trascrizione automatica in produzione, configurare una chiave API per OpenAI Whisper o Google Speech-to-Text nelle impostazioni.`;
+        }
+    }
+
+    showTranscriptionConsentPrompt(recordingId) {
+        const transcriptionArea = document.getElementById('transcription-area');
+        const transcriptionText = document.getElementById('transcription-text');
+        
+        transcriptionArea.style.display = 'block';
+        transcriptionText.innerHTML = `
+            <div style="padding: var(--spacing-md);">
+                <p><strong>Trascrizione automatica disponibile</strong></p>
+                <p>Per attivare la trascrizione automatica dei tuoi appunti vocali, è necessario fornire il consenso per l'elaborazione dei dati audio tramite servizi AI.</p>
+                <button id="enable-transcription-btn" class="btn-primary" style="margin-top: var(--spacing-md);">
+                    Abilita trascrizione
+                </button>
+            </div>
+        `;
+
+        document.getElementById('enable-transcription-btn')?.addEventListener('click', () => {
+            // Enable consent
+            recordingsAPI.setUserConsent({
+                recording: true,
+                transcription: true
+            });
+
+            // Start transcription
+            this.startTranscription(recordingId);
+        });
     }
 
     renderSummary() {
@@ -993,8 +1106,11 @@ function renderDailyTimeline() {
     }, 300);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const dataManager = new InClasseDataManager();
+    
+    // Initialize data manager asynchronously
+    await dataManager.init();
     
     // Initialize daily timeline widget
     renderDailyTimeline();
@@ -1023,6 +1139,15 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Lezione non trovata. Verrai reindirizzato alla home.');
         window.location.href = 'index.html#home';
         return;
+    }
+
+    // Request user consent for recordings if not already given
+    const consent = recordingsAPI.getUserConsent();
+    if (!consent.recording) {
+        recordingsAPI.setUserConsent({
+            recording: true,
+            transcription: false
+        });
     }
 
     const audioRecorder = new AudioRecorder();

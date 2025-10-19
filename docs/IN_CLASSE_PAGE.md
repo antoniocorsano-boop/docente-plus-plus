@@ -123,24 +123,93 @@ Permette di:
 - ✅ Registrare appunti vocali
 - ✅ Riprodurre le registrazioni
 - ✅ Visualizzare la durata
-- ✅ (DEMO) Trascrizione IA simulata
+- ✅ Trascrizione automatica con IA (con consenso utente)
+- ✅ Gestione privacy e retention
+- ✅ Gestione quote e limiti
 
-**Funzionalità future:**
-- Integrazione con OpenAI Whisper
-- Integrazione con Google Speech-to-Text
-- Trascrizione automatica real-time
-- Traduzione multilingua
+**API Recordings (src/api/recordings.js):**
+- `uploadRecording(data)`: Carica una nuova registrazione audio
+- `getRecordings(filter)`: Lista registrazioni con filtri
+- `getRecording(id)`: Ottiene una singola registrazione
+- `deleteRecording(id)`: Elimina una registrazione
+- `getStorageStats()`: Statistiche di utilizzo storage
+- `cleanupOldRecordings()`: Pulizia automatica secondo retention policy
+- `setUserConsent(consent)`: Gestione consenso utente
+- `getUserConsent()`: Verifica stato consenso
 
-**Implementazione corrente:**
+**API Transcriptions (src/api/transcriptions.js):**
+- `startTranscription(jobData)`: Avvia job di trascrizione
+- `getTranscription(id)`: Ottiene stato e risultato trascrizione
+- `pollTranscription(id, options)`: Polling automatico fino a completamento
+- `getTranscriptions(filter)`: Lista tutte le trascrizioni
+- `cancelTranscription(id)`: Annulla trascrizione in corso
+- `getProviders()`: Provider AI disponibili (OpenAI Whisper, Google Speech-to-Text)
+- `setProvider(provider, apiKey)`: Configura provider AI
+
+**Privacy e Consenso:**
 ```javascript
-// La registrazione audio è completamente funzionale
-await audioRecorder.start();
-const result = await audioRecorder.stop();
-// result contiene: { blob, url, duration }
+import { recordingsAPI } from './src/api/recordings.js';
 
-// La trascrizione è simulata (placeholder)
-// TODO: Integrare con API IA
+// Richiede consenso prima di registrare
+recordingsAPI.setUserConsent({
+    recording: true,      // Permesso per registrare audio
+    transcription: true   // Permesso per trascrizione AI
+});
 ```
+
+**Quote e Limiti:**
+- Dimensione massima file: 50 MB
+- Storage totale: 500 MB
+- Numero massimo registrazioni: 100
+- Durata massima: 1 ora per registrazione
+- Retention: 90 giorni (configurabile)
+
+**Implementazione:**
+```javascript
+import { recordingsAPI } from './src/api/recordings.js';
+import { transcriptionsAPI } from './src/api/transcriptions.js';
+
+// Registrare audio
+const result = await recordingsAPI.uploadRecording({
+    blob: audioBlob,
+    lessonKey: 'Lunedì-08:00',
+    duration: 120,
+    fileName: 'appunto.webm'
+});
+
+// Avviare trascrizione
+const transcription = await transcriptionsAPI.startTranscription({
+    recordingId: result.recording.id,
+    language: 'it-IT',
+    model: 'whisper-1'
+});
+
+// Polling per risultato
+const completed = await transcriptionsAPI.pollTranscription(
+    transcription.id,
+    {
+        interval: 2000,
+        timeout: 300000,
+        onProgress: (t) => console.log('Status:', t.status)
+    }
+);
+
+console.log('Testo trascritto:', completed.text);
+```
+
+**Provider AI Supportati:**
+- **OpenAI Whisper**: Modelli: whisper-1
+- **Google Speech-to-Text**: Modelli: default, video, phone_call, command_and_search
+
+**Error Handling:**
+- `CONSENT_REQUIRED`: Consenso utente non fornito
+- `MISSING_FILE`: File audio mancante
+- `INVALID_DURATION`: Durata non valida
+- `DURATION_EXCEEDED`: Durata massima superata
+- `FILE_TOO_LARGE`: File troppo grande
+- `INVALID_MIME_TYPE`: Tipo file non supportato
+- `QUOTA_EXCEEDED`: Quota storage superata
+- `PROVIDER_UNREACHABLE`: Provider AI non raggiungibile
 
 ### 6. Sezione Analytics
 
@@ -326,8 +395,35 @@ class InClasseDataManager {
 }
 ```
 
-### Endpoint Suggeriti
+### Endpoint API Implementati
 
+**Recordings API:**
+```
+POST   /api/recordings                      # Upload audio (multipart/form-data)
+GET    /api/recordings                      # Lista registrazioni (con filtri)
+GET    /api/recordings/:id                  # Dettagli registrazione
+DELETE /api/recordings/:id                  # Elimina registrazione
+```
+
+**Transcriptions API:**
+```
+POST   /api/transcriptions                  # Avvia job trascrizione
+GET    /api/transcriptions/:id              # Stato e risultato trascrizione
+POST   /api/transcriptions/:id/cancel       # Annulla trascrizione
+GET    /api/transcriptions                  # Lista trascrizioni (con filtri)
+```
+
+**Query Parameters (Recordings):**
+- `lessonKey`: Filtra per lezione
+- `status`: Filtra per stato (uploaded, processing, ready, error)
+- `dateFrom`: Filtra da data (ISO 8601)
+- `dateTo`: Filtra fino a data (ISO 8601)
+
+**Query Parameters (Transcriptions):**
+- `recordingId`: Filtra per ID registrazione
+- `status`: Filtra per stato (pending, processing, completed, failed, cancelled)
+
+**Endpoint Suggeriti (Future):**
 ```
 GET    /api/lessons/:lessonKey              # Carica lezione
 GET    /api/lessons/:lessonKey/activities   # Lista attività
@@ -340,9 +436,6 @@ PUT    /api/lessons/:lessonKey/homework/:id # Aggiorna compito
 
 GET    /api/lessons/:lessonKey/evaluations  # Lista valutazioni
 POST   /api/lessons/:lessonKey/evaluations  # Nuova valutazione
-
-POST   /api/lessons/:lessonKey/recordings   # Salva registrazione
-POST   /api/transcribe                      # Trascrivi audio
 
 GET    /api/lessons/:lessonKey/summary      # Carica sintesi
 PUT    /api/lessons/:lessonKey/summary      # Aggiorna sintesi
