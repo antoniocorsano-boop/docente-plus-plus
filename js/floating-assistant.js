@@ -153,6 +153,24 @@ class FloatingAssistant {
                 this.sendMessage();
             }
         });
+        
+        // Mobile: Scroll input into view on focus to ensure visibility
+        textInput.addEventListener('focus', () => {
+            if (window.innerWidth < 769) {
+                setTimeout(() => {
+                    textInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        });
+        
+        // Mobile: Listen to visualViewport changes to adjust for keyboard
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                if (document.activeElement === textInput) {
+                    textInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
 
         // Send button
         const sendBtn = document.getElementById('ai-send-button');

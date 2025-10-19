@@ -32,6 +32,7 @@
     <!-- MD3 Theme Styles -->
     <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
     <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
+    <link rel="stylesheet" href="src/styles/common-page.css">
     <!-- Theme Switcher Component -->
     <link rel="stylesheet" href="src/components/ThemeSwitcher.css">
     <!-- Schedule Component Styles -->
@@ -252,7 +253,7 @@
                 
                 <!-- Quick Access Cards -->
                 <div class="landing-cards">
-                    <button class="landing-card landing-card-primary" onclick="window.open('in-classe.html', '_blank')">
+                    <button class="landing-card landing-card-primary" onclick="window.app.openInClasse()">
                         <span class="material-symbols-outlined landing-card-icon">school</span>
                         <h3>Entra in Classe</h3>
                         <p>Gestisci le tue classi e gli studenti</p>
