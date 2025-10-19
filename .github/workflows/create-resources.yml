@@ -23,16 +23,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ -f package-lock.json ] || [ -f package.json ]; then
-            npm ci
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
           else
             echo "No package.json found, skipping install"
           fi
 
       - name: Create resources (idempotent)
         run: |
-          if npm run | grep -q create-resources; then
-            npm run create-resources
+          if [ -f package.json ]; then
+            if npm run | grep -q create-resources; then
+              npm run create-resources
+            else
+              echo "No create-resources script; nothing to do"
+            fi
           else
-            echo "No create-resources script; nothing to do"
+            echo "No package.json found, skipping create-resources"
           fi
