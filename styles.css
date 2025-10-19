@@ -7,42 +7,104 @@
 
 :root {
     /* Material Design 3 Expressive - Light Theme */
-    --md-primary: #6750A4;
-    --md-primary-container: #EADDFF;
-    --md-on-primary: #FFFFFF;
-    --md-on-primary-container: #21005D;
+    /* MD3 System Colors - Primary */
+    --md-sys-color-primary: #6750A4;
+    --md-sys-color-primary-container: #EADDFF;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-on-primary-container: #21005D;
     
-    --md-secondary: #625B71;
-    --md-secondary-container: #E8DEF8;
-    --md-on-secondary: #FFFFFF;
-    --md-on-secondary-container: #1D192B;
+    /* Legacy aliases for backwards compatibility */
+    --md-primary: var(--md-sys-color-primary);
+    --md-primary-container: var(--md-sys-color-primary-container);
+    --md-on-primary: var(--md-sys-color-on-primary);
+    --md-on-primary-container: var(--md-sys-color-on-primary-container);
     
-    --md-tertiary: #7D5260;
-    --md-tertiary-container: #FFD8E4;
-    --md-on-tertiary: #FFFFFF;
-    --md-on-tertiary-container: #31111D;
+    /* MD3 System Colors - Secondary */
+    --md-sys-color-secondary: #625B71;
+    --md-sys-color-secondary-container: #E8DEF8;
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-on-secondary-container: #1D192B;
     
-    --md-error: #BA1A1A;
-    --md-error-container: #FFDAD6;
-    --md-on-error: #FFFFFF;
-    --md-on-error-container: #410002;
+    --md-secondary: var(--md-sys-color-secondary);
+    --md-secondary-container: var(--md-sys-color-secondary-container);
+    --md-on-secondary: var(--md-sys-color-on-secondary);
+    --md-on-secondary-container: var(--md-sys-color-on-secondary-container);
     
-    --md-success: #4caf50;
-    --md-warning: #ff9800;
-    --md-info: #2196f3;
+    /* MD3 System Colors - Tertiary */
+    --md-sys-color-tertiary: #7D5260;
+    --md-sys-color-tertiary-container: #FFD8E4;
+    --md-sys-color-on-tertiary: #FFFFFF;
+    --md-sys-color-on-tertiary-container: #31111D;
     
-    /* Surface Colors */
-    --md-surface: #FEF7FF;
-    --md-surface-dim: #DED8E1;
-    --md-surface-bright: #FEF7FF;
-    --md-surface-container-lowest: #FFFFFF;
-    --md-surface-container-low: #F7F2FA;
-    --md-surface-container: #F3EDF7;
-    --md-surface-container-high: #ECE6F0;
-    --md-surface-container-highest: #E6E0E9;
-    --md-surface-variant: #E7E0EC;
-    --md-on-surface: #1C1B1F;
-    --md-on-surface-variant: #49454F;
+    --md-tertiary: var(--md-sys-color-tertiary);
+    --md-tertiary-container: var(--md-sys-color-tertiary-container);
+    --md-on-tertiary: var(--md-sys-color-on-tertiary);
+    --md-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+    
+    /* MD3 System Colors - Error */
+    --md-sys-color-error: #BA1A1A;
+    --md-sys-color-error-container: #FFDAD6;
+    --md-sys-color-on-error: #FFFFFF;
+    --md-sys-color-on-error-container: #410002;
+    
+    --md-error: var(--md-sys-color-error);
+    --md-error-container: var(--md-sys-color-error-container);
+    --md-on-error: var(--md-sys-color-on-error);
+    --md-on-error-container: var(--md-sys-color-on-error-container);
+    
+    /* MD3 System Colors - Semantic (Success, Warning, Info) */
+    --md-sys-color-success: #4caf50;
+    --md-sys-color-success-container: #C8E6C9;
+    --md-sys-color-on-success: #FFFFFF;
+    --md-sys-color-on-success-container: #1B5E20;
+    
+    --md-sys-color-warning: #ff9800;
+    --md-sys-color-warning-container: #FFE0B2;
+    --md-sys-color-on-warning: #FFFFFF;
+    --md-sys-color-on-warning-container: #E65100;
+    
+    --md-sys-color-info: #2196f3;
+    --md-sys-color-info-container: #BBDEFB;
+    --md-sys-color-on-info: #FFFFFF;
+    --md-sys-color-on-info-container: #0D47A1;
+    
+    --md-success: var(--md-sys-color-success);
+    --md-warning: var(--md-sys-color-warning);
+    --md-info: var(--md-sys-color-info);
+    
+    /* MD3 System Colors - Surface */
+    --md-sys-color-surface: #FEF7FF;
+    --md-sys-color-surface-dim: #DED8E1;
+    --md-sys-color-surface-bright: #FEF7FF;
+    --md-sys-color-surface-container-lowest: #FFFFFF;
+    --md-sys-color-surface-container-low: #F7F2FA;
+    --md-sys-color-surface-container: #F3EDF7;
+    --md-sys-color-surface-container-high: #ECE6F0;
+    --md-sys-color-surface-container-highest: #E6E0E9;
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-on-surface: #1C1B1F;
+    --md-sys-color-on-surface-variant: #49454F;
+    
+    /* MD3 System Colors - Outline */
+    --md-sys-color-outline: #79747E;
+    --md-sys-color-outline-variant: #C4C7C5;
+    
+    /* MD3 System Colors - Background */
+    --md-sys-color-background: #FFFBFF;
+    --md-sys-color-on-background: #1C1B1F;
+    
+    /* Legacy aliases */
+    --md-surface: var(--md-sys-color-surface);
+    --md-surface-dim: var(--md-sys-color-surface-dim);
+    --md-surface-bright: var(--md-sys-color-surface-bright);
+    --md-surface-container-lowest: var(--md-sys-color-surface-container-lowest);
+    --md-surface-container-low: var(--md-sys-color-surface-container-low);
+    --md-surface-container: var(--md-sys-color-surface-container);
+    --md-surface-container-high: var(--md-sys-color-surface-container-high);
+    --md-surface-container-highest: var(--md-sys-color-surface-container-highest);
+    --md-surface-variant: var(--md-sys-color-surface-variant);
+    --md-on-surface: var(--md-sys-color-on-surface);
+    --md-on-surface-variant: var(--md-sys-color-on-surface-variant);
     
     --md-card-bg: var(--md-surface-container-low);
     --md-overlay: rgba(0, 0, 0, 0.5);
@@ -145,42 +207,66 @@
 body.dark-theme,
 :root.dark-theme {
     /* Material Design 3 Expressive - Dark Theme */
-    --md-primary: #D0BCFF;
-    --md-primary-container: #4F378B;
-    --md-on-primary: #371E73;
-    --md-on-primary-container: #EADDFF;
+    /* MD3 System Colors - Primary (Dark) */
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-on-primary: #371E73;
+    --md-sys-color-on-primary-container: #EADDFF;
     
-    --md-secondary: #CCC2DC;
-    --md-secondary-container: #4A4458;
-    --md-on-secondary: #332D41;
-    --md-on-secondary-container: #E8DEF8;
+    /* MD3 System Colors - Secondary (Dark) */
+    --md-sys-color-secondary: #CCC2DC;
+    --md-sys-color-secondary-container: #4A4458;
+    --md-sys-color-on-secondary: #332D41;
+    --md-sys-color-on-secondary-container: #E8DEF8;
     
-    --md-tertiary: #EFB8C8;
-    --md-tertiary-container: #633B48;
-    --md-on-tertiary: #492532;
-    --md-on-tertiary-container: #FFD8E4;
+    /* MD3 System Colors - Tertiary (Dark) */
+    --md-sys-color-tertiary: #EFB8C8;
+    --md-sys-color-tertiary-container: #633B48;
+    --md-sys-color-on-tertiary: #492532;
+    --md-sys-color-on-tertiary-container: #FFD8E4;
     
-    --md-error: #FFB4AB;
-    --md-error-container: #93000A;
-    --md-on-error: #690005;
-    --md-on-error-container: #FFDAD6;
+    /* MD3 System Colors - Error (Dark) */
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-error-container: #93000A;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-on-error-container: #FFDAD6;
     
-    --md-success: #81c784;
-    --md-warning: #ffb74d;
-    --md-info: #64b5f6;
+    /* MD3 System Colors - Semantic (Dark) */
+    --md-sys-color-success: #81c784;
+    --md-sys-color-success-container: #2E7D32;
+    --md-sys-color-on-success: #1B5E20;
+    --md-sys-color-on-success-container: #C8E6C9;
     
-    /* Surface Colors */
-    --md-surface: #141218;
-    --md-surface-dim: #141218;
-    --md-surface-bright: #3B383E;
-    --md-surface-container-lowest: #0F0D13;
-    --md-surface-container-low: #1D1B20;
-    --md-surface-container: #211F26;
-    --md-surface-container-high: #2B2930;
-    --md-surface-container-highest: #36343B;
-    --md-surface-variant: #49454F;
-    --md-on-surface: #E6E1E5;
-    --md-on-surface-variant: #CAC4D0;
+    --md-sys-color-warning: #ffb74d;
+    --md-sys-color-warning-container: #F57C00;
+    --md-sys-color-on-warning: #E65100;
+    --md-sys-color-on-warning-container: #FFE0B2;
+    
+    --md-sys-color-info: #64b5f6;
+    --md-sys-color-info-container: #1565C0;
+    --md-sys-color-on-info: #0D47A1;
+    --md-sys-color-on-info-container: #BBDEFB;
+    
+    /* MD3 System Colors - Surface (Dark) */
+    --md-sys-color-surface: #141218;
+    --md-sys-color-surface-dim: #141218;
+    --md-sys-color-surface-bright: #3B383E;
+    --md-sys-color-surface-container-lowest: #0F0D13;
+    --md-sys-color-surface-container-low: #1D1B20;
+    --md-sys-color-surface-container: #211F26;
+    --md-sys-color-surface-container-high: #2B2930;
+    --md-sys-color-surface-container-highest: #36343B;
+    --md-sys-color-surface-variant: #49454F;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    
+    /* MD3 System Colors - Outline (Dark) */
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-outline-variant: #49454F;
+    
+    /* MD3 System Colors - Background (Dark) */
+    --md-sys-color-background: #1C1B1F;
+    --md-sys-color-on-background: #E6E1E5;
     
     --md-card-bg: var(--md-surface-container);
     --md-overlay: rgba(0, 0, 0, 0.7);
@@ -1263,8 +1349,8 @@ main {
 .progress-bar {
     width: 100%;
     height: 20px;
-    background-color: #e0e0e0;
-    border-radius: 8px;
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: var(--md-radius-small);
     overflow: hidden;
 }
 
@@ -1332,25 +1418,25 @@ main {
     opacity: 0.9;
 }
 
-/* Different colors for summary cards */
+/* Different colors for summary cards - using MD3 system colors */
 .summary-cards .summary-card:nth-child(1) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-primary-container) 100%);
 }
 
 .summary-cards .summary-card:nth-child(2) {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    background: linear-gradient(135deg, var(--md-sys-color-info) 0%, var(--md-sys-color-info-container) 100%);
 }
 
 .summary-cards .summary-card:nth-child(3) {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    background: linear-gradient(135deg, var(--md-sys-color-warning) 0%, var(--md-sys-color-warning-container) 100%);
 }
 
 .summary-cards .summary-card:nth-child(4) {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    background: linear-gradient(135deg, var(--md-sys-color-success) 0%, var(--md-sys-color-success-container) 100%);
 }
 
 .summary-cards .summary-card:nth-child(5) {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    background: linear-gradient(135deg, var(--md-sys-color-error) 0%, var(--md-sys-color-error-container) 100%);
 }
 
 .activities-list {
@@ -1510,15 +1596,15 @@ main {
 }
 
 .api-key-status.verified {
-    color: #28a745;
+    color: var(--md-sys-color-success);
 }
 
 .api-key-status.invalid {
-    color: #dc3545;
+    color: var(--md-sys-color-error);
 }
 
 .api-key-status.unverified {
-    color: #6c757d;
+    color: var(--md-sys-color-on-surface-variant);
 }
 
 /* Responsive Design */
@@ -1639,7 +1725,7 @@ main {
 }
 
 .file-upload-label:hover {
-    background: #3fa864;
+    background: var(--md-sys-color-success);
     transform: translateY(-1px);
 }
 
@@ -1683,7 +1769,7 @@ main {
 }
 
 .selected-file-display .remove-file-btn:hover {
-    background: #c0392b;
+    background: var(--md-sys-color-error-container);
 }
 
 /* Modal Styles */
@@ -5060,6 +5146,156 @@ body.dark-theme textarea {
 .theme-color-option input[type="radio"]:focus + .theme-color-swatch {
     outline: 2px solid var(--md-primary);
     outline-offset: 2px;
+}
+
+/* ====================================
+   Theme Preview Section
+   ==================================== */
+
+.theme-preview-section {
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: var(--spacing-lg);
+    border-radius: var(--md-radius-large);
+}
+
+.theme-preview-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-radius-medium);
+}
+
+/* Preview Card */
+.preview-card {
+    background: var(--md-sys-color-surface-container-low);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-radius-large);
+    overflow: hidden;
+    box-shadow: var(--md-elevation-1);
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.preview-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.preview-card-header .material-symbols-outlined {
+    color: var(--md-sys-color-primary);
+    font-size: var(--icon-size-lg);
+}
+
+.preview-card-header h4 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.preview-card-content {
+    padding: var(--spacing-md);
+}
+
+.preview-card-content p {
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Preview Buttons */
+.preview-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.preview-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--md-radius-large);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: none;
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.preview-btn-primary {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: var(--md-elevation-1);
+}
+
+.preview-btn-primary:hover {
+    box-shadow: var(--md-elevation-2);
+}
+
+.preview-btn-secondary {
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+}
+
+.preview-btn-secondary:hover {
+    background: var(--md-sys-color-primary-container);
+}
+
+/* Preview Text Samples */
+.preview-text-samples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    background: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-radius-medium);
+}
+
+.preview-text-primary {
+    color: var(--md-sys-color-on-surface);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+}
+
+.preview-text-secondary {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: var(--font-size-sm);
+}
+
+/* Preview Surface */
+.preview-surface {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border-radius: var(--md-radius-medium);
+    box-shadow: var(--md-elevation-1);
+}
+
+.preview-surface .material-symbols-outlined {
+    color: var(--md-sys-color-secondary);
+    font-size: var(--icon-size-md);
+}
+
+/* Responsive Preview */
+@media (max-width: 768px) {
+    .theme-preview-container {
+        padding: var(--spacing-sm);
+    }
+    
+    .preview-buttons {
+        flex-direction: column;
+    }
+    
+    .preview-btn {
+        width: 100%;
+    }
 }
 
 /* Material Web Components customization (if loaded) */

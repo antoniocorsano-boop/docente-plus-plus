@@ -9,36 +9,49 @@ const THEME_DARK = 'dark';
 // Color palettes for Material Design 3
 const COLOR_PALETTES = {
     purple: {
+        name: 'Viola',
         light: { primary: '#6750A4', primaryContainer: '#EADDFF', onPrimary: '#FFFFFF', onPrimaryContainer: '#21005D' },
         dark: { primary: '#D0BCFF', primaryContainer: '#4F378B', onPrimary: '#371E73', onPrimaryContainer: '#EADDFF' }
     },
+    lilla: {
+        name: 'Lilla',
+        light: { primary: '#9C27B0', primaryContainer: '#F3E5F5', onPrimary: '#FFFFFF', onPrimaryContainer: '#4A148C' },
+        dark: { primary: '#CE93D8', primaryContainer: '#6A1B9A', onPrimary: '#4A148C', onPrimaryContainer: '#F3E5F5' }
+    },
     blue: {
+        name: 'Blu',
         light: { primary: '#1976D2', primaryContainer: '#BBDEFB', onPrimary: '#FFFFFF', onPrimaryContainer: '#0D47A1' },
         dark: { primary: '#90CAF9', primaryContainer: '#1565C0', onPrimary: '#0D47A1', onPrimaryContainer: '#E3F2FD' }
     },
-    green: {
-        light: { primary: '#388E3C', primaryContainer: '#C8E6C9', onPrimary: '#FFFFFF', onPrimaryContainer: '#1B5E20' },
-        dark: { primary: '#81C784', primaryContainer: '#2E7D32', onPrimary: '#1B5E20', onPrimaryContainer: '#E8F5E9' }
-    },
-    red: {
-        light: { primary: '#C62828', primaryContainer: '#FFCDD2', onPrimary: '#FFFFFF', onPrimaryContainer: '#B71C1C' },
-        dark: { primary: '#EF5350', primaryContainer: '#B71C1C', onPrimary: '#FFEBEE', onPrimaryContainer: '#FFCDD2' }
-    },
-    orange: {
-        light: { primary: '#EF6C00', primaryContainer: '#FFE0B2', onPrimary: '#FFFFFF', onPrimaryContainer: '#E65100' },
-        dark: { primary: '#FFB74D', primaryContainer: '#F57C00', onPrimary: '#E65100', onPrimaryContainer: '#FFF3E0' }
-    },
     teal: {
+        name: 'Teal',
         light: { primary: '#00796B', primaryContainer: '#B2DFDB', onPrimary: '#FFFFFF', onPrimaryContainer: '#004D40' },
         dark: { primary: '#4DB6AC', primaryContainer: '#00695C', onPrimary: '#004D40', onPrimaryContainer: '#E0F2F1' }
     },
-    indigo: {
-        light: { primary: '#303F9F', primaryContainer: '#C5CAE9', onPrimary: '#FFFFFF', onPrimaryContainer: '#1A237E' },
-        dark: { primary: '#7986CB', primaryContainer: '#283593', onPrimary: '#1A237E', onPrimaryContainer: '#E8EAF6' }
+    green: {
+        name: 'Verde',
+        light: { primary: '#388E3C', primaryContainer: '#C8E6C9', onPrimary: '#FFFFFF', onPrimaryContainer: '#1B5E20' },
+        dark: { primary: '#81C784', primaryContainer: '#2E7D32', onPrimary: '#1B5E20', onPrimaryContainer: '#E8F5E9' }
+    },
+    orange: {
+        name: 'Arancione',
+        light: { primary: '#EF6C00', primaryContainer: '#FFE0B2', onPrimary: '#FFFFFF', onPrimaryContainer: '#E65100' },
+        dark: { primary: '#FFB74D', primaryContainer: '#F57C00', onPrimary: '#E65100', onPrimaryContainer: '#FFF3E0' }
     },
     pink: {
+        name: 'Rosa',
         light: { primary: '#C2185B', primaryContainer: '#F8BBD0', onPrimary: '#FFFFFF', onPrimaryContainer: '#880E4F' },
         dark: { primary: '#F06292', primaryContainer: '#AD1457', onPrimary: '#880E4F', onPrimaryContainer: '#FCE4EC' }
+    },
+    red: {
+        name: 'Rosso',
+        light: { primary: '#C62828', primaryContainer: '#FFCDD2', onPrimary: '#FFFFFF', onPrimaryContainer: '#B71C1C' },
+        dark: { primary: '#EF5350', primaryContainer: '#B71C1C', onPrimary: '#FFEBEE', onPrimaryContainer: '#FFCDD2' }
+    },
+    indigo: {
+        name: 'Indigo',
+        light: { primary: '#303F9F', primaryContainer: '#C5CAE9', onPrimary: '#FFFFFF', onPrimaryContainer: '#1A237E' },
+        dark: { primary: '#7986CB', primaryContainer: '#283593', onPrimary: '#1A237E', onPrimaryContainer: '#E8EAF6' }
     }
 };
 
@@ -97,7 +110,13 @@ function applyColorPalette(colorName, mode) {
     const colors = palette[mode];
     const root = document.documentElement;
     
-    // Apply colors as CSS variables
+    // Apply colors as MD3 system properties
+    root.style.setProperty('--md-sys-color-primary', colors.primary);
+    root.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
+    root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+    root.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
+    
+    // Also set legacy properties for backwards compatibility
     root.style.setProperty('--md-primary', colors.primary);
     root.style.setProperty('--md-primary-container', colors.primaryContainer);
     root.style.setProperty('--md-on-primary', colors.onPrimary);
@@ -165,6 +184,34 @@ export function initializeTheme() {
 }
 
 /**
+ * Update preview with selected theme and color
+ * @param {string} theme - The theme mode ('light', 'dark', or 'auto')
+ * @param {string} color - The color palette name
+ */
+function updatePreview(theme, color) {
+    const preview = document.getElementById('theme-preview');
+    if (!preview) return;
+    
+    // Determine effective theme
+    let effectiveTheme = theme;
+    if (theme === THEME_AUTO) {
+        effectiveTheme = getSystemTheme();
+    }
+    
+    // Get color palette
+    const palette = COLOR_PALETTES[color];
+    if (!palette) return;
+    
+    const colors = palette[effectiveTheme];
+    
+    // Apply colors to preview container
+    preview.style.setProperty('--md-sys-color-primary', colors.primary);
+    preview.style.setProperty('--md-sys-color-primary-container', colors.primaryContainer);
+    preview.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+    preview.style.setProperty('--md-sys-color-on-primary-container', colors.onPrimaryContainer);
+}
+
+/**
  * Setup the theme picker dialog
  */
 export function setupThemePicker() {
@@ -196,11 +243,36 @@ export function setupThemePicker() {
             colorRadioToCheck.checked = true;
         }
         
+        // Update preview with current settings
+        updatePreview(currentTheme, currentColor);
+        
         dialog.style.display = 'flex';
         
         // Focus the apply button
         setTimeout(() => applyBtn.focus(), 100);
     };
+    
+    // Listen for theme mode changes to update preview
+    const themeRadios = form.querySelectorAll('input[name="theme"]');
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const selectedColor = form.querySelector('input[name="themeColor"]:checked');
+            if (selectedColor) {
+                updatePreview(radio.value, selectedColor.value);
+            }
+        });
+    });
+    
+    // Listen for color changes to update preview
+    const colorRadios = form.querySelectorAll('input[name="themeColor"]');
+    colorRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const selectedTheme = form.querySelector('input[name="theme"]:checked');
+            if (selectedTheme) {
+                updatePreview(selectedTheme.value, radio.value);
+            }
+        });
+    });
     
     // Open dialog when button is clicked (original button in header, if exists)
     if (openButton) {
@@ -249,13 +321,14 @@ export function setupThemePicker() {
                 };
                 const colorNames = {
                     purple: 'Viola',
+                    lilla: 'Lilla',
                     blue: 'Blu',
-                    green: 'Verde',
-                    red: 'Rosso',
-                    orange: 'Arancione',
                     teal: 'Teal',
-                    indigo: 'Indigo',
-                    pink: 'Rosa'
+                    green: 'Verde',
+                    orange: 'Arancione',
+                    pink: 'Rosa',
+                    red: 'Rosso',
+                    indigo: 'Indigo'
                 };
                 window.showToast(`Tema ${themeNames[selectedTheme]} con colore ${colorNames[selectedColor]} applicato`, 'success');
             }
