@@ -16,10 +16,14 @@ Questa recovery PR ripristina con successo le modifiche originali della PR #20 "
 
 ### Differenze Rispetto a Main
 
-I file ripristinati sono stati riportati allo stato originale della PR #20, **prima** dell'aggiunta successiva delle API avanzate di recordings e transcriptions. Questo permette di:
-1. Vedere esattamente cosa conteneva la PR #20 originale
-2. Revisionare le modifiche della feature "In Classe" in modo isolato
-3. Verificare la compatibilità con il sistema attuale
+I file `docs/IN_CLASSE_PAGE.md` e `js/in-classe.js` sono stati riportati allo stato originale della PR #20. 
+
+**Nota importante**: Le API avanzate di recordings e transcriptions (`src/api/recordings.js` e `src/api/transcriptions.js`) sono ancora presenti in questo branch perché furono aggiunte a main dopo il merge della PR #20. Questo recovery si concentra sul ripristino dei file core della feature "In Classe" che furono modificati dalla PR #20.
+
+Questo permette di:
+1. Vedere lo stato originale dei componenti In Classe dalla PR #20
+2. Revisionare le modifiche core della feature in modo isolato
+3. Verificare la compatibilità con le API aggiunte successivamente
 
 ## Commit Originali Inclusi
 
@@ -55,6 +59,8 @@ Tutti i test unitari passano correttamente con lo stato ripristinato.
 - **Implementato**: `copilot/recoverin-classe` (branch designato dal sistema)
 - **Locale**: `recover/in-classe` (punta al commit a47e24b della PR #20 originale)
 
+**Nota**: Il nome del branch contiene un typo ("recoverin" invece di "recover-in") dovuto al sistema di automazione che ha interpretato il nome della task.
+
 ### Riferimenti
 - **PR originale**: #20
 - **Branch originale**: copilot/featurein-classe-page
@@ -64,9 +70,9 @@ Tutti i test unitari passano correttamente con lo stato ripristinato.
 
 ## Note per il Review
 
-1. **Stato dei file**: I file `docs/IN_CLASSE_PAGE.md` e `js/in-classe.js` mostrano una riduzione di 256 linee rispetto a main, riflettendo lo stato più semplice della PR #20 originale.
+1. **Stato dei file**: I file `docs/IN_CLASSE_PAGE.md` e `js/in-classe.js` mostrano modifiche (157 aggiunte, 256 rimozioni) rispetto a main, riflettendo lo stato più semplice della PR #20 originale.
 
-2. **API avanzate**: Le API `src/api/recordings.js` e `src/api/transcriptions.js` non sono presenti in questa versione perché furono aggiunte dopo il merge della PR #20.
+2. **API avanzate**: Le API `src/api/recordings.js` e `src/api/transcriptions.js` sono ancora presenti in questo branch (non fanno parte delle modifiche della PR #20). Furono aggiunte a main dopo il merge della PR #20.
 
 3. **Compatibilità**: Nonostante il ripristino allo stato originale, tutti i 412 test unitari passano, confermando che le modifiche sono compatibili con il sistema attuale.
 
