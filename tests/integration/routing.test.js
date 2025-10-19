@@ -226,7 +226,7 @@ describe('SPA Routing', () => {
         it('should not trigger full page reload for tab navigation', () => {
             // The beforeEach already sets up window.location with assign mock
             // Simulate tab navigation (not calling window.location.assign)
-            history.pushState({ page: 'home' }, '', '#home');
+            window.history.pushState({ page: 'home' }, '', '#home');
 
             expect(window.location.assign).not.toHaveBeenCalled();
         });
@@ -234,9 +234,9 @@ describe('SPA Routing', () => {
         it('should not call window.location.reload() for navigation', () => {
             // The beforeEach already sets up window.location with reload mock
             // Simulate various navigation actions
-            history.pushState({ page: 'lessons' }, '', '#lessons');
-            history.pushState({ page: 'students' }, '', '#students');
-            history.pushState({ page: 'home' }, '', '#home');
+            window.history.pushState({ page: 'lessons' }, '', '#lessons');
+            window.history.pushState({ page: 'students' }, '', '#students');
+            window.history.pushState({ page: 'home' }, '', '#home');
 
             expect(window.location.reload).not.toHaveBeenCalled();
         });
@@ -244,8 +244,8 @@ describe('SPA Routing', () => {
         it('should not call window.location.assign() for same-app navigation', () => {
             // The beforeEach already sets up window.location with assign mock
             // Simulate internal tab switches
-            history.pushState({ page: 'schedule' }, '', '#schedule');
-            history.pushState({ page: 'agenda' }, '', '#agenda');
+            window.history.pushState({ page: 'schedule' }, '', '#schedule');
+            window.history.pushState({ page: 'agenda' }, '', '#agenda');
 
             expect(window.location.assign).not.toHaveBeenCalled();
         });
