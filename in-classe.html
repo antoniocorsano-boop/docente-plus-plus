@@ -55,9 +55,9 @@
             <span class="back-button-text">Indietro</span>
         </button>
         <div id="breadcrumb-container-in-classe" class="breadcrumb" aria-label="Percorso di navigazione">
-            <a href="index.html" class="breadcrumb-link">Home</a>
+            <a href="index.html" class="breadcrumb-link" onclick="window.location.href='index.html'; return false;">Home</a>
             <span class="breadcrumb-separator" aria-hidden="true">/</span>
-            <a href="index.html#schedule" class="breadcrumb-link">Orario</a>
+            <a href="index.html#schedule" class="breadcrumb-link" onclick="window.location.href='index.html#schedule'; return false;">Orario</a>
             <span class="breadcrumb-separator" aria-hidden="true">/</span>
             <span class="breadcrumb-current" aria-current="page">In Classe</span>
         </div>
@@ -95,6 +95,20 @@
 
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
+        <!-- Daily Timeline Widget -->
+        <section class="daily-timeline-section" id="daily-timeline-section">
+            <div class="daily-timeline-header">
+                <h2>
+                    <span class="material-symbols-outlined">schedule</span>
+                    Orario di Oggi
+                </h2>
+                <span class="current-date" id="current-date-label"></span>
+            </div>
+            <div class="daily-timeline-container" id="daily-timeline-container">
+                <!-- Daily lessons will be populated here -->
+            </div>
+        </section>
+        
         <!-- Static Schedule Grid (Enhanced by schedule-enhance.js) -->
         <div class="schedule-table-wrapper" role="region" aria-label="Orario settimanale">
             <table id="static-schedule-grid" role="table" aria-label="Griglia orario settimanale">

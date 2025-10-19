@@ -81,6 +81,8 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md);
+    /* Add bottom padding to account for input area on mobile */
+    padding-bottom: calc(var(--spacing-md) + 100px);
     background: var(--md-surface-container-low);
 }
 
@@ -90,6 +92,8 @@
     flex-direction: column;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-md);
+    /* Extra padding for mobile keyboard */
+    padding-bottom: 20px;
 }
 
 .ai-message {
