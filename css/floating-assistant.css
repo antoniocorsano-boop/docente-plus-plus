@@ -223,6 +223,8 @@
     padding: var(--spacing-md);
     background: var(--md-surface);
     border-top: 1px solid var(--md-divider);
+    /* Support safe area insets for mobile */
+    padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
 }
 
 .ai-input-wrapper {
