@@ -783,11 +783,16 @@ ${this.dataManager.summary.nextSteps.map((s, i) => `${i + 1}. ${s.text}`).join('
     }
 
     exit() {
-        // Navigate back to schedule or main app
+        // Navigate back to schedule or main app (without full page reload)
         if (window.opener) {
             window.close();
         } else {
-            window.location.href = 'index.html#schedule';
+            // Use history.back() for SPA-like navigation
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html#schedule';
+            }
         }
     }
 }
@@ -887,6 +892,107 @@ class LessonPickerModal {
 // Initialize app
 let inClasseApp;
 
+// Daily Timeline Widget
+function renderDailyTimeline() {
+    const container = document.getElementById('daily-timeline-container');
+    const dateLabel = document.getElementById('current-date-label');
+    
+    if (!container) return;
+    
+    // Get current day and date
+    const now = new Date();
+    const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    const currentDay = days[now.getDay()];
+    const currentHour = now.getHours();
+    
+    // Update date label
+    if (dateLabel) {
+        dateLabel.textContent = `${currentDay}, ${now.toLocaleDateString('it-IT', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        })}`;
+    }
+    
+    // Load schedule from localStorage
+    const scheduleStr = localStorage.getItem('schedule');
+    let schedule = {};
+    try {
+        schedule = scheduleStr ? JSON.parse(scheduleStr) : {};
+    } catch (e) {
+        console.error('Error loading schedule:', e);
+    }
+    
+    // Filter today's lessons
+    const todayLessons = [];
+    const timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+    
+    timeSlots.forEach(time => {
+        const key = `${currentDay}-${time}`;
+        const slot = schedule[key];
+        if (slot && slot.classId) {
+            todayLessons.push({
+                time: time,
+                hour: parseInt(time.split(':')[0]),
+                slot: slot,
+                key: key
+            });
+        }
+    });
+    
+    // Render timeline
+    if (todayLessons.length === 0) {
+        container.innerHTML = `
+            <div class="daily-timeline-empty">
+                <span class="material-symbols-outlined">event_busy</span>
+                <p>Nessuna lezione programmata per oggi</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="daily-timeline-list">';
+    todayLessons.forEach(lesson => {
+        const isCurrent = lesson.hour === currentHour;
+        const isPast = lesson.hour < currentHour;
+        
+        const statusClass = isCurrent ? 'current' : (isPast ? 'past' : 'future');
+        const statusIcon = isCurrent ? 'play_circle' : (isPast ? 'check_circle' : 'schedule');
+        
+        html += `
+            <div class="daily-timeline-item ${statusClass}" data-time="${lesson.time}">
+                <div class="timeline-time">
+                    <span class="material-symbols-outlined timeline-icon">${statusIcon}</span>
+                    <strong>${lesson.time}</strong>
+                    ${isCurrent ? '<span class="timeline-badge">In Corso</span>' : ''}
+                </div>
+                <div class="timeline-content">
+                    <h4>${lesson.slot.classId || 'N/A'}</h4>
+                    <p><strong>Materia:</strong> ${lesson.slot.subject || 'N/A'}</p>
+                    <p><strong>Tipo:</strong> ${lesson.slot.activityType || 'N/A'}</p>
+                </div>
+                <div class="timeline-actions">
+                    <button class="btn btn-sm btn-primary" onclick="window.location.href='in-classe.html?lesson=${encodeURIComponent(lesson.key)}'">
+                        <span class="material-symbols-outlined">login</span>
+                        Entra
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    // Auto-scroll to current lesson if exists
+    setTimeout(() => {
+        const currentItem = container.querySelector('.daily-timeline-item.current');
+        if (currentItem) {
+            currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 300);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize daily view first
     if (typeof initDailyView === 'function') {
@@ -894,6 +1000,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const dataManager = new InClasseDataManager();
+    
+    // Initialize daily timeline widget
+    renderDailyTimeline();
     
     // Auto-open lesson picker is now disabled (suppressed by schedule-enhance.js)
     // Users must select lessons through the static schedule grid on this page
@@ -943,20 +1052,33 @@ function initBreadcrumbNavigation() {
     const headerBackButton = document.getElementById('back-button');
     
     if (backButton) {
-        backButton.addEventListener('click', () => {
-            window.location.href = 'index.html#schedule';
+        backButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Use history.back() for SPA-like navigation
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html#schedule';
+            }
         });
     }
     
     if (homeButton) {
-        homeButton.addEventListener('click', () => {
+        homeButton.addEventListener('click', (e) => {
+            e.preventDefault();
             window.location.href = 'index.html#home';
         });
     }
     
     if (headerBackButton) {
-        headerBackButton.addEventListener('click', () => {
-            window.location.href = 'index.html#schedule';
+        headerBackButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Use history.back() for SPA-like navigation
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html#schedule';
+            }
         });
     }
     

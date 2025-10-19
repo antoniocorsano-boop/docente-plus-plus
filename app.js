@@ -4,8 +4,11 @@ import { loadData, saveData, isOnboardingComplete, isProfileComplete, skipOnboar
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, showOnboardingBanner, hideOnboardingBanner, disableMenuItems, enableAllMenuItems, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { initializeTheme, setupThemePicker } from './js/theme.js';
+import themeProvider from './src/components/ThemeProvider.js';
+import { initThemeSwitcher } from './src/components/ThemeSwitcher.js';
 import { initAppBar } from './js/appbar.js';
 import { initNavigation } from './js/navigation.js';
+import { initInClassePage } from './src/pages/InClasse.js';
 import { 
     showModal, hideModal, 
     createClass, editClass, deleteClass,
@@ -60,6 +63,9 @@ class DocentePlusPlus {
         this.agendaView = 'weekly'; // 'weekly' or 'daily'
         this.currentAgendaDate = null; // Current date for agenda view
         this.currentEditingEvent = null; // Track the event being edited
+        
+        // InClasse page instance
+        this.inClassePage = null;
     }
     
     // Generate time slots based on settings
@@ -91,7 +97,10 @@ class DocentePlusPlus {
 
     init() {
         try {
-            // Initialize theme first (before loading data)
+            // Initialize theme provider first
+            themeProvider.initialize();
+            
+            // Initialize legacy theme system for backwards compatibility
             initializeTheme();
             
             const dataLoaded = loadData();
@@ -165,6 +174,9 @@ class DocentePlusPlus {
         updateActiveClassBadge();
         switchTab('home');
         
+        // Initialize theme switcher UI
+        initThemeSwitcher();
+        
         // NEW: Menu is always active - just show/hide banner based on profile status
         if (isProfileComplete()) {
             hideOnboardingBanner();
@@ -180,9 +192,16 @@ class DocentePlusPlus {
     switchTab(tabName) {
         switchTab(tabName);
     }
+    
+    // Open In Classe page - using window.open is acceptable for focused classroom mode
+    // This keeps the main app accessible while teacher is in class
+    openInClasse() {
+        window.open('in-classe.html', '_blank');
+    }
 
     renderAllTabs() {
         this.renderHome();
+        this.renderInClasse();
         this.renderLessons();
         this.renderStudents();
         this.renderClasses();
@@ -193,6 +212,13 @@ class DocentePlusPlus {
         this.renderAiAssistant();
         this.renderDocumentImport();
         this.renderNotifications();
+    }
+
+    renderInClasse() {
+        // Initialize InClasse page on first render
+        if (!this.inClassePage) {
+            this.inClassePage = initInClassePage('in-classe-container');
+        }
     }
 
     renderHome() {
@@ -2104,7 +2130,7 @@ class DocentePlusPlus {
         // Apply theme immediately
         import('./js/theme.js').then(({ applyTheme }) => {
             try {
-                applyTheme();
+                applyTheme(themeMode, themeColor);
                 showToast('Tema applicato!', 'success');
             } catch (err) {
                 console.error("Errore durante l'applicazione del tema:", err);

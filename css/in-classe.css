@@ -400,10 +400,11 @@ body {
 }
 
 .activity-badge {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--md-sys-color-surface-variant);
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--md-radius-small);
     font-weight: 500;
+    opacity: 0.8;
 }
 
 .lesson-header .icon-btn {
@@ -412,13 +413,15 @@ body {
 }
 
 .lesson-header .btn-secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--md-on-primary);
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
     border: none;
+    opacity: 0.8;
 }
 
 .lesson-header .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--md-sys-color-primary-container);
+    opacity: 1;
 }
 
 /* Main Content */
@@ -1088,5 +1091,192 @@ body {
     
     .section-content {
         display: block !important;
+    }
+}
+
+/* Daily Timeline Widget */
+.daily-timeline-section {
+    background: var(--md-surface-container);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--md-elevation-1);
+}
+
+.daily-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.daily-timeline-header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    margin: 0;
+    color: var(--md-text-primary);
+}
+
+.daily-timeline-header .material-symbols-outlined {
+    font-size: 28px;
+    color: var(--md-primary);
+}
+
+.current-date-label {
+    font-size: var(--font-size-sm);
+    color: var(--md-text-secondary);
+    font-weight: 400;
+}
+
+.daily-timeline-container {
+    min-height: 100px;
+}
+
+.daily-timeline-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.daily-timeline-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--md-surface);
+    border-radius: 8px;
+    border-left: 4px solid var(--md-outline);
+    transition: all 0.3s ease;
+}
+
+.daily-timeline-item.current {
+    border-left-color: var(--md-primary);
+    background: var(--md-primary-container);
+    box-shadow: var(--md-elevation-2);
+}
+
+.daily-timeline-item.past {
+    border-left-color: var(--md-outline-variant);
+    opacity: 0.7;
+}
+
+.daily-timeline-item.future {
+    border-left-color: var(--md-tertiary);
+}
+
+.timeline-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+}
+
+.timeline-time strong {
+    font-size: var(--font-size-lg);
+    color: var(--md-text-primary);
+}
+
+.timeline-icon {
+    font-size: 24px;
+    color: var(--md-primary);
+}
+
+.daily-timeline-item.current .timeline-icon {
+    color: var(--md-primary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.daily-timeline-item.past .timeline-icon {
+    color: var(--md-outline);
+}
+
+.timeline-badge {
+    font-size: var(--font-size-xs);
+    padding: 2px 8px;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.timeline-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.timeline-content h4 {
+    margin: 0 0 4px 0;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    color: var(--md-text-primary);
+}
+
+.timeline-content p {
+    margin: 2px 0;
+    font-size: var(--font-size-sm);
+    color: var(--md-text-secondary);
+}
+
+.timeline-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.daily-timeline-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--md-text-secondary);
+}
+
+.daily-timeline-empty .material-symbols-outlined {
+    font-size: 64px;
+    opacity: 0.3;
+    margin-bottom: var(--spacing-md);
+}
+
+.daily-timeline-empty p {
+    margin: 0;
+    font-size: var(--font-size-md);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive adjustments for daily timeline */
+@media (max-width: 768px) {
+    .daily-timeline-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .timeline-time {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .timeline-actions {
+        width: 100%;
+    }
+    
+    .timeline-actions .btn {
+        flex: 1;
     }
 }

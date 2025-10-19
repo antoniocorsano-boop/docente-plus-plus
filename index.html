@@ -156,6 +156,10 @@
                 <span class="material-symbols-outlined">home</span>
                 <span class="nav-label">Home</span>
             </button>
+            <button class="nav-item" data-tab="inClasse">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-label">In Classe</span>
+            </button>
             <button class="nav-item" data-tab="lessons">
                 <span class="material-symbols-outlined">menu_book</span>
                 <span class="nav-label">Lezioni</span>
@@ -250,7 +254,7 @@
                 
                 <!-- Quick Access Cards -->
                 <div class="landing-cards">
-                    <button class="landing-card landing-card-primary" onclick="window.open('in-classe.html', '_blank')">
+                    <button class="landing-card landing-card-primary" onclick="window.app.switchTab('inClasse')">
                         <span class="material-symbols-outlined landing-card-icon">school</span>
                         <h3>Entra in Classe</h3>
                         <p>Gestisci le tue classi e gli studenti</p>
@@ -326,6 +330,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- In Classe Tab -->
+        <div id="inClasse" class="tab-content app-page">
+            <div id="in-classe-container">
+                <!-- InClasse page content will be loaded here -->
             </div>
         </div>
 
@@ -486,22 +497,32 @@
                     <div class="form-group">
                         <label for="theme-color-select">Colore Principale</label>
                         <select id="theme-color-select">
-                            <option value="purple">Viola (predefinito)</option>
+                            <option value="lilac">Lilla (predefinito)</option>
+                            <option value="purple">Viola</option>
+                            <option value="teal">Teal</option>
+                            <option value="orange">Arancione</option>
                             <option value="blue">Blu</option>
+                            <option value="teal">Teal</option>
                             <option value="green">Verde</option>
                             <option value="red">Rosso</option>
-                            <option value="orange">Arancione</option>
-                            <option value="teal">Teal</option>
                             <option value="indigo">Indaco</option>
                             <option value="pink">Rosa</option>
+                            <option value="red">Rosso</option>
+                            <option value="indigo">Indaco</option>
                         </select>
-                        <p class="help-text">Personalizza il colore principale dell'interfaccia</p>
+                        <p class="help-text">Personalizza il colore principale dell'interfaccia secondo lo stile MD3 Expressive</p>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">
-                        <span class="material-symbols-outlined">save</span>
-                        Salva Tema
-                    </button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">save</span>
+                            Salva Tema
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="theme-picker-btn-settings">
+                            <span class="material-symbols-outlined">palette</span>
+                            Anteprima Avanzata
+                        </button>
+                    </div>
                 </form>
             </div>
             
@@ -1215,9 +1236,47 @@
                             <span class="theme-color-swatch" style="background: #303F9F;" title="Indigo"></span>
                         </label>
                         <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="lilla" id="color-lilla">
+                            <span class="theme-color-swatch" style="background: #9C27B0;" title="Lilla"></span>
+                        </label>
+                        <label class="theme-color-option">
                             <input type="radio" name="themeColor" value="pink" id="color-pink">
                             <span class="theme-color-swatch" style="background: #C2185B;" title="Rosa"></span>
                         </label>
+                    </div>
+                </div>
+                
+                <!-- Live Preview Section -->
+                <div class="theme-section theme-preview-section">
+                    <h3>Anteprima dal Vivo</h3>
+                    <p class="theme-description">Vedi come appare il tema selezionato</p>
+                    <div class="theme-preview-container" id="theme-preview">
+                        <!-- Preview Card -->
+                        <div class="preview-card">
+                            <div class="preview-card-header">
+                                <span class="material-symbols-outlined">palette</span>
+                                <h4>Esempio Card</h4>
+                            </div>
+                            <div class="preview-card-content">
+                                <p>Questo è un esempio di come apparirà il contenuto con il tema selezionato.</p>
+                                <div class="preview-buttons">
+                                    <button class="preview-btn preview-btn-primary">Pulsante Primario</button>
+                                    <button class="preview-btn preview-btn-secondary">Pulsante Secondario</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Text -->
+                        <div class="preview-text-samples">
+                            <div class="preview-text-primary">Testo Primario</div>
+                            <div class="preview-text-secondary">Testo Secondario</div>
+                        </div>
+                        
+                        <!-- Preview Surface -->
+                        <div class="preview-surface">
+                            <span class="material-symbols-outlined">info</span>
+                            <span>Superficie con icona</span>
+                        </div>
                     </div>
                 </div>
                 
