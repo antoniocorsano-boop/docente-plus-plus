@@ -4,6 +4,8 @@ import { loadData, saveData, isOnboardingComplete, isProfileComplete, skipOnboar
 import { createToastContainer, showToast, switchTab, updateActiveClassBadge, showOnboarding, showOnboardingBanner, hideOnboardingBanner, disableMenuItems, enableAllMenuItems, renderChatMessages } from './js/ui.js';
 import { setupEventListeners } from './js/events.js';
 import { initializeTheme, setupThemePicker } from './js/theme.js';
+import themeProvider from './src/components/ThemeProvider.js';
+import { initThemeSwitcher } from './src/components/ThemeSwitcher.js';
 import { initAppBar } from './js/appbar.js';
 import { initNavigation } from './js/navigation.js';
 import { 
@@ -91,7 +93,10 @@ class DocentePlusPlus {
 
     init() {
         try {
-            // Initialize theme first (before loading data)
+            // Initialize theme provider first
+            themeProvider.initialize();
+            
+            // Initialize legacy theme system for backwards compatibility
             initializeTheme();
             
             const dataLoaded = loadData();
@@ -164,6 +169,9 @@ class DocentePlusPlus {
         this.renderAllTabs();
         updateActiveClassBadge();
         switchTab('home');
+        
+        // Initialize theme switcher UI
+        initThemeSwitcher();
         
         // NEW: Menu is always active - just show/hide banner based on profile status
         if (isProfileComplete()) {
