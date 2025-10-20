@@ -295,7 +295,7 @@ router.post('/', upload.single('audio'), async (req, res) => {
         res.json({
             id: 'rec_123',
             lessonKey,
-            duration: parseInt(duration),
+            duration: parseInt(duration, 10),
             fileName: audioFile.originalname,
             fileSize: audioFile.size,
             mimeType: audioFile.mimetype,
