@@ -142,10 +142,15 @@
   };
 
   // Lesson instances
-  InClasseDataManager.prototype.createLessonInstanceFromSchedule = async function(lessonKey){
+  // Updated to accept optional overrides to snapshot (e.g. activityType changed at start)
+  InClasseDataManager.prototype.createLessonInstanceFromSchedule = async function(lessonKey, overrides){
     const entry = await this.getScheduleEntry(lessonKey);
     const id = 'li_' + Date.now();
     const snapshot = entry ? Object.assign({}, entry) : {};
+    if (overrides && typeof overrides === 'object'){
+      // apply overrides only in snapshot, do not modify schedule entry
+      Object.assign(snapshot, overrides);
+    }
     const instance = {
       id,
       lessonKey: lessonKey || null,
