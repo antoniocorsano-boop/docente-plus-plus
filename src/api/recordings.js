@@ -247,7 +247,7 @@ export class RecordingsAPI {
             maxFileSize: this.quotaLimits.maxFileSize,
             maxTotalSize: this.quotaLimits.maxTotalSize,
             maxRecordings: this.quotaLimits.maxRecordings,
-            percentUsed: (totalSize / this.quotaLimits.maxTotalSize) * 100,
+            percentUsed: this.quotaLimits.maxTotalSize > 0 ? (totalSize / this.quotaLimits.maxTotalSize) * 100 : 0,
             remainingSize: this.quotaLimits.maxTotalSize - totalSize,
             remainingCount: this.quotaLimits.maxRecordings - totalCount
         };
