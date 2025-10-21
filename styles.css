@@ -201,6 +201,21 @@
     --z-index-modal: 1050;
     --z-index-popover: 1060;
     --z-index-tooltip: 1070;
+    
+    /* In Classe Page - Additional Theme Variables */
+    --bg: #FFFBFF;
+    --surface: #FEF7FF;
+    --accent: #CFA8FF;
+    --accent-strong: #b788ff;
+    --muted: #bdb0c3;
+    --text: #1C1B1F;
+    --danger: #ff6b6b;
+    --radius-lg: 28px;
+    --radius-sm: 10px;
+    --gap: 16px;
+    --hit: 44px;
+    --max-content-width: 920px;
+    --shadow-soft: 0 8px 24px rgba(11,7,15,0.6);
 }
 
 /* Dark Theme */
@@ -280,6 +295,15 @@ body.dark-theme,
     /* Borders */
     --md-border: var(--md-on-surface-variant);
     --md-divider: rgba(230, 225, 229, 0.12);
+    
+    /* In Classe Page - Dark Theme Overrides */
+    --bg: #130f14;
+    --surface: #1b151b;
+    --accent: #CFA8FF;
+    --accent-strong: #b788ff;
+    --muted: #bdb0c3;
+    --text: #f4eefe;
+    --danger: #ff6b6b;
 }
 
 /* Material Symbols styling */
@@ -7334,5 +7358,311 @@ body.dark-theme .info-box strong {
     
     .quick-actions-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   In Classe Page - Enhanced UI Components
+   ======================================== */
+
+/* Container */
+.container {
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    padding: var(--gap);
+}
+
+/* Lesson Card */
+.lesson-card {
+    background: var(--md-surface-container);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--md-elevation-1);
+    margin-bottom: var(--gap);
+    transition: box-shadow var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.lesson-card:hover {
+    box-shadow: var(--md-elevation-2);
+}
+
+.lesson-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-medium);
+    color: var(--md-text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.lesson-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    color: var(--md-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.icon-label .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* Enhanced Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    min-height: var(--hit);
+    min-width: var(--hit);
+    padding: 10px var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-button);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+.btn-primary:hover {
+    background: var(--accent-strong, var(--md-primary));
+    box-shadow: var(--md-elevation-2);
+}
+
+.btn-secondary {
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+    border: 1px solid var(--md-outline-variant);
+}
+
+.btn-secondary:hover {
+    background: var(--md-surface-container-high);
+    box-shadow: var(--md-elevation-1);
+}
+
+/* Floating Action Button (FAB) */
+.fab, .ai-fab {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--md-elevation-3);
+    cursor: pointer;
+    transition: all var(--md-transition-duration) var(--md-transition-timing);
+    z-index: var(--z-index-fixed);
+}
+
+.fab:hover, .ai-fab:hover {
+    box-shadow: var(--md-elevation-4);
+    transform: scale(1.05);
+}
+
+.fab:focus-visible, .ai-fab:focus-visible {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.fab:active, .ai-fab:active {
+    transform: scale(0.95);
+}
+
+/* Lesson Drawer */
+.lesson-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-index-modal-backdrop);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--md-transition-duration) var(--md-transition-timing),
+                visibility var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.lesson-drawer-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lesson-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    background: var(--md-surface-container-low);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: var(--shadow-soft);
+    z-index: var(--z-index-modal);
+    transform: translateY(100%);
+    transition: transform var(--md-transition-duration) var(--md-transition-timing);
+    overflow-y: auto;
+}
+
+.lesson-drawer.active {
+    transform: translateY(0);
+}
+
+.lesson-drawer-header {
+    position: sticky;
+    top: 0;
+    background: var(--md-surface-container-low);
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--md-divider);
+    z-index: 1;
+}
+
+.lesson-drawer-handle {
+    width: 32px;
+    height: 4px;
+    background: var(--md-outline-variant);
+    border-radius: 2px;
+    margin: 0 auto var(--spacing-md) auto;
+}
+
+.lesson-drawer-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-medium);
+    color: var(--md-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.lesson-drawer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    color: var(--md-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.lesson-drawer-content {
+    padding: var(--spacing-lg);
+}
+
+.lesson-drawer-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.lesson-drawer-section h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--md-text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.lesson-drawer-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--md-surface-container-low);
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--md-divider);
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.drawer-close {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: var(--hit);
+    height: var(--hit);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--md-text-secondary);
+    transition: background var(--md-transition-duration) var(--md-transition-timing);
+}
+
+.drawer-close:hover {
+    background: var(--md-surface-container-high);
+}
+
+.drawer-close:focus-visible {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Body overflow control when drawer is open */
+body.drawer-open {
+    overflow: hidden;
+}
+
+/* Responsive adjustments for drawer */
+@media (min-width: 768px) {
+    .lesson-drawer {
+        left: 50%;
+        transform: translateX(-50%) translateY(100%);
+        max-width: 600px;
+        border-radius: var(--radius-lg);
+        bottom: var(--spacing-lg);
+        max-height: 85vh;
+    }
+    
+    .lesson-drawer.active {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    .lesson-drawer {
+        border: 2px solid var(--md-outline);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .lesson-drawer,
+    .lesson-drawer-backdrop,
+    .btn,
+    .fab,
+    .ai-fab {
+        transition-duration: 0.01ms !important;
     }
 }
