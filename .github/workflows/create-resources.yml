@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create GitHub projects via API
+      - name: Create GitHub proj via API
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Metti qui i nomi dei progetti separati da |, es: "Progetto A|Progetto B"
