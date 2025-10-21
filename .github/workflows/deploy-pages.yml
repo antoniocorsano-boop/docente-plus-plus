@@ -1,6 +1,3 @@
-# Deploy site to GitHub Pages (supports static site in repo root or a build step that outputs to build/ or dist/)
-# Save this file as: .github/workflows/deploy-pages.yml
-# Triggers on push to main. Adjust branches if you publish from a different branch.
 name: Deploy to GitHub Pages
 
 on:
@@ -13,23 +10,20 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (optional, safe to keep if repo has package.json)
+      - name: Setup Node.js (optional)
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -52,17 +46,14 @@ jobs:
           elif [ -d "./dist" ] && [ "$(ls -A dist 2>/dev/null)" ]; then
             rsync -av dist/ _publish/
           else
-            # fallback: publish repository root (exclude .git and workflow files)
             rsync -av --exclude='.git' --exclude='.github' --exclude='./_publish' . _publish/
           fi
-          # ensure nojekyll to avoid Jekyll processing if there are files/dirs starting with _
           touch _publish/.nojekyll
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
-        # Updated to v3 to avoid deprecated dependencies
         uses: actions/upload-pages-artifact@v3
         with:
           path: _publish
