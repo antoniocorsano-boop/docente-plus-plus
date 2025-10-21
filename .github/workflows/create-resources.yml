@@ -1,6 +1,4 @@
 name: Create resources
-
-# Trigger on pushes to main (change branches array if you need other branches)
 on:
   push:
     branches:
@@ -10,39 +8,28 @@ jobs:
   create-resources:
     name: Create resources
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      projects: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (if needed)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
+      - name: Create GitHub projects via API
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Metti qui i nomi dei progetti separati da |, es: "Progetto A|Progetto B"
+          PROJECT_LIST: "Progetto A|Progetto B"
         run: |
-          if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
-          else
-            echo "No package.json found, skipping install"
-          fi
-
-      - name: Create resources (idempotent)
-        run: |
-          if [ -f package.json ]; then
-            if npm run | grep -q create-resources; then
-              npm run create-resources
-            else
-              echo "No create-resources script; nothing to do"
-            fi
-          else
-            echo "No package.json found, skipping create-resources"
-          fi
+          set -euo pipefail
+          IFS='|' read -ra PROJECTS <<< "$PROJECT_LIST"
+          OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f1)
+          REPO=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2)
+          for p in "${PROJECTS[@]}"; do
+            p_trimmed="$(echo "$p" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+            echo "Creazione progetto: '$p_trimmed' in $OWNER/$REPO"
+            payload=$(printf '{"name":"%s","body":"Creato da workflow"}' "$p_trimmed")
+            resp=$(curl -s -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$OWNER/$REPO/projects" \
+              -d "$payload")
+            echo "$resp"
+          done
