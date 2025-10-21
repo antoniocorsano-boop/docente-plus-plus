@@ -4,60 +4,42 @@ on:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages-deploy-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
+    concurrency:
+      group: pages-deploy-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (optional)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies (if package.json exists)
-        run: |
-          if [ -f package.json ]; then npm ci; fi
-
-      - name: Build (if npm build script is present)
-        run: |
-          if [ -f package.json ] && grep -q '"build"' package.json; then npm run build; fi
-
-      - name: Prepare publish directory
-        run: |
-          set -e
-          rm -rf _publish || true
-          mkdir -p _publish
-          if [ -d "./build" ] && [ "$(ls -A build 2>/dev/null)" ]; then
-            rsync -av build/ _publish/
-          elif [ -d "./dist" ] && [ "$(ls -A dist 2>/dev/null)" ]; then
-            rsync -av dist/ _publish/
-          else
-            rsync -av --exclude='.git' --exclude='.github' --exclude='./_publish' . _publish/
-          fi
-          touch _publish/.nojekyll
-
-      - name: Configure Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Build site
+        run: |
+          # This is a static PWA - copy all files excluding development/CI artifacts
+          mkdir -p public
+          rsync -av --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='public' --exclude='tests' --exclude='.idx' --exclude='.vscode' . public/
+          touch public/.nojekyll
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: _publish
+          path: ./public
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Show deployment URL
+        run: echo "Pages URL: ${{ steps.deployment.outputs.page_url }}"
