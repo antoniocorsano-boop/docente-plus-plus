@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>In Classe (Modular)</title>
+  <style>
+    /* Theme variables and two visual variants - scoped to this file so we only change in-classe-modular.html */
+    :root{
+      --bg: #130f14;
+      --surface: #1b151b;
+      --text: #f4eefe;
+      --muted: #bdb0c3;
+      --accent: #CFA8FF;
+      --accent-strong: #b788ff;
+      --radius-lg: 28px;
+      --hit: 44px;
+      --gap: 16px;
+    }
+
+    /* Variant 1 - default (coherent with Home) */
+    .variant-default { --accent: #CFA8FF; --accent-strong: #b788ff; --gap:16px; }
+
+    /* Variant 2 - higher contrast alternate */
+    .variant-contrast { --accent: #FFD48A; --accent-strong: #ffb86b; --gap:12px; }
+
+    body{ background: var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; }
+    .page{ max-width:920px; margin:0 auto; padding:20px; }
+    header.h{ text-align:center; padding:18px 8px; }
+    header.h h1{ margin:0; font-size:1.6rem; font-weight:700; }
+    header.h p{ margin:8px 0 0; color:var(--muted); }
+
+    /* Lesson card list - minimal, non-invasive */
+    .lesson-card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px; padding:16px; margin:18px 0; border:1px solid rgba(255,255,255,0.03); }
+    .lesson-title{ font-size:1.25rem; font-weight:800; margin:8px 0; }
+    .lesson-meta{ color:var(--muted); display:flex; flex-direction:column; gap:8px; font-size:0.98rem; }
+
+    /* Buttons */
+    .btn{ min-height:var(--hit); display:inline-flex; align-items:center; gap:10px; padding:10px 18px; border-radius:999px; font-weight:600; cursor:pointer; border:none; }
+    .btn-primary{ background:var(--accent); color:#1a0f1a; box-shadow:0 6px 16px rgba(0,0,0,0.45); }
+    .btn-secondary{ background:transparent; color:var(--accent); border:2px solid rgba(207,168,255,0.18); }
+
+    /* Floating action button */
+    .fab{ position: fixed; right:18px; bottom:18px; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--accent-strong); color:var(--text); z-index:1000; box-shadow:0 12px 30px rgba(0,0,0,0.6); }
+
+    /* Drawer styles (scoped, file-only change) */
+    .lesson-drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1100; display:none; align-items:flex-end; justify-content:center; }
+    .lesson-drawer{ width:100%; max-width:760px; background:linear-gradient(180deg,var(--surface), #231824); border-top-left-radius:var(--radius-lg); border-top-right-radius:var(--radius-lg); padding:20px; box-shadow:0 8px 24px rgba(11,7,15,0.6); max-height:86vh; overflow:auto; position:relative; }
+    .drawer-close{ position:absolute; right:14px; top:12px; background:transparent; border:2px solid rgba(255,255,255,0.06); color:var(--text); width:40px; height:40px; border-radius:8px; }
+
+    .drawer-header{ padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03); }
+    .drawer-footer{ display:flex; gap:12px; margin-top:16px; }
+
+    /* Accessibility focus */
+    button:focus, .btn:focus{ outline:3px solid rgba(207,168,255,0.24); outline-offset:3px; }
+
+    /* Variant UI helper controls (small panel) */
+    .variants-panel{ position:fixed; left:18px; bottom:18px; z-index:1200; display:flex; gap:8px; background:rgba(0,0,0,0.35); padding:8px; border-radius:12px; }
+    .variants-panel button{ padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.03); color:var(--text); border:1px solid rgba(255,255,255,0.04); font-size:0.9rem; }
+
+    @media(min-width:900px){ .lesson-drawer-backdrop{ align-items:flex-start; justify-content:flex-end; } .lesson-drawer{ width:420px; border-radius:12px; top:120px; right:28px; position:fixed; } }
+  </style>
+</head>
+<body class="variant-default">
+  <div class="page">
+    <header class="h">
+      <h1>In Classe</h1>
+      <p>Esplora e iscriviti alle lezioni disponibili</p>
+    </header>
+
+    <!-- Modular-specific filter / controls (kept compatible) -->
+    <div class="modular-controls" style="margin-bottom:12px;">
+      <label for="materia_mod">Materia</label>
+      <select id="materia_mod">
+        <option>Tutte le materie</option>
+      </select>
+    </div>
+
+    <!-- Example lesson list (modular) -->
+    <div class="lesson-card" data-lesson-id="m1">
+      <div class="lesson-meta">Teoria • Matematica</div>
+      <div class="lesson-title">Introduzione all'Algebra Lineare (Modular)</div>
+      <div class="lesson-meta">
+        <div>👤 Prof. Mario Rossi</div>
+        <div>👥 Classe 3A</div>
+        <div>⏱ 08:00 - 09:00 (60 min)</div>
+        <div>📅 lunedì 20 ottobre</div>
+        <div style="font-weight:700">18 / 25 iscritti</div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+        <button class="btn btn-secondary" onclick="openDrawer('m1')">ℹ️ Dettagli</button>
+        <button class="btn btn-primary" onclick="subscribe('m1')">➕ Iscriviti</button>
+      </div>
+    </div>
+
+    <div class="lesson-card" data-lesson-id="m2">
+      <div class="lesson-meta">Laboratorio • Scienze</div>
+      <div class="lesson-title">Esperimenti di Chimica Organica (Modular)</div>
+      <div class="lesson-meta">
+        <div>👤 Prof.ssa Laura Bianchi</div>
+        <div>👥 Classe 4B</div>
+        <div>⏱ 10:00 - 12:00 (120 min)</div>
+        <div>📅 lunedì 20 ottobre</div>
+        <div style="font-weight:700">15 / 20 iscritti</div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+        <button class="btn btn-secondary" onclick="openDrawer('m2')">ℹ️ Dettagli</button>
+        <button class="btn btn-primary" onclick="subscribe('m2')">➕ Iscriviti</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Drawer (file-scoped change) -->
+  <div id="lessonDrawerBackdrop" class="lesson-drawer-backdrop" role="dialog" aria-hidden="true" aria-modal="true">
+    <aside class="lesson-drawer" role="document" aria-labelledby="lessonTitle">
+      <button class="drawer-close" aria-label="Chiudi dettagli" onclick="closeDrawer()">✕</button>
+      <header class="drawer-header">
+        <h2 id="lessonTitle" class="lesson-title">Titolo lezione</h2>
+        <div id="lessonShort" class="lesson-meta"></div>
+      </header>
+
+      <section id="lessonBody" style="margin-top:12px; color:var(--muted);"></section>
+
+      <footer class="drawer-footer">
+        <button class="btn btn-secondary" id="drawerDetailsBtn">ℹ️ Più info</button>
+        <button class="btn btn-primary" id="drawerSubscribeBtn">➕ Iscriviti</button>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- Variants panel (file-only control) -->
+  <div class="variants-panel" aria-hidden="false">
+    <button onclick="setVariant('default')">Default</button>
+    <button onclick="setVariant('contrast')">Contrast</button>
+    <button onclick="setVariant('compact')">Compatto</button>
+  </div>
+
+  <button class="fab" aria-label="Nuova lezione">🤖</button>
+
+  <script>
+    // Minimal data for demo; in real app this will come dynamically
+    const LESSONS = {
+      m1: { title:"Introduzione all'Algebra Lineare (Modular)", short:"Prof. Mario Rossi • Classe 3A", body: `08:00 - 09:00 (60 min)\nLunedì 20 ottobre\n18 / 25 iscritti` },
+      m2: { title:"Esperimenti di Chimica Organica (Modular)", short:"Prof.ssa Laura Bianchi • Classe 4B", body: `10:00 - 12:00 (120 min)\nLunedì 20 ottobre\n15 / 20 iscritti` }
+    };
+
+    function openDrawer(id){
+      const b = document.getElementById('lessonDrawerBackdrop');
+      const t = document.getElementById('lessonTitle');
+      const s = document.getElementById('lessonShort');
+      const body = document.getElementById('lessonBody');
+      const subscribeBtn = document.getElementById('drawerSubscribeBtn');
+      const detailsBtn = document.getElementById('drawerDetailsBtn');
+      const lesson = LESSONS[id];
+      if(!lesson) return;
+      t.textContent = lesson.title;
+      s.textContent = lesson.short;
+      body.textContent = lesson.body;
+      subscribeBtn.onclick = ()=> subscribe(id);
+      detailsBtn.onclick = ()=> alert('Mostra più dettagli per ' + lesson.title);
+      b.style.display = 'flex';
+      b.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer(){
+      const b = document.getElementById('lessonDrawerBackdrop');
+      b.style.display = 'none';
+      b.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+    function subscribe(id){
+      alert('Iscritto alla lezione ' + (LESSONS[id]?.title || id));
+    }
+
+    // Variants handling - apply class to body only (file-limited change)
+    function setVariant(v){
+      document.body.classList.remove('variant-default','variant-contrast');
+      if(v==='default') document.body.classList.add('variant-default');
+      if(v==='contrast') document.body.classList.add('variant-contrast');
+      if(v==='compact'){
+        document.documentElement.style.setProperty('--gap','8px');
+        document.querySelectorAll('.lesson-card').forEach(c=>c.style.padding='10px');
+      } else {
+        document.documentElement.style.setProperty('--gap','16px');
+        document.querySelectorAll('.lesson-card').forEach(c=>c.style.padding='16px');
+      }
+    }
+
+    // Close drawer on backdrop click
+    document.getElementById('lessonDrawerBackdrop').addEventListener('click', function(e){
+      if(e.target === this) closeDrawer();
+    });
+
+    // set default variant explicitly
+    setVariant('default');
+  </script>
+</body>
+</html>
