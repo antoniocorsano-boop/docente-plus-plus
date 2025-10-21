@@ -2,7 +2,7 @@
 
 **Stato del Progetto: v1.2.4 - In Sviluppo**
 
-**Applicazione web per la gestione completa della didattica, potenziata da un assistente intelligente.**
+**Applicazione web  per la gestione completa della didattica, potenziata da un assistente intelligente.**
 
 **Docente++** è un'applicazione web moderna progettata per diventare il braccio destro digitale di ogni insegnante. Semplifica la gestione delle classi, la pianificazione delle lezioni, la valutazione degli studenti e molto altro, tutto in un'unica interfaccia intuitiva e reattiva. Grazie all'assistente IA  integrato, l'app non solo organizza, ma suggerisce e supporta attivamente il processo didattico.
 
