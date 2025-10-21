@@ -462,6 +462,71 @@
         </div>
     </div>
 
+    <!-- Lesson Details Drawer -->
+    <div class="lesson-drawer-backdrop" id="lesson-drawer-backdrop" aria-hidden="true"></div>
+    <aside class="lesson-drawer" id="lesson-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-hidden="true">
+        <div class="lesson-drawer-header">
+            <div class="lesson-drawer-handle"></div>
+            <button class="drawer-close" id="drawer-close" aria-label="Chiudi dettagli lezione">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h3 class="lesson-drawer-title" id="drawer-title">Dettagli Lezione</h3>
+            <div class="lesson-drawer-meta" id="drawer-meta">
+                <span class="icon-label">
+                    <span class="material-symbols-outlined">schedule</span>
+                    <span id="drawer-time">08:00 - 09:00</span>
+                </span>
+                <span class="icon-label">
+                    <span class="material-symbols-outlined">room</span>
+                    <span id="drawer-room">Aula 101</span>
+                </span>
+                <span class="icon-label">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span id="drawer-class">5A</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="lesson-drawer-content">
+            <div class="lesson-drawer-section">
+                <h4>
+                    <span class="material-symbols-outlined">info</span>
+                    Informazioni
+                </h4>
+                <div class="icon-label">
+                    <span class="material-symbols-outlined">book</span>
+                    <span id="drawer-subject">Materia</span>
+                </div>
+                <p id="drawer-description" style="margin-top: var(--spacing-sm); color: var(--md-text-secondary);">
+                    Descrizione della lezione
+                </p>
+            </div>
+            
+            <div class="lesson-drawer-section">
+                <h4>
+                    <span class="material-symbols-outlined">assignment</span>
+                    Attività
+                </h4>
+                <div id="drawer-activities">
+                    <p style="color: var(--md-text-secondary); font-size: var(--font-size-sm);">
+                        Nessuna attività programmata
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lesson-drawer-footer">
+            <button class="btn btn-secondary" id="drawer-details-btn" style="flex: 1;">
+                <span class="material-symbols-outlined">open_in_new</span>
+                Dettagli
+            </button>
+            <button class="btn btn-primary" id="drawer-join-btn" style="flex: 1;">
+                <span class="material-symbols-outlined">login</span>
+                Iscriviti
+            </button>
+        </div>
+    </aside>
+
     <!-- Scripts -->
     <script src="js/icons.js"></script>
     <script src="js/schedule-patch.js"></script>
@@ -504,6 +569,125 @@
     </script>
     <script type="module" src="js/in-classe.js"></script>
     <script src="js/schedule-enhance.js"></script>
+
+    <!-- Drawer Control Script -->
+    <script>
+        // Lesson Drawer Functions
+        function openDrawer(lessonData) {
+            const drawer = document.getElementById('lesson-drawer');
+            const backdrop = document.getElementById('lesson-drawer-backdrop');
+            
+            if (!drawer || !backdrop) return;
+            
+            // Populate drawer with lesson data if provided
+            if (lessonData) {
+                const title = document.getElementById('drawer-title');
+                const time = document.getElementById('drawer-time');
+                const room = document.getElementById('drawer-room');
+                const classEl = document.getElementById('drawer-class');
+                const subject = document.getElementById('drawer-subject');
+                const description = document.getElementById('drawer-description');
+                
+                if (title && lessonData.title) title.textContent = lessonData.title;
+                if (time && lessonData.time) time.textContent = lessonData.time;
+                if (room && lessonData.room) room.textContent = lessonData.room;
+                if (classEl && lessonData.class) classEl.textContent = lessonData.class;
+                if (subject && lessonData.subject) subject.textContent = lessonData.subject;
+                if (description && lessonData.description) description.textContent = lessonData.description;
+            }
+            
+            // Show drawer
+            backdrop.classList.add('active');
+            drawer.classList.add('active');
+            backdrop.setAttribute('aria-hidden', 'false');
+            drawer.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('drawer-open');
+            
+            // Focus first interactive element
+            const closeBtn = document.getElementById('drawer-close');
+            if (closeBtn) closeBtn.focus();
+        }
+        
+        function closeDrawer() {
+            const drawer = document.getElementById('lesson-drawer');
+            const backdrop = document.getElementById('lesson-drawer-backdrop');
+            
+            if (!drawer || !backdrop) return;
+            
+            backdrop.classList.remove('active');
+            drawer.classList.remove('active');
+            backdrop.setAttribute('aria-hidden', 'true');
+            drawer.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('drawer-open');
+        }
+        
+        // Initialize drawer controls
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeBtn = document.getElementById('drawer-close');
+            const backdrop = document.getElementById('lesson-drawer-backdrop');
+            const detailsBtn = document.getElementById('drawer-details-btn');
+            const joinBtn = document.getElementById('drawer-join-btn');
+            
+            // Close button
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeDrawer);
+            }
+            
+            // Backdrop click to close
+            if (backdrop) {
+                backdrop.addEventListener('click', closeDrawer);
+            }
+            
+            // Escape key to close
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeDrawer();
+                }
+            });
+            
+            // Demo: Open drawer when clicking lesson cards (you can customize this)
+            // Uncomment and customize as needed:
+            /*
+            document.querySelectorAll('.lesson-card, .daily-timeline-item').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Prevent opening if clicking a button inside
+                    if (e.target.closest('button')) return;
+                    
+                    // Extract lesson data from card
+                    const lessonData = {
+                        title: card.querySelector('h4')?.textContent || 'Lezione',
+                        time: card.querySelector('.timeline-time strong')?.textContent || '08:00 - 09:00',
+                        subject: 'Materia',
+                        class: '5A',
+                        room: 'Aula 101',
+                        description: 'Descrizione della lezione'
+                    };
+                    
+                    openDrawer(lessonData);
+                });
+            });
+            */
+            
+            // Placeholder actions for drawer buttons
+            if (detailsBtn) {
+                detailsBtn.addEventListener('click', () => {
+                    console.log('Opening lesson details...');
+                    // Add your details navigation logic here
+                });
+            }
+            
+            if (joinBtn) {
+                joinBtn.addEventListener('click', () => {
+                    console.log('Joining lesson...');
+                    // Add your join lesson logic here
+                });
+            }
+        });
+        
+        // Make functions globally available
+        window.openDrawer = openDrawer;
+        window.closeDrawer = closeDrawer;
+    </script>
 
     <!-- AI Agent Floating Action Button (FAB) -->
     <button id="ai-fab" class="ai-fab" title="Apri Assistente IA" aria-label="Apri Assistente IA">
