@@ -3,7 +3,7 @@
 
 :root {
     /* Schedule uses app's Material Design 3 colors */
-    --schedule-primary: var(--md-primary);                    /* var(--md-sys-color-primary) - Purple */
+    --schedule-primary: var(--md-primary);                    /* #6750A4 - Purple */
     --schedule-primary-container: var(--md-primary-container); /* #EADDFF */
     --schedule-on-primary: var(--md-on-primary);              /* White */
     --schedule-secondary: var(--md-secondary);                 /* #625B71 */
@@ -29,23 +29,23 @@
     
     /* Activity type colors - Material Design 3 palette */
     --schedule-activity-theory: var(--md-sys-color-primary);       /* Primary purple - Theory */
-    --schedule-activity-practice: #7D5260;     /* Tertiary rose - Practice */
-    --schedule-activity-lab: #006A6A;          /* Teal - Lab */
-    --schedule-activity-test: #984061;         /* Deep rose - Test */
-    --schedule-activity-group: var(--md-sys-color-primary);        /* Primary - Group */
-    --schedule-activity-other: #625B71;        /* Secondary gray - Other */
+    --schedule-activity-practice: var(--md-sys-color-tertiary);     /* Tertiary rose - Practice */
+    --schedule-activity-lab: var(--md-sys-color-info);          /* Info blue - Lab */
+    --schedule-activity-test: var(--md-sys-color-error);         /* Error red - Test */
+    --schedule-activity-group: var(--md-sys-color-secondary);        /* Secondary - Group */
+    --schedule-activity-other: var(--md-sys-color-on-surface-variant);        /* Surface variant - Other */
     
     /* Spacing - Use app's spacing system */
-    --schedule-spacing-xs: var(--spacing-xs);      /* var(--md-spacing-xs) */
-    --schedule-spacing-sm: var(--spacing-sm);      /* var(--md-spacing-sm) */
-    --schedule-spacing-md: var(--spacing-md);      /* var(--md-spacing-md) */
-    --schedule-spacing-lg: var(--spacing-lg);      /* 2var(--md-spacing-xs) */
+    --schedule-spacing-xs: var(--spacing-xs);      /* 4px */
+    --schedule-spacing-sm: var(--spacing-sm);      /* 8px */
+    --schedule-spacing-md: var(--spacing-md);      /* 16px */
+    --schedule-spacing-lg: var(--spacing-lg);      /* 24px */
     --schedule-spacing-xl: var(--spacing-xl);      /* 32px */
     
     /* Border radius - Use app's radius system */
-    --schedule-radius-sm: var(--md-radius-small);    /* var(--md-spacing-sm) */
+    --schedule-radius-sm: var(--md-radius-small);    /* 8px */
     --schedule-radius-md: var(--md-radius-medium);   /* 12px */
-    --schedule-radius-lg: var(--md-radius-large);    /* var(--md-spacing-md) */
+    --schedule-radius-lg: var(--md-radius-large);    /* 16px */
     
     /* Shadows - Use app's elevation system */
     --schedule-shadow-sm: var(--md-elevation-1);
@@ -60,9 +60,9 @@
     /* Typography - Use app's font system */
     --schedule-font-family: var(--font-family-primary);  /* Roboto */
     --schedule-font-size-xs: var(--font-size-xs);        /* 12px */
-    --schedule-font-size-sm: var(--font-size-sm);        /* 1var(--md-spacing-xs) */
-    --schedule-font-size-base: var(--font-size-base);    /* var(--md-spacing-md) */
-    --schedule-font-size-lg: var(--font-size-lg);        /* 1var(--md-spacing-sm) */
+    --schedule-font-size-sm: var(--font-size-sm);        /* 14px */
+    --schedule-font-size-base: var(--font-size-base);    /* 16px */
+    --schedule-font-size-lg: var(--font-size-lg);        /* 18px */
     --schedule-font-size-xl: var(--font-size-xl);        /* 20px */
     
     --schedule-font-weight-normal: var(--font-weight-regular);    /* 400 */
@@ -80,13 +80,13 @@
 body.dark-theme,
 :root.dark-theme {
     /* Dark theme colors automatically inherited from app theme variables */
-    /* Activity colors adjusted for dark theme */
-    --schedule-activity-theory: #D0BCFF;       /* Light purple for dark */
-    --schedule-activity-practice: #EFB8C8;     /* Light rose for dark */
-    --schedule-activity-lab: #4FD8EB;          /* Light teal for dark */
-    --schedule-activity-test: #FFB1C8;         /* Light pink for dark */
-    --schedule-activity-group: #D0BCFF;        /* Light purple for dark */
-    --schedule-activity-other: #CCC2DC;        /* Light gray for dark */
+    /* Activity colors adjusted for dark theme - use same MD3 system colors */
+    --schedule-activity-theory: var(--md-sys-color-primary);       /* Primary - adapts to dark theme */
+    --schedule-activity-practice: var(--md-sys-color-tertiary);     /* Tertiary - adapts to dark theme */
+    --schedule-activity-lab: var(--md-sys-color-info);          /* Info - adapts to dark theme */
+    --schedule-activity-test: var(--md-sys-color-error);         /* Error - adapts to dark theme */
+    --schedule-activity-group: var(--md-sys-color-secondary);        /* Secondary - adapts to dark theme */
+    --schedule-activity-other: var(--md-sys-color-on-surface-variant);        /* Surface variant - adapts to dark theme */
 }
 
 /* Schedule configuration constants (6 hours, 08:00-14:00) */

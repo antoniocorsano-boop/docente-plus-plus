@@ -1,0 +1,62 @@
+# Deploy site to GitHub Pages (supports static site in repo root or a build step that outputs to build/ or dist/)
+# Save this file as: .github/workflows/deploy-pages.yml
+# Triggers on push to main. Adjust branches if you publish from a different branch.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (optional, safe to keep if repo has package.json)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies (if package.json exists)
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+
+      - name: Build (if npm build script is present)
+        run: |
+          if [ -f package.json ] && grep -q '"build"' package.json; then npm run build; fi
+
+      - name: Prepare publish directory
+        run: |
+          set -e
+          rm -rf _publish || true
+          mkdir -p _publish
+          if [ -d "./build" ] && [ "$(ls -A build 2>/dev/null)" ]; then
+            rsync -av build/ _publish/
+          elif [ -d "./dist" ] && [ "$(ls -A dist 2>/dev/null)" ]; then
+            rsync -av dist/ _publish/
+          else
+            # fallback: publish repository root (exclude .git and workflow files)
+            rsync -av --exclude='.git' --exclude='.github' --exclude='./_publish' . _publish/
+          fi
+          # ensure nojekyll to avoid Jekyll processing if there are files/dirs starting with _
+          touch _publish/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        # aggiornato alla versione più recente per evitare dipendenze deprecate
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: _publish
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1

@@ -73,7 +73,7 @@
 }
 
 .ai-assistant-close .material-symbols-outlined {
-    font-size: calc(2 * var(--md-spacing-xs));
+    font-size: 24px;
 }
 
 /* Panel Body */
@@ -81,6 +81,8 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md);
+    /* Add bottom padding to account for input area on mobile */
+    padding-bottom: calc(var(--spacing-md) + 100px);
     background: var(--md-surface-container-low);
 }
 
@@ -90,6 +92,8 @@
     flex-direction: column;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-md);
+    /* Extra padding for mobile keyboard */
+    padding-bottom: 20px;
 }
 
 .ai-message {
@@ -165,7 +169,7 @@
 }
 
 .ai-empty-state .material-symbols-outlined {
-    font-size: calc(6 * var(--md-spacing-xs));
+    font-size: 64px;
     color: var(--md-primary);
     margin-bottom: var(--spacing-md);
     opacity: 0.5;
@@ -221,8 +225,11 @@
 .ai-assistant-input-area {
     flex-shrink: 0;
     padding: var(--spacing-md);
+    padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
     background: var(--md-surface);
     border-top: 1px solid var(--md-divider);
+    /* Support safe area insets for mobile */
+    padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
 }
 
 .ai-input-wrapper {
@@ -238,7 +245,7 @@
 
 .ai-text-input {
     width: 100%;
-    min-height: calc(4 * var(--md-spacing-xs));
+    min-height: 44px;
     max-height: 120px;
     padding: var(--spacing-sm) var(--spacing-md);
     border: 2px solid var(--md-border);
@@ -263,8 +270,8 @@
 
 /* Voice Recording Button */
 .ai-voice-button {
-    width: calc(11 * var(--md-spacing-xs));
-    height: calc(11 * var(--md-spacing-xs));
+    width: 44px;
+    height: 44px;
     background: var(--md-secondary-container);
     border: none;
     border-radius: 50%;
@@ -309,13 +316,13 @@
 }
 
 .ai-voice-button .material-symbols-outlined {
-    font-size: var(--md-spacing-lg);
+    font-size: 24px;
 }
 
 /* Send Button */
 .ai-send-button {
-    width: calc(11 * var(--md-spacing-xs));
-    height: calc(11 * var(--md-spacing-xs));
+    width: 44px;
+    height: 44px;
     background: var(--md-primary);
     border: none;
     border-radius: 50%;
@@ -353,7 +360,7 @@
 }
 
 .ai-send-button .material-symbols-outlined {
-    font-size: var(--md-spacing-lg);
+    font-size: 24px;
 }
 
 /* Recording Status */
@@ -419,18 +426,18 @@
 /* Loading State */
 .ai-message.loading .ai-message-text {
     display: flex;
-    gap: var(--md-spacing-xs);
+    gap: 4px;
     align-items: center;
 }
 
 .ai-typing-indicator {
     display: inline-flex;
-    gap: var(--md-spacing-xs);
+    gap: 4px;
 }
 
 .ai-typing-dot {
-    width: var(--md-spacing-sm);
-    height: var(--md-spacing-sm);
+    width: 8px;
+    height: 8px;
     background: var(--md-text-secondary);
     border-radius: 50%;
     animation: typing 1.4s infinite;

@@ -153,6 +153,19 @@ class FloatingAssistant {
                 this.sendMessage();
             }
         });
+        
+        // Mobile: Scroll input into view on focus to handle virtual keyboard
+        textInput.addEventListener('focus', () => {
+            if (window.innerWidth < 769) {
+                setTimeout(() => {
+                    textInput.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest',
+                        inline: 'nearest'
+                    });
+                }, 300); // Delay to allow keyboard to open
+            }
+        });
 
         // Send button
         const sendBtn = document.getElementById('ai-send-button');

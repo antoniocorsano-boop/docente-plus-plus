@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Interfaccia In Classe - Docente++">
-    <meta name="theme-color" content="#8657FF">
+    <meta name="theme-color" content="#4a90e2">
     <title>In Classe - Docente++</title>
     
     <!-- Material Design Icons -->
@@ -16,11 +16,13 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- MD3 Expressive Theme -->
-    <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
+    <!-- MD3 Theme Styles -->
     <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
+    <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
+    <link rel="stylesheet" href="src/styles/common-page.css">
     <link rel="stylesheet" href="css/in-classe.css">
     <link rel="stylesheet" href="css/schedule.css">
+    <link rel="stylesheet" href="css/daily-timeline.css">
     <link rel="stylesheet" href="css/floating-assistant.css">
 </head>
 <body>
@@ -53,9 +55,9 @@
             <span class="back-button-text">Indietro</span>
         </button>
         <div id="breadcrumb-container-in-classe" class="breadcrumb" aria-label="Percorso di navigazione">
-            <a href="index.html" class="breadcrumb-link">Home</a>
+            <a href="index.html" class="breadcrumb-link" onclick="window.location.href='index.html'; return false;">Home</a>
             <span class="breadcrumb-separator" aria-hidden="true">/</span>
-            <a href="index.html#schedule" class="breadcrumb-link">Orario</a>
+            <a href="index.html#schedule" class="breadcrumb-link" onclick="window.location.href='index.html#schedule'; return false;">Orario</a>
             <span class="breadcrumb-separator" aria-hidden="true">/</span>
             <span class="breadcrumb-current" aria-current="page">In Classe</span>
         </div>
@@ -93,6 +95,20 @@
 
     <!-- Main Content -->
     <main id="in-classe-main" class="in-classe-main">
+        <!-- Daily Timeline Widget -->
+        <section class="daily-timeline-section" id="daily-timeline-section">
+            <div class="daily-timeline-header">
+                <h2>
+                    <span class="material-symbols-outlined">schedule</span>
+                    Orario di Oggi
+                </h2>
+                <span class="current-date" id="current-date-label"></span>
+            </div>
+            <div class="daily-timeline-container" id="daily-timeline-container">
+                <!-- Daily lessons will be populated here -->
+            </div>
+        </section>
+        
         <!-- Static Schedule Grid (Enhanced by schedule-enhance.js) -->
         <div class="schedule-table-wrapper" role="region" aria-label="Orario settimanale">
             <table id="static-schedule-grid" role="table" aria-label="Griglia orario settimanale">
@@ -161,6 +177,13 @@
         
         <!-- Schedule Container -->
         <div id="schedule-container"></div>
+        
+        <!-- Daily Timeline Widget (shows lessons for the day) -->
+        <aside id="daily-timeline-widget" class="daily-timeline-widget" role="complementary" aria-label="Orario del giorno">
+            <div id="daily-timeline">
+                <!-- Timeline will be rendered here by DailyTimeline.js -->
+            </div>
+        </aside>
         
         <!-- Activities Section -->
         <section class="collapsible-section" data-section="activities">
@@ -442,12 +465,42 @@
     <!-- Scripts -->
     <script src="js/icons.js"></script>
     <script src="js/schedule-patch.js"></script>
-    <!-- MD3 Theme Hook (runtime theme integration) -->
-    <script type="module" src="src/js/theme-hook.js"></script>
     <script type="module">
+        // Import centralized theme system
+        import themeProvider from './src/components/ThemeProvider.js';
+        import { validatePageTheme } from './src/utils/ThemeValidator.js';
+        import { initializeTheme, setupThemePicker } from './js/theme.js';
+        
+        // Initialize ThemeProvider (centralized theme management)
+        themeProvider.initialize();
+        
+        // Also initialize legacy theme system for backwards compatibility
+        initializeTheme();
+        
+        // Validate theme setup
+        validatePageTheme('in-classe');
+        
         // Import floating assistant
         import { initFloatingAssistant } from './js/floating-assistant.js';
         window.initFloatingAssistant = initFloatingAssistant;
+        
+        // Import and initialize DailyTimeline
+        import { initDailyTimeline } from './src/components/DailyTimeline.js';
+        
+        // Initialize DailyTimeline on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const timeline = initDailyTimeline('daily-timeline', new Date(), (lesson) => {
+                console.log('Lesson clicked:', lesson);
+                // Navigate to lesson if needed
+                if (lesson.id) {
+                    window.location.href = `in-classe.html?lesson=${encodeURIComponent(lesson.id)}`;
+                }
+            });
+            window.dailyTimeline = timeline;
+        });
+        
+        // Make themeProvider available globally for debugging
+        window.themeProvider = themeProvider;
     </script>
     <script type="module" src="js/in-classe.js"></script>
     <script src="js/schedule-enhance.js"></script>

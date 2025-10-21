@@ -195,7 +195,7 @@
     justify-content: center;
     z-index: var(--schedule-z-modal);
     padding: var(--schedule-spacing-lg);
-    backdrop-filter: blur(var(--md-spacing-xs));
+    backdrop-filter: blur(4px);
     animation: scheduleModalFadeIn var(--schedule-transition-duration) var(--schedule-transition-timing);
 }
 
@@ -394,7 +394,7 @@ body.dark-theme .schedule-modal__close:hover {
 
 /* Buttons - Material Design 3 (using app button styles) */
 .schedule-btn {
-    padding: 10px calc(2 * var(--md-spacing-xs));
+    padding: 10px 24px;
     border: none;
     border-radius: var(--schedule-radius-lg);
     cursor: pointer;
@@ -472,7 +472,7 @@ body.dark-theme .schedule-btn--secondary:hover {
 }
 
 /* Responsive Styles */
-@media (max-width: calc(102 * var(--md-spacing-xs))) {
+@media (max-width: 1024px) {
     .schedule-wrapper {
         padding: var(--schedule-spacing-md);
     }
@@ -657,6 +657,6 @@ body.dark-theme .schedule-btn--secondary:hover {
     }
     
     .schedule-cell:focus {
-        outline-width: var(--md-spacing-xs);
+        outline-width: 4px;
     }
 }
