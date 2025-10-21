@@ -3,351 +3,123 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>In Classe (Modular - Docente)</title>
+  <title>In Classe (Modular) - Docente</title>
   <style>
-    /* Theme variables - teacher-facing interface */
     :root{
-      --bg: #130f14;
-      --surface: #1b151b;
-      --text: #f4eefe;
-      --muted: #bdb0c3;
-      --accent: #CFA8FF;
-      --accent-strong: #b788ff;
-      --success: #a8ffc5;
-      --warning: #ffd48a;
-      --radius-lg: 28px;
-      --hit: 44px;
-      --gap: 16px;
-    }
-
-    body{ background: var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; }
-    .page{ max-width:1200px; margin:0 auto; padding:20px; }
-    header.h{ text-align:center; padding:18px 8px; margin-bottom:24px; }
-    header.h h1{ margin:0; font-size:1.8rem; font-weight:700; }
-    header.h p{ margin:8px 0 0; color:var(--muted); }
-
-    /* Tab navigation for teacher sections */
-    .tab-nav{ display:flex; gap:8px; margin-bottom:24px; overflow-x:auto; padding-bottom:8px; }
-    .tab-btn{ min-height:var(--hit); display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:12px; font-weight:600; cursor:pointer; border:2px solid rgba(207,168,255,0.15); background:transparent; color:var(--text); white-space:nowrap; }
-    .tab-btn.active{ background:var(--accent); color:#1a0f1a; border-color:var(--accent); }
-    .tab-btn:hover:not(.active){ background:rgba(207,168,255,0.08); }
-
-    /* Content sections */
-    .tab-content{ display:none; }
-    .tab-content.active{ display:block; }
-
-    /* Cards for teacher tools */
-    .tool-card{ background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-radius:16px; padding:20px; margin-bottom:16px; border:1px solid rgba(255,255,255,0.05); }
-    .tool-card h3{ margin:0 0 12px 0; font-size:1.3rem; font-weight:700; }
-    .tool-card p{ color:var(--muted); margin:0 0 16px 0; line-height:1.6; }
-
-    /* Registro (class register) specific */
-    .student-list{ display:grid; gap:8px; }
-    .student-row{ display:flex; align-items:center; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; }
-    .student-name{ font-weight:600; }
-    .presence-status{ padding:6px 12px; border-radius:6px; font-size:0.9rem; font-weight:600; }
-    .presence-status.present{ background:rgba(168,255,197,0.15); color:var(--success); }
-    .presence-status.absent{ background:rgba(255,168,168,0.15); color:#ffa8a8; }
-
-    /* Valutazioni (evaluations) specific */
-    .eval-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
-    .eval-card{ background:rgba(255,255,255,0.02); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.04); }
-    .eval-grade{ font-size:2rem; font-weight:800; color:var(--accent); }
-
-    /* Materiali (materials) specific */
-    .material-item{ display:flex; align-items:center; gap:12px; padding:16px; background:rgba(255,255,255,0.02); border-radius:12px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.04); }
-    .material-icon{ font-size:2rem; }
-    .material-info{ flex:1; }
-    .material-title{ font-weight:700; margin-bottom:4px; }
-    .material-meta{ color:var(--muted); font-size:0.9rem; }
-
-    /* Analytics specific */
-    .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px; }
-    .stat-card{ background:linear-gradient(135deg, rgba(207,168,255,0.1), rgba(207,168,255,0.05)); border-radius:12px; padding:20px; text-align:center; border:1px solid rgba(207,168,255,0.15); }
-    .stat-value{ font-size:2.5rem; font-weight:800; color:var(--accent); margin-bottom:8px; }
-    .stat-label{ color:var(--muted); font-size:0.95rem; }
-
-    /* Buttons */
-    .btn{ min-height:var(--hit); display:inline-flex; align-items:center; gap:10px; padding:10px 18px; border-radius:999px; font-weight:600; cursor:pointer; border:none; }
-    .btn-primary{ background:var(--accent); color:#1a0f1a; box-shadow:0 6px 16px rgba(0,0,0,0.45); }
-    .btn-secondary{ background:transparent; color:var(--accent); border:2px solid rgba(207,168,255,0.18); }
-
-    /* Floating action button */
-    .fab{ position: fixed; right:18px; bottom:18px; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--accent-strong); color:var(--text); z-index:1000; box-shadow:0 12px 30px rgba(0,0,0,0.6); cursor:pointer; }
-
-    /* Accessibility */
-    button:focus, .btn:focus, .tab-btn:focus{ outline:3px solid rgba(207,168,255,0.24); outline-offset:3px; }
-
-    @media(max-width:768px){
-      .stat-grid{ grid-template-columns:1fr; }
-      .eval-grid{ grid-template-columns:1fr; }
-    }
+      --bg:#130f14; --surface:#1b151b; --text:#f4eefe; --muted:#bdb0c3; --accent:#CFA8FF; --accent-strong:#b788ff; --radius-lg:12px; --hit:44px; }
+    body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;margin:0;padding:20px}
+    .page{max-width:920px;margin:0 auto}
+    .lesson-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:14px;margin:18px 0;border:1px solid rgba(255,255,255,0.03)}
+    .lesson-title{font-size:1.15rem;font-weight:700;margin:6px 0}
+    .lesson-meta{color:var(--muted);font-size:0.95rem}
+    .btn{min-height:var(--hit);display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:10px;font-weight:600;border:none;cursor:pointer}
+    .btn-primary{background:var(--accent);color:#120a12}
+    .btn-secondary{background:transparent;color:var(--accent);border:1px solid rgba(207,168,255,0.12)}
+    .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:1000}
+    .drawer{width:100%;max-width:760px;background:linear-gradient(180deg,var(--surface),#231824);border-top-left-radius:20px;border-top-right-radius:20px;padding:18px;max-height:86vh;overflow:auto}
+    .drawer-header{border-bottom:1px solid rgba(255,255,255,0.03);padding-bottom:8px}
+    .drawer-footer{display:flex;gap:8px;margin-top:12px}
+    .variants-panel{display:none}
+    @media(min-width:900px){.drawer{width:420px;position:fixed;top:120px;right:28px;border-radius:12px}}
   </style>
 </head>
 <body>
   <div class="page">
-    <header class="h">
-      <h1>In Classe - Strumenti Docente</h1>
-      <p>Gestisci registro, valutazioni, materiali e analisi della classe</p>
+    <header>
+      <h1>In Classe — Modalità Docente</h1>
+      <p class="lesson-meta">Gestisci la lezione, registra valutazioni, carica materiali e analizza la crescita degli studenti</p>
     </header>
 
-    <!-- Tab Navigation -->
-    <nav class="tab-nav" role="tablist">
-      <button class="tab-btn active" data-tab="registro" role="tab" aria-selected="true" aria-controls="registro-panel">
-        📋 Registro
-      </button>
-      <button class="tab-btn" data-tab="valutazioni" role="tab" aria-selected="false" aria-controls="valutazioni-panel">
-        ⭐ Valutazioni
-      </button>
-      <button class="tab-btn" data-tab="materiali" role="tab" aria-selected="false" aria-controls="materiali-panel">
-        📚 Materiali
-      </button>
-      <button class="tab-btn" data-tab="analytics" role="tab" aria-selected="false" aria-controls="analytics-panel">
-        📊 Analytics
-      </button>
-    </nav>
-
-    <!-- Registro Tab -->
-    <section id="registro-panel" class="tab-content active" role="tabpanel" aria-labelledby="registro">
-      <div class="tool-card">
-        <h3>Registro di Classe</h3>
-        <p>Gestisci presenze e annotazioni per la lezione corrente</p>
-        
-        <div style="margin-bottom:16px;">
-          <strong>Lezione:</strong> Matematica - Classe 3A<br>
-          <strong>Data:</strong> lunedì 21 ottobre 2025, 08:00-09:00
-        </div>
-
-        <div class="student-list">
-          <div class="student-row">
-            <span class="student-name">🧑 Mario Rossi</span>
-            <span class="presence-status present">Presente</span>
-          </div>
-          <div class="student-row">
-            <span class="student-name">👩 Laura Bianchi</span>
-            <span class="presence-status present">Presente</span>
-          </div>
-          <div class="student-row">
-            <span class="student-name">🧑 Giuseppe Verdi</span>
-            <span class="presence-status absent">Assente</span>
-          </div>
-          <div class="student-row">
-            <span class="student-name">👩 Anna Ferrari</span>
-            <span class="presence-status present">Presente</span>
-          </div>
-          <div class="student-row">
-            <span class="student-name">🧑 Paolo Romano</span>
-            <span class="presence-status present">Presente</span>
-          </div>
-        </div>
-
-        <div style="margin-top:20px;">
-          <button class="btn btn-primary">💾 Salva Registro</button>
-          <button class="btn btn-secondary">📝 Aggiungi Nota</button>
-        </div>
+    <div class="lesson-card" data-lesson-id="m1">
+      <div class="lesson-meta">Teoria • Matematica • Classe 3A</div>
+      <div class="lesson-title">Introduzione all'Algebra Lineare (Modular)</div>
+      <div class="lesson-meta">
+        <div>⌛ 08:00 - 09:00 • 60 min</div>
+        <div>📅 lunedì 20 ottobre</div>
       </div>
-    </section>
-
-    <!-- Valutazioni Tab -->
-    <section id="valutazioni-panel" class="tab-content" role="tabpanel" aria-labelledby="valutazioni">
-      <div class="tool-card">
-        <h3>Valutazioni Studenti</h3>
-        <p>Inserisci e gestisci le valutazioni per compiti, interrogazioni e verifiche</p>
-        
-        <div class="eval-grid">
-          <div class="eval-card">
-            <div class="student-name" style="margin-bottom:12px;">🧑 Mario Rossi</div>
-            <div class="eval-grade">8.5</div>
-            <div style="color:var(--muted); margin-top:8px;">Verifica scritta - Algebra</div>
-          </div>
-          <div class="eval-card">
-            <div class="student-name" style="margin-bottom:12px;">👩 Laura Bianchi</div>
-            <div class="eval-grade">9.0</div>
-            <div style="color:var(--muted); margin-top:8px;">Interrogazione orale</div>
-          </div>
-          <div class="eval-card">
-            <div class="student-name" style="margin-bottom:12px;">👩 Anna Ferrari</div>
-            <div class="eval-grade">7.5</div>
-            <div style="color:var(--muted); margin-top:8px;">Esercizi a casa</div>
-          </div>
-          <div class="eval-card">
-            <div class="student-name" style="margin-bottom:12px;">🧑 Paolo Romano</div>
-            <div class="eval-grade">8.0</div>
-            <div style="color:var(--muted); margin-top:8px;">Verifica scritta - Algebra</div>
-          </div>
-        </div>
-
-        <div style="margin-top:20px;">
-          <button class="btn btn-primary">➕ Nuova Valutazione</button>
-          <button class="btn btn-secondary">📄 Esporta Voti</button>
-        </div>
+      <div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+        <button class="btn btn-primary" onclick="openRegister('m1')">📋 Registro</button>
+        <button class="btn btn-secondary" onclick="editLesson('m1')">✏️ Modifica lezione</button>
+        <button class="btn btn-secondary" onclick="openDrawer('m1')">ℹ️ Dettagli</button>
       </div>
-    </section>
+    </div>
 
-    <!-- Materiali Tab -->
-    <section id="materiali-panel" class="tab-content" role="tabpanel" aria-labelledby="materiali">
-      <div class="tool-card">
-        <h3>Materiali Didattici</h3>
-        <p>Condividi e gestisci dispense, presentazioni e risorse per gli studenti</p>
-
-        <div class="material-item">
-          <div class="material-icon">📄</div>
-          <div class="material-info">
-            <div class="material-title">Dispensa - Equazioni di Secondo Grado</div>
-            <div class="material-meta">PDF • 2.4 MB • Caricato il 15 ottobre 2025</div>
-          </div>
-          <button class="btn btn-secondary">📥 Scarica</button>
-        </div>
-
-        <div class="material-item">
-          <div class="material-icon">📊</div>
-          <div class="material-info">
-            <div class="material-title">Presentazione - Trigonometria Base</div>
-            <div class="material-meta">PowerPoint • 5.1 MB • Caricato il 10 ottobre 2025</div>
-          </div>
-          <button class="btn btn-secondary">📥 Scarica</button>
-        </div>
-
-        <div class="material-item">
-          <div class="material-icon">🎥</div>
-          <div class="material-info">
-            <div class="material-title">Video - Teorema di Pitagora Spiegato</div>
-            <div class="material-meta">MP4 • 45 MB • Caricato il 8 ottobre 2025</div>
-          </div>
-          <button class="btn btn-secondary">▶️ Riproduci</button>
-        </div>
-
-        <div style="margin-top:20px;">
-          <button class="btn btn-primary">📤 Carica Materiale</button>
-          <button class="btn btn-secondary">🗂️ Gestisci Cartelle</button>
-        </div>
+    <div class="lesson-card" data-lesson-id="m2">
+      <div class="lesson-meta">Laboratorio • Scienze • Classe 4B</div>
+      <div class="lesson-title">Esperimenti di Chimica Organica (Modular)</div>
+      <div class="lesson-meta">
+        <div>⌛ 10:00 - 12:00 • 120 min</div>
+        <div>📅 lunedì 20 ottobre</div>
       </div>
-    </section>
-
-    <!-- Analytics Tab -->
-    <section id="analytics-panel" class="tab-content" role="tabpanel" aria-labelledby="analytics">
-      <div class="tool-card">
-        <h3>Analytics e Statistiche</h3>
-        <p>Monitora le prestazioni della classe e individua aree di miglioramento</p>
-
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-value">85%</div>
-            <div class="stat-label">Media Presenze</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">7.8</div>
-            <div class="stat-label">Media Voti Classe</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">24</div>
-            <div class="stat-label">Studenti Attivi</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">92%</div>
-            <div class="stat-label">Tasso Completamento Compiti</div>
-          </div>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.02); border-radius:12px; padding:20px; margin-bottom:16px;">
-          <h4 style="margin-top:0;">Andamento Mensile</h4>
-          <div style="color:var(--muted); line-height:1.8;">
-            📈 <strong>Tendenza positiva:</strong> +5% rispetto al mese scorso<br>
-            ⚠️ <strong>Attenzione:</strong> 3 studenti con prestazioni in calo<br>
-            ✅ <strong>Eccellenze:</strong> 5 studenti con media superiore a 9.0
-          </div>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.02); border-radius:12px; padding:20px;">
-          <h4 style="margin-top:0;">Argomenti da Rafforzare</h4>
-          <div style="color:var(--muted); line-height:1.8;">
-            • Equazioni di secondo grado (media classe: 6.8)<br>
-            • Sistemi lineari (media classe: 7.2)<br>
-            • Geometria analitica (media classe: 7.5)
-          </div>
-        </div>
-
-        <div style="margin-top:20px;">
-          <button class="btn btn-primary">📊 Report Dettagliato</button>
-          <button class="btn btn-secondary">📧 Invia Report via Email</button>
-        </div>
+      <div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+        <button class="btn btn-primary" onclick="openRegister('m2')">📋 Registro</button>
+        <button class="btn btn-secondary" onclick="editLesson('m2')">✏️ Modifica lezione</button>
+        <button class="btn btn-secondary" onclick="openDrawer('m2')">ℹ️ Dettagli</button>
       </div>
-    </section>
+    </div>
 
   </div>
 
-  <!-- Floating Action Button -->
-  <button class="fab" aria-label="Azioni rapide" title="Azioni rapide">⚡</button>
+  <div id="drawerBackdrop" class="drawer-backdrop" role="dialog" aria-hidden="true">
+    <aside class="drawer" role="document" aria-labelledby="lessonTitle">
+      <button onclick="closeDrawer()" aria-label="Chiudi" style="position:absolute;right:14px;top:12px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:6px;border-radius:8px">✕</button>
+      <header class="drawer-header">
+        <h2 id="lessonTitle" class="lesson-title">Titolo lezione</h2>
+        <div id="lessonShort" class="lesson-meta"></div>
+      </header>
+
+      <section id="lessonBody" style="margin-top:12px;color:var(--muted);">
+        <!-- Teacher-focused details: activities, homework, evaluations, materials, notes -->
+      </section>
+
+      <footer class="drawer-footer">
+        <button class="btn btn-secondary" onclick="uploadMaterial()">📁 Carica Materiale</button>
+        <button class="btn btn-secondary" onclick="exportCsv()">⬇️ Esporta CSV</button>
+      </footer>
+    </aside>
+  </div>
 
   <script>
-    // Tab switching functionality
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const LESSONS = {
+      m1:{title:"Introduzione all'Algebra Lineare (Modular)", short:"Matematica • Classe 3A", activities:[], homework:[], evaluations:{}},
+      m2:{title:"Esperimenti di Chimica Organica (Modular)", short:"Scienze • Classe 4B", activities:[], homework:[], evaluations:{}},
+    };
 
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.dataset.tab;
-        
-        // Update button states
-        tabBtns.forEach(b => {
-          b.classList.remove('active');
-          b.setAttribute('aria-selected', 'false');
-        });
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-        
-        // Update content visibility
-        tabContents.forEach(content => {
-          content.classList.remove('active');
-        });
-        document.getElementById(targetTab + '-panel').classList.add('active');
-      });
-    });
+    function openDrawer(id){
+      const b=document.getElementById('drawerBackdrop');
+      const t=document.getElementById('lessonTitle');
+      const s=document.getElementById('lessonShort');
+      const body=document.getElementById('lessonBody');
+      const lesson=LESSONS[id];
+      if(!lesson) return;
+      t.textContent=lesson.title;
+      s.textContent=lesson.short;
+      body.innerHTML = `
+        <h3>Attività</h3>
+        <div>(Lista attività qui)</div>
+        <h3>Compiti</h3>
+        <div>(Lista compiti qui)</div>
+        <h3>Valutazioni</h3>
+        <div>(Scheda valutazioni e storico)</div>
+        <h3>Note Docente</h3>
+        <div contenteditable='true' style='background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;'>Aggiungi note qui...</div>
+      `;
+      b.style.display='flex'; b.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+    }
+    function closeDrawer(){const b=document.getElementById('drawerBackdrop');b.style.display='none';b.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 
-    // Keyboard navigation for tabs
-    tabBtns.forEach((btn, index) => {
-      btn.addEventListener('keydown', (e) => {
-        let newIndex = index;
-        
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          newIndex = (index + 1) % tabBtns.length;
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          newIndex = (index - 1 + tabBtns.length) % tabBtns.length;
-        } else if (e.key === 'Home') {
-          e.preventDefault();
-          newIndex = 0;
-        } else if (e.key === 'End') {
-          e.preventDefault();
-          newIndex = tabBtns.length - 1;
-        }
-        
-        if (newIndex !== index) {
-          tabBtns[newIndex].focus();
-          tabBtns[newIndex].click();
-        }
-      });
-    });
+    function openRegister(id){
+      alert('Apri registro per lezione ' + id + ' (implementare lista studenti e valutazioni)');
+    }
+    function editLesson(id){
+      alert('Apri editor lezione per ' + id);
+    }
+    function uploadMaterial(){alert('Funzionalità Carica Materiale - da implementare');}
+    function exportCsv(){alert('Esporta CSV - da implementare');}
 
-    // Demo: presence toggle
-    document.querySelectorAll('.presence-status').forEach(status => {
-      status.addEventListener('click', function() {
-        if (this.classList.contains('present')) {
-          this.classList.remove('present');
-          this.classList.add('absent');
-          this.textContent = 'Assente';
-        } else {
-          this.classList.remove('absent');
-          this.classList.add('present');
-          this.textContent = 'Presente';
-        }
-      });
-      status.style.cursor = 'pointer';
-    });
+    // Keep localStorage keys aligned with docs
+    // inClasse_activities_${lessonKey}, inClasse_homework_${lessonKey}, inClasse_evaluations_${lessonKey}
 
-    console.log('✅ In Classe Modular (Teacher-Facing) - Initialized');
-    console.log('📋 Features: Registro, Valutazioni, Materiali, Analytics');
   </script>
 </body>
 </html>
