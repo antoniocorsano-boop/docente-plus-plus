@@ -53,7 +53,8 @@ jobs:
         uses: actions/configure-pages@v3
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v1
+        # aggiornato alla versione più recente per evitare dipendenze deprecate
+        uses: actions/upload-pages-artifact@v2
         with:
           path: _publish
 
