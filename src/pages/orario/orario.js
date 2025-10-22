@@ -1,40 +1,35 @@
-/**
- * Orario (Schedule) Module
- * Grid-based timetable rendering with collision detection
- * Mobile-first, accessible schedule display
- */
+// Patch da inserire in src/pages/orario/orario.js (import + helper export/attach)
 
+// IMPORT (in cima al file, con gli altri import)
 import { exportScheduleToICS, downloadICS } from '../../utils/ics-export.js';
 
-/**
- * Normalize time string to HH:MM format
- * @param {string} time - Time string in various formats (e.g., "8:00", "08:00", "8")
- * @returns {string} Normalized time in HH:MM format
- */
-export function normalizeTime(time) {
-  if (!time || typeof time !== 'string') {
-    console.warn('Invalid time input:', time);
-    return '00:00';
+// Funzione pubblica che esporta lo schedule corrente (accetta array di slot)
+export function exportCurrentScheduleAsICS(scheduleSlots) {
+  let slots = scheduleSlots;
+  if (!slots && typeof window !== 'undefined') {
+    slots = window.currentScheduleData || null;
   }
-
-  // Remove whitespace
-  time = time.trim();
-
-  // Handle HH:MM format
-  if (time.includes(':')) {
-    const [hours, minutes] = time.split(':');
-    const h = parseInt(hours, 10);
-    const m = parseInt(minutes, 10);
-    
-    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) {
-      console.warn('Invalid time format:', time);
-      return '00:00';
-    }
-    
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  if (!slots || !Array.isArray(slots)) {
+    console.warn('exportCurrentScheduleAsICS: no schedule slots provided');
+    return;
   }
+  try {
+    const ics = exportScheduleToICS(slots);
+    downloadICS('docente-plus-plus-schedule.ics', ics);
+  } catch (err) {
+    console.error('Error exporting ICS', err);
+  }
+}
 
-  // Handle hour-only format
+// Helper per collegare un pulsante al getter dello schedule
+export function attachExportButton(buttonId, slotsGetter) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const slots = (typeof slotsGetter === 'function') ? slotsGetter() : slotsGetter;
+    exportCurrentScheduleAsICS(slots);
+  });
+}  // Handle hour-only format
   const h = parseInt(time, 10);
   if (isNaN(h) || h < 0 || h > 23) {
     console.warn('Invalid hour:', time);
