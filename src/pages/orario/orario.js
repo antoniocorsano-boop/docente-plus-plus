@@ -1,9 +1,9 @@
-// Patch da inserire in src/pages/orario/orario.js (import + helper export/attach)
+// Inserisci/importa queste funzioni nel file src/pages/orario/orario.js (dove appropriato)
 
-// IMPORT (in cima al file, con gli altri import)
+// IMPORT
 import { exportScheduleToICS, downloadICS } from '../../utils/ics-export.js';
 
-// Funzione pubblica che esporta lo schedule corrente (accetta array di slot)
+// Export helper
 export function exportCurrentScheduleAsICS(scheduleSlots) {
   let slots = scheduleSlots;
   if (!slots && typeof window !== 'undefined') {
@@ -21,7 +21,7 @@ export function exportCurrentScheduleAsICS(scheduleSlots) {
   }
 }
 
-// Helper per collegare un pulsante al getter dello schedule
+// Attach button helper
 export function attachExportButton(buttonId, slotsGetter) {
   const btn = document.getElementById(buttonId);
   if (!btn) return;
@@ -29,37 +29,7 @@ export function attachExportButton(buttonId, slotsGetter) {
     const slots = (typeof slotsGetter === 'function') ? slotsGetter() : slotsGetter;
     exportCurrentScheduleAsICS(slots);
   });
-}  // Handle hour-only format
-  const h = parseInt(time, 10);
-  if (isNaN(h) || h < 0 || h > 23) {
-    console.warn('Invalid hour:', time);
-    return '00:00';
-  }
-  
-  return `${String(h).padStart(2, '0')}:00`;
-}
-
-/**
- * Convert day name to column index (1-indexed for CSS Grid)
- * @param {string} day - Day name (e.g., "Lunedì", "Monday")
- * @returns {number} Column index (1 = Monday, 5 = Friday, 0 = invalid)
- */
-export function dayToColumnIndex(day) {
-  if (!day || typeof day !== 'string') {
-    console.warn('Invalid day input:', day);
-    return 0;
-  }
-
-  const dayMap = {
-    'lunedì': 1,
-    'monday': 1,
-    'lun': 1,
-    'mon': 1,
-    'martedì': 2,
-    'tuesday': 2,
-    'mar': 2,
-    'tue': 2,
-    'mercoledì': 3,
+}    'mercoledì': 3,
     'wednesday': 3,
     'mer': 3,
     'wed': 3,
