@@ -114,8 +114,10 @@ export function createDateTime(weekday, timeStr, baseDate = new Date()) {
  */
 export function generateUID(slot) {
   const id = slot.lessonKey || slot.id || `${slot.day}-${slot.startTime}`;
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
-  return `${id}-${randomSuffix}@docente-plus-plus`;
+  // Use timestamp for uniqueness instead of Math.random() for better entropy
+  const timestamp = Date.now().toString(36);
+  const counter = (Math.floor(performance.now() * 1000) % 1000000).toString(36);
+  return `${id}-${timestamp}-${counter}@docente-plus-plus`;
 }
 
 /**
