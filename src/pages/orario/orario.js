@@ -1,9 +1,9 @@
-// Inserisci/importa queste funzioni nel file src/pages/orario/orario.js (dove appropriato)
+// Inserisci queste funzioni nel file src/pages/orario/orario.js (dove appropriato, vicino agli altri export/import)
 
-// IMPORT
+// IMPORT (aggiungi alla lista import all'inizio del file)
 import { exportScheduleToICS, downloadICS } from '../../utils/ics-export.js';
 
-// Export helper
+// Export helper: esporta lo schedule corrente (accetta array di slot)
 export function exportCurrentScheduleAsICS(scheduleSlots) {
   let slots = scheduleSlots;
   if (!slots && typeof window !== 'undefined') {
@@ -21,7 +21,7 @@ export function exportCurrentScheduleAsICS(scheduleSlots) {
   }
 }
 
-// Attach button helper
+// Attach button helper: collega un pulsante UI all'export
 export function attachExportButton(buttonId, slotsGetter) {
   const btn = document.getElementById(buttonId);
   if (!btn) return;
@@ -29,12 +29,7 @@ export function attachExportButton(buttonId, slotsGetter) {
     const slots = (typeof slotsGetter === 'function') ? slotsGetter() : slotsGetter;
     exportCurrentScheduleAsICS(slots);
   });
-}    'mercoledì': 3,
-    'wednesday': 3,
-    'mer': 3,
-    'wed': 3,
-    'giovedì': 4,
-    'thursday': 4,
+}    'thursday': 4,
     'gio': 4,
     'thu': 4,
     'venerdì': 5,
