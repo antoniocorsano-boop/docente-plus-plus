@@ -1,8 +1,9 @@
-/* src/utils/ics-export.js */
+/* src/utils/ics-export.js
+   ICS export utility - simplified: use system local time (no TZID)
+*/
+
 export function exportScheduleToICS(slots = []) {
   const pad = (n) => String(n).padStart(2, '0');
-
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
   function formatLocalDateTime(d) {
     return (
@@ -35,6 +36,106 @@ export function exportScheduleToICS(slots = []) {
   }
 
   function getNextDateForWeekday(weekday, fromDate = new Date()) {
+    const d = new Date(fromDate);
+    const diff = (weekday + 7 - d.getDay()) % 7;
+    if (diff === 0) return d; // today
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  function uidForSlot(slot) {
+    const base = slot.lessonKey || slot.id || (slot.day + '-' + slot.startTime);
+    const rand = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+    return `${base}-${rand}@docente-plus-plus`;
+  }
+
+  function escapeText(s = '') {
+    return String(s)
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;');
+  }
+
+  const lines = [];
+  lines.push('BEGIN:VCALENDAR');
+  lines.push('VERSION:2.0');
+  lines.push('PRODID:-//Docente++//iCal Export//IT');
+  lines.push('CALSCALE:GREGORIAN');
+
+  slots.forEach(slot => {
+    try {
+      const dayName = slot.day || slot.giorno || slot.weekday || '';
+      const weekday = italianDayToWeekdayNumber(dayName);
+      const startTime = slot.startTime || slot.time || (slot.orario && slot.orario.split('-')[0]) || '';
+      let endTime = slot.endTime || '';
+      if (!startTime) return; // skip invalid
+
+      if (!endTime) {
+        // default 1 hour
+        const [h, m] = startTime.split(':').map(x => parseInt(x, 10));
+        const d = new Date();
+        d.setHours(h || 0, m || 0, 0, 0);
+        d.setHours(d.getHours() + 1);
+        endTime = pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+
+      const nextDate = (weekday !== null) ? getNextDateForWeekday(weekday) : new Date();
+
+      const [sh, sm] = startTime.split(':').map(x => parseInt(x, 10));
+      const [eh, em] = endTime.split(':').map(x => parseInt(x, 10));
+
+      const dtStart = new Date(nextDate);
+      dtStart.setHours(sh || 0, sm || 0, 0, 0);
+      const dtEnd = new Date(nextDate);
+      dtEnd.setHours(eh || (sh + 1) || 0, em || 0, 0, 0);
+
+      const dtStartStr = formatLocalDateTime(dtStart);
+      const dtEndStr = formatLocalDateTime(dtEnd);
+
+      const uid = uidForSlot(slot);
+      const summary = escapeText(`${slot.subject || slot.materia || slot.title || ''}${slot.class ? ' (' + slot.class + ')' : ''}`);
+      const descriptionParts = [];
+      if (slot.room) descriptionParts.push(`Sala: ${slot.room}`);
+      if (slot.notes) descriptionParts.push(`Note: ${slot.notes}`);
+      if (slot.type) descriptionParts.push(`Tipo: ${slot.type}`);
+      const description = escapeText(descriptionParts.join('\n'));
+
+      lines.push('BEGIN:VEVENT');
+      lines.push(`UID:${uid}`);
+      // Local time (no TZID) — use system local time representation
+      lines.push(`DTSTART:${dtStartStr}`);
+      lines.push(`DTEND:${dtEndStr}`);
+      lines.push(`SUMMARY:${summary}`);
+      if (description) lines.push(`DESCRIPTION:${description}`);
+      if (slot.room) lines.push(`LOCATION:${escapeText(slot.room)}`);
+      lines.push('RRULE:FREQ=WEEKLY');
+      lines.push('END:VEVENT');
+    } catch (err) {
+      // skip malformed slot
+      // eslint-disable-next-line no-console
+      console.error('ics-export: error building event for slot', slot, err);
+    }
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+export function downloadICS(filename = 'docente-plus-plus-schedule.ics', icsContent) {
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+}  function getNextDateForWeekday(weekday, fromDate = new Date()) {
     // weekday: 0 (Sun) .. 6 (Sat)
     const d = new Date(fromDate);
     const diff = (weekday + 7 - d.getDay()) % 7;
