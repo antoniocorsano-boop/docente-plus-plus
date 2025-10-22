@@ -35,6 +35,7 @@ jobs:
           touch public/.nojekyll
 
       - name: Upload Pages artifact
+        id: upload-pages
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./public
@@ -42,6 +43,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_id: ${{ steps.upload-pages.outputs['artifact-id'] }}
 
       - name: Show deployment URL
         run: echo "Pages URL - ${{ steps.deployment.outputs.page_url }}"
