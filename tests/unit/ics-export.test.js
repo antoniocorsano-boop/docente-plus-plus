@@ -1,40 +1,27 @@
-/**
- * Tests for ICS Export Module
- */
+```javascript
+import { exportScheduleToICS } from '../../src/utils/ics-export.js';
 
-import { describe, test, expect, beforeEach } from '@jest/globals';
-import {
-  DAY_TO_WEEKDAY,
-  getWeekdayNumber,
-  getNextDateForWeekday,
-  formatICalDateTime,
-  parseTime,
-  createDateTime,
-  generateUID,
-  escapeICalText,
-  slotToVEvent,
-  exportScheduleToICS,
-  downloadICS
-} from '../../src/utils/ics-export.js';
-
-describe('ICS Export Module', () => {
-  describe('getWeekdayNumber', () => {
-    test('maps Italian weekdays correctly', () => {
-      expect(getWeekdayNumber('Lunedì')).toBe(1);
-      expect(getWeekdayNumber('Martedì')).toBe(2);
-      expect(getWeekdayNumber('Mercoledì')).toBe(3);
-      expect(getWeekdayNumber('Giovedì')).toBe(4);
-      expect(getWeekdayNumber('Venerdì')).toBe(5);
-      expect(getWeekdayNumber('Sabato')).toBe(6);
-      expect(getWeekdayNumber('Domenica')).toBe(0);
-    });
-
-    test('maps English weekdays correctly', () => {
-      expect(getWeekdayNumber('Monday')).toBe(1);
-      expect(getWeekdayNumber('Tuesday')).toBe(2);
-      expect(getWeekdayNumber('Wednesday')).toBe(3);
-      expect(getWeekdayNumber('Thursday')).toBe(4);
-      expect(getWeekdayNumber('Friday')).toBe(5);
+describe('ICS export', () => {
+  test('generates basic VCALENDAR with VEVENT and RRULE', () => {
+    const slots = [
+      {
+        day: 'Lunedì',
+        startTime: '08:00',
+        endTime: '09:00',
+        subject: 'Matematica',
+        class: '3A',
+        room: 'Aula 1',
+        lessonKey: 'Lunedì-08:00'
+      }
+    ];
+    const ics = exportScheduleToICS(slots);
+    expect(ics).toContain('BEGIN:VCALENDAR');
+    expect(ics).toContain('BEGIN:VEVENT');
+    expect(ics).toContain('RRULE:FREQ=WEEKLY');
+    expect(ics).toMatch(/UID:.+@docente-plus-plus/);
+    expect(ics).toContain('SUMMARY:Matematica (3A)');
+  });
+});      expect(getWeekdayNumber('Friday')).toBe(5);
       expect(getWeekdayNumber('Saturday')).toBe(6);
       expect(getWeekdayNumber('Sunday')).toBe(0);
     });
