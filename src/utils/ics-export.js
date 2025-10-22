@@ -162,7 +162,7 @@ export function downloadICS(filename = 'docente-plus-plus-schedule.ics', icsCont
   const lines = [];
   lines.push('BEGIN:VCALENDAR');
   lines.push('VERSION:2.0');
-  lines.push('PRODID:-//Docente++//iCal Export//IT');
+  lines.push('PRODID:-//Docente++//Schedule Export//IT');
   lines.push('CALSCALE:GREGORIAN');
 
   slots.forEach(slot => {
