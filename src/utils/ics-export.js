@@ -1,40 +1,141 @@
-/**
- * ICS (iCalendar) Export Utility
- * Converts schedule slots to iCalendar format (.ics) for calendar integration
- */
+/* src/utils/ics-export.js */
+export function exportScheduleToICS(slots = []) {
+  const pad = (n) => String(n).padStart(2, '0');
 
-/**
- * Map Italian day names to weekday numbers (0 = Sunday, 1 = Monday, etc.)
- * @type {Object<string, number>}
- */
-export const DAY_TO_WEEKDAY = {
-  'domenica': 0,
-  'lunedì': 1,
-  'martedì': 2,
-  'mercoledì': 3,
-  'giovedì': 4,
-  'venerdì': 5,
-  'sabato': 6,
-  // English variants
-  'sunday': 0,
-  'monday': 1,
-  'tuesday': 2,
-  'wednesday': 3,
-  'thursday': 4,
-  'friday': 5,
-  'saturday': 6,
-  // Abbreviated forms
-  'dom': 0,
-  'lun': 1,
-  'mar': 2,
-  'mer': 3,
-  'gio': 4,
-  'ven': 5,
-  'sab': 6
-};
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
-/**
- * Get weekday number from day name
+  function formatLocalDateTime(d) {
+    return (
+      d.getFullYear().toString() +
+      pad(d.getMonth() + 1) +
+      pad(d.getDate()) +
+      'T' +
+      pad(d.getHours()) +
+      pad(d.getMinutes()) +
+      pad(d.getSeconds())
+    );
+  }
+
+  function italianDayToWeekdayNumber(day) {
+    const map = {
+      'Domenica': 0,
+      'Lunedì': 1,
+      'Lunedi': 1,
+      'Martedì': 2,
+      'Martedi': 2,
+      'Mercoledì': 3,
+      'Mercoledi': 3,
+      'Giovedì': 4,
+      'Giovedi': 4,
+      'Venerdì': 5,
+      'Venerdi': 5,
+      'Sabato': 6
+    };
+    return map[day] !== undefined ? map[day] : null;
+  }
+
+  function getNextDateForWeekday(weekday, fromDate = new Date()) {
+    // weekday: 0 (Sun) .. 6 (Sat)
+    const d = new Date(fromDate);
+    const diff = (weekday + 7 - d.getDay()) % 7;
+    if (diff === 0) return d; // today
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  function uidForSlot(slot) {
+    const base = slot.lessonKey || slot.id || (slot.day + '-' + slot.startTime);
+    const rand = Math.random().toString(36).slice(2, 9);
+    return `${base}-${rand}@docente-plus-plus`;
+  }
+
+  function escapeText(s = '') {
+    return String(s)
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;');
+  }
+
+  const lines = [];
+  lines.push('BEGIN:VCALENDAR');
+  lines.push('VERSION:2.0');
+  lines.push('PRODID:-//Docente++//iCal Export//IT');
+  lines.push('CALSCALE:GREGORIAN');
+
+  slots.forEach(slot => {
+    try {
+      const dayName = slot.day || slot.giorno || slot.weekday || '';
+      const weekday = italianDayToWeekdayNumber(dayName);
+      const startTime = slot.startTime || slot.time || (slot.orario && slot.orario.split('-')[0]) || '';
+      let endTime = slot.endTime || '';
+      if (!startTime) return; // skip invalid
+
+      if (!endTime) {
+        // default 1 hour
+        const [h, m] = startTime.split(':').map(x => parseInt(x, 10));
+        const d = new Date();
+        d.setHours(h || 0, m || 0, 0, 0);
+        d.setHours(d.getHours() + 1);
+        endTime = pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+
+      const nextDate = (weekday !== null) ? getNextDateForWeekday(weekday) : new Date();
+
+      const [sh, sm] = startTime.split(':').map(x => parseInt(x, 10));
+      const [eh, em] = endTime.split(':').map(x => parseInt(x, 10));
+
+      const dtStart = new Date(nextDate);
+      dtStart.setHours(sh || 0, sm || 0, 0, 0);
+      const dtEnd = new Date(nextDate);
+      dtEnd.setHours(eh || (sh + 1) || 0, em || 0, 0, 0);
+
+      const dtStartStr = formatLocalDateTime(dtStart);
+      const dtEndStr = formatLocalDateTime(dtEnd);
+
+      const uid = uidForSlot(slot);
+      const summary = escapeText(`${slot.subject || slot.materia || slot.title || ''}${slot.class ? ' (' + slot.class + ')' : ''}`);
+      const descriptionParts = [];
+      if (slot.room) descriptionParts.push(`Sala: ${slot.room}`);
+      if (slot.notes) descriptionParts.push(`Note: ${slot.notes}`);
+      if (slot.type) descriptionParts.push(`Tipo: ${slot.type}`);
+      const description = escapeText(descriptionParts.join('\n'));
+
+      lines.push('BEGIN:VEVENT');
+      lines.push(`UID:${uid}`);
+      // Use TZID for local time
+      lines.push(`DTSTART;TZID=${tz}:${dtStartStr}`);
+      lines.push(`DTEND;TZID=${tz}:${dtEndStr}`);
+      lines.push(`SUMMARY:${summary}`);
+      if (description) lines.push(`DESCRIPTION:${description}`);
+      if (slot.room) lines.push(`LOCATION:${escapeText(slot.room)}`);
+      lines.push('RRULE:FREQ=WEEKLY');
+      lines.push('END:VEVENT');
+    } catch (err) {
+      // skip malformed slot
+      // eslint-disable-next-line no-console
+      console.error('ics-export: error building event for slot', slot, err);
+    }
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+export function downloadICS(filename = 'docente-plus-plus-schedule.ics', icsContent) {
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+} * Get weekday number from day name
  * @param {string} dayName - Day name (e.g., "Lunedì", "Monday")
  * @returns {number} Weekday number (0-6, Sunday=0) or -1 if invalid
  */
