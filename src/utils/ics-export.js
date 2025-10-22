@@ -144,11 +144,7 @@ export function downloadICS(filename = 'docente-plus-plus-schedule.ics', icsCont
     return d;
   }
 
-  function uidForSlot(slot) {
-    const base = slot.lessonKey || slot.id || (slot.day + '-' + slot.startTime);
-    const rand = Math.random().toString(36).slice(2, 9);
-    return `${base}-${rand}@docente-plus-plus`;
-  }
+/* Removed insecure uidForSlot function. Use generateUID() instead. */
 
   function escapeText(s = '') {
     return String(s)
