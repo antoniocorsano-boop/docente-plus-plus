@@ -1,73 +1,35 @@
-/**
- * Orario (Schedule) Module
- * Grid-based timetable rendering with collision detection
- * Mobile-first, accessible schedule display
- */
+// Inserisci queste funzioni nel file src/pages/orario/orario.js (dove appropriato, vicino agli altri export/import)
 
-/**
- * Normalize time string to HH:MM format
- * @param {string} time - Time string in various formats (e.g., "8:00", "08:00", "8")
- * @returns {string} Normalized time in HH:MM format
- */
-export function normalizeTime(time) {
-  if (!time || typeof time !== 'string') {
-    console.warn('Invalid time input:', time);
-    return '00:00';
+// IMPORT (aggiungi alla lista import all'inizio del file)
+import { exportScheduleToICS, downloadICS } from '../../utils/ics-export.js';
+
+// Export helper: esporta lo schedule corrente (accetta array di slot)
+export function exportCurrentScheduleAsICS(scheduleSlots) {
+  let slots = scheduleSlots;
+  if (!slots && typeof window !== 'undefined') {
+    slots = window.currentScheduleData || null;
   }
-
-  // Remove whitespace
-  time = time.trim();
-
-  // Handle HH:MM format
-  if (time.includes(':')) {
-    const [hours, minutes] = time.split(':');
-    const h = parseInt(hours, 10);
-    const m = parseInt(minutes, 10);
-    
-    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) {
-      console.warn('Invalid time format:', time);
-      return '00:00';
-    }
-    
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  if (!slots || !Array.isArray(slots)) {
+    console.warn('exportCurrentScheduleAsICS: no schedule slots provided');
+    return;
   }
-
-  // Handle hour-only format
-  const h = parseInt(time, 10);
-  if (isNaN(h) || h < 0 || h > 23) {
-    console.warn('Invalid hour:', time);
-    return '00:00';
+  try {
+    const ics = exportScheduleToICS(slots);
+    downloadICS('docente-plus-plus-schedule.ics', ics);
+  } catch (err) {
+    console.error('Error exporting ICS', err);
   }
-  
-  return `${String(h).padStart(2, '0')}:00`;
 }
 
-/**
- * Convert day name to column index (1-indexed for CSS Grid)
- * @param {string} day - Day name (e.g., "Lunedì", "Monday")
- * @returns {number} Column index (1 = Monday, 5 = Friday, 0 = invalid)
- */
-export function dayToColumnIndex(day) {
-  if (!day || typeof day !== 'string') {
-    console.warn('Invalid day input:', day);
-    return 0;
-  }
-
-  const dayMap = {
-    'lunedì': 1,
-    'monday': 1,
-    'lun': 1,
-    'mon': 1,
-    'martedì': 2,
-    'tuesday': 2,
-    'mar': 2,
-    'tue': 2,
-    'mercoledì': 3,
-    'wednesday': 3,
-    'mer': 3,
-    'wed': 3,
-    'giovedì': 4,
-    'thursday': 4,
+// Attach button helper: collega un pulsante UI all'export
+export function attachExportButton(buttonId, slotsGetter) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const slots = (typeof slotsGetter === 'function') ? slotsGetter() : slotsGetter;
+    exportCurrentScheduleAsICS(slots);
+  });
+}    'thursday': 4,
     'gio': 4,
     'thu': 4,
     'venerdì': 5,
@@ -319,4 +281,55 @@ export async function loadScheduleData(jsonPath = '/src/mock/orario-mock.json') 
     console.error('Error loading schedule data:', error);
     return { schedule: [], timeSlots: [], days: [] };
   }
+}
+
+/**
+ * Export current schedule to ICS format
+ * @param {Array|HTMLElement} scheduleData - Schedule data array or container element
+ * @returns {boolean} Success status
+ */
+export function exportCurrentScheduleAsICS(scheduleData) {
+  let slots = [];
+
+  // Extract slots from different input types
+  if (Array.isArray(scheduleData)) {
+    slots = scheduleData;
+  } else if (scheduleData instanceof HTMLElement) {
+    // Extract slots from DOM
+    const slotElements = scheduleData.querySelectorAll('.schedule-slot');
+    slots = Array.from(slotElements).map(element => ({
+      id: element.dataset.slotId,
+      day: element.dataset.day,
+      startTime: element.dataset.startTime,
+      endTime: element.dataset.endTime,
+      subject: element.querySelector('.slot-subject')?.textContent || '',
+      class: element.querySelector('.slot-class')?.textContent || '',
+      room: element.querySelector('.slot-room')?.textContent || '',
+      type: element.querySelector('.slot-type')?.textContent || ''
+    }));
+  } else if (scheduleData && scheduleData.schedule) {
+    // Extract from schedule data object
+    slots = scheduleData.schedule;
+  }
+
+  if (slots.length === 0) {
+    console.error('No schedule data to export');
+    alert('Nessun orario da esportare. Carica prima un orario.');
+    return false;
+  }
+
+  // Generate ICS content
+  const icsContent = exportScheduleToICS(slots);
+  
+  if (!icsContent) {
+    console.error('Failed to generate ICS content');
+    alert('Errore nella generazione del file ICS.');
+    return false;
+  }
+
+  // Trigger download
+  downloadICS('docente-plus-plus-schedule.ics', icsContent);
+  console.log(`Exported ${slots.length} schedule slots to ICS`);
+  
+  return true;
 }
