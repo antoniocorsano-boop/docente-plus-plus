@@ -1,4 +1,3 @@
-```javascript
 import { exportScheduleToICS } from '../../src/utils/ics-export.js';
 
 describe('ICS export', () => {
@@ -21,20 +20,7 @@ describe('ICS export', () => {
     expect(ics).toMatch(/UID:.+@docente-plus-plus/);
     expect(ics).toContain('SUMMARY:Matematica (3A)');
   });
-});      expect(getWeekdayNumber('Friday')).toBe(5);
-      expect(getWeekdayNumber('Saturday')).toBe(6);
-      expect(getWeekdayNumber('Sunday')).toBe(0);
-    });
-
-    test('is case-insensitive', () => {
-      expect(getWeekdayNumber('lunedì')).toBe(1);
-      expect(getWeekdayNumber('LUNEDÌ')).toBe(1);
-      expect(getWeekdayNumber('LuNeDì')).toBe(1);
-    });
-
-    test('handles invalid input', () => {
-      expect(getWeekdayNumber('')).toBe(-1);
-      expect(getWeekdayNumber(null)).toBe(-1);
+});      expect(getWeekdayNumber(null)).toBe(-1);
       expect(getWeekdayNumber('InvalidDay')).toBe(-1);
     });
   });
