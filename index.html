@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web app per la gestione della didattica dell'insegnante potenziata da IA OpenRouter">
+    <meta name="theme-color" content="#4a90e2">
+    <title>Docente++ - Gestione Didattica con IA</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons for iOS & PWA -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Docente++">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    
+    <!-- Material Design Icons -->
+    <link href="fonts/material-icons.css" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <!-- Roboto Font -->
+    <link href="fonts/roboto.css" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- MD3 Theme Styles -->
+    <link rel="stylesheet" href="src/styles/generated-md3-expressive.css">
+    <link rel="stylesheet" href="src/styles/theme-md3-expressive.css">
+    <!-- Common Page Styles -->
+    <link rel="stylesheet" href="src/styles/common-page.css">
+    <!-- Theme Switcher Component -->
+    <link rel="stylesheet" href="src/components/ThemeSwitcher.css">
+    <!-- Schedule Component Styles -->
+    <link rel="stylesheet" href="css/schedule-theme.css">
+    <link rel="stylesheet" href="css/schedule-component.css">
+    <!-- Import System Styles -->
+    <link rel="stylesheet" href="css/import-system.css">
+    <!-- Floating AI Assistant Styles -->
+    <link rel="stylesheet" href="css/floating-assistant.css">
+    
+    <!-- Third-party libraries for document processing -->
+    <script src="libs/papaparse.min.js"></script>
+    <script src="libs/xlsx.full.min.js"></script>
+    <script src="libs/jszip.min.js"></script>
+    
+    <!-- Note: PDF/Excel/ZIP libraries can be loaded dynamically when needed to avoid ES6 module conflicts -->
+    <!--
+    <script>
+        // Dynamically load third-party libraries to avoid ES6 module strict mode conflicts
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Load libraries after DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            Promise.all([
+                loadScript('libs/papaparse.min.js'),
+                loadScript('libs/jszip.min.js'),
+                loadScript('libs/jspdf.umd.min.js').then(() => loadScript('libs/jspdf.plugin.autotable.min.js')),
+                loadScript('libs/xlsx.full.min.js')
+            ]).catch(err => console.error('Error loading libraries:', err));
+        });
+    </script>
+    -->
+</head>
+<body>
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Benvenuto in Docente++</h2>
+            <p>Configura il tuo profilo per iniziare</p>
+            <form id="onboarding-form">
+                <div class="form-group">
+                    <label for="onboarding-first-name">Nome *</label>
+                    <input type="text" id="onboarding-first-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-last-name">Cognome</label>
+                    <input type="text" id="onboarding-last-name">
+                </div>
+                <div class="form-group">
+                    <label for="onboarding-school-year">Anno Scolastico</label>
+                    <input type="text" id="onboarding-school-year" placeholder="2024/2025">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Inizia ad Usare Docente++</button>
+                </div>
+            </form>
+            <p style="margin-top: 16px; color: var(--md-text-secondary); font-size: var(--font-size-sm);">
+                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">info</span>
+                Il completamento del profilo è necessario per accedere all'applicazione.
+            </p>
+        </div>
+    </div>
+
+    <!-- Profile Notice - Small, non-invasive text reminder -->
+    <div id="onboarding-incomplete-banner" class="profile-notice" style="display: none;">
+        <div class="profile-notice-content">
+            <span class="material-symbols-outlined">info</span>
+            <span class="profile-notice-text">Profilo incompleto. <a href="#settings" onclick="window.app.switchTab('settings'); return false;">Completa dalle Impostazioni</a></span>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header id="app-header">
+        <div class="header-content">
+            <button id="menu-toggle" class="menu-toggle icon-btn" title="Menu" aria-label="Apri menu navigazione">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h1>Docente++</h1>
+        </div>
+    </header>
+
+    <!-- Notification Center Dropdown -->
+    <div id="notification-center" class="notification-center" style="display: none;">
+        <div class="notification-center-header">
+            <h3>Notifiche</h3>
+            <div class="notification-center-actions">
+                <button id="notification-filter-btn" class="icon-btn-sm" title="Filtri">
+                    <span class="material-symbols-outlined">filter_list</span>
+                </button>
+                <button id="notification-mark-all-read-btn" class="icon-btn-sm" title="Segna tutte come lette">
+                    <span class="material-symbols-outlined">done_all</span>
+                </button>
+                <button id="notification-settings-btn" class="icon-btn-sm" title="Impostazioni notifiche">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+        </div>
+        <div id="notification-filter-tabs" class="notification-filter-tabs" style="display: none;">
+            <button class="notification-filter-tab active" data-filter="all">Tutte</button>
+            <button class="notification-filter-tab" data-filter="unread">Non lette</button>
+            <button class="notification-filter-tab" data-filter="important">Importanti</button>
+            <button class="notification-filter-tab" data-filter="completed">Completate</button>
+        </div>
+        <div id="notification-center-content" class="notification-center-content" data-filter="all">
+            <!-- Notifications will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Menu Backdrop for Mobile -->
+    <div id="menu-backdrop" class="menu-backdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="main-nav" class="sidebar">
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-tab="home">
+                <span class="material-symbols-outlined">home</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" data-tab="inClasse">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-label">In Classe</span>
+            </button>
+            <button class="nav-item" data-tab="lessons">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span class="nav-label">Lezioni</span>
+            </button>
+            <button class="nav-item" data-tab="students">
+                <span class="material-symbols-outlined">group</span>
+                <span class="nav-label">Studenti</span>
+            </button>
+            <button class="nav-item" data-tab="classes">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-label">Classi</span>
+            </button>
+            <button class="nav-item" data-tab="activities">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-label">Attività</span>
+            </button>
+            <button class="nav-item" data-tab="evaluations">
+                <span class="material-symbols-outlined">assessment</span>
+                <span class="nav-label">Valutazioni</span>
+            </button>
+            <button class="nav-item" data-tab="schedule">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span class="nav-label">Orario</span>
+            </button>
+            <button class="nav-item" data-tab="agenda">
+                <span class="material-symbols-outlined">event</span>
+                <span class="nav-label">Agenda</span>
+            </button>
+            <button class="nav-item" data-tab="aiAssistant">
+                <span class="material-symbols-outlined">psychology</span>
+                <span class="nav-label">Assistente IA</span>
+            </button>
+            <button class="nav-item" data-tab="documentImport">
+                <span class="material-symbols-outlined">upload_file</span>
+                <span class="nav-label">Importa Documenti</span>
+            </button>
+            
+            <div class="nav-divider"></div>
+            
+            <!-- Settings with submenu -->
+            <div class="nav-submenu-container" id="settings-submenu-container">
+                <button class="nav-item" id="settings-menu-toggle" aria-expanded="false" aria-controls="settings-submenu">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="nav-label">Impostazioni</span>
+                    <span class="material-symbols-outlined expand-icon">expand_more</span>
+                </button>
+                <div class="nav-submenu" id="settings-submenu" role="group" aria-label="Menu impostazioni">
+                    <button class="nav-submenu-item" data-tab="settings" data-section="profile">
+                        <span class="material-symbols-outlined">person</span>
+                        <span class="nav-label">Profilo</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="preferences">
+                        <span class="material-symbols-outlined">tune</span>
+                        <span class="nav-label">Preferenze</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="privacy">
+                        <span class="material-symbols-outlined">lock</span>
+                        <span class="nav-label">Privacy</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="nav-label">Notifiche</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="backup">
+                        <span class="material-symbols-outlined">backup</span>
+                        <span class="nav-label">Backup & Ripristino</span>
+                    </button>
+                    <button class="nav-submenu-item" data-tab="settings" data-section="theme">
+                        <span class="material-symbols-outlined">palette</span>
+                        <span class="nav-label">Tema</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button class="nav-item" id="notification-bell-btn-sidebar" title="Centro Notifiche" aria-label="Apri centro notifiche">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="nav-label">Notifiche</span>
+                <span id="notification-badge-sidebar" class="notification-badge" style="display: none;">0</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Home Tab - New Landing Page -->
+        <div id="home" class="tab-content">
+            <div class="landing-page">
+                <div class="landing-header">
+                    <h2>Benvenuto in Docente++</h2>
+                    <p class="landing-subtitle">Scegli dove vuoi andare</p>
+                </div>
+                
+                <!-- Quick Access Cards -->
+                <div class="landing-cards">
+                    <button class="landing-card landing-card-primary" onclick="window.app.switchTab('inClasse')">
+                        <span class="material-symbols-outlined landing-card-icon">school</span>
+                        <h3>Entra in Classe</h3>
+                        <p>Gestisci le tue classi e gli studenti</p>
+                    </button>
+                    
+                    <button class="landing-card landing-card-secondary" onclick="window.app.switchTab('lessons')">
+                        <span class="material-symbols-outlined landing-card-icon">menu_book</span>
+                        <h3>Sala Docenti</h3>
+                        <p>Pianifica lezioni e attività didattiche</p>
+                    </button>
+                    
+                    <button class="landing-card landing-card-tertiary" onclick="window.app.switchTab('evaluations')">
+                        <span class="material-symbols-outlined landing-card-icon">assessment</span>
+                        <h3>Consigli e Scrutini</h3>
+                        <p>Valutazioni e analisi degli studenti</p>
+                    </button>
+                </div>
+                
+                <!-- Secondary Quick Access -->
+                <div class="landing-section">
+                    <h3>Accesso Rapido</h3>
+                    <div class="landing-quick-links">
+                        <button class="quick-link-btn" onclick="window.app.switchTab('schedule')">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span>Orario</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('agenda')">
+                            <span class="material-symbols-outlined">event</span>
+                            <span>Agenda</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('activities')">
+                            <span class="material-symbols-outlined">assignment</span>
+                            <span>Attività</span>
+                        </button>
+                        <button class="quick-link-btn" onclick="window.app.switchTab('aiAssistant')">
+                            <span class="material-symbols-outlined">psychology</span>
+                            <span>Assistente IA</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dashboard Summary -->
+                <div class="landing-section">
+                    <h3>Riepilogo</h3>
+                    <div class="landing-stats">
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-lesson-count">0</span>
+                                <span class="landing-stat-label">Lezioni</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">group</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-student-count">0</span>
+                                <span class="landing-stat-label">Studenti</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">assignment</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-activity-count">0</span>
+                                <span class="landing-stat-label">Attività</span>
+                            </div>
+                        </div>
+                        <div class="landing-stat-card">
+                            <span class="material-symbols-outlined">assessment</span>
+                            <div class="landing-stat-content">
+                                <span class="landing-stat-value" id="home-evaluation-count">0</span>
+                                <span class="landing-stat-label">Valutazioni</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Classe Tab -->
+        <div id="inClasse" class="tab-content app-page">
+            <div id="in-classe-container">
+                <!-- InClasse page content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Lessons Tab -->
+        <div id="lessons" class="tab-content">
+            <h2>Gestione Lezioni</h2>
+            <button class="btn btn-primary" onclick="window.app.newLesson()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Lezione
+            </button>
+            <div id="lessons-list"></div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <h2>Gestione Studenti</h2>
+            <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="window.app.newStudent()">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Nuovo Studente
+                </button>
+                <button class="btn btn-secondary" onclick="window.app.exportStudentsCSV()">
+                    <span class="material-symbols-outlined">download</span>
+                    Esporta CSV
+                </button>
+                <label class="btn btn-secondary" style="cursor: pointer;">
+                    <span class="material-symbols-outlined">upload</span>
+                    Importa CSV
+                    <input type="file" id="import-csv-input" accept=".csv" style="display:none;" onchange="window.app.importStudentsCSV(this.files[0])">
+                </label>
+            </div>
+            <div id="students-list"></div>
+        </div>
+
+        <!-- Classes Tab -->
+        <div id="classes" class="tab-content">
+            <h2>Gestione Classi</h2>
+            <button class="btn btn-primary" onclick="window.app.newClass()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Classe
+            </button>
+            <div id="classes-list"></div>
+        </div>
+
+        <!-- Activities Tab -->
+        <div id="activities" class="tab-content">
+            <h2>Gestione Attività</h2>
+            <button class="btn btn-primary" onclick="window.app.newActivity()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Attività
+            </button>
+            <div id="activities-list"></div>
+        </div>
+
+        <!-- Evaluations Tab -->
+        <div id="evaluations" class="tab-content">
+            <h2>Gestione Valutazioni</h2>
+            <button class="btn btn-primary" onclick="window.app.newEvaluation()">
+                <span class="material-symbols-outlined">add</span>
+                Nuova Valutazione
+            </button>
+            <div id="evaluations-list"></div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <h2>Orario Settimanale</h2>
+            <div id="schedule-view"></div>
+        </div>
+
+        <!-- Agenda Tab -->
+        <div id="agenda" class="tab-content">
+            <h2>Agenda</h2>
+            <div class="agenda-header">
+                <button class="btn btn-primary" onclick="window.app.newEvent()">
+                    <span class="material-symbols-outlined">add</span>
+                    Nuovo Evento
+                </button>
+            </div>
+            
+            <!-- Smart Suggestions -->
+            <div id="agenda-suggestions" class="agenda-suggestions-container">
+                <h3>💡 Suggerimenti Smart</h3>
+                <div id="agenda-suggestions-list"></div>
+            </div>
+            
+            <!-- View Controls -->
+            <div class="agenda-controls">
+                <div class="agenda-nav">
+                    <button class="btn btn-sm btn-secondary" onclick="window.app.navigateAgenda('prev')">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                        Indietro
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="window.app.navigateAgenda('today')">
+                        <span class="material-symbols-outlined">today</span>
+                        Oggi
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="window.app.navigateAgenda('next')">
+                        Avanti
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+                <div class="agenda-view-toggle">
+                    <button class="btn btn-sm" id="agenda-view-daily" onclick="window.app.toggleAgendaView('daily')">
+                        <span class="material-symbols-outlined">view_day</span>
+                        Giorno
+                    </button>
+                    <button class="btn btn-sm" id="agenda-view-weekly" onclick="window.app.toggleAgendaView('weekly')">
+                        <span class="material-symbols-outlined">view_week</span>
+                        Settimana
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Agenda View -->
+            <div id="agenda-view"></div>
+        </div>
+
+        <!-- AI Assistant Tab -->
+        <div id="aiAssistant" class="tab-content">
+            <h2>Assistente IA</h2>
+            <div id="ai-chat-container">
+                <div id="ai-chat-messages"></div>
+                <div class="ai-chat-input-area">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedimi qualcosa...">
+                    <button id="ai-chat-send">Invia</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Import Tab -->
+        <div id="documentImport" class="tab-content">
+            <h2>Importa Documenti</h2>
+            <div class="import-area">
+                <input type="file" id="pdf-upload" accept=".pdf,.txt,.csv,.xlsx,.json">
+                <label for="pdf-upload">Carica un documento</label>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <h2>Impostazioni</h2>
+            
+            <!-- Theme Settings Section (NEW: Moved from sidebar to settings) -->
+            <div class="settings-section" data-settings-section="theme">
+                <h3>🎨 Aspetto e Tema</h3>
+                <form id="theme-settings-form">
+                    <div class="form-group">
+                        <label for="theme-mode-select">Modalità Tema</label>
+                        <select id="theme-mode-select" required>
+                            <option value="auto">Automatico (segue il sistema)</option>
+                            <option value="light">Chiaro</option>
+                            <option value="dark">Scuro</option>
+                        </select>
+                        <p class="help-text">Scegli come visualizzare l'interfaccia. La modalità automatica segue le preferenze del tuo sistema operativo.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="theme-color-select">Colore Principale</label>
+                        <select id="theme-color-select">
+                            <option value="lilac">Lilla (predefinito)</option>
+                            <option value="purple">Viola</option>
+                            <option value="teal">Teal</option>
+                            <option value="orange">Arancione</option>
+                            <option value="blue">Blu</option>
+                            <option value="teal">Teal</option>
+                            <option value="green">Verde</option>
+                            <option value="red">Rosso</option>
+                            <option value="indigo">Indaco</option>
+                            <option value="pink">Rosa</option>
+                            <option value="red">Rosso</option>
+                            <option value="indigo">Indaco</option>
+                        </select>
+                        <p class="help-text">Personalizza il colore principale dell'interfaccia secondo lo stile MD3 Expressive</p>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">save</span>
+                            Salva Tema
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="theme-picker-btn-settings">
+                            <span class="material-symbols-outlined">palette</span>
+                            Anteprima Avanzata
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Profile Section (NEW: Enhanced with email) -->
+            <div class="settings-section" data-settings-section="profile">
+                <h3>👤 Profilo Docente</h3>
+                <form id="profile-settings-form">
+                    <div class="form-group">
+                        <label for="profile-first-name">Nome *</label>
+                        <input type="text" id="profile-first-name" required placeholder="Es: Mario">
+                        <p class="help-text">Il tuo nome</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-last-name">Cognome</label>
+                        <input type="text" id="profile-last-name" placeholder="Es: Rossi">
+                        <p class="help-text">Il tuo cognome (opzionale)</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-email">Email</label>
+                        <input type="email" id="profile-email" placeholder="mario.rossi@scuola.it">
+                        <p class="help-text">La tua email (opzionale)</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Profilo
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Discipline/Subject Association Section (NEW) -->
+            <div class="settings-section" data-settings-section="profile">
+                <h3>📚 Discipline Insegnate</h3>
+                <form id="disciplines-settings-form">
+                    <div class="form-group">
+                        <label>Seleziona le discipline che insegni</label>
+                        <div class="checkbox-group" id="disciplines-checkbox-group">
+                            <label><input type="checkbox" class="discipline-checkbox" value="Italiano"> Italiano</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Storia"> Storia</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Geografia"> Geografia</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Matematica"> Matematica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Scienze"> Scienze</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Inglese"> Inglese</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Francese"> Francese</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Spagnolo"> Spagnolo</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Tedesco"> Tedesco</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Arte e Immagine"> Arte e Immagine</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Musica"> Musica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Educazione Fisica"> Educazione Fisica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Tecnologia"> Tecnologia</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Religione"> Religione</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Informatica"> Informatica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Fisica"> Fisica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Chimica"> Chimica</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Filosofia"> Filosofia</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Latino"> Latino</label>
+                            <label><input type="checkbox" class="discipline-checkbox" value="Greco"> Greco</label>
+                        </div>
+                        <p class="help-text">Le discipline selezionate saranno disponibili per la pianificazione delle lezioni e verranno utilizzate per filtrare l'orario personale.</p>
+                        <p class="help-text" style="margin-top: 8px;">💡 <strong>Nota:</strong> Se non selezioni alcuna disciplina, tutte le discipline saranno disponibili.</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Discipline
+                    </button>
+                </form>
+            </div>
+            
+            <!-- School Year Configuration (NEW: Dropdown selection) -->
+            <div class="settings-section" data-settings-section="preferences">
+                <h3>🎓 Anno Scolastico</h3>
+                <form id="school-year-settings-form">
+                    <div class="form-group">
+                        <label for="school-year-select">Anno Scolastico *</label>
+                        <select id="school-year-select" required>
+                            <option value="">-- Seleziona Anno Scolastico --</option>
+                            <option value="2023/2024">2023/2024</option>
+                            <option value="2024/2025">2024/2025</option>
+                            <option value="2025/2026">2025/2026</option>
+                            <option value="2026/2027">2026/2027</option>
+                            <option value="2027/2028">2027/2028</option>
+                        </select>
+                        <p class="help-text">Seleziona l'anno scolastico corrente</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Anno Scolastico
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Class Management (NEW: Section and class generation) -->
+            <div class="settings-section">
+                <h3>🏫 Gestione Classi</h3>
+                <form id="class-management-form">
+                    <div class="form-group">
+                        <label>Sezioni Disponibili</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" class="section-checkbox" value="A" checked> Sezione A</label>
+                            <label><input type="checkbox" class="section-checkbox" value="B" checked> Sezione B</label>
+                            <label><input type="checkbox" class="section-checkbox" value="C"> Sezione C</label>
+                            <label><input type="checkbox" class="section-checkbox" value="D"> Sezione D</label>
+                            <label><input type="checkbox" class="section-checkbox" value="E"> Sezione E</label>
+                        </div>
+                        <p class="help-text">Seleziona le sezioni presenti nella tua scuola</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="class-levels">Anni Scolastici (livelli)</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" class="level-checkbox" value="1" checked> 1° Anno</label>
+                            <label><input type="checkbox" class="level-checkbox" value="2" checked> 2° Anno</label>
+                            <label><input type="checkbox" class="level-checkbox" value="3" checked> 3° Anno</label>
+                            <label><input type="checkbox" class="level-checkbox" value="4"> 4° Anno</label>
+                            <label><input type="checkbox" class="level-checkbox" value="5"> 5° Anno</label>
+                        </div>
+                        <p class="help-text">Seleziona i livelli presenti nella tua scuola</p>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" id="generate-classes-btn">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        Genera Classi Automaticamente
+                    </button>
+                    
+                    <div id="generated-classes-preview" style="display: none; margin-top: 16px;">
+                        <h4>Classi Generate</h4>
+                        <p class="help-text">Deseleziona le classi che non insegni:</p>
+                        <div id="generated-classes-list" class="checkbox-group">
+                            <!-- Generated classes will appear here -->
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="margin-top: 16px;">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Classi Selezionate
+                    </button>
+                </form>
+                <p class="help-text" style="margin-top: 16px;">
+                    💡 <strong>Suggerimento:</strong> Puoi anche gestire manualmente le classi dalla sezione <a href="#" onclick="window.app.switchTab('classes'); return false;">Gestione Classi</a>
+                </p>
+            </div>
+            
+            <!-- AI Configuration Section (NEW: Enhanced with privacy and validation) -->
+            <div class="settings-section" data-settings-section="privacy">
+                <h3>🤖 Configurazione Agente IA</h3>
+                <form id="ai-settings-form">
+                    <div class="form-group">
+                        <label for="ai-api-key-input">Chiave API IA (Opzionale)</label>
+                        <input type="password" id="ai-api-key-input" placeholder="sk-or-v1-...">
+                        <button type="button" class="btn btn-sm btn-secondary" id="toggle-api-key-visibility" style="margin-top: 8px;">
+                            <span class="material-symbols-outlined">visibility</span>
+                            Mostra/Nascondi
+                        </button>
+                        <p class="help-text">
+                            <strong>🔒 Privacy:</strong> La tua chiave API viene salvata localmente nel tuo browser e non viene mai condivisa con terze parti.
+                            Inserisci la tua chiave API di OpenRouter per abilitare le funzionalità IA avanzate.
+                            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Ottieni una chiave API</a>
+                        </p>
+                        <div id="api-key-status" style="margin-top: 8px; display: none;">
+                            <!-- Validation status will appear here -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ai-model-select">Modello IA</label>
+                        <select id="ai-model-select">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Veloce ed Economico)</option>
+                            <option value="gpt-4">GPT-4 (Più Accurato)</option>
+                            <option value="claude-2">Claude 2</option>
+                            <option value="llama-2-70b">Llama 2 70B</option>
+                        </select>
+                        <p class="help-text">Seleziona il modello IA da utilizzare per le funzionalità avanzate</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Impostazioni IA
+                    </button>
+                </form>
+                <p class="help-text" style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    ⚠️ <strong>Nota:</strong> Senza una chiave API, l'assistente IA funzionerà in modalità simulata con risposte predefinite.
+                </p>
+            </div>
+            
+            <!-- Schedule Configuration Section -->
+            <div class="settings-section">
+                <h3>📅 Configurazione Orario</h3>
+                <form id="schedule-settings-form">
+                    <div class="form-group">
+                        <label for="schedule-hours-per-day">Ore di lezione al giorno</label>
+                        <input type="number" id="schedule-hours-per-day" min="1" max="12" value="6" required>
+                        <p class="help-text">Numero di ore di lezione per ogni giorno lavorativo</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="schedule-start-time">Orario inizio lezioni</label>
+                        <input type="time" id="schedule-start-time" value="08:00" required>
+                        <p class="help-text">Ora di inizio delle lezioni</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Giorni lavorativi</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="schedule-day-1" value="1" checked> Lunedì</label>
+                            <label><input type="checkbox" id="schedule-day-2" value="2" checked> Martedì</label>
+                            <label><input type="checkbox" id="schedule-day-3" value="3" checked> Mercoledì</label>
+                            <label><input type="checkbox" id="schedule-day-4" value="4" checked> Giovedì</label>
+                            <label><input type="checkbox" id="schedule-day-5" value="5" checked> Venerdì</label>
+                            <label><input type="checkbox" id="schedule-day-6" value="6"> Sabato</label>
+                            <label><input type="checkbox" id="schedule-day-0" value="0"> Domenica</label>
+                        </div>
+                        <p class="help-text">Seleziona i giorni della settimana in cui si svolgono le lezioni</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Impostazioni Orario
+                    </button>
+                </form>
+            </div>
+            
+            <!-- AI Agent FAB Settings -->
+            <div class="settings-section">
+                <h3>🤖 Agente IA Floating</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="ai-fab-enabled-checkbox" checked>
+                        Mostra Agente IA Floating
+                    </label>
+                    <p class="help-text">Attiva o disattiva il pulsante floating dell'Agente IA visibile su tutte le pagine.</p>
+                </div>
+                <button id="reset-ai-fab-position-btn" class="btn btn-secondary" style="margin-top: 10px;">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Ripristina Posizione Agente IA
+                </button>
+                <p class="help-text">Riporta il pulsante floating alla posizione predefinita (in basso a destra).</p>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-section" data-settings-section="notifications">
+                <h3>🔔 Impostazioni Notifiche</h3>
+                <form id="notification-settings-form">
+                    <div class="form-group">
+                        <label><strong>Modalità di Notifica</strong></label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-enable-inapp" checked>
+                                Notifiche In-App (toast/popup)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-enable-push">
+                                Notifiche Push (browser)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-enable-email">
+                                Notifiche Email (simulato)
+                            </label>
+                        </div>
+                        <p class="help-text">Scegli come ricevere le notifiche dall'applicazione</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label><strong>Tipi di Notifiche</strong></label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="notification-deadlines" checked>
+                                ⏰ Scadenze imminenti
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-schedule-changes" checked>
+                                📅 Cambi orario
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-new-documents" checked>
+                                📄 Nuovi documenti
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-smart-suggestions" checked>
+                                💡 Suggerimenti smart
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notification-institutional" checked>
+                                🏫 Impegni istituzionali
+                            </label>
+                        </div>
+                        <p class="help-text">Seleziona quali tipi di eventi devono generare notifiche</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Preferenze Notifiche
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Advanced Settings TODO -->
+            <div class="settings-section">
+                <h3>⚙️ Impostazioni Avanzate</h3>
+                <p class="help-text" style="padding: 12px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                    📝 <strong>TODO:</strong> Le seguenti funzionalità saranno disponibili in versioni future:
+                </p>
+                <ul class="help-text" style="margin-left: 20px; margin-top: 8px;">
+                    <li>Import/Export configurazioni tramite API esterna</li>
+                    <li>Sincronizzazione calendario con Google Calendar/Outlook</li>
+                    <li>Notifiche push personalizzate</li>
+                    <li>Automazione pianificazione lezioni con IA</li>
+                    <li>Integrazione con registro elettronico</li>
+                    <li>Backup automatico su cloud</li>
+                    <li>Modalità collaborativa per team docenti</li>
+                </ul>
+            </div>
+            
+            <!-- Backup/Restore Section -->
+            <div class="settings-section" data-settings-section="backup">
+                <h3>💾 Backup e Ripristino</h3>
+                <div class="backup-section">
+                    <p class="help-text">Esporta i tuoi dati per creare un backup o importa un backup precedente.</p>
+                    <div class="form-actions" style="margin-top: 16px;">
+                        <button class="btn btn-primary">
+                            <span class="material-symbols-outlined">download</span>
+                            Esporta Backup
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span class="material-symbols-outlined">upload</span>
+                            Importa Backup
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Troubleshooting Section -->
+            <div class="settings-section">
+                <h3>🔧 Risoluzione Problemi</h3>
+                <button id="clear-all-data-btn" class="btn btn-danger">
+                    <span class="material-symbols-outlined">delete_forever</span>
+                    Cancella Tutti i Dati
+                </button>
+                <p class="help-text">⚠️ Questa azione cancellerà tutti i tuoi dati salvati e ripristinerà l'app allo stato iniziale.</p>
+            </div>
+        </div>
+
+        <!-- Backup/Restore Tab -->
+        <div id="backupRestore" class="tab-content">
+            <h2>Backup e Ripristino</h2>
+            <div class="backup-section">
+                <button class="btn btn-primary">Esporta Backup</button>
+                <button class="btn btn-secondary">Importa Backup</button>
+            </div>
+        </div>
+
+        <!-- Help Tab -->
+        <div id="help" class="tab-content">
+            <h2>Aiuto</h2>
+            <div class="help-section">
+                <h3>Guide Rapide</h3>
+                <ul>
+                    <li>Come creare una nuova classe</li>
+                    <li>Come aggiungere studenti</li>
+                    <li>Come pianificare lezioni</li>
+                    <li>Come utilizzare l'assistente IA</li>
+                </ul>
+                
+                <h3>Risoluzione Problemi</h3>
+                <p>Se l'app non funziona correttamente:</p>
+                <ol>
+                    <li>Prova a ricaricare la pagina (F5)</li>
+                    <li>Controlla la console del browser per errori</li>
+                    <li>Se i dati sono corrotti, vai in Impostazioni e usa "Cancella Tutti i Dati"</li>
+                    <li>Assicurati che il localStorage del browser sia abilitato</li>
+                </ol>
+                
+                <h3>Informazioni</h3>
+                <p>Docente++ v1.1.0 (Refactored)</p>
+                <p>App web per la gestione della didattica</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Class Modal -->
+    <div id="class-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Classe</h2>
+            <form id="class-modal-form">
+                <div class="form-group">
+                    <label for="class-modal-name">Nome Classe *</label>
+                    <input type="text" id="class-modal-name" name="name" required placeholder="es. 3A, 5B">
+                </div>
+                <div class="form-group">
+                    <label for="class-modal-schoolYear">Anno Scolastico</label>
+                    <input type="text" id="class-modal-schoolYear" name="schoolYear" placeholder="es. 2024/2025">
+                </div>
+                <div class="form-group">
+                    <label for="class-modal-description">Descrizione</label>
+                    <textarea id="class-modal-description" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('class-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="student-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Studente</h2>
+            <form id="student-modal-form">
+                <div class="form-group">
+                    <label for="student-modal-firstName">Nome *</label>
+                    <input type="text" id="student-modal-firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-lastName">Cognome *</label>
+                    <input type="text" id="student-modal-lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-email">Email</label>
+                    <input type="email" id="student-modal-email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-classId">Classe</label>
+                    <select id="student-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-birthDate">Data di Nascita</label>
+                    <input type="date" id="student-modal-birthDate" name="birthDate">
+                </div>
+                <div class="form-group">
+                    <label for="student-modal-notes">Note</label>
+                    <textarea id="student-modal-notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('student-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lesson Modal -->
+    <div id="lesson-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Lezione</h2>
+            <form id="lesson-modal-form">
+                <div class="form-group">
+                    <label for="lesson-modal-title">Titolo *</label>
+                    <input type="text" id="lesson-modal-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-subject">Materia *</label>
+                    <select id="lesson-modal-subject" name="subject" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-date">Data *</label>
+                    <input type="date" id="lesson-modal-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-time">Ora</label>
+                    <input type="time" id="lesson-modal-time" name="time" value="09:00">
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-classId">Classe</label>
+                    <select id="lesson-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-modal-description">Descrizione</label>
+                    <textarea id="lesson-modal-description" name="description" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('lesson-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activity Modal -->
+    <div id="activity-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Attività</h2>
+            <form id="activity-modal-form">
+                <div class="form-group">
+                    <label for="activity-modal-title">Titolo *</label>
+                    <input type="text" id="activity-modal-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-type">Tipo *</label>
+                    <select id="activity-modal-type" name="type" required>
+                        <option value="">-- Seleziona --</option>
+                        <option value="Compito">Compito</option>
+                        <option value="Verifica">Verifica</option>
+                        <option value="Progetto">Progetto</option>
+                        <option value="Laboratorio">Laboratorio</option>
+                        <option value="Esercitazione">Esercitazione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-date">Data *</label>
+                    <input type="date" id="activity-modal-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-status">Stato</label>
+                    <select id="activity-modal-status" name="status">
+                        <option value="pianificata">Pianificata</option>
+                        <option value="in corso">In corso</option>
+                        <option value="completata">Completata</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-classId">Classe</label>
+                    <select id="activity-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activity-modal-description">Descrizione</label>
+                    <textarea id="activity-modal-description" name="description" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('activity-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div id="evaluation-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Valutazione</h2>
+            <form id="evaluation-modal-form">
+                <div class="form-group">
+                    <label for="evaluation-modal-studentId">Studente *</label>
+                    <select id="evaluation-modal-studentId" name="studentId" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-activityId">Attività *</label>
+                    <select id="evaluation-modal-activityId" name="activityId" required>
+                        <option value="">-- Seleziona --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-grade">Voto</label>
+                    <input type="text" id="evaluation-modal-grade" name="grade" placeholder="es. 8, 9/10, Ottimo">
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-date">Data</label>
+                    <input type="date" id="evaluation-modal-date" name="date">
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-modal-comment">Commento</label>
+                    <textarea id="evaluation-modal-comment" name="comment" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('evaluation-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Gestione Evento</h2>
+            <form id="event-modal-form">
+                <div class="form-group">
+                    <label for="event-modal-title">Titolo *</label>
+                    <input type="text" id="event-modal-title" name="title" required placeholder="Es: Lezione di Matematica">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-type">Tipo *</label>
+                    <select id="event-modal-type" name="type" required>
+                        <option value="">-- Seleziona Tipo --</option>
+                        <option value="lezione">📚 Lezione</option>
+                        <option value="compito">📝 Compito</option>
+                        <option value="verifica">✏️ Verifica</option>
+                        <option value="progetto">📊 Progetto</option>
+                        <option value="evento">📅 Evento</option>
+                        <option value="riunione">👥 Riunione</option>
+                        <option value="laboratorio">🔬 Laboratorio</option>
+                        <option value="gita">🚌 Gita</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-start-date">Data Inizio *</label>
+                    <input type="date" id="event-modal-start-date" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-start-time">Ora Inizio *</label>
+                    <input type="time" id="event-modal-start-time" name="startTime" required value="09:00">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-end-date">Data Fine</label>
+                    <input type="date" id="event-modal-end-date" name="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-end-time">Ora Fine</label>
+                    <input type="time" id="event-modal-end-time" name="endTime" value="10:00">
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-classId">Classe</label>
+                    <select id="event-modal-classId" name="classId">
+                        <option value="">-- Nessuna classe --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-modal-note">Note</label>
+                    <textarea id="event-modal-note" name="note" rows="4" placeholder="Aggiungi dettagli, materiali, preparazione..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="event-modal-linkedToOrario" name="linkedToOrario">
+                        Collegato all'orario
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.app.hideModal('event-modal')">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Theme Picker Dialog -->
+    <div id="theme-picker-dialog" class="modal theme-picker-modal" style="display: none;">
+        <div class="modal-content theme-picker-content">
+            <h2>Personalizza Tema</h2>
+            <form id="theme-picker-form">
+                <!-- Theme Mode Selection -->
+                <div class="theme-section">
+                    <h3>Modalità Tema</h3>
+                    <div class="theme-options">
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="light" id="theme-light">
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">light_mode</span>
+                                <span class="theme-option-text">
+                                    <strong>Chiaro</strong>
+                                    <small>Tema luminoso per ambienti ben illuminati</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="dark" id="theme-dark">
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">dark_mode</span>
+                                <span class="theme-option-text">
+                                    <strong>Scuro</strong>
+                                    <small>Tema scuro per ridurre l'affaticamento degli occhi</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="theme-option">
+                            <input type="radio" name="theme" value="auto" id="theme-auto" checked>
+                            <span class="theme-option-content">
+                                <span class="material-symbols-outlined">contrast</span>
+                                <span class="theme-option-text">
+                                    <strong>Automatico (Dinamico)</strong>
+                                    <small>Segue le impostazioni del sistema operativo</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Theme Color Selection -->
+                <div class="theme-section">
+                    <h3>Colore Principale</h3>
+                    <p class="theme-description">Scegli il colore principale dell'interfaccia</p>
+                    <div class="theme-color-options">
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="purple" id="color-purple" checked>
+                            <span class="theme-color-swatch" style="background: #6750A4;" title="Viola (Predefinito)"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="blue" id="color-blue">
+                            <span class="theme-color-swatch" style="background: #1976D2;" title="Blu"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="green" id="color-green">
+                            <span class="theme-color-swatch" style="background: #388E3C;" title="Verde"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="red" id="color-red">
+                            <span class="theme-color-swatch" style="background: #C62828;" title="Rosso"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="orange" id="color-orange">
+                            <span class="theme-color-swatch" style="background: #EF6C00;" title="Arancione"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="teal" id="color-teal">
+                            <span class="theme-color-swatch" style="background: #00796B;" title="Teal"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="indigo" id="color-indigo">
+                            <span class="theme-color-swatch" style="background: #303F9F;" title="Indigo"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="lilla" id="color-lilla">
+                            <span class="theme-color-swatch" style="background: #9C27B0;" title="Lilla"></span>
+                        </label>
+                        <label class="theme-color-option">
+                            <input type="radio" name="themeColor" value="pink" id="color-pink">
+                            <span class="theme-color-swatch" style="background: #C2185B;" title="Rosa"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Live Preview Section -->
+                <div class="theme-section theme-preview-section">
+                    <h3>Anteprima dal Vivo</h3>
+                    <p class="theme-description">Vedi come appare il tema selezionato</p>
+                    <div class="theme-preview-container" id="theme-preview">
+                        <!-- Preview Card -->
+                        <div class="preview-card">
+                            <div class="preview-card-header">
+                                <span class="material-symbols-outlined">palette</span>
+                                <h4>Esempio Card</h4>
+                            </div>
+                            <div class="preview-card-content">
+                                <p>Questo è un esempio di come apparirà il contenuto con il tema selezionato.</p>
+                                <div class="preview-buttons">
+                                    <button class="preview-btn preview-btn-primary">Pulsante Primario</button>
+                                    <button class="preview-btn preview-btn-secondary">Pulsante Secondario</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Text -->
+                        <div class="preview-text-samples">
+                            <div class="preview-text-primary">Testo Primario</div>
+                            <div class="preview-text-secondary">Testo Secondario</div>
+                        </div>
+                        
+                        <!-- Preview Surface -->
+                        <div class="preview-surface">
+                            <span class="material-symbols-outlined">info</span>
+                            <span>Superficie con icona</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="theme-cancel-btn">Annulla</button>
+                    <button type="submit" class="btn btn-primary" id="theme-apply-btn">Applica</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Agent Floating Action Button (FAB) -->
+    <button id="ai-fab" class="ai-fab" title="Apri Agente IA Contestuale" aria-label="Apri Agente IA Contestuale">
+        <span class="material-symbols-outlined">smart_toy</span>
+    </button>
+
+    <!-- AI Agent Modal -->
+    <div id="ai-agent-modal" class="modal" style="display: none;">
+        <div class="modal-content ai-agent-content">
+            <h2>🤖 Agente IA - Assistenza Contestuale</h2>
+            <div class="ai-agent-body">
+                <!-- Context Info Section -->
+                <div class="ai-context-info">
+                    <p><strong>Sezione attiva:</strong> <span id="ai-current-section">Dashboard</span></p>
+                    <p>L'agente IA fornisce suggerimenti specifici per questa sezione dell'applicazione.</p>
+                </div>
+
+                <!-- Contextual Suggestions Section -->
+                <div class="ai-agent-suggestions">
+                    <p><strong>💡 Suggerimenti Contestuali:</strong></p>
+                    <div id="ai-suggestions-buttons">
+                        <!-- Suggestions will be populated dynamically based on context -->
+                    </div>
+                </div>
+
+                <!-- User Prompt Input -->
+                <div class="form-group">
+                    <label for="ai-prompt-input"><strong>Chiedi all'Agente IA:</strong></label>
+                    <textarea id="ai-prompt-input" rows="3" placeholder="Es: Suggerisci le attività prioritarie per oggi..."></textarea>
+                    <button class="btn btn-primary" id="ai-submit-prompt" style="margin-top: 10px;">
+                        <span class="material-symbols-outlined">send</span>
+                        Invia Richiesta
+                    </button>
+                </div>
+
+                <!-- AI Output Area (stub) -->
+                <div class="ai-agent-results" id="ai-output-section" style="display: none;">
+                    <h4>📋 Risposta Agente IA</h4>
+                    <div id="ai-agent-results-content">
+                        <!-- AI response will be populated here -->
+                    </div>
+                    <!-- TODO: Add proposed actions section when API integration is complete -->
+                    <div class="ai-agent-actions" id="ai-proposed-actions-section" style="display: none;">
+                        <h5>🎯 Azioni Proposte</h5>
+                        <div id="ai-agent-proposed-actions">
+                            <!-- Proposed actions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="window.app.closeAIAgentModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Icon Component -->
+    <script src="js/icons.js"></script>
+    
+    <!-- Main App -->
+    <script type="module" src="app.js"></script>
+
+</body>
+</html>

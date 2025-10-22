@@ -1,0 +1,168 @@
+{
+  "timestamp": "2025-10-12T17:06:54.346Z",
+  "summary": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0,
+    "warnings": 3,
+    "successRate": "100.0"
+  },
+  "results": [
+    {
+      "status": "PASS",
+      "message": "manifest.json exists (761 bytes)"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js exists (4336 bytes)"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html exists (91887 bytes)"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json is valid JSON"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has required field 'name'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has required field 'short_name'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has required field 'start_url'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has required field 'display'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has required field 'icons'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has recommended field 'description'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has recommended field 'theme_color'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has recommended field 'background_color'"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has 2 icon(s) defined"
+    },
+    {
+      "status": "PASS",
+      "message": "Icon 1: 192x192 (image/png)"
+    },
+    {
+      "status": "PASS",
+      "message": "Icon 2: 512x512 (image/png)"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has 192x192 icon"
+    },
+    {
+      "status": "PASS",
+      "message": "manifest.json has 512x512 icon"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js has balanced braces"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js has balanced parentheses"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js has 'install' event listener"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js has 'activate' event listener"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js has 'fetch' event listener"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js uses Cache API"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js calls skipWaiting()"
+    },
+    {
+      "status": "PASS",
+      "message": "sw.js calls clients.claim()"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html has manifest link"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html has theme-color meta tag"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html has apple-touch-icon"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html has viewport meta tag"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html has Service Worker registration code"
+    },
+    {
+      "status": "PASS",
+      "message": "index.html registers sw.js correctly"
+    },
+    {
+      "status": "PASS",
+      "message": "icons/ directory exists"
+    },
+    {
+      "status": "PASS",
+      "message": "icon-192x192.png exists (2153 bytes)"
+    },
+    {
+      "status": "PASS",
+      "message": "icon-192x192.png has reasonable file size"
+    },
+    {
+      "status": "PASS",
+      "message": "icon-512x512.png exists (5790 bytes)"
+    },
+    {
+      "status": "PASS",
+      "message": "icon-512x512.png has reasonable file size"
+    },
+    {
+      "status": "WARN",
+      "message": "PWA_INSTALLATION.md not found (recommended)"
+    },
+    {
+      "status": "WARN",
+      "message": "PWA_IMPLEMENTATION_SUMMARY.md not found (recommended)"
+    },
+    {
+      "status": "WARN",
+      "message": "PWA_QUICK_START.md not found (recommended)"
+    }
+  ]
+}
