@@ -232,7 +232,10 @@ export function downloadICS(filename = 'docente-plus-plus-schedule.ics', icsCont
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, 1000);
-} * Get weekday number from day name
+}
+
+/**
+ * Get weekday number from day name
  * @param {string} dayName - Day name (e.g., "Lunedì", "Monday")
  * @returns {number} Weekday number (0-6, Sunday=0) or -1 if invalid
  */
