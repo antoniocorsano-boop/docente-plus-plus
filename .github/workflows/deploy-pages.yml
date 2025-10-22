@@ -4,26 +4,42 @@ on:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  workflow_dispatch:
 
 jobs:
   deploy:
-    environment: github-pages
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    concurrency:
+      group: pages-deploy-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
-      - name: Upload artifact for GitHub Pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build site
+        run: |
+          # This is a static PWA - copy all files excluding development/CI artifacts
+          mkdir -p public
+          rsync -av --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='public' --exclude='tests' --exclude='.idx' --exclude='.vscode' . public/
+          touch public/.nojekyll
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
-          name: github-pages
-          retention-days: 1
+          path: ./public
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Show deployment URL
+        run: echo "Pages URL - ${{ steps.deployment.outputs.page_url }}"
