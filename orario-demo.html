@@ -123,6 +123,10 @@
                 <span class="material-symbols-outlined" style="vertical-align: middle;">warning</span>
                 Test Collisioni
             </button>
+            <button id="export-ics-btn">
+                <span class="material-symbols-outlined" style="vertical-align: middle;">download</span>
+                Esporta ICS
+            </button>
         </div>
 
         <div id="error-container"></div>
@@ -153,7 +157,8 @@
             initializeScheduleGrid, 
             loadScheduleData,
             detectCollision,
-            renderSlotToGrid
+            renderSlotToGrid,
+            exportCurrentScheduleAsICS
         } from './src/pages/orario/orario.js';
         
         import { breadcrumbsInstance } from './src/components/breadcrumbs/breadcrumbs.js';
@@ -250,6 +255,16 @@
             }
             
             console.log('Collision detection results:', collisions);
+        });
+
+        // Export ICS button
+        document.getElementById('export-ics-btn').addEventListener('click', () => {
+            if (!currentScheduleData) {
+                alert('Carica prima l\'orario!');
+                return;
+            }
+
+            exportCurrentScheduleAsICS(currentScheduleData);
         });
 
         // Auto-load on page load

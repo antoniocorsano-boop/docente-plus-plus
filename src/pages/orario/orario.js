@@ -4,6 +4,8 @@
  * Mobile-first, accessible schedule display
  */
 
+import { exportScheduleToICS, downloadICS } from '../../utils/ics-export.js';
+
 /**
  * Normalize time string to HH:MM format
  * @param {string} time - Time string in various formats (e.g., "8:00", "08:00", "8")
@@ -319,4 +321,55 @@ export async function loadScheduleData(jsonPath = '/src/mock/orario-mock.json') 
     console.error('Error loading schedule data:', error);
     return { schedule: [], timeSlots: [], days: [] };
   }
+}
+
+/**
+ * Export current schedule to ICS format
+ * @param {Array|HTMLElement} scheduleData - Schedule data array or container element
+ * @returns {boolean} Success status
+ */
+export function exportCurrentScheduleAsICS(scheduleData) {
+  let slots = [];
+
+  // Extract slots from different input types
+  if (Array.isArray(scheduleData)) {
+    slots = scheduleData;
+  } else if (scheduleData instanceof HTMLElement) {
+    // Extract slots from DOM
+    const slotElements = scheduleData.querySelectorAll('.schedule-slot');
+    slots = Array.from(slotElements).map(element => ({
+      id: element.dataset.slotId,
+      day: element.dataset.day,
+      startTime: element.dataset.startTime,
+      endTime: element.dataset.endTime,
+      subject: element.querySelector('.slot-subject')?.textContent || '',
+      class: element.querySelector('.slot-class')?.textContent || '',
+      room: element.querySelector('.slot-room')?.textContent || '',
+      type: element.querySelector('.slot-type')?.textContent || ''
+    }));
+  } else if (scheduleData && scheduleData.schedule) {
+    // Extract from schedule data object
+    slots = scheduleData.schedule;
+  }
+
+  if (slots.length === 0) {
+    console.error('No schedule data to export');
+    alert('Nessun orario da esportare. Carica prima un orario.');
+    return false;
+  }
+
+  // Generate ICS content
+  const icsContent = exportScheduleToICS(slots);
+  
+  if (!icsContent) {
+    console.error('Failed to generate ICS content');
+    alert('Errore nella generazione del file ICS.');
+    return false;
+  }
+
+  // Trigger download
+  downloadICS('docente-plus-plus-schedule.ics', icsContent);
+  console.log(`Exported ${slots.length} schedule slots to ICS`);
+  
+  return true;
 }
