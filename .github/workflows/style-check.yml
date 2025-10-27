@@ -91,7 +91,7 @@ jobs:
         echo "${{ github.event.pull_request.number }}" > pr-number.txt
         
     - name: Upload style check results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: steps.token-check.outputs.status == 'warn'
       with:
         name: style-results
